@@ -1,11 +1,15 @@
 # Copyright Cloudinary
-import pycurl 
 import time
 import pycloudinary
 from pycloudinary import utils
 import json
 import re
-import StringIO
+from poster.encode import multipart_encode
+from poster.streaminghttp import register_openers
+import urllib
+import urllib2
+
+_initialized = False
 
 def now():
   return str(int(time.time()))
@@ -24,11 +28,7 @@ def build_upload_params(**options):
  
 def upload(file, **options):
   params = build_upload_params(**options)
-  if re.match(r"^https?:", file):
-    params["file"] = file
-  else:
-    params["file"] = (pycurl.FORM_FILE, file)
-  return call_api("upload", params, non_signable = ["file"], **options)
+  return call_api("upload", params, file = file, **options)
 
 def destroy(public_id, **options):
   params = {
@@ -66,29 +66,46 @@ def call_api(action, params, **options):
   api_secret = options.get("api_secret", pycloudinary.config().api_secret)
   if not api_secret: raise Exception("Must supply api_secret")
 
-  non_signable = options.get("non_signable", [])
-  
-  signable_params = dict([(k,v) for k,v in params.items() if k not in non_signable])
-  params["signature"] = utils.api_sign_request(signable_params, api_secret)
+  params["signature"] = utils.api_sign_request(params, api_secret)
   params["api_key"] = api_key
+
+  # Remove blank parameters
+  for k, v in params.items():
+    if not v:
+      del params[k]
 
   api_url = utils.cloudinary_api_url(action, **options)
  
-  c = pycurl.Curl()
-  c.setopt(c.URL, api_url)
-  c.setopt(c.POST, 1)
-  c.setopt(c.HTTPPOST, [(k,v) for k, v in params.items() if v])
-  b = StringIO.StringIO()
-  c.setopt(pycurl.WRITEFUNCTION, b.write)
-  c.perform()
-  response = b.getvalue()
-  code = c.getinfo(pycurl.HTTP_CODE)
-  c.close()
-  if not code in [200, 400, 500]:
-    raise Exception("Server returned unexpected status code - %d - %s" % (code, response))
+  global _initialized
+  if not _initialized:
+    _initialized = True
+    # Register the streaming http handlers with urllib2
+    register_openers()
+  
+  datagen = ""
+  headers = {}
+  if "file" in options:
+    file = options["file"]
+    if not isinstance(file, str):
+      datagen, headers = multipart_encode({'file': file})
+    elif not re.match(r'^https?:', file):
+      datagen, headers = multipart_encode({'file': open(file)})
+    else:
+      params["file"] = file
+  request = urllib2.Request(api_url + "?" + urllib.urlencode(params), datagen, headers)
+    
+  code = 200
+  try:
+    response = urllib2.urlopen(request).read()
+  except urllib2.HTTPError, e:
+    if not e.code in [200, 400, 500]:
+      raise Exception("Server returned unexpected status code - %d - %s" % (e.code, e.read()))
+    code = e.code
+    response = e.read()
+
   try:
     result = json.loads(response) 
-  except exception as e:
+  except Exception, e:
     # Error is parsing json
     raise Exception("Error parsing server response (%d) - %s. Got - %s", code, response, e)
 

@@ -18,7 +18,7 @@ setup(name='pycloudinary',
       include_package_data=True,
       zip_safe=False,
       test_suite="tests",                          
-      install_requires=["pycurl" ],
+      install_requires=["poster" ],
       entry_points="""
       # -*- Entry points: -*-
       """,
