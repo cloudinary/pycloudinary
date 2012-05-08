@@ -1,4 +1,5 @@
 import os
+from urlparse import urlparse
 
 def module_exists(module_name):
     try:
@@ -20,7 +21,16 @@ class Config(object):
         secure_distribution = os.environ.get("CLOUDINARY_SECURE_DISTRIBUTION"),
         private_cdn = os.environ.get("CLOUDINARY_PRIVATE_CDN") == 'true'
       )
-
+    elif os.environ.get("CLOUDINARY_URL"):
+      uri = urlparse(os.environ.get("CLOUDINARY_URL"))
+      self.update(
+        cloud_name = uri.hostname,
+        api_key = uri.username,
+        api_secret = uri.password,
+        private_cdn = uri.path != ''
+      )
+      if uri.path != '': 
+        self.update(secure_distribution = uri.path[1:]) 
   def __getattr__(self, i):
     if i in self.__dict__:
       return self.__dict__[i]

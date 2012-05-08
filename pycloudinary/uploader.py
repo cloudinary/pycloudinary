@@ -52,12 +52,19 @@ def replace_tag(tag, public_ids = [], **options):
 
 def call_tags_api(tag, command, public_ids = [], **options):
   params = {
-    "timestamp": int(time.time()),
+    "timestamp": now(),
     "tag": tag,
     "public_ids":  utils.build_array(public_ids),
     "command":  command
   }
   return call_api("tags", params, **options)
+
+TEXT_PARAMS = ["public_id", "font_family", "font_size", "font_color", "text_align", "font_weight", "font_style", "background", "opacity", "text_decoration"]  
+def text(text, **options):
+  params = {"timestamp": now(), "text": text}
+  for key in TEXT_PARAMS:
+    params[key] = options.get(key)
+  return call_api("text", params, **options)
 
 def call_api(action, params, **options):
   return_error = options.get("return_error")

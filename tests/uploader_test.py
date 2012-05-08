@@ -17,6 +17,15 @@ class TestUploader(unittest.TestCase):
     expected_signature = utils.api_sign_request(dict(public_id=result["public_id"], version=result["version"]), pycloudinary.config().api_secret)
     self.assertEqual(result["signature"], expected_signature)
 
+  def test_text(self):
+    """should successfully generate text image """
+    if not pycloudinary.config().api_secret: 
+      print "Please setup environment for upload test to run"
+      return
+    result = uploader.text("hello world")
+    self.assertGreater(result["width"], 1)
+    self.assertGreater(result["height"], 1)
+
 if __name__ == '__main__':
     unittest.main()
 

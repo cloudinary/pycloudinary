@@ -166,6 +166,20 @@ class TestUtils(unittest.TestCase):
     self.assertEqual(options, {})
     self.assertEqual(result, "http://res.cloudinary.com/test123/image/upload/d_default/test" )
 
+  def test_angle(self):
+    """should support angle"""
+    options = {"angle": 12}
+    result, options = pycloudinary.utils.cloudinary_url("test", **options)
+    self.assertEqual(options, {})
+    self.assertEqual(result, "http://res.cloudinary.com/test123/image/upload/a_12/test" )
+
+  def test_overlay(self):
+    """should support overlay"""
+    options = {"overlay": "text:hello"}
+    result, options = pycloudinary.utils.cloudinary_url("test", **options)
+    self.assertEqual(options, {})
+    self.assertEqual(result, "http://res.cloudinary.com/test123/image/upload/l_text:hello/test" )
+
 if __name__ == '__main__':
     unittest.main()
 
