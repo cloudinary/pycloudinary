@@ -13,13 +13,13 @@ For Python, Cloudinary provides an egg for simplifying the integration even furt
 
 ## Setup ######################################################################
 
-Download pycloudinary from [here](https://github.com/downloads/cloudinary/pycloudinary/pycloudinary-0.1.tar.gz)
+Download pycloudinary from [here](https://github.com/downloads/cloudinary/pycloudinary/pycloudinary-0.2.tar.gz)
 
 To install the pycloudinary, open the package and run:
 
 	$ python setup.py install
 
-*Note: pycloudinary depends on pycurl to work.*
+*Note: pycloudinary depends on poster to work.*
 
 ## Try it right away
 
@@ -114,6 +114,10 @@ You can also specify your own public ID:
 
     http://res.cloudinary.com/demo/image/upload/sample_remote.jpg
         
+## Django 
+
+
+
 ## Additional resources ##########################################################
 
 Additional resources are available at:
