@@ -1,4 +1,5 @@
 import os
+import utils
 from urlparse import urlparse
 
 def module_exists(module_name):
@@ -51,4 +52,25 @@ def config(**keywords):
 def reset_config():
   global _config
   _config = Config()
+
+class CloudinaryImage(object):
+  def __init__(self, public_id, format = None, version = None, signature = None):
+    self.public_id = public_id
+    self.format = format
+    self.version = version
+    self.signature = signature
+
+  def validate(self):
+    expected = utils.api_sign_request({"public_id": self.public_id, "version": self.version}, config().api_secret)
+    return self.signature == expected
+   
+  def url(self, **options):
+    options.update(format = self.format, version = self.version)
+    return utils.cloudinary_url(self.public_id, **options)[0]
+
+  def image(self, **options):
+    options.update(format = self.format, version = self.version)
+    src, attrs = utils.cloudinary_url(self.public_id, **options)
+    return "<img src='{0}' {1}/>".format(src, ' '.join(sorted(["{0}='{1}'".format(key, value) for key, value in attrs.items() if value])))
+
 

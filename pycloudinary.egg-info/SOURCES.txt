@@ -1,6 +1,7 @@
 setup.cfg
 setup.py
 pycloudinary/__init__.py
+pycloudinary/models.py
 pycloudinary/uploader.py
 pycloudinary/utils.py
 pycloudinary.egg-info/PKG-INFO
