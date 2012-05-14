@@ -180,6 +180,20 @@ class TestUtils(unittest.TestCase):
     self.assertEqual(options, {})
     self.assertEqual(result, "http://res.cloudinary.com/test123/image/upload/l_text:hello/test" )
 
+  def test_fetch_format(self):
+    """should support format for fetch urls"""
+    options = {"format": "jpg", "type": "fetch"}
+    result, options = pycloudinary.utils.cloudinary_url("http://cloudinary.com/images/logo.png", **options)
+    self.assertEqual(options, {})
+    self.assertEqual(result, "http://res.cloudinary.com/test123/image/fetch/f_jpg/http://cloudinary.com/images/logo.png" )
+
+  def test_effects(self):
+    """should support effects"""
+    options = {"effects": "sepia"}
+    result, options = pycloudinary.utils.cloudinary_url("test", **options)
+    self.assertEqual(options, {})
+    self.assertEqual(result, "http://res.cloudinary.com/test123/image/upload/e_sepia/test" )
+
 if __name__ == '__main__':
     unittest.main()
 

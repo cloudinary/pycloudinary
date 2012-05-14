@@ -45,7 +45,9 @@ def generate_transformation_string(**options):
     base_transformations = []
 
   params = {"w": width, "h": height, "t": named_transformation, "b": background}
-  for param, option in {"c": "crop", "q": "quality", "g": "gravity", "p": "prefix", "x": "x", "y": "y", "r": "radius", "d": "default_image", "a": "angle", "l": "overlay"}.items():
+  for param, option in {"c": "crop", "q": "quality", "g": "gravity", "p": "prefix", "x": "x",
+                        "y": "y", "r": "radius", "d": "default_image", "a": "angle", "l": "overlay",
+                        "f": "fetch_format", "e": "effects"}.items():
     params[param] = options.pop(option, None)
 
   transformations = [param + "_" + str(value) for param, value in params.items() if value]
@@ -62,9 +64,12 @@ def api_sign_request(params_to_sign, api_secret):
 
 def cloudinary_url(source, **options):
   original_source = source
-  transformation, options = generate_transformation_string(**options)
 
   type = options.pop("type", "upload")
+  if type == 'fetch':
+    options["fetch_format"] = options.get("fetch_format", options.pop("format", None))
+  transformation, options = generate_transformation_string(**options)
+
   resource_type = options.pop("resource_type", "image")
   version = options.pop("version", None)
   format = options.pop("format", None)

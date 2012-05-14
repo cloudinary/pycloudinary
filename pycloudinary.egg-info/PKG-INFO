@@ -1,6 +1,6 @@
 Metadata-Version: 1.0
 Name: pycloudinary
-Version: 0.1dev
+Version: 0.2dev
 Summary: Python interface to Cloudinary
 Home-page: http://cloudinary.com
 Author: Tal Lev-Ami
