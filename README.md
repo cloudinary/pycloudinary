@@ -124,10 +124,10 @@ Usage:
     img = pycloudinary.CloudinaryImage("sample", format="png")
     
     img.url(width=100, height=100, crop="fill") 
-    # == http://res.cloudinary.com/cloud_name/image/upload/c_fill,h_100,w_100/sample.png 
+    # http://res.cloudinary.com/cloud_name/image/upload/c_fill,h_100,w_100/sample.png 
     
     img.image(width=100, height=100, crop="fill") 
-    # == <img src="http://res.cloudinary.com/cloud_name/image/upload/c_fill,h_100,w_100/sample.png" width="100" height="100"/>
+    # <img src="http://res.cloudinary.com/cloud_name/image/upload/c_fill,h_100,w_100/sample.png" width="100" height="100"/>
 
 ### pycloudinary.models.CloudinaryField
 
@@ -135,11 +135,9 @@ Allows you to store references to Cloudinary stored images in your model. Return
 
 Usage:
 
-  class Poll(models.Model):
-
-    # ...
-
-    image = pycloudinary.models.CloudinaryField('image')
+    class Poll(models.Model):
+      # ...
+      image = pycloudinary.models.CloudinaryField('image')
 
 ### pycloudinary.forms.CloudinaryField
 
@@ -147,21 +145,22 @@ Form field that allows you to validate and convert to CloudinaryImage a signed C
 
 ### cloudinary template tags
 
-Initialization
-  {% load cloudinary %}
+Initialization:
+
+    {% load cloudinary %}
 
 Image tags can be generated from public_id or from CloudinaryImage object using:
 
-  {% cloudinary image width=100, height=100, crop="fill" %} 
-  # == <img src="http://res.cloudinary.com/cloud_name/image/upload/c_fill,h_100,w_100/sample.png" width="100" height="100" crop="scale"/>
+    {% cloudinary image width=100, height=100, crop="fill" %}   
+    # <img src="http://res.cloudinary.com/cloud_name/image/upload/c_fill,h_100,w_100/sample.png" width="100" height="100" crop="scale"/>
 
 The following tag generates an html form that can be used to upload the file directly to Cloudinary. The result is a redirect to the supplied callback_url.
 
-  {% cloudinary_direct_upload callback_url %}
+    {% cloudinary_direct_upload callback_url %}
 
 Optional parameters:
 
-  public_id - The name of the uploaded file in Cloudinary
+    public_id - The name of the uploaded file in Cloudinary
   
 ## Additional resources ##########################################################
 
