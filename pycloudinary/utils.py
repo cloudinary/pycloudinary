@@ -44,10 +44,15 @@ def generate_transformation_string(**options):
     named_transformation = ".".join(base_transformations)
     base_transformations = []
 
-  params = {"w": width, "h": height, "t": named_transformation, "b": background}
+  effect = options.pop("effect", None)
+  if isinstance(effect, list): 
+    effect = ":".join([str(x) for x in effect])
+  elif isinstance(effect, dict):
+    effect = ":".join([str(x) for x in effect.items()[0]])
+  params = {"w": width, "h": height, "t": named_transformation, "b": background, "e": effect}
   for param, option in {"c": "crop", "q": "quality", "g": "gravity", "p": "prefix", "x": "x",
                         "y": "y", "r": "radius", "d": "default_image", "a": "angle", "l": "overlay",
-                        "f": "fetch_format", "e": "effects"}.items():
+                        "f": "fetch_format"}.items():
     params[param] = options.pop(option, None)
 
   transformations = [param + "_" + str(value) for param, value in params.items() if value]

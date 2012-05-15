@@ -187,12 +187,26 @@ class TestUtils(unittest.TestCase):
     self.assertEqual(options, {})
     self.assertEqual(result, "http://res.cloudinary.com/test123/image/fetch/f_jpg/http://cloudinary.com/images/logo.png" )
 
-  def test_effects(self):
-    """should support effects"""
-    options = {"effects": "sepia"}
+  def test_effect(self):
+    """should support effect"""
+    options = {"effect": "sepia"}
     result, options = pycloudinary.utils.cloudinary_url("test", **options)
     self.assertEqual(options, {})
     self.assertEqual(result, "http://res.cloudinary.com/test123/image/upload/e_sepia/test" )
+
+  def test_effect_with_dict(self):
+    """should support effect with dict"""
+    options = {"effect": {"sepia": 10}}
+    result, options = pycloudinary.utils.cloudinary_url("test", **options)
+    self.assertEqual(options, {})
+    self.assertEqual(result, "http://res.cloudinary.com/test123/image/upload/e_sepia:10/test" )
+
+  def test_effect_with_array(self):
+    """should support effect with array"""
+    options = {"effect": ["sepia", 10]}
+    result, options = pycloudinary.utils.cloudinary_url("test", **options)
+    self.assertEqual(options, {})
+    self.assertEqual(result, "http://res.cloudinary.com/test123/image/upload/e_sepia:10/test" )
 
 if __name__ == '__main__':
     unittest.main()
