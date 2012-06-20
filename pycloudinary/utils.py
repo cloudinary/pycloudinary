@@ -23,12 +23,13 @@ def generate_transformation_string(**options):
     options["width"], options["height"] = size.split("x")
   width = options.get("width")
   height = options.get("height")
-  if width and float(width) < 1:
+  has_layer = ("underlay" in options) or ("overlay" in options)
+  if width and (float(width) < 1 or has_layer):
     del options["width"]
-  if height and float(height) < 1:
+  if height and (float(height) < 1 or has_layer):
     del options["height"]
      
-  if not("crop" in options):
+  if not("crop" in options) and not has_layer:
     width = height = None
 
   background = options.pop("background", None)
@@ -51,7 +52,7 @@ def generate_transformation_string(**options):
     effect = ":".join([str(x) for x in effect.items()[0]])
   params = {"w": width, "h": height, "t": named_transformation, "b": background, "e": effect}
   for param, option in {"c": "crop", "q": "quality", "g": "gravity", "p": "prefix", "x": "x",
-                        "y": "y", "r": "radius", "d": "default_image", "a": "angle", "l": "overlay",
+                        "y": "y", "r": "radius", "d": "default_image", "a": "angle", "l": "overlay", "u": "underlay",
                         "f": "fetch_format"}.items():
     params[param] = options.pop(option, None)
 

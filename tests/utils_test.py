@@ -179,6 +179,23 @@ class TestUtils(unittest.TestCase):
     result, options = pycloudinary.utils.cloudinary_url("test", **options)
     self.assertEqual(options, {})
     self.assertEqual(result, "http://res.cloudinary.com/test123/image/upload/l_text:hello/test" )
+    # Should not pass width height to HTML with overlay
+    options = {"overlay": "text:hello", "height": 100, "width": 100}
+    result, options = pycloudinary.utils.cloudinary_url("test", **options)
+    self.assertEqual(options, {})
+    self.assertEqual(result, "http://res.cloudinary.com/test123/image/upload/h_100,l_text:hello,w_100/test" )
+
+  def test_underlay(self):
+    """should support underlay"""
+    options = {"underlay": "text:hello"}
+    result, options = pycloudinary.utils.cloudinary_url("test", **options)
+    self.assertEqual(options, {})
+    self.assertEqual(result, "http://res.cloudinary.com/test123/image/upload/u_text:hello/test" )
+    # Should not pass width height to HTML with underlay
+    options = {"underlay": "text:hello", "height": 100, "width": 100}
+    result, options = pycloudinary.utils.cloudinary_url("test", **options)
+    self.assertEqual(options, {})
+    self.assertEqual(result, "http://res.cloudinary.com/test123/image/upload/h_100,u_text:hello,w_100/test" )
 
   def test_fetch_format(self):
     """should support format for fetch urls"""
