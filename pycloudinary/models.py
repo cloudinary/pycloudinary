@@ -9,8 +9,9 @@ class CloudinaryField(models.Field):
   __metaclass__ = models.SubfieldBase
 
   def __init__(self, *args, **kwargs):
-    kwargs.update({'max_length': 100})
-    super(CloudinaryField, self).__init__(*args, **kwargs)
+    options = {'max_length': 100}
+    options.update(kwargs)
+    super(CloudinaryField, self).__init__(*args, **options)
 
   def get_internal_type(self):
     return 'CharField'
@@ -34,6 +35,6 @@ class CloudinaryField(models.Field):
     return prep
 
   def formfield(self, **kwargs):
-      defaults = {'form_class': forms.CloudinaryField}
+      defaults = {'form_class': forms.CloudinaryFileField}
       defaults.update(kwargs)
       return super(CloudinaryField, self).formfield(**defaults)

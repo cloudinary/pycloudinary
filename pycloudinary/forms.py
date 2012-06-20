@@ -1,9 +1,44 @@
 from django import forms
 from pycloudinary import CloudinaryImage
 import pycloudinary.uploader
+import pycloudinary.utils
 import re
+import json
 
-class CloudinaryField(forms.Field):
+class CloudinaryInput(forms.FileInput):
+  def render(self, name, value, attrs=None):
+    attrs = attrs or {}
+    attrs['data-cloudinary-field'] = name
+    return super(CloudinaryInput, self).render("file", None, attrs=attrs)
+    
+
+class CloudinaryJsFileField(forms.Field):
+  def __init__(self, *args, **kwargs):
+    attrs = kwargs.get('attrs', {})
+    options = kwargs.get('options', {})
+    if 'resource_type' not in options: options['resource_type'] = 'auto'
+    cloudinary_upload_url = pycloudinary.utils.cloudinary_api_url("upload", **options)
+    api_key = options.get("api_key", pycloudinary.config().api_key)
+    if not api_key: raise Exception("Must supply api_key")
+    api_secret = options.get("api_secret", pycloudinary.config().api_secret)
+    if not api_secret: raise Exception("Must supply api_secret")
+
+    params = pycloudinary.uploader.build_upload_params(**options)
+    params['signature'] = pycloudinary.utils.api_sign_request(params, api_secret)
+    params['api_key'] = api_key
+    # Remove blank parameters
+    for k, v in params.items():
+      if not v:
+        del params[k]
+
+    attrs["data-url"] = cloudinary_upload_url
+    attrs["data-form-data"] = json.dumps(params)
+    attrs["class"] = " ".join(["cloudinary-fileupload", attrs.get("class", "")])
+
+    options = {'widget': CloudinaryInput(attrs=attrs)}
+    options.update(kwargs)
+    super(CloudinaryField, self).__init__(*args, **options)
+
   def to_python(self, value):
     "Convert to CloudinaryImage"
     m = re.search(r'^([^/]+)/upload/v(\d+)/([^/]+)#([^/]+)$', value)
@@ -24,7 +59,6 @@ class CloudinaryField(forms.Field):
 
   def validate(self, value):
     "Validate the signature"
-
     # Use the parent's handling of required fields, etc.
     super(CloudinaryField, self).validate(value)
     if not value.validate(): 
