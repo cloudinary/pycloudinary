@@ -21,6 +21,7 @@ def build_upload_params(**options):
             "callback":  options.get("callback"),
             "format": options.get("format"),
             "type": options.get("type"),
+            "backup": options.get("backup"),
             "tags": options.get("tags") and ",".join(utils.build_array(options["tags"]))}    
   if "eager" in options:
     params["eager"] = "|".join([utils.generate_transformation_string(**tr)[0] for tr in utils.build_array(options["eager"]) if tr])
