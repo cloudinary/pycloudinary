@@ -12,7 +12,6 @@ pycloudinary/utils.py
 pycloudinary.egg-info/PKG-INFO
 pycloudinary.egg-info/SOURCES.txt
 pycloudinary.egg-info/dependency_links.txt
-pycloudinary.egg-info/entry_points.txt
 pycloudinary.egg-info/not-zip-safe
 pycloudinary.egg-info/requires.txt
 pycloudinary.egg-info/top_level.txt
