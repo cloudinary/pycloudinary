@@ -1,11 +1,11 @@
 Metadata-Version: 1.0
 Name: pycloudinary
-Version: 0.2dev
+Version: 0.2.0
 Summary: Python interface to Cloudinary
 Home-page: http://cloudinary.com
-Author: Tal Lev-Ami
-Author-email: tal.levami@cloudinary.com
+Author: Cloudinary
+Author-email: info@cloudinary.com
 License: MIT
 Description: UNKNOWN
-Keywords: cloudinary image upload cdn
+Keywords: cloudinary image upload transformation cdn
 Platform: UNKNOWN
