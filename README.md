@@ -13,13 +13,9 @@ For Python, Cloudinary provides an egg for simplifying the integration even furt
 
 ## Setup ######################################################################
 
-Download cloudinary from [here](https://github.com/downloads/cloudinary/cloudinary/cloudinary-0.2.tar.gz)
+You can install Cloudinary's module using either `easy_install` or `pip` package management tools. For example:
 
-To install the cloudinary, open the package and run:
-
-	$ python setup.py install
-
-*Note: cloudinary depends on poster to work.*
+        $ pip install cloudinary
 
 ## Try it right away
 
