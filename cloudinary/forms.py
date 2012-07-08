@@ -1,7 +1,7 @@
 from django import forms
-from pycloudinary import CloudinaryImage
-import pycloudinary.uploader
-import pycloudinary.utils
+from cloudinary import CloudinaryImage
+import cloudinary.uploader
+import cloudinary.utils
 import re
 import json
 
@@ -17,14 +17,14 @@ class CloudinaryJsFileField(forms.Field):
     attrs = kwargs.get('attrs', {})
     options = kwargs.get('options', {})
     if 'resource_type' not in options: options['resource_type'] = 'auto'
-    cloudinary_upload_url = pycloudinary.utils.cloudinary_api_url("upload", **options)
-    api_key = options.get("api_key", pycloudinary.config().api_key)
+    cloudinary_upload_url = cloudinary.utils.cloudinary_api_url("upload", **options)
+    api_key = options.get("api_key", cloudinary.config().api_key)
     if not api_key: raise Exception("Must supply api_key")
-    api_secret = options.get("api_secret", pycloudinary.config().api_secret)
+    api_secret = options.get("api_secret", cloudinary.config().api_secret)
     if not api_secret: raise Exception("Must supply api_secret")
 
-    params = pycloudinary.uploader.build_upload_params(**options)
-    params['signature'] = pycloudinary.utils.api_sign_request(params, api_secret)
+    params = cloudinary.uploader.build_upload_params(**options)
+    params['signature'] = cloudinary.utils.api_sign_request(params, api_secret)
     params['api_key'] = api_key
     # Remove blank parameters
     for k, v in params.items():
@@ -72,5 +72,5 @@ class CloudinaryFileField(forms.FileField):
     "Upload and convert to CloudinaryImage"
     value = super(CloudinaryFileField, self).to_python(value)
    
-    result = pycloudinary.uploader.upload(value)
+    result = cloudinary.uploader.upload(value)
     return CloudinaryImage(result["public_id"], version=str(result["version"]), format=result["format"])

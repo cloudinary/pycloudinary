@@ -1,5 +1,7 @@
+from __future__ import absolute_import
+ 
 import os
-import utils
+from cloudinary import utils
 from urlparse import urlparse
 
 def module_exists(module_name):

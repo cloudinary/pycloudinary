@@ -1,5 +1,5 @@
 import re
-from pycloudinary import CloudinaryImage, forms
+from cloudinary import CloudinaryImage, forms
 from django.db import models
 
 class CloudinaryField(models.Field):

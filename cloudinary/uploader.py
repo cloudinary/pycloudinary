@@ -1,7 +1,7 @@
 # Copyright Cloudinary
 import time
-import pycloudinary
-from pycloudinary import utils
+import cloudinary
+from cloudinary import utils
 import json
 import re
 from poster.encode import multipart_encode
@@ -69,9 +69,9 @@ def text(text, **options):
 
 def call_api(action, params, **options):
   return_error = options.get("return_error")
-  api_key = options.get("api_key", pycloudinary.config().api_key)
+  api_key = options.get("api_key", cloudinary.config().api_key)
   if not api_key: raise Exception("Must supply api_key")
-  api_secret = options.get("api_secret", pycloudinary.config().api_secret)
+  api_secret = options.get("api_secret", cloudinary.config().api_secret)
   if not api_secret: raise Exception("Must supply api_secret")
 
   params["signature"] = utils.api_sign_request(params, api_secret)

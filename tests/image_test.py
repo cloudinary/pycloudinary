@@ -1,10 +1,10 @@
-import pycloudinary
-from pycloudinary import CloudinaryImage
+import cloudinary
+from cloudinary import CloudinaryImage
 import unittest
 
 class TestCloudinaryImage(unittest.TestCase):
   def setUp(self):
-    pycloudinary.config(cloud_name="test", api_secret="1234")
+    cloudinary.config(cloud_name="test", api_secret="1234")
     self.image = CloudinaryImage("hello", format = "png")
 
   def test_url(self):

@@ -1,2 +1,2 @@
-v0.2.0, 2012-07-08 -- First release for distributing as a package.
+v0.2.1, 2012-07-08 -- First release for distributing as a package.
 

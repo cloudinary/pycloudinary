@@ -13,13 +13,13 @@ For Python, Cloudinary provides an egg for simplifying the integration even furt
 
 ## Setup ######################################################################
 
-Download pycloudinary from [here](https://github.com/downloads/cloudinary/pycloudinary/pycloudinary-0.2.tar.gz)
+Download cloudinary from [here](https://github.com/downloads/cloudinary/cloudinary/cloudinary-0.2.tar.gz)
 
-To install the pycloudinary, open the package and run:
+To install the cloudinary, open the package and run:
 
 	$ python setup.py install
 
-*Note: pycloudinary depends on poster to work.*
+*Note: cloudinary depends on poster to work.*
 
 ## Try it right away
 
@@ -63,7 +63,7 @@ For more details, see our documentation for embedding [Facebook](http://cloudina
 Each request for building a URL of a remote cloud resource must have the `cloud_name` parameter set. 
 Each request to our secure APIs (e.g., image uploads, eager sprite generation) must have the `api_key` and `api_secret` parameters set. See [API, URLs and access identifiers](http://cloudinary.com/documentation/api_and_access_identifiers) for more details.
 
-Setting the `cloud_name`, `api_key` and `api_secret` parameters can be done either directly in each call to a Cloudinary method, by calling the pycloudinary.config(), by using environment variables, or using the CLOUDINARY django settings.
+Setting the `cloud_name`, `api_key` and `api_secret` parameters can be done either directly in each call to a Cloudinary method, by calling the cloudinary.config(), by using environment variables, or using the CLOUDINARY django settings.
 
 You can [download your customized cloudinary python configuration](https://cloudinary.com/console/cloudinary_python.txt) using our Management Console.
 
@@ -74,23 +74,23 @@ Any image uploaded to Cloudinary can be transformed and embedded using powerful 
 
 The following example generates the url for accessing an uploaded `sample` image while transforming it to fill a 100x150 rectangle:
 
-    pycloudinary.utils.cloudinary_url("sample.jpg", width = 100, height = 150, crop = "fill")
+    cloudinary.utils.cloudinary_url("sample.jpg", width = 100, height = 150, crop = "fill")
 
 Another example, emedding a smaller version of an uploaded image while generating a 90x90 face detection based thumbnail: 
 
-    pycloudinary.utils.cloudinary_url("woman.jpg", width = 90, height = 90, 
+    cloudinary.utils.cloudinary_url("woman.jpg", width = 90, height = 90, 
                  crop = "thumb", gravity = "face")
 
 You can provide either a Facebook name or a numeric ID of a Facebook profile or a fan page.  
              
 Embedding a Facebook profile to match your graphic design is very simple:
 
-    pycloudinary.utils.cloudinary_url("billclinton.jpg", width = 90, height = 130, type = "facebook",
+    cloudinary.utils.cloudinary_url("billclinton.jpg", width = 90, height = 130, type = "facebook",
                                crop => "fill", gravity => "north_west")
                            
 Same goes for Twitter:
 
-    pycloudinary.utils.cloudinary_url("billclinton.jpg", type = "twitter_name")
+    cloudinary.utils.cloudinary_url("billclinton.jpg", type = "twitter_name")
 
 ### Upload
 
@@ -98,30 +98,30 @@ Assuming you have your Cloudinary configuration parameters defined (`cloud_name`
     
 The following example uploads a local JPG to the cloud: 
     
-    pycloudinary.uploader.upload("my_picture.jpg")
+    cloudinary.uploader.upload("my_picture.jpg")
         
 The uploaded image is assigned a randomly generated public ID. The image is immediately available for download through a CDN:
 
-    pycloudinary.utils.cloudinary_url("abcfrmo8zul1mafopawefg.jpg")
+    cloudinary.utils.cloudinary_url("abcfrmo8zul1mafopawefg.jpg")
         
     http://res.cloudinary.com/demo/image/upload/abcfrmo8zul1mafopawefg.jpg
 
 You can also specify your own public ID:    
     
-    pycloudinary.uploader.upload("http://www.example.com/image.jpg", public_id = 'sample_remote')
+    cloudinary.uploader.upload("http://www.example.com/image.jpg", public_id = 'sample_remote')
 
-    pycloudinary.utils.cloudinary_url("sample_remote.jpg")
+    cloudinary.utils.cloudinary_url("sample_remote.jpg")
 
     http://res.cloudinary.com/demo/image/upload/sample_remote.jpg
         
 ## Django 
 
-### pycloudinary.CloudinaryImage
+### cloudinary.CloudinaryImage
 
 Represents an image stored in Cloudinary.
 
 Usage:
-    img = pycloudinary.CloudinaryImage("sample", format="png")
+    img = cloudinary.CloudinaryImage("sample", format="png")
     
     img.url(width=100, height=100, crop="fill") 
     # http://res.cloudinary.com/cloud_name/image/upload/c_fill,h_100,w_100/sample.png 
@@ -129,7 +129,7 @@ Usage:
     img.image(width=100, height=100, crop="fill") 
     # <img src="http://res.cloudinary.com/cloud_name/image/upload/c_fill,h_100,w_100/sample.png" width="100" height="100"/>
 
-### pycloudinary.models.CloudinaryField
+### cloudinary.models.CloudinaryField
 
 Allows you to store references to Cloudinary stored images in your model. Returns an CloudinaryImage object.
 
@@ -137,9 +137,9 @@ Usage:
 
     class Poll(models.Model):
       # ...
-      image = pycloudinary.models.CloudinaryField('image')
+      image = cloudinary.models.CloudinaryField('image')
 
-### pycloudinary.forms.CloudinaryField
+### cloudinary.forms.CloudinaryField
 
 Form field that allows you to validate and convert to CloudinaryImage a signed Cloudinary image reference (see [here](http://github.com/cloudinary/cloudinary_js))
 
@@ -173,7 +173,7 @@ Additional resources are available at:
 
 ## Support
 
-You can [open an issue through GitHub](https://github.com/cloudinary/pycloudinary/issues).
+You can [open an issue through GitHub](https://github.com/cloudinary/cloudinary/issues).
 
 Contact us at [info@cloudinary.com](mailto:info@cloudinary.com)
 

@@ -5,7 +5,7 @@ import re
 import struct
 import uuid
 import base64
-import pycloudinary
+import cloudinary
 
 SHARED_CDN = "d3jpl91pxevbkh.cloudfront.net"
 
@@ -79,14 +79,14 @@ def cloudinary_url(source, **options):
   resource_type = options.pop("resource_type", "image")
   version = options.pop("version", None)
   format = options.pop("format", None)
-  cdn_subdomain = options.pop("cdn_subdomain", pycloudinary.config().cdn_subdomain)
+  cdn_subdomain = options.pop("cdn_subdomain", cloudinary.config().cdn_subdomain)
     
-  cloud_name = options.pop("cloud_name", pycloudinary.config().cloud_name or None)
+  cloud_name = options.pop("cloud_name", cloudinary.config().cloud_name or None)
   if cloud_name == None: 
     raise Exception("Must supply cloud_name in tag or in configuration")
-  secure = options.pop("secure", pycloudinary.config().secure)
-  private_cdn = options.pop("private_cdn", pycloudinary.config().private_cdn)
-  secure_distribution = options.pop("secure_distribution", pycloudinary.config().secure_distribution)
+  secure = options.pop("secure", cloudinary.config().secure)
+  private_cdn = options.pop("private_cdn", cloudinary.config().private_cdn)
+  secure_distribution = options.pop("secure_distribution", cloudinary.config().secure_distribution)
     
   if not source:
     return (original_source, options)
@@ -118,11 +118,11 @@ def cloudinary_url(source, **options):
   return (source, options)
   
 def cloudinary_api_url(action = 'upload', **options):
-  cloudinary = options.get("upload_prefix", pycloudinary.config().upload_prefix) or "https://api.cloudinary.com"
-  cloud_name = options.get("cloud_name", pycloudinary.config().cloud_name)
+  cloudinary_prefix = options.get("upload_prefix", cloudinary.config().upload_prefix) or "https://api.cloudinary.com"
+  cloud_name = options.get("cloud_name", cloudinary.config().cloud_name)
   if not cloud_name: raise Exception("Must supply cloud_name")
   resource_type = options.get("resource_type", "image")
-  return "/".join([cloudinary, "v1_1", cloud_name, resource_type, action])
+  return "/".join([cloudinary_prefix, "v1_1", cloud_name, resource_type, action])
 
 # Based on ruby's CGI::unescape. In addition does not escape / :
 def smart_escape(string):

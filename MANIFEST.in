@@ -1,1 +1,3 @@
-include README.md *.txt
+include *.txt
+recursive-include cloudinary/templates *.html
+
