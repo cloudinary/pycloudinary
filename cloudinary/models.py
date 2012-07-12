@@ -25,13 +25,14 @@ class CloudinaryField(models.Field):
       return value
     if not value:
       return value
-    m = re.search(r'v(\d+)/(.*)\.(.*)', value)
+    m = re.search(r'(?:v(\d+)/)?(.*)\.(.*)', value)
     return CloudinaryImage(m.group(2), version=m.group(1), format=m.group(3))
 
   def get_prep_value(self, value):
     prep = ''
     if value.version: prep = prep + 'v' + value.version + '/'
-    prep = prep + value.public_id + '.' + value.format
+    prep = prep + value.public_id
+    if value.format: prep = prep + '.' + value.format
     return prep
 
   def formfield(self, **kwargs):
