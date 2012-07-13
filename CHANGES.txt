@@ -1,2 +1,4 @@
 v0.2.1, 2012-07-08 -- First release for distributing as a package.
+v0.2.2, 2012-07-12 -- Allow saving an CloudinaryField assigned with CloudinaryImage with no format and version.
+v0.2.3, 2012-07-13 -- Fix serialization of CloudinaryImage when version is a number.
 
