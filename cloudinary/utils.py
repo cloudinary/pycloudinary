@@ -113,7 +113,7 @@ def cloudinary_url(source, **options):
     if not private_cdn:
       prefix += "/" + cloud_name
   
-  components = [prefix, resource_type, type, transformation, "v" + version if version else "", source] 
+  components = [prefix, resource_type, type, transformation, "v" + str(version) if version else "", source]
   source = re.sub(r'([^:])/+', r'\1/', "/".join(components))
   return (source, options)
   
