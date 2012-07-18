@@ -7,17 +7,6 @@ import cloudinary.uploader
 import urllib2
 
 
-try:
-    _config = settings.CLOUDINARY
-    CLOUD_NAME = _config['cloud_name']
-    API_KEY = _config['api_key']
-    API_SECRET = _config['api_secret']
-except AttributeError, KeyError:
-    raise ImproperlyConfigured('Cloudinary settings not found. '
-            'You can get them here: '
-            'https://cloudinary.com/console/cloudinary_python.txt')
-
-
 class CloudinaryStorage(Storage):
     def __init__(self):
         pass
