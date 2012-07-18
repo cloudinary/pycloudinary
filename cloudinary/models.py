@@ -1,39 +1,31 @@
-import re
-from cloudinary import CloudinaryImage, forms
+from cloudinary import forms, utils
+from cloudinary.storage import CloudinaryStorage
 from django.db import models
+from django.db.models.fields.files import ImageFieldFile
 
-class CloudinaryField(models.Field):
 
+class CloudinaryFieldFile(ImageFieldFile):
+
+  def url_with_options(self, **options):
+    return utils.cloudinary_url(self.name, **options)[0]
+
+
+class CloudinaryField(models.ImageField):
+
+  attr_class = CloudinaryFieldFile
   description = "An image stored in Cloudinary"
 
-  __metaclass__ = models.SubfieldBase
-
   def __init__(self, *args, **kwargs):
-    options = {'max_length': 100}
+    for arg in ('storage', 'upload_to'):
+        if arg in kwargs:
+            raise TypeError("'%s' cannot be modified for %s." % (arg, self.__class__))
+
+    options = {
+      'storage': CloudinaryStorage(),
+      'upload_to': '/',
+    }
     options.update(kwargs)
     super(CloudinaryField, self).__init__(*args, **options)
-
-  def get_internal_type(self):
-    return 'CharField'
-
-  def value_to_string(self, obj):
-    value = self._get_val_from_obj(obj)
-    return self.get_db_prep_value(value)
-
-  def to_python(self, value):
-    if isinstance(value, CloudinaryImage):
-      return value
-    if not value:
-      return value
-    m = re.search(r'(?:v(\d+)/)?(.*)\.(.*)', value)
-    return CloudinaryImage(m.group(2), version=m.group(1), format=m.group(3))
-
-  def get_prep_value(self, value):
-    prep = ''
-    if value.version: prep = prep + 'v' + str(value.version) + '/'
-    prep = prep + value.public_id
-    if value.format: prep = prep + '.' + value.format
-    return prep
 
   def formfield(self, **kwargs):
       defaults = {'form_class': forms.CloudinaryFileField}
