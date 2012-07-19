@@ -3,26 +3,17 @@ from __future__ import absolute_import
 import os
 from cloudinary import utils
 from urlparse import urlparse
-from django.conf import settings
 
-def module_exists(module_name):
-    try:
-        __import__(module_name)
-    except ImportError:
-        return False
-    else:
-        return True
+def import_module(module_name):
+  try:
+    return __import__(module_name)
+  except ImportError:
+    return None
 
 class Config(object):
   def __init__(self):
-    if 'CLOUDINARY' in dir(settings):
-      #self.update(settings.CLOUDINARY)
-      print(settings.CLOUDINARY)
-      self.update(
-        cloud_name = settings.CLOUDINARY['cloud_name'],
-        api_key = settings.CLOUDINARY['api_key'],
-        api_secret = settings.CLOUDINARY['api_secret']
-      )
+    if import_module('django') and 'CLOUDINARY' in dir(import_module('django').conf.settings):
+      self.update(**import_module('django').conf.settings.CLOUDINARY)
     elif os.environ.get("CLOUDINARY_CLOUD_NAME"):
       self.update(
         cloud_name = os.environ.get("CLOUDINARY_CLOUD_NAME"),
