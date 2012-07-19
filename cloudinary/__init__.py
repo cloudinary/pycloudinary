@@ -3,6 +3,7 @@ from __future__ import absolute_import
 import os
 from cloudinary import utils
 from urlparse import urlparse
+from django.conf import settings
 
 def module_exists(module_name):
     try:
@@ -14,8 +15,14 @@ def module_exists(module_name):
 
 class Config(object):
   def __init__(self):
-    if module_exists('django.conf.settings') and 'CLOUDINARY' in dir(django.conf.settings):
-      self.update(django.conf.settings.CLOUDINARY)
+    if 'CLOUDINARY' in dir(settings):
+      #self.update(settings.CLOUDINARY)
+      print(settings.CLOUDINARY)
+      self.update(
+        cloud_name = settings.CLOUDINARY['cloud_name'],
+        api_key = settings.CLOUDINARY['api_key'],
+        api_secret = settings.CLOUDINARY['api_secret']
+      )
     elif os.environ.get("CLOUDINARY_CLOUD_NAME"):
       self.update(
         cloud_name = os.environ.get("CLOUDINARY_CLOUD_NAME"),
