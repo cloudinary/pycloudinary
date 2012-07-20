@@ -6,7 +6,6 @@ setup.py
 cloudinary/__init__.py
 cloudinary/forms.py
 cloudinary/models.py
-cloudinary/storage.py
 cloudinary/uploader.py
 cloudinary/utils.py
 cloudinary.egg-info/PKG-INFO

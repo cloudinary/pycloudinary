@@ -127,24 +127,17 @@ Usage:
 
 ### cloudinary.models.CloudinaryField
 
-Allows you to store references to Cloudinary stored images in your model. `CloudinaryField` inherits from `ImageFileField` so it should be a drop-in replacement if you already use an `ImageFileField`. (You'll still have to upload existing images to Cloudinary.)
-
-Field instances have a `url_with_options` method which can be passed the same options as `cloudinary_url`.
+Allows you to store references to Cloudinary stored images in your model. Returns an CloudinaryImage object.
 
 Usage:
 
     class Poll(models.Model):
       # ...
-      image = cloudinary.models.CloudinaryField()
+      image = cloudinary.models.CloudinaryField('image')
 
 ### cloudinary.forms.CloudinaryField
 
 Form field that allows you to validate and convert to CloudinaryImage a signed Cloudinary image reference (see [here](http://github.com/cloudinary/cloudinary_js))
-
-
-### cloudinary.storage.CloudinaryStorage
-
-If you want to store images in Cloudinary without using a `CloudinaryField`, you can use the storage backend for convenient image access.
 
 ### cloudinary template tags
 
