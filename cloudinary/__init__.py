@@ -4,18 +4,17 @@ import os
 from cloudinary import utils
 from urlparse import urlparse
 
-def module_exists(module_name):
-    try:
-        __import__(module_name)
-    except ImportError:
-        return False
-    else:
-        return True
+def import_module(module_name):
+  try:
+    return __import__(module_name)
+  except ImportError:
+    return None
 
 class Config(object):
   def __init__(self):
-    if module_exists('django.conf.settings') and 'CLOUDINARY' in dir(django.conf.settings):
-      self.update(django.conf.settings.CLOUDINARY)
+    django = import_module('django.conf')
+    if django and 'CLOUDINARY' in dir(django.conf.settings):
+      self.update(**django.conf.settings.CLOUDINARY)
     elif os.environ.get("CLOUDINARY_CLOUD_NAME"):
       self.update(
         cloud_name = os.environ.get("CLOUDINARY_CLOUD_NAME"),
