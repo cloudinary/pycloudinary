@@ -12,8 +12,9 @@ def import_module(module_name):
 
 class Config(object):
   def __init__(self):
-    if import_module('django') and 'CLOUDINARY' in dir(import_module('django').conf.settings):
-      self.update(**import_module('django').conf.settings.CLOUDINARY)
+    django = import_module('django.conf')
+    if django and 'CLOUDINARY' in dir(django.conf.settings):
+      self.update(**django.conf.settings.CLOUDINARY)
     elif os.environ.get("CLOUDINARY_CLOUD_NAME"):
       self.update(
         cloud_name = os.environ.get("CLOUDINARY_CLOUD_NAME"),
