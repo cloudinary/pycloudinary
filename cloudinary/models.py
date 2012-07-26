@@ -31,7 +31,7 @@ class CloudinaryField(models.Field):
   def get_prep_value(self, value):
     prep = ''
     if not value: 
-      return prep
+      return None
     if value.version: prep = prep + 'v' + str(value.version) + '/'
     prep = prep + value.public_id
     if value.format: prep = prep + '.' + value.format
