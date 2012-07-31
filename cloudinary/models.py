@@ -3,6 +3,17 @@ from cloudinary.storage import CloudinaryStorage
 from django.db import models
 from django.db.models.fields.files import ImageFieldFile
 
+# Ensure South doesn't explode on this field
+try:
+    import south.modelsinspector
+except ImportError:
+    pass
+else:
+    south.modelsinspector.add_introspection_rules(
+        [],
+        ["^cloudinary\.models\.CloudinaryField"]
+    )
+
 
 class CloudinaryFieldFile(ImageFieldFile):
 
