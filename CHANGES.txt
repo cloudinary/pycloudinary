@@ -2,4 +2,6 @@ v0.2.1, 2012-07-08 -- First release for distributing as a package.
 v0.2.2, 2012-07-12 -- Allow saving an CloudinaryField assigned with CloudinaryImage with no format and version.
 v0.2.3, 2012-07-13 -- Fix serialization of CloudinaryImage when version is a number.
 v0.2.4, 2012-07-23 -- Fix bug when assigning None to CloudinaryField, Fixed handling of django based settings, Update README.md
+v0.2.5, 2012-07-27 -- Fix case in which Django is in python path but not used, Support density and page. Support http public ids in non-fetch types (e.g. vimeo)
+
 

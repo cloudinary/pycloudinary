@@ -225,6 +225,20 @@ class TestUtils(unittest.TestCase):
     self.assertEqual(options, {})
     self.assertEqual(result, "http://res.cloudinary.com/test123/image/upload/e_sepia:10/test" )
 
+  def test_density(self):
+    """should support density"""
+    options = {"density": 150}
+    result, options = cloudinary.utils.cloudinary_url("test", **options)
+    self.assertEqual(options, {})
+    self.assertEqual(result, "http://res.cloudinary.com/test123/image/upload/dn_150/test" )
+
+  def test_page(self):
+    """should support page"""
+    options = {"page": 3}
+    result, options = cloudinary.utils.cloudinary_url("test", **options)
+    self.assertEqual(options, {})
+    self.assertEqual(result, "http://res.cloudinary.com/test123/image/upload/pg_3/test" )
+
 if __name__ == '__main__':
     unittest.main()
 

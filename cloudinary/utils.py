@@ -53,7 +53,7 @@ def generate_transformation_string(**options):
   params = {"w": width, "h": height, "t": named_transformation, "b": background, "e": effect}
   for param, option in {"c": "crop", "q": "quality", "g": "gravity", "p": "prefix", "x": "x",
                         "y": "y", "r": "radius", "d": "default_image", "a": "angle", "l": "overlay", "u": "underlay",
-                        "f": "fetch_format"}.items():
+                        "f": "fetch_format", "pg": "page", "dn": "density"}.items():
     params[param] = options.pop(option, None)
 
   transformations = [param + "_" + str(value) for param, value in params.items() if value]
@@ -87,14 +87,13 @@ def cloudinary_url(source, **options):
   secure = options.pop("secure", cloudinary.config().secure)
   private_cdn = options.pop("private_cdn", cloudinary.config().private_cdn)
   secure_distribution = options.pop("secure_distribution", cloudinary.config().secure_distribution)
-    
-  if not source:
+  
+  if (not source) or ((type == "upload" or type=="asset") and re.match(r'^https?:', source)):
     return (original_source, options)
-  if type == "fetch":
+  if re.match(r'^https?:', source):
     source = smart_escape(source)
-  else:
-    if re.match(r'^https?:', source): return (original_source, options)
-    if format: source = source + "." + format
+  elif format: 
+    source = source + "." + format
   
   if cloud_name.startswith("/"):
     prefix = "/res" + cloud_name
