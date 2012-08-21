@@ -46,10 +46,10 @@ def add_tag(tag, public_ids = [], **options):
   return call_tags_api(tag, command, public_ids, **options)    
 
 def remove_tag(tag, public_ids = [], **options):
-  return self.call_tags_api(tag, "remove", public_ids, **options)
+  return call_tags_api(tag, "remove", public_ids, **options)
 
 def replace_tag(tag, public_ids = [], **options):
-  return self.call_tags_api(tag, "replace", public_ids, **options)    
+  return call_tags_api(tag, "replace", public_ids, **options)    
 
 def call_tags_api(tag, command, public_ids = [], **options):
   params = {
