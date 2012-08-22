@@ -25,3 +25,7 @@ def cloudinary_direct_upload(callback_url, **options):
       del params[k]
 
   return {"params": params, "url": api_url}
+
+@register.inclusion_tag('cloudinary_includes.html')
+def cloudinary_includes():
+  return {}

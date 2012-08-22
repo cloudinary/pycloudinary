@@ -5,24 +5,17 @@ import cloudinary.utils
 import re
 import json
 
-class CloudinaryInput(forms.FileInput):
-  def render(self, name, value, attrs=None):
-    attrs = attrs or {}
-    attrs['data-cloudinary-field'] = name
-    return super(CloudinaryInput, self).render("file", None, attrs=attrs)
-    
+class CloudinaryInput(forms.TextInput):
+  input_type = 'file'
 
-class CloudinaryJsFileField(forms.Field):
-  def __init__(self, *args, **kwargs):
-    attrs = kwargs.get('attrs', {})
-    options = kwargs.get('options', {})
-    if 'resource_type' not in options: options['resource_type'] = 'auto'
-    cloudinary_upload_url = cloudinary.utils.cloudinary_api_url("upload", **options)
+  def render(self, name, value, attrs=None):
+    self.build_attrs(attrs)
+    options = self.attrs.pop('options')
     api_key = options.get("api_key", cloudinary.config().api_key)
     if not api_key: raise Exception("Must supply api_key")
     api_secret = options.get("api_secret", cloudinary.config().api_secret)
     if not api_secret: raise Exception("Must supply api_secret")
-
+    
     params = cloudinary.uploader.build_upload_params(**options)
     params['signature'] = cloudinary.utils.api_sign_request(params, api_secret)
     params['api_key'] = api_key
@@ -31,13 +24,26 @@ class CloudinaryJsFileField(forms.Field):
       if not v:
         del params[k]
 
+    if 'resource_type' not in options: options['resource_type'] = 'auto'
+    cloudinary_upload_url = cloudinary.utils.cloudinary_api_url("upload", **options)
+
     attrs["data-url"] = cloudinary_upload_url
     attrs["data-form-data"] = json.dumps(params)
-    attrs["class"] = " ".join(["cloudinary-fileupload", attrs.get("class", "")])
+    attrs["data-cloudinary-field"] = name
+    attrs["class"] = " ".join(["cloudinary-fileupload", self.attrs.get("class", "")])
+
+    return super(CloudinaryInput, self).render("file", None, attrs=attrs)
+    
+
+class CloudinaryJsFileField(forms.Field):
+  def __init__(self, *args, **kwargs):
+    attrs = kwargs.get('attrs', {})
+    options = kwargs.get('options', {})
+    attrs["options"] = options
 
     options = {'widget': CloudinaryInput(attrs=attrs)}
     options.update(kwargs)
-    super(CloudinaryField, self).__init__(*args, **options)
+    super(CloudinaryJsFileField, self).__init__(*args, **options)
 
   def to_python(self, value):
     "Convert to CloudinaryImage"
@@ -60,7 +66,7 @@ class CloudinaryJsFileField(forms.Field):
   def validate(self, value):
     "Validate the signature"
     # Use the parent's handling of required fields, etc.
-    super(CloudinaryField, self).validate(value)
+    super(CloudinaryJsFileField, self).validate(value)
     if not value.validate(): 
       raise forms.ValidationError("Signature mismatch")
 
