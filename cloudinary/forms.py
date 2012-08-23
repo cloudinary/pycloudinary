@@ -4,6 +4,12 @@ import cloudinary.uploader
 import cloudinary.utils
 import re
 import json
+from django.contrib.staticfiles.storage import staticfiles_storage
+
+def cl_init_js_callbacks(form, request):
+  for field in form.fields.values():
+    if (isinstance(field, CloudinaryJsFileField)):
+      field.enable_callback(request)
 
 class CloudinaryInput(forms.TextInput):
   input_type = 'file'
@@ -44,6 +50,9 @@ class CloudinaryJsFileField(forms.Field):
     options = {'widget': CloudinaryInput(attrs=attrs)}
     options.update(kwargs)
     super(CloudinaryJsFileField, self).__init__(*args, **options)
+
+  def enable_callback(self, request):
+    self.widget.attrs["options"]["callback"] = request.build_absolute_uri(staticfiles_storage.url("html/cloudinary_cors.html"))
 
   def to_python(self, value):
     "Convert to CloudinaryImage"
