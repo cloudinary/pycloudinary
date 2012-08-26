@@ -24,12 +24,17 @@ def generate_transformation_string(**options):
   width = options.get("width")
   height = options.get("height")
   has_layer = ("underlay" in options) or ("overlay" in options)
-  if width and (float(width) < 1 or has_layer):
+
+  crop = options.pop("crop", None)
+  angle = ".".join([str(value) for value in build_array(options.pop("angle", None))])
+  no_html_sizes = has_layer or angle or crop == "fit" or crop == "limit"
+  
+  if width and (float(width) < 1 or no_html_sizes):
     del options["width"]
-  if height and (float(height) < 1 or has_layer):
+  if height and (float(height) < 1 or no_html_sizes):
     del options["height"]
      
-  if not("crop" in options) and not has_layer:
+  if not crop and not has_layer:
     width = height = None
 
   background = options.pop("background", None)
@@ -50,9 +55,9 @@ def generate_transformation_string(**options):
     effect = ":".join([str(x) for x in effect])
   elif isinstance(effect, dict):
     effect = ":".join([str(x) for x in effect.items()[0]])
-  params = {"w": width, "h": height, "t": named_transformation, "b": background, "e": effect}
-  for param, option in {"c": "crop", "q": "quality", "g": "gravity", "p": "prefix", "x": "x",
-                        "y": "y", "r": "radius", "d": "default_image", "a": "angle", "l": "overlay", "u": "underlay",
+  params = {"w": width, "h": height, "t": named_transformation, "b": background, "e": effect, "c": crop, "a": angle}
+  for param, option in {"q": "quality", "g": "gravity", "p": "prefix", "x": "x",
+                        "y": "y", "r": "radius", "d": "default_image", "l": "overlay", "u": "underlay",
                         "f": "fetch_format", "pg": "page", "dn": "density"}.items():
     params[param] = options.pop(option, None)
 

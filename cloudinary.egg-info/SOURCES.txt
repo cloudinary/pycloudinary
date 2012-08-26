@@ -16,5 +16,6 @@ cloudinary.egg-info/not-zip-safe
 cloudinary.egg-info/requires.txt
 cloudinary.egg-info/top_level.txt
 cloudinary/templates/cloudinary_direct_upload.html
+cloudinary/templates/cloudinary_includes.html
 cloudinary/templatetags/__init__.py
 cloudinary/templatetags/cloudinary.py
