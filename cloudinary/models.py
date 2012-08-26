@@ -10,6 +10,7 @@ class CloudinaryField(models.Field):
 
   def __init__(self, *args, **kwargs):
     options = {'max_length': 100}
+    self.default_form_class = kwargs.pop("default_form_class", forms.CloudinaryFileField)
     options.update(kwargs)
     super(CloudinaryField, self).__init__(*args, **options)
 
@@ -38,6 +39,6 @@ class CloudinaryField(models.Field):
     return prep
 
   def formfield(self, **kwargs):
-      defaults = {'form_class': forms.CloudinaryFileField}
+      defaults = {'form_class': self.default_form_class}
       defaults.update(kwargs)
       return super(CloudinaryField, self).formfield(**defaults)
