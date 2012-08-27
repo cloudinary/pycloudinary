@@ -15,6 +15,11 @@ cloudinary.egg-info/dependency_links.txt
 cloudinary.egg-info/not-zip-safe
 cloudinary.egg-info/requires.txt
 cloudinary.egg-info/top_level.txt
+cloudinary/static/html/cloudinary_cors.html
+cloudinary/static/js/jquery.cloudinary.js
+cloudinary/static/js/jquery.fileupload.js
+cloudinary/static/js/jquery.iframe-transport.js
+cloudinary/static/js/jquery.ui.widget.js
 cloudinary/templates/cloudinary_direct_upload.html
 cloudinary/templates/cloudinary_includes.html
 cloudinary/templatetags/__init__.py
