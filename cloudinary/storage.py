@@ -29,7 +29,8 @@ class CloudinaryStorage(Storage):
         return source
 
     def delete(self, name):
-        raise NotImplementedError('Delete not yet implemented')
+        # Parse the public ID from the name and delete
+        cloudinary.uploader.destroy(name.split('/')[-1].split('.')[0])
 
     def exists(self, name):
         # Since Cloudinary generates names automatically,
