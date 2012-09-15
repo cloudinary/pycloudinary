@@ -16,6 +16,24 @@ class TestUploader(unittest.TestCase):
     self.assertEqual(result["signature"], expected_signature)
 
   @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+  def test_explicit(self):
+    """should support explicit """
+    result = uploader.explicit("cloudinary", type="twitter_name", eager=[dict(crop="scale", width="2.0")])        
+    url = utils.cloudinary_url("cloudinary", type="twitter_name", crop="scale", width="2.0", format="png", version=result["version"])[0]
+    self.assertEqual(result["eager"][0]["url"], url)
+
+  @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+  def test_eager(self):
+    """should support eager """
+    uploader.upload("tests/logo.png", eager=[dict(crop="scale", width="2.0")])        
+
+  @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+  def test_header(self):
+    """should support headers """
+    uploader.upload("tests/logo.png", headers=["Link: 1"])        
+    uploader.upload("tests/logo.png", headers={"Link": "1"})        
+
+  @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
   def test_text(self):
     """should successfully generate text image """
     result = uploader.text("hello world")
