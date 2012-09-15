@@ -166,6 +166,20 @@ class TestUtils(unittest.TestCase):
     self.assertEqual(options, {})
     self.assertEqual(result, "http://res.cloudinary.com/test123/image/fetch/http://blah.com/hello%3Fa%3Db" )
 
+  def test_cname(self):
+    """should support extenal cname"""
+    options = {"cname": "hello.com"}
+    result, options = cloudinary.utils.cloudinary_url("test", **options)
+    self.assertEqual(options, {})
+    self.assertEqual(result, "http://hello.com/test123/image/upload/test" )
+
+  def test_cname_subdomain(self):
+    """should support extenal cname with cdn_subdomain on"""
+    options = {"cname": "hello.com", "cdn_subdomain": True}
+    result, options = cloudinary.utils.cloudinary_url("test", **options)
+    self.assertEqual(options, {})
+    self.assertEqual(result, "http://a2.hello.com/test123/image/upload/test" )
+
   def test_background(self):
     """should support background"""
     options = {"background": "red"}

@@ -85,6 +85,7 @@ def cloudinary_url(source, **options):
   version = options.pop("version", None)
   format = options.pop("format", None)
   cdn_subdomain = options.pop("cdn_subdomain", cloudinary.config().cdn_subdomain)
+  cname = options.pop("cname", cloudinary.config().cname)
     
   cloud_name = options.pop("cloud_name", cloudinary.config().cloud_name or None)
   if cloud_name == None: 
@@ -112,8 +113,14 @@ def cloudinary_url(source, **options):
     if secure:
       prefix = "https://" + secure_distribution
     else:
-      subdomain = "a" + (zlib.crc32(source)%5 + 1) if cdn_subdomain else ""
-      prefix = "http://" + subdomain + (cloud_name + "-" if private_cdn else "") + "res.cloudinary.com"
+      subdomain = "a" + str((zlib.crc32(source) & 0xffffffff)%5 + 1) + "." if cdn_subdomain else ""
+      if cname:
+        host = cname
+      elif private_cdn:
+        host = cloud_name + "-res.cloudinary.com"
+      else:
+        host = "res.cloudinary.com"    
+      prefix = "http://" + subdomain + host
     if not private_cdn:
       prefix += "/" + cloud_name
   
