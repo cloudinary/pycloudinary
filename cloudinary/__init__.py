@@ -76,6 +76,6 @@ class CloudinaryImage(object):
   def image(self, **options):
     options.update(format = self.format, version = self.version)
     src, attrs = utils.cloudinary_url(self.public_id, **options)
-    return "<img src='{0}' {1}/>".format(src, ' '.join(sorted(["{0}='{1}'".format(key, value) for key, value in attrs.items() if value])))
+    return u"<img src='{0}' {1}/>".format(src, ' '.join(sorted([u"{0}='{1}'".format(key, value) for key, value in attrs.items() if value])))
 
 
