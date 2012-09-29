@@ -3,5 +3,4 @@ v0.2.2, 2012-07-12 -- Allow saving an CloudinaryField assigned with CloudinaryIm
 v0.2.3, 2012-07-13 -- Fix serialization of CloudinaryImage when version is a number.
 v0.2.4, 2012-07-23 -- Fix bug when assigning None to CloudinaryField, Fixed handling of django based settings, Update README.md
 v0.2.5, 2012-07-27 -- Fix case in which Django is in python path but not used, Support density and page. Support http public ids in non-fetch types (e.g. vimeo)
-
-
+v0.2.6, 2012-08-27 -- Wrapper for Cloudinary management API, Better integration with JS library for direct uploads, Allow supplying default formfield for CloudinaryField model field, Do not pass width/height to html in case of crop fit or limit and in case of angle.
