@@ -4,7 +4,6 @@ import cloudinary.uploader
 import cloudinary.utils
 import re
 import json
-from django.contrib.staticfiles.storage import staticfiles_storage
 
 def cl_init_js_callbacks(form, request):
   for field in form.fields.values():
@@ -52,6 +51,7 @@ class CloudinaryJsFileField(forms.Field):
     super(CloudinaryJsFileField, self).__init__(*args, **options)
 
   def enable_callback(self, request):
+    from django.contrib.staticfiles.storage import staticfiles_storage
     self.widget.attrs["options"]["callback"] = request.build_absolute_uri(staticfiles_storage.url("html/cloudinary_cors.html"))
 
   def to_python(self, value):
