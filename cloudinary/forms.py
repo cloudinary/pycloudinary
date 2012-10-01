@@ -86,6 +86,7 @@ class CloudinaryFileField(forms.FileField):
   def to_python(self, value):
     "Upload and convert to CloudinaryImage"
     value = super(CloudinaryFileField, self).to_python(value)
-   
+    if not value:
+        raise forms.ValidationError("No image selected!")
     result = cloudinary.uploader.upload(value)
     return CloudinaryImage(result["public_id"], version=str(result["version"]), format=result["format"])
