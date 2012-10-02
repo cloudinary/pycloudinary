@@ -3,8 +3,4 @@
 .pydevproject
 dist
 venv
-<<<<<<< HEAD
-*.idea/
-=======
 cloudinary/static
->>>>>>> upstream/master
