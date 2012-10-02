@@ -62,6 +62,24 @@ class TestUtils(unittest.TestCase):
     result, options = cloudinary.utils.cloudinary_url("test", **options)
     self.assertEqual(options, {"width": 100, "height": 100})
     self.assertEqual(result, "http://res.cloudinary.com/test123/image/upload/c_crop,h_100,w_100/test" )
+
+  def test_html_width_height_on_crop_fit_limit(self):
+    """should not pass width and height to html in case of fit or limit crop"""
+    options = {"width": 100, "height": 100, "crop": "limit"}
+    result, options = cloudinary.utils.cloudinary_url("test", **options)
+    self.assertEqual(result, "http://res.cloudinary.com/test123/image/upload/c_limit,h_100,w_100/test" )
+    self.assertEqual(options, {})
+    options = {"width": 100, "height": 100, "crop": "fit"}
+    result, options = cloudinary.utils.cloudinary_url("test", **options)
+    self.assertEqual(options, {})
+    self.assertEqual(result, "http://res.cloudinary.com/test123/image/upload/c_fit,h_100,w_100/test" )
+
+  def test_html_width_height_on_angle(self):
+    """should not pass width and height to html in case angle was used"""
+    options = {"width": 100, "height": 100, "crop": "scale", "angle": "auto"}
+    result, options = cloudinary.utils.cloudinary_url("test", **options)
+    self.assertEqual(result, "http://res.cloudinary.com/test123/image/upload/a_auto,c_scale,h_100,w_100/test" )
+    self.assertEqual(options, {})
   
   def test_various_options(self):
     """should use x, y, radius, prefix, gravity and quality from options"""    
@@ -147,6 +165,20 @@ class TestUtils(unittest.TestCase):
     result, options = cloudinary.utils.cloudinary_url("http://blah.com/hello?a=b", **options)
     self.assertEqual(options, {})
     self.assertEqual(result, "http://res.cloudinary.com/test123/image/fetch/http://blah.com/hello%3Fa%3Db" )
+
+  def test_cname(self):
+    """should support extenal cname"""
+    options = {"cname": "hello.com"}
+    result, options = cloudinary.utils.cloudinary_url("test", **options)
+    self.assertEqual(options, {})
+    self.assertEqual(result, "http://hello.com/test123/image/upload/test" )
+
+  def test_cname_subdomain(self):
+    """should support extenal cname with cdn_subdomain on"""
+    options = {"cname": "hello.com", "cdn_subdomain": True}
+    result, options = cloudinary.utils.cloudinary_url("test", **options)
+    self.assertEqual(options, {})
+    self.assertEqual(result, "http://a2.hello.com/test123/image/upload/test" )
 
   def test_background(self):
     """should support background"""

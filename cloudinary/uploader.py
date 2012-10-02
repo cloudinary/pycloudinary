@@ -14,6 +14,25 @@ _initialized = False
 def now():
   return str(int(time.time()))
 
+def build_eager(transformations):
+  eager = []
+  for tr in utils.build_array(transformations):
+    format = tr.get("format") 
+    single_eager = "/".join([x for x in [utils.generate_transformation_string(**tr)[0], format] if x])      
+    eager.append(single_eager)
+  return "|".join(eager)          
+
+def build_custom_headers(headers):
+  if headers == None:
+    return None
+  elif isinstance(headers, list):
+    pass
+  elif isinstance(headers, dict):
+    headers = [k + ": " + v for k, v in headers.items()]    
+  else:
+    return headers
+  return "\n".join(headers)
+  
 def build_upload_params(**options):
   params = {"timestamp": now(),
             "transformation" :  utils.generate_transformation_string(**options)[0],
@@ -22,9 +41,9 @@ def build_upload_params(**options):
             "format": options.get("format"),
             "type": options.get("type"),
             "backup": options.get("backup"),
+            "headers": build_custom_headers(options.get("headers")),
+            "eager": build_eager(options.get("eager")),
             "tags": options.get("tags") and ",".join(utils.build_array(options["tags"]))}    
-  if "eager" in options:
-    params["eager"] = "|".join([utils.generate_transformation_string(**tr)[0] for tr in utils.build_array(options["eager"]) if tr])
   return params    
  
 def upload(file, **options):
@@ -38,6 +57,17 @@ def destroy(public_id, **options):
     "public_id":  public_id
   }
   return call_api("destroy", params, **options)
+
+def explicit(public_id, **options):
+   params = {
+    "timestamp": now(),
+    "type": options.get("type"),
+    "public_id": public_id,
+    "callback": options.get("callback"),
+    "headers": build_custom_headers(options.get("headers")),
+    "eager": build_eager(options.get("eager")),
+    "tags": options.get("tags") and ",".join(utils.build_array(options["tags"]))}
+   return call_api("explicit", params, **options)
   
 # options may include 'exclusive' (boolean) which causes clearing this tag from all other resources 
 def add_tag(tag, public_ids = [], **options):
@@ -46,17 +76,18 @@ def add_tag(tag, public_ids = [], **options):
   return call_tags_api(tag, command, public_ids, **options)    
 
 def remove_tag(tag, public_ids = [], **options):
-  return self.call_tags_api(tag, "remove", public_ids, **options)
+  return call_tags_api(tag, "remove", public_ids, **options)
 
 def replace_tag(tag, public_ids = [], **options):
-  return self.call_tags_api(tag, "replace", public_ids, **options)    
+  return call_tags_api(tag, "replace", public_ids, **options)    
 
 def call_tags_api(tag, command, public_ids = [], **options):
   params = {
     "timestamp": now(),
     "tag": tag,
     "public_ids":  utils.build_array(public_ids),
-    "command":  command
+    "command":  command,
+    "type": options.get("type")
   }
   return call_api("tags", params, **options)
 
