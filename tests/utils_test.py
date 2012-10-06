@@ -271,6 +271,21 @@ class TestUtils(unittest.TestCase):
     self.assertEqual(options, {})
     self.assertEqual(result, "http://res.cloudinary.com/test123/image/upload/pg_3/test" )
 
+  def test_border(self):
+    """should support border"""
+    options = {"border": {"width": 5}}
+    result, options = cloudinary.utils.cloudinary_url("test", **options)
+    self.assertEqual(options, {})
+    self.assertEqual(result, "http://res.cloudinary.com/test123/image/upload/bo_5px_solid_black/test" )
+    options = {"border": {"width": 5, "color": "#ffaabbdd"}}
+    result, options = cloudinary.utils.cloudinary_url("test", **options)
+    self.assertEqual(options, {})
+    self.assertEqual(result, "http://res.cloudinary.com/test123/image/upload/bo_5px_solid_rgb:ffaabbdd/test" )
+    options = {"border": "1px_solid_blue"}
+    result, options = cloudinary.utils.cloudinary_url("test", **options)
+    self.assertEqual(options, {})
+    self.assertEqual(result, "http://res.cloudinary.com/test123/image/upload/bo_1px_solid_blue/test" )
+
 if __name__ == '__main__':
     unittest.main()
 
