@@ -59,8 +59,9 @@ def delete_resources(public_ids, **options):
   params = [("public_ids[]", public_id) for public_id in public_ids]
   return call_api("delete", uri, params, **options)
 
-def delete_resources_by_prefix(type, prefix, **options):
+def delete_resources_by_prefix(prefix, **options):
   resource_type = options.pop("resource_type", "image")
+  type = options.pop("type", "upload")
   uri = ["resources", resource_type, type]
   return call_api("delete", uri, {"prefix": prefix}, **options)      
 
