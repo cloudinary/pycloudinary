@@ -95,6 +95,24 @@ class TestApi(unittest.TestCase):
     self.assertRaises(api.NotFound, api.resource, ("api_test3"))
 
   @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+  def test09a_delete_resources_by_prefix(self):
+    """ should allow deleting resources by prefix """
+    uploader.upload("tests/logo.png", public_id="api_test_by_prefix")
+    resource = api.resource("api_test_by_prefix")
+    self.assertNotEqual(resource, None)    
+    api.delete_resources_by_prefix("api_test_by")
+    self.assertRaises(api.NotFound, api.resource, ("api_test_by_prefix"))
+
+  @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+  def test09b_delete_resources_by_prefix(self):
+    """ should allow deleting resources by tags """
+    uploader.upload("tests/logo.png", public_id="api_test4", tags=["api_test_tag_for_delete"])
+    resource = api.resource("api_test4")
+    self.assertNotEqual(resource, None)    
+    api.delete_resources_by_tags("api_test_tag_for_delete")
+    self.assertRaises(api.NotFound, api.resource, ("api_test4"))
+
+  @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
   def test10_tags(self):
     """ should allow listing tags """
     tags = api.tags()["tags"]

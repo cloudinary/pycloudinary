@@ -57,13 +57,18 @@ def delete_resources(public_ids, **options):
   type = options.pop("type", "upload")
   uri = ["resources", resource_type, type]
   params = [("public_ids[]", public_id) for public_id in public_ids]
-  return call_api("delete", uri, params, **options)
+  return call_api("delete", uri, params + only(options, "keep_original").items(), **options)
 
 def delete_resources_by_prefix(prefix, **options):
   resource_type = options.pop("resource_type", "image")
   type = options.pop("type", "upload")
   uri = ["resources", resource_type, type]
-  return call_api("delete", uri, {"prefix": prefix}, **options)      
+  return call_api("delete", uri, dict(only(options, "keep_original"), prefix=prefix), **options)      
+
+def delete_resources_by_tag(tag, **options):
+  resource_type = options.pop("resource_type", "image")
+  uri = ["resources", resource_type, "tags", tag]
+  return call_api("delete", uri, only(options, "keep_original"), **options)
 
 def delete_derived_resources(derived_resource_ids, **options):
   uri = ["derived_resources"]
