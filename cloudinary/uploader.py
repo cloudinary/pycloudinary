@@ -125,7 +125,7 @@ def call_api(action, params, **options):
   headers = {}
   if "file" in options:
     file = options["file"]
-    if not isinstance(file, str):
+    if not isinstance(file, basestring):
       datagen, headers = multipart_encode({'file': file})
     elif not re.match(r'^https?:', file):
       datagen, headers = multipart_encode({'file': open(file)})

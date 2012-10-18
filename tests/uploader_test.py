@@ -16,6 +16,24 @@ class TestUploader(unittest.TestCase):
     self.assertEqual(result["signature"], expected_signature)
 
   @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+  def test_upload_url(self):
+    """should successfully upload file by url """
+    result = uploader.upload("http://cloudinary.com/images/logo.png")
+    self.assertEqual(result["width"], 241)
+    self.assertEqual(result["height"], 51)
+    expected_signature = utils.api_sign_request(dict(public_id=result["public_id"], version=result["version"]), cloudinary.config().api_secret)
+    self.assertEqual(result["signature"], expected_signature)
+
+  @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+  def test_upload_unicode_url(self):
+    """should successfully upload file by unicode url """
+    result = uploader.upload(u"http://cloudinary.com/images/logo.png")
+    self.assertEqual(result["width"], 241)
+    self.assertEqual(result["height"], 51)
+    expected_signature = utils.api_sign_request(dict(public_id=result["public_id"], version=result["version"]), cloudinary.config().api_secret)
+    self.assertEqual(result["signature"], expected_signature)
+
+  @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
   def test_explicit(self):
     """should support explicit """
     result = uploader.explicit("cloudinary", type="twitter_name", eager=[dict(crop="scale", width="2.0")])        
