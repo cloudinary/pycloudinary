@@ -42,6 +42,7 @@ class CloudinaryInput(forms.TextInput):
 
 class CloudinaryJsFileField(forms.Field):
   def __init__(self, *args, **kwargs):
+    self.autosave = kwargs.pop('autosave', True)
     attrs = kwargs.get('attrs', {})
     options = kwargs.get('options', {})
     attrs["options"] = options
@@ -81,6 +82,8 @@ class CloudinaryJsFileField(forms.Field):
 
 class CloudinaryFileField(forms.FileField):
   def __init__(self, *args, **kwargs):
+    self.options = kwargs.get('options', {})
+    self.autosave = kwargs.pop('autosave', True)
     super(CloudinaryFileField, self).__init__(*args, **kwargs)
 
   def to_python(self, value):
@@ -88,5 +91,10 @@ class CloudinaryFileField(forms.FileField):
     value = super(CloudinaryFileField, self).to_python(value)
     if not value:
         raise forms.ValidationError("No image selected!")
-    result = cloudinary.uploader.upload(value)
-    return CloudinaryImage(result["public_id"], version=str(result["version"]), format=result["format"])
+    if self.autosave:
+      result = cloudinary.uploader.upload(value, **self.options)
+      return CloudinaryImage(result["public_id"], version=str(result["version"]), format=result["format"])
+    else:
+      return value
+      
+      

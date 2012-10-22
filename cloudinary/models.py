@@ -1,6 +1,7 @@
 import re
-from cloudinary import CloudinaryImage, forms
+from cloudinary import CloudinaryImage, forms, uploader
 from django.db import models
+from django.core.files.uploadedfile import UploadedFile
 
 class CloudinaryField(models.Field):
 
@@ -24,21 +25,40 @@ class CloudinaryField(models.Field):
   def to_python(self, value):
     if isinstance(value, CloudinaryImage):
       return value
-    if not value:
+    elif isinstance(value, UploadedFile):
       return value
-    m = re.search(r'(?:v(\d+)/)?(.*)\.(.*)', value)
-    return CloudinaryImage(m.group(2), version=m.group(1), format=m.group(3))
+    elif not value:
+      return value
+    else:
+      m = re.search(r'(?:v(\d+)/)?(.*)\.(.*)', value)
+      return CloudinaryImage(m.group(2), version=m.group(1), format=m.group(3))
 
+  def upload_options(self, model_instance):
+    return {}
+  
+  def pre_save(self, model_instance, add):
+    value = super(CloudinaryField, self).pre_save(model_instance, add)
+    if isinstance(value, UploadedFile):
+      result = uploader.upload(value, **self.upload_options(model_instance))
+      value = self.get_prep_value(CloudinaryImage(result["public_id"], version=str(result["version"]), format=result["format"]))
+      setattr(model_instance, self.attname, value)
+      return value
+    else:
+      return value
+    
   def get_prep_value(self, value):
     prep = ''
     if not value: 
       return None
-    if value.version: prep = prep + 'v' + str(value.version) + '/'
-    prep = prep + value.public_id
-    if value.format: prep = prep + '.' + value.format
-    return prep
+    if isinstance(value, CloudinaryImage):
+      if value.version: prep = prep + 'v' + str(value.version) + '/'
+      prep = prep + value.public_id
+      if value.format: prep = prep + '.' + value.format
+      return prep      
+    else:
+      return value
 
   def formfield(self, **kwargs):
       defaults = {'form_class': self.default_form_class}
       defaults.update(kwargs)
-      return super(CloudinaryField, self).formfield(**defaults)
+      return super(CloudinaryField, self).formfield(autosave=False, **defaults)

@@ -59,20 +59,25 @@ def reset_config():
   _config = Config()
 
 class CloudinaryImage(object):
-  def __init__(self, public_id, format = None, version = None, signature = None):
+  def __init__(self, public_id, format = None, version = None, signature = None, url_options = {}):
     self.public_id = public_id
     self.format = format
     self.version = version
     self.signature = signature
+    self.url_options = url_options
 
   def validate(self):
     expected = utils.api_sign_request({"public_id": self.public_id, "version": self.version}, config().api_secret)
     return self.signature == expected
    
-  def url(self, **options):
+  @property
+  def url(self):
+    return self.build_url(**self.url_options)
+  
+  def build_url(self, **options):
     options.update(format = self.format, version = self.version)
     return utils.cloudinary_url(self.public_id, **options)[0]
-
+    
   def image(self, **options):
     options.update(format = self.format, version = self.version)
     src, attrs = utils.cloudinary_url(self.public_id, **options)

@@ -7,9 +7,13 @@ class TestCloudinaryImage(unittest.TestCase):
     cloudinary.config(cloud_name="test", api_secret="1234")
     self.image = CloudinaryImage("hello", format = "png")
 
-  def test_url(self):
+  def test_build_url(self):
     """should generate url """
-    self.assertEqual(self.image.url(), "http://res.cloudinary.com/test/image/upload/hello.png")
+    self.assertEqual(self.image.build_url(), "http://res.cloudinary.com/test/image/upload/hello.png")
+
+  def test_url(self):
+    """should url property """
+    self.assertEqual(self.image.url, "http://res.cloudinary.com/test/image/upload/hello.png")
 
   def test_image(self):
     """should generate image """
