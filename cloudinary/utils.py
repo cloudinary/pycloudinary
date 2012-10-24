@@ -59,8 +59,10 @@ def generate_transformation_string(**options):
   border = options.pop("border", None)
   if isinstance(border, dict):
     border = "%(width)spx_solid_%(color)s" % {"color": border.get("color", "black").replace("#", "rgb:"), "width": str(border.get("width", 2))}
+
+  flags = ".".join(build_array(options.pop("flags", None)))
     
-  params = {"w": width, "h": height, "t": named_transformation, "b": background, "e": effect, "c": crop, "a": angle, "bo": border}
+  params = {"w": width, "h": height, "t": named_transformation, "b": background, "e": effect, "c": crop, "a": angle, "bo": border, "fl": flags}
   for param, option in {"q": "quality", "g": "gravity", "p": "prefix", "x": "x",
                         "y": "y", "r": "radius", "d": "default_image", "l": "overlay", "u": "underlay",
                         "f": "fetch_format", "pg": "page", "dn": "density", "dl": "delay", "cs": "color_space"}.items():

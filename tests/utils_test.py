@@ -286,6 +286,17 @@ class TestUtils(unittest.TestCase):
     self.assertEqual(options, {})
     self.assertEqual(result, "http://res.cloudinary.com/test123/image/upload/bo_1px_solid_blue/test" )
 
+  def test_flags(self):
+    """should support flags"""
+    options = {"flags": "abc"}
+    result, options = cloudinary.utils.cloudinary_url("test", **options)
+    self.assertEqual(options, {})
+    self.assertEqual(result, "http://res.cloudinary.com/test123/image/upload/fl_abc/test" )
+    options = {"flags": ["abc", "def"]}
+    result, options = cloudinary.utils.cloudinary_url("test", **options)
+    self.assertEqual(options, {})
+    self.assertEqual(result, "http://res.cloudinary.com/test123/image/upload/fl_abc.def/test" )
+
 if __name__ == '__main__':
     unittest.main()
 
