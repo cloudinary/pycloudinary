@@ -109,7 +109,7 @@ class TestApi(unittest.TestCase):
     uploader.upload("tests/logo.png", public_id="api_test4", tags=["api_test_tag_for_delete"])
     resource = api.resource("api_test4")
     self.assertNotEqual(resource, None)    
-    api.delete_resources_by_tags("api_test_tag_for_delete")
+    api.delete_resources_by_tag("api_test_tag_for_delete")
     self.assertRaises(api.NotFound, api.resource, ("api_test4"))
 
   @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")

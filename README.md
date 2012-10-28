@@ -119,8 +119,10 @@ Represents an image stored in Cloudinary.
 Usage:
     img = cloudinary.CloudinaryImage("sample", format="png")
     
-    img.url(width=100, height=100, crop="fill") 
+    img.build_url(width=100, height=100, crop="fill") 
     # http://res.cloudinary.com/cloud_name/image/upload/c_fill,h_100,w_100/sample.png 
+ 
+    # Note: since v1.0.0 this method was change from 'url' to 'build_url' to avoid conflicts with the 'url' property.
     
     img.image(width=100, height=100, crop="fill") 
     # <img src="http://res.cloudinary.com/cloud_name/image/upload/c_fill,h_100,w_100/sample.png" width="100" height="100"/>
