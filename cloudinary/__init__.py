@@ -83,4 +83,7 @@ class CloudinaryImage(object):
     src, attrs = utils.cloudinary_url(self.public_id, **options)
     return u"<img src='{0}' {1}/>".format(src, ' '.join(sorted([u"{0}='{1}'".format(key, value) for key, value in attrs.items() if value])))
 
+  def __str__(self):
+      return self.url()
+
 
