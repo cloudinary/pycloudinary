@@ -17,8 +17,17 @@ else:
 
 class CloudinaryFieldFile(ImageFieldFile):
 
+  def save(self, name, content, save=True):
+    if isinstance(content, str):
+        content = StringWithSize(content)
+    super(CloudinaryFieldFile, self).save(name, content, save)
+
   def url_with_options(self, **options):
     return utils.cloudinary_url(self.name, **options)[0]
+
+
+class StringWithSize(str):
+  size = 0
 
 
 class CloudinaryField(models.ImageField):
