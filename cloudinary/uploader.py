@@ -41,6 +41,9 @@ def build_upload_params(**options):
             "format": options.get("format"),
             "type": options.get("type"),
             "backup": options.get("backup"),
+            "faces": options.get("faces"),
+            "exif": options.get("exif"),
+            "colors": options.get("colors"),
             "headers": build_custom_headers(options.get("headers")),
             "eager": build_eager(options.get("eager")),
             "tags": options.get("tags") and ",".join(utils.build_array(options["tags"]))}    
