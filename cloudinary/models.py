@@ -46,8 +46,3 @@ class CloudinaryField(models.ImageField):
     }
     options.update(kwargs)
     super(CloudinaryField, self).__init__(*args, **options)
-
-  def formfield(self, **kwargs):
-      defaults = {'form_class': forms.CloudinaryFileField}
-      defaults.update(kwargs)
-      return super(CloudinaryField, self).formfield(**defaults)
