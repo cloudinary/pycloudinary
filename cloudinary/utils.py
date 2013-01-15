@@ -64,7 +64,7 @@ def generate_transformation_string(**options):
     
   params = {"w": width, "h": height, "t": named_transformation, "b": background, "e": effect, "c": crop, "a": angle, "bo": border, "fl": flags}
   for param, option in {"q": "quality", "g": "gravity", "p": "prefix", "x": "x",
-                        "y": "y", "r": "radius", "d": "default_image", "l": "overlay", "u": "underlay",
+                        "y": "y", "r": "radius", "d": "default_image", "l": "overlay", "u": "underlay", "o": "opacity",
                         "f": "fetch_format", "pg": "page", "dn": "density", "dl": "delay", "cs": "color_space"}.items():
     params[param] = options.pop(option, None)
 

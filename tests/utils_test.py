@@ -83,10 +83,10 @@ class TestUtils(unittest.TestCase):
   
   def test_various_options(self):
     """should use x, y, radius, prefix, gravity and quality from options"""    
-    options = {"x": 1, "y": 2, "radius": 3, "gravity": "center", "quality": 0.4, "prefix": "a"}
+    options = {"x": 1, "y": 2, "opacity": 20, "radius": 3, "gravity": "center", "quality": 0.4, "prefix": "a"}
     result, options = cloudinary.utils.cloudinary_url("test", **options)
     self.assertEqual(options, {})
-    self.assertEqual(result, "http://res.cloudinary.com/test123/image/upload/g_center,p_a,q_0.4,r_3,x_1,y_2/test" )
+    self.assertEqual(result, "http://res.cloudinary.com/test123/image/upload/g_center,o_20,p_a,q_0.4,r_3,x_1,y_2/test" )
   
   def test_transformation_simple(self):
     """should support named tranformation"""    
