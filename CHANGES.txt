@@ -9,4 +9,5 @@ v0.2.8, 2012-10-08 -- Change delete_resources_by_prefix to match other signature
 v1.0.0, 2012-10-28 -- Renamed url method of CloudinaryImage to build_url to avoid conflicts with the url property. Support keep_original in resource deletion. Support delete_resources_by_tag, Allow supplying unicode url in cloudinary.uploader.upload, Support passing parameters to cloudinary upload. Support upload parameters based on model in CloudinaryField, Support for transformation flags.
 v1.0.1, 2012-11-22 -- Fix issue 8 - error in serialization, Support for info flags in upload.
 v1.0.2, 2013-01-15 -- Supporting opacity transformation parameter, Allow giving pages flag to resource details API.
+v1.0.3, 2013-01-20 -- Open uploaded file in binary mode to solve python windows issues.
 
