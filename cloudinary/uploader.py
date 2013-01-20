@@ -131,7 +131,7 @@ def call_api(action, params, **options):
     if not isinstance(file, basestring):
       datagen, headers = multipart_encode({'file': file})
     elif not re.match(r'^https?:', file):
-      datagen, headers = multipart_encode({'file': open(file)})
+      datagen, headers = multipart_encode({'file': open(file, "rb")})
     else:
       params["file"] = file
   request = urllib2.Request(api_url + "?" + urllib.urlencode(params), datagen, headers)
