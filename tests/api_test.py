@@ -21,7 +21,7 @@ class TestApi(unittest.TestCase):
         uploader.upload("tests/logo.png", public_id="api_test2", tags="api_test_tag", eager=[{"width": 100,"crop": "scale"}])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
-    def test01_resource_types(self):    """ should allow listing resource_types """
+    def test01_resource_types(self):        """ should allow listing resource_types """
         self.assertIn("image", api.resource_types()["resource_types"])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
