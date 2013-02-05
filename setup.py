@@ -22,6 +22,6 @@ setup(name='cloudinary',
       ],
       include_package_data=True,
       zip_safe=False,
-      test_suite="tests",                          
+      test_suite="tests",
       install_requires=["poster"]
       )
