@@ -53,10 +53,10 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(result, "http://res.cloudinary.com/test123/image/upload/test.jpg" )
 
     def test_crop(self):
-        """should use width and height from options only if crop is given"""
+    """should always use width and height from options"""
         options = {"width": 100, "height": 100}
         result, options = cloudinary.utils.cloudinary_url("test", **options)
-        self.assertEqual(result, "http://res.cloudinary.com/test123/image/upload/test" )
+    self.assertEqual(result, "http://res.cloudinary.com/test123/image/upload/h_100,w_100/test" )
         self.assertEqual(options, {"width": 100, "height": 100})
         options = {"width": 100, "height": 100, "crop": "crop"}
         result, options = cloudinary.utils.cloudinary_url("test", **options)
