@@ -50,7 +50,7 @@ def resource(public_id, **options):
   resource_type = options.pop("resource_type", "image")
   type = options.pop("type", "upload")
   uri = ["resources", resource_type, type, public_id]
-  return call_api("get", uri, only(options, "exif", "faces", "colors", "pages", "max_results"), **options)
+  return call_api("get", uri, only(options, "exif", "faces", "colors", "image_metadata", "pages", "max_results"), **options)
 
 def delete_resources(public_ids, **options):
   resource_type = options.pop("resource_type", "image")

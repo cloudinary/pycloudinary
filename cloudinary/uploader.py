@@ -42,6 +42,7 @@ def build_upload_params(**options):
             "type": options.get("type"),
             "backup": options.get("backup"),
             "faces": options.get("faces"),
+            "image_metadata": options.get("image_metadata"),
             "exif": options.get("exif"),
             "colors": options.get("colors"),
             "headers": build_custom_headers(options.get("headers")),
