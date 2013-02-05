@@ -27,5 +27,5 @@ def cloudinary_direct_upload(callback_url, **options):
   return {"params": params, "url": api_url}
 
 @register.inclusion_tag('cloudinary_includes.html')
-def cloudinary_includes():
-  return {}
+def cloudinary_includes(processing=False):
+  return {"processing": processing}
