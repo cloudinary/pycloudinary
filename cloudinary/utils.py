@@ -34,9 +34,6 @@ def generate_transformation_string(**options):
   if height and (float(height) < 1 or no_html_sizes):
     del options["height"]
      
-  if not crop and not has_layer:
-    width = height = None
-
   background = options.pop("background", None)
   if background:
     background = background.replace("#", "rgb:")
