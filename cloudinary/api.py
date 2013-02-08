@@ -31,6 +31,9 @@ class Response(dict):
         self.rate_limit_reset_at = email.utils.parsedate(response.headers["x-featureratelimit-reset"])
         self.rate_limit_remaining = int(response.headers["x-featureratelimit-remaining"])
 
+def usage(**options):
+    return call_api("get", ["usage"], {}, **options)
+
 def resource_types(**options):
     return call_api("get", ["resources"], {}, **options)
 
