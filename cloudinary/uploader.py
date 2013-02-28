@@ -47,6 +47,10 @@ def build_upload_params(**options):
               "colors": options.get("colors"),
               "headers": build_custom_headers(options.get("headers")),
               "eager": build_eager(options.get("eager")),
+              "use_filename": options.get("use_filename"),
+              "notification_url": options.get("notification_url"),
+              "eager_notification_url": options.get("eager_notification_url"),
+              "eager_async": options.get("eager_async"),
               "tags": options.get("tags") and ",".join(utils.build_array(options["tags"]))}
     return params
 
@@ -72,6 +76,37 @@ def explicit(public_id, **options):
         "eager": build_eager(options.get("eager")),
         "tags": options.get("tags") and ",".join(utils.build_array(options["tags"]))}
      return call_api("explicit", params, **options)
+
+def generate_sprite(tag, **options):
+     params = {
+        "timestamp": now(),
+        "tag": tag,
+        "async": options.get("async"),
+        "notification_url": options.get("notification_url"),
+        "transformation": utils.generate_transformation_string(fetch_format=options.get("format"), **options)[0]
+        }
+     return call_api("sprite", params, **options)
+
+def multi(tag, **options):
+     params = {
+        "timestamp": now(),
+        "tag": tag,
+        "format": options.get("format"),
+        "async": options.get("async"),
+        "notification_url": options.get("notification_url"),
+        "transformation": utils.generate_transformation_string(**options)[0]
+        }
+     return call_api("multi", params, **options)
+
+def explode(public_id, **options):
+     params = {
+        "timestamp": now(),
+        "public_id": public_id,
+        "format": options.get("format"),
+        "notification_url": options.get("notification_url"),
+        "transformation": utils.generate_transformation_string(**options)[0]
+        }
+     return call_api("explode", params, **options)
 
 # options may include 'exclusive' (boolean) which causes clearing this tag from all other resources
 def add_tag(tag, public_ids = [], **options):
