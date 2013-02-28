@@ -1,5 +1,6 @@
 import cloudinary
 import cloudinary.uploader
+from cloudinary.api import delete_resources_by_tag, resources_by_tag
 import os, sys
 
 # config
@@ -54,24 +55,21 @@ def upload(uploads):
         ))[0]
         show_response(title, response, url)
 
-def delete():
+def cleanup():
+    tag = DEFAULT_OPTIONS['tags']
+    response = resources_by_tag(tag)
+    count = len(response.get('resources', []))
+    if (count == 0):
+        print "No images found"
+        return
+    print "Deleting %d images..." % (count,)
+    delete_resources_by_tag(tag)
+    print "Done!"
     pass
 
 if len(sys.argv) > 1:
     if sys.argv[1] == 'upload': upload(UPLOADS)
-    if sys.argv[1] == 'delete': delete()
+    if sys.argv[1] == 'cleanup': cleanup()
     if 'test' in sys.argv:
         print os.getcwd(), sys.argv, __package__, __name__
 
-"""
-{u'bytes': 53696,
- u'format': u'jpg',
- u'height': 360,
- u'public_id': u'sidjkjtpmnysrqa92xfj',
- u'resource_type': u'image',
- u'secure_url': u'https://d3jpl91pxevbkh.cloudfront.net/ndividev/image/upload/v1361304062/sidjkjtpmnysrqa92xfj.jpg',
- u'signature': u'b1a528c55097e357d50cdb7efde8cec86241a105',
- u'url': u'http://res.cloudinary.com/ndividev/image/upload/v1361304062/sidjkjtpmnysrqa92xfj.jpg',
- u'version': 1361304062,
- u'width': 480}
-"""
