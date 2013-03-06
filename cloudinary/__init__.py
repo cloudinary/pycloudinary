@@ -66,6 +66,9 @@ class CloudinaryImage(object):
         self.signature = signature
         self.url_options = url_options
 
+    def __unicode__(self):
+        return self.public_id
+
     def validate(self):
         expected = utils.api_sign_request({"public_id": self.public_id, "version": self.version}, config().api_secret)
         return self.signature == expected
@@ -75,10 +78,12 @@ class CloudinaryImage(object):
         return self.build_url(**self.url_options)
 
     def build_url(self, **options):
-        options.update(format = self.format, version = self.version)
-        return utils.cloudinary_url(self.public_id, **options)[0]
+        combined_options = dict(format = self.format, version = self.version)
+        combined_options.update(options)
+        return utils.cloudinary_url(self.public_id, **combined_options)[0]
 
     def image(self, **options):
-        options.update(format = self.format, version = self.version)
-        src, attrs = utils.cloudinary_url(self.public_id, **options)
+        combined_options = dict(format = self.format, version = self.version)
+        combined_options.update(options)
+        src, attrs = utils.cloudinary_url(self.public_id, **combined_options)
         return u"<img src='{0}' {1}/>".format(src, ' '.join(sorted([u"{0}='{1}'".format(key, value) for key, value in attrs.items() if value])))

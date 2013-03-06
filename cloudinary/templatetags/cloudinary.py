@@ -6,6 +6,10 @@ from django import template
 
 register = template.Library()
 
+@register.simple_tag(name='cloudinary_url')
+def cloudinary_url(*args, **kwargs):
+    return utils.cloudinary_url(*args, **kwargs)[0]
+
 @register.simple_tag(name='cloudinary')
 def cloudinary_tag(image, **options):
     if not isinstance(image, CloudinaryImage):
