@@ -7,11 +7,13 @@ from django import template
 register = template.Library()
 
 @register.simple_tag(name='cloudinary_url')
-def cloudinary_url(*args, **kwargs):
-    return utils.cloudinary_url(*args, **kwargs)[0]
+def cloudinary_url(source, options_dict={}, **options):
+    options = dict(options_dict, **options)
+    return utils.cloudinary_url(source, **options)[0]
 
 @register.simple_tag(name='cloudinary')
-def cloudinary_tag(image, **options):
+def cloudinary_tag(image, options_dict={}, **options):
+    options = dict(options_dict, **options)
     if not isinstance(image, CloudinaryImage):
         image = CloudinaryImage(image)
     return image.image(**options)
