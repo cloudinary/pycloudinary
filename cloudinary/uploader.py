@@ -147,10 +147,13 @@ def call_api(action, params, **options):
     params["signature"] = utils.api_sign_request(params, api_secret)
     params["api_key"] = api_key
 
-    # Remove blank parameters
+    param_list = []
     for k, v in params.items():
-        if not v:
-            del params[k]
+        if isinstance(v, list):          
+            for vv in v:
+              param_list.append((k+"[]", vv))
+        elif v:
+            param_list.append((k, v))            
 
     api_url = utils.cloudinary_api_url(action, **options)
 
@@ -169,8 +172,8 @@ def call_api(action, params, **options):
         elif not re.match(r'^https?:', file):
             datagen, headers = multipart_encode({'file': open(file, "rb")})
         else:
-            params["file"] = file
-    request = urllib2.Request(api_url + "?" + urllib.urlencode(params), datagen, headers)
+            param_list.append(("file", file))
+    request = urllib2.Request(api_url + "?" + urllib.urlencode(param_list), datagen, headers)
 
     code = 200
     try:

@@ -1,5 +1,5 @@
 import cloudinary
-from cloudinary import uploader, utils
+from cloudinary import uploader, utils, api
 import unittest
 
 class TestUploader(unittest.TestCase):
@@ -57,6 +57,18 @@ class TestUploader(unittest.TestCase):
         result = uploader.text("hello world")
         self.assertGreater(result["width"], 1)
         self.assertGreater(result["height"], 1)
+
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_tags(self):
+        """should successfully upload file """
+        result = uploader.upload("tests/logo.png")
+        uploader.add_tag("tag1", result["public_id"])
+        uploader.add_tag("tag2", result["public_id"])
+        self.assertEqual(api.resource(result["public_id"])["tags"], ["tag1", "tag2"])
+        uploader.remove_tag("tag1", result["public_id"])
+        self.assertEqual(api.resource(result["public_id"])["tags"], ["tag2"])
+        uploader.replace_tag("tag3", result["public_id"])
+        self.assertEqual(api.resource(result["public_id"])["tags"], ["tag3"])
 
 if __name__ == '__main__':
     unittest.main()
