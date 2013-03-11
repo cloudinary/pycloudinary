@@ -11,4 +11,5 @@ v1.0.1, 2012-11-22 -- Fix issue 8 - error in serialization, Support for info fla
 v1.0.2, 2013-01-15 -- Supporting opacity transformation parameter, Allow giving pages flag to resource details API.
 v1.0.3, 2013-01-20 -- Open uploaded file in binary mode to solve python windows issues.
 v1.0.4, 2013-03-12 -- Fix tag handing methods of api, Support for sprite, multi and explode apis. Support for new async and notification params, Support for usage API call, Support js files needed for client side image processing in jquery direct upload, Support new image_metadata flag in upload and admin API, Use width/height even if crop is not given.
+v1.0.5, 2013-03-13 -- Support Django 1.5, Add cloudinary_direct_upload_field, cloudinary_js_config, cloudinary_url templatetags, Add basic sample, Update documentation
 
