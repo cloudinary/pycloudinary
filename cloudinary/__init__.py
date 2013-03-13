@@ -1,8 +1,13 @@
 from __future__ import absolute_import
 
 import os
-from cloudinary import utils
 from urlparse import urlparse
+
+CF_SHARED_CDN = "d3jpl91pxevbkh.cloudfront.net"
+AKAMAI_SHARED_CDN = "cloudinary-a.akamaihd.net"
+SHARED_CDN = AKAMAI_SHARED_CDN
+
+from cloudinary import utils
 
 def import_django_settings():
     try:

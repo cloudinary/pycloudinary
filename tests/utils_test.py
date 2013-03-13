@@ -22,7 +22,7 @@ class TestUtils(unittest.TestCase):
         options = {"secure": True}
         result, options = cloudinary.utils.cloudinary_url("test", **options)
         self.assertEqual(options, {})
-        self.assertEqual(result, "https://d3jpl91pxevbkh.cloudfront.net/test123/image/upload/test" )
+        self.assertEqual(result, "https://cloudinary-a.akamaihd.net/test123/image/upload/test" )
 
     def test_secure_distribution_overwrite(self):
         """should allow overwriting secure distribution if secure=True"""
@@ -39,11 +39,26 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(options, {})
         self.assertEqual(result, "https://config.secure.distribution.com/test123/image/upload/test" )
 
-    def test_missing_secure_distribution(self):
-        """should raise exception if secure is given with private_cdn and no secure_distribution"""
-        cloudinary.config().private_cdn = True
-        with self.assertRaises(Exception):
-            cloudinary.utils.cloudinary_url("test", secure=True)
+    def test_secure_akamai(self):
+        """should default to akamai if secure is given with private_cdn and no secure_distribution"""
+        options = {"secure": True, "private_cdn": True}
+        result, options = cloudinary.utils.cloudinary_url("test", **options)
+        self.assertEqual(options, {})
+        self.assertEqual(result, "https://cloudinary-a.akamaihd.net/test123/image/upload/test" )
+
+    def test_secure_non_akamai(self):
+        """should not add cloud_name if private_cdn and secure non akamai secure_distribution"""
+        options = {"secure": True, "private_cdn": True, "secure_distribution": "something.cloudfront.net"}
+        result, options = cloudinary.utils.cloudinary_url("test", **options)
+        self.assertEqual(options, {})
+        self.assertEqual(result, "https://something.cloudfront.net/image/upload/test")
+
+    def test_http_private_cdn(self):
+        """should not add cloud_name if private_cdn and not secure"""
+        options = {"private_cdn": True}
+        result, options = cloudinary.utils.cloudinary_url("test", **options)
+        self.assertEqual(options, {})
+        self.assertEqual(result, "http://test123-res.cloudinary.com/image/upload/test")
 
     def test_format(self):
         """should use format from options"""

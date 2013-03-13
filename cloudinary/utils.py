@@ -7,7 +7,8 @@ import uuid
 import base64
 import cloudinary
 
-SHARED_CDN = "d3jpl91pxevbkh.cloudfront.net"
+""" @deprecated: use cloudinary.SHARED_CDN """
+SHARED_CDN = cloudinary.SHARED_CDN
 
 def build_array(arg):
     if isinstance(arg, list):
@@ -108,11 +109,7 @@ def cloudinary_url(source, **options):
     if cloud_name.startswith("/"):
         prefix = "/res" + cloud_name
     else:
-        if secure and not secure_distribution:
-            if private_cdn:
-                raise Exception("secure_distribution not defined")
-            else:
-                secure_distribution = SHARED_CDN
+        secure_distribution = secure_distribution or cloudinary.SHARED_CDN
 
         if secure:
             prefix = "https://" + secure_distribution
@@ -125,7 +122,7 @@ def cloudinary_url(source, **options):
             else:
                 host = "res.cloudinary.com"
             prefix = "http://" + subdomain + host
-        if not private_cdn:
+        if not private_cdn or (secure and secure_distribution == cloudinary.AKAMAI_SHARED_CDN):
             prefix += "/" + cloud_name
 
     components = [prefix, resource_type, type, transformation, "v" + str(version) if version else "", source]

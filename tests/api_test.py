@@ -182,6 +182,7 @@ class TestApi(unittest.TestCase):
         api.delete_transformation("c_scale,w_100")
         self.assertRaises(api.NotFound, api.transformation, ("c_scale,w_100"))
 
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test18_usage(self):
         """ should support usage API """
         self.assertIn("last_updated", api.usage())
