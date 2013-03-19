@@ -4,6 +4,7 @@ import cloudinary.uploader
 import cloudinary.utils
 import re
 import json
+from django.utils.translation import ugettext_lazy as _
 
 def cl_init_js_callbacks(form, request):
     for field in form.fields.values():
@@ -40,7 +41,11 @@ class CloudinaryInput(forms.TextInput):
         return super(CloudinaryInput, self).render("file", None, attrs=attrs)
 
 
-class CloudinaryJsFileField(forms.Field):
+class CloudinaryJsFileField(forms.Field):      
+    default_error_messages = {
+        'required': _(u"No image selected!")
+    }
+
     def __init__(self, *args, **kwargs):
         self.autosave = kwargs.pop('autosave', True)
         attrs = kwargs.get('attrs', {})
@@ -57,6 +62,8 @@ class CloudinaryJsFileField(forms.Field):
 
     def to_python(self, value):
         "Convert to CloudinaryImage"
+        if not value:
+            return None;
         m = re.search(r'^([^/]+)/upload/v(\d+)/([^/]+)#([^/]+)$', value)
         if not m:
             raise forms.ValidationError("Invalid format")
@@ -77,10 +84,15 @@ class CloudinaryJsFileField(forms.Field):
         "Validate the signature"
         # Use the parent's handling of required fields, etc.
         super(CloudinaryJsFileField, self).validate(value)
+        if not value: return
         if not value.validate():
             raise forms.ValidationError("Signature mismatch")
 
-class CloudinaryFileField(forms.FileField):
+class CloudinaryFileField(forms.FileField):    
+    my_default_error_messages = {
+        'required': _(u"No image selected!")
+    }
+    default_error_messages = dict(forms.FileField.default_error_messages.items() + my_default_error_messages.items())
     def __init__(self, *args, **kwargs):
         self.options = kwargs.get('options', {})
         self.autosave = kwargs.pop('autosave', True)
@@ -90,7 +102,7 @@ class CloudinaryFileField(forms.FileField):
         "Upload and convert to CloudinaryImage"
         value = super(CloudinaryFileField, self).to_python(value)
         if not value:
-            raise forms.ValidationError("No image selected!")
+            return None;
         if self.autosave:
             result = cloudinary.uploader.upload(value, **self.options)
             return CloudinaryImage(result["public_id"], version=str(result["version"]), format=result["format"])
