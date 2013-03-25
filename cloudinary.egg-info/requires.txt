@@ -1,1 +1,1 @@
-poster
+poster==0.8.2

@@ -127,7 +127,8 @@ Usage:
     img.image(width=100, height=100, crop="fill") 
     # <img src="http://res.cloudinary.com/cloud_name/image/upload/c_fill,h_100,w_100/sample.png" width="100" height="100"/>
 
-### cloudinary.models.CloudinaryField
+### Models
+#### cloudinary.models.CloudinaryField
 
 Allows you to store references to Cloudinary stored images in your model. Returns an CloudinaryImage object.
 
@@ -137,20 +138,61 @@ Usage:
       # ...
       image = cloudinary.models.CloudinaryField('image')
 
-### cloudinary.forms.CloudinaryField
+### Forms
 
-Form field that allows you to validate and convert to CloudinaryImage a signed Cloudinary image reference (see [here](http://github.com/cloudinary/cloudinary_js))
+The CloudinaryField model field has `default_form_class = cloudinary.forms.CloudinaryFileField`. You can create a simple ModelForm that will let you upload an image to through the backend to cloudinary.
+
+    class PollForm(django.forms.ModelForm):
+        Meta:
+            class = Poll
+
+#### cloudinary.forms.CloudinaryFileField - simple upload
+
+Form field that renders to a simple file input html element and allows you to validate, upload to Cloudinary and convert to CloudinaryImage an uploaded image file
+
+#### cloudinary.forms.CloudinaryJsFileField - direct ajax upload
+
+This form field renders to a special input element that interacts with Cloudinary's jQuery plugin and jQuery-File-Upload.
+It allows you to validate and convert to CloudinaryImage a signed Cloudinary image reference resulting from a successful image upload (see [here](http://github.com/cloudinary/cloudinary_js))
+
 
 ### cloudinary template tags
 
-Initialization:
+#### Initialization:
 
     {% load cloudinary %}
 
-Image tags can be generated from public_id or from CloudinaryImage object using:
+Including the required Javascript files:
+
+    {% cloudinary_includes %}
+
+Passing configuration parameters to Cloudinary's jQuery plugin - will create a script tag with configuration initialization: 
+
+    {% cloudinary_js_config %}
+
+#### Embedding images
+
+Image tags can be generated from a public\_id or from a CloudinaryImage object using:
 
     {% cloudinary image width=100 height=100 crop="fill" %}   
     # <img src="http://res.cloudinary.com/cloud_name/image/upload/c_fill,h_100,w_100/sample.png" width="100" height="100" crop="scale"/>
+
+#### Uploading images
+
+The following tag generates an html form field that can be used to upload the file directly to Cloudinary via ajax
+using the jQuery-File-Upload widget. It could be used simply without parameters, anywhere in the DOM:
+
+    {% cloudinary_direct_upload_field request=request %}
+
+Alternatively, if used within an HTML form, after successful upload, the jQuery plugin creates a hidden input field
+that could be used to pass the uploaded image's metadata to the backend:
+
+    <form action="{% url "direct_upload_complete" %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% cloudinary_direct_upload_field field='fieldname' request=request %}
+    </form>
+
+In both cases, the request object is optional, but is needed for correctly handling older browsers which don't fully support CORS.
 
 The following tag generates an html form that can be used to upload the file directly to Cloudinary. The result is a redirect to the supplied callback_url.
 

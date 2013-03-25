@@ -30,8 +30,8 @@ class CloudinaryField(models.Field):
         elif not value:
             return value
         else:
-            m = re.search(r'(?:v(\d+)/)?(.*)\.(.*)', value)
-            return CloudinaryImage(m.group(2), version=m.group(1), format=m.group(3))
+            m = re.search('(v(?P<version>\d+)/)?(?P<public_id>.*?)(\.(?P<format>[^.]+))?$', value)
+            return CloudinaryImage(**m.groupdict())
 
     def upload_options(self, model_instance):
         return {}

@@ -15,7 +15,7 @@ class CloudinaryInput(forms.TextInput):
 
     def render(self, name, value, attrs=None):
         self.build_attrs(attrs)
-        options = self.attrs.pop('options')
+        options = self.attrs.pop('options', {})
         api_key = options.get("api_key", cloudinary.config().api_key)
         if not api_key: raise Exception("Must supply api_key")
         api_secret = options.get("api_secret", cloudinary.config().api_secret)
@@ -43,8 +43,8 @@ class CloudinaryInput(forms.TextInput):
 class CloudinaryJsFileField(forms.Field):
     def __init__(self, *args, **kwargs):
         self.autosave = kwargs.pop('autosave', True)
-        attrs = kwargs.get('attrs', {})
-        options = kwargs.get('options', {})
+        attrs = kwargs.get('attrs', {}).copy()
+        options = kwargs.get('options', {}).copy()
         attrs["options"] = options
 
         options = {'widget': CloudinaryInput(attrs=attrs)}
