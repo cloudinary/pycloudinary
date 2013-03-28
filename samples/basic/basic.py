@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import os, sys
 
 from cloudinary.uploader import upload
@@ -114,3 +115,9 @@ def cleanup():
 if len(sys.argv) > 1:
     if sys.argv[1] == 'upload': upload_files()
     if sys.argv[1] == 'cleanup': cleanup()
+else:
+    print "--- Uploading files and then cleaning up"
+    print "    you can only one instead by passing 'upload' or 'cleanup' as an argument"
+    print
+    upload_files()
+    cleanup()
