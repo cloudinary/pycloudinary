@@ -73,9 +73,11 @@ class TestUploader(unittest.TestCase):
     def test_tags(self):
         """should successfully upload file """
         result = uploader.upload("tests/logo.png")
-        uploader.add_tag("tag1", result["public_id"])
+        result2 = uploader.upload("tests/logo.png")
+        uploader.add_tag("tag1", [result["public_id"], result2["public_id"]])
         uploader.add_tag("tag2", result["public_id"])
         self.assertEqual(api.resource(result["public_id"])["tags"], ["tag1", "tag2"])
+        self.assertEqual(api.resource(result2["public_id"])["tags"], ["tag1"])
         uploader.remove_tag("tag1", result["public_id"])
         self.assertEqual(api.resource(result["public_id"])["tags"], ["tag2"])
         uploader.replace_tag("tag3", result["public_id"])

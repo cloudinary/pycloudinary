@@ -96,11 +96,13 @@ def delete_transformation(transformation, **options):
     uri = ["transformations", transformation_string(transformation)]
     return call_api("delete", uri, {}, **options)
 
-# updates - currently only supported update is the "allowed_for_strict" boolean flag
+# updates - currently only supported update is the "allowed_for_strict" boolean flag and unsafe_update
 def update_transformation(transformation, **options):
     uri = ["transformations", transformation_string(transformation)]
     updates = only(options, "allowed_for_strict")
-    if len(updates) == 0: raise Exception("Must supply cloud_name")
+    if "unsafe_update" in options:
+      updates["unsafe_update"] = transformation_string(options.get("unsafe_update")) 
+    if len(updates) == 0: raise Exception("No updates given")
 
     return call_api("put", uri, updates, **options)
 

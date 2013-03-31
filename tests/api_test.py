@@ -17,6 +17,14 @@ class TestApi(unittest.TestCase):
             api.delete_transformation("api_test_transformation")
         except:
             pass
+        try:
+            api.delete_transformation("api_test_transformation2")
+        except:
+            pass
+        try:
+            api.delete_transformation("api_test_transformation3")
+        except:
+            pass
         uploader.upload("tests/logo.png", public_id="api_test", tags="api_test_tag", eager=[{"width": 100,"crop": "scale"}])
         uploader.upload("tests/logo.png", public_id="api_test2", tags="api_test_tag", eager=[{"width": 100,"crop": "scale"}])
 
@@ -165,6 +173,16 @@ class TestApi(unittest.TestCase):
         self.assertNotEqual(transformation, None)
         self.assertEqual(transformation["allowed_for_strict"], True)
         self.assertEqual(transformation["info"], [{"crop": "scale", "width": 102}])
+        self.assertEqual(transformation["used"], False)
+
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test15a_transformation_unsafe_update(self):
+        """ should allow unsafe update of named transformation """
+        api.create_transformation("api_test_transformation3", {"crop": "scale", "width": 102})
+        api.update_transformation("api_test_transformation3", unsafe_update={"crop": "scale", "width": 103})
+        transformation = api.transformation("api_test_transformation3")
+        self.assertNotEqual(transformation, None)
+        self.assertEqual(transformation["info"], [{"crop": "scale", "width": 103}])
         self.assertEqual(transformation["used"], False)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
