@@ -34,6 +34,17 @@ class TestUploader(unittest.TestCase):
         self.assertEqual(result["signature"], expected_signature)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_rename(self):
+        """should successfully rename a file"""
+        result = uploader.upload("tests/logo.png")
+        uploader.rename(result["public_id"], result["public_id"]+"2")
+        self.assertIsNotNone(api.resource(result["public_id"]+"2"))
+        result2 = uploader.upload("tests/favicon.ico")
+        self.assertRaises(Exception, uploader.rename, (result2["public_id"], result["public_id"]+"2"))
+        uploader.rename(result2["public_id"], result["public_id"]+"2", overwrite=True)
+        self.assertEqual(api.resource(result["public_id"]+"2")["format"], "ico")
+
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_explicit(self):
         """should support explicit """
         result = uploader.explicit("cloudinary", type="twitter_name", eager=[dict(crop="scale", width="2.0")])

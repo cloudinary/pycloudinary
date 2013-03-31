@@ -66,6 +66,16 @@ def destroy(public_id, **options):
     }
     return call_api("destroy", params, **options)
 
+def rename(from_public_id, to_public_id, **options):
+    params = {
+        "timestamp": now(),
+        "type": options.get("type"),
+        "overwrite": options.get("overwrite"),
+        "from_public_id": from_public_id,
+        "to_public_id": to_public_id
+    }
+    return call_api("rename", params, **options)
+
 def explicit(public_id, **options):
      params = {
         "timestamp": now(),
