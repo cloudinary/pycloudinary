@@ -91,6 +91,7 @@ def cloudinary_url(source, **options):
     format = options.pop("format", None)
     cdn_subdomain = options.pop("cdn_subdomain", cloudinary.config().cdn_subdomain)
     cname = options.pop("cname", cloudinary.config().cname)
+    shorten = options.pop("shorten", cloudinary.config().shorten)
 
     cloud_name = options.pop("cloud_name", cloudinary.config().cloud_name or None)
     if cloud_name == None:
@@ -125,6 +126,9 @@ def cloudinary_url(source, **options):
         if not private_cdn or (secure and secure_distribution == cloudinary.AKAMAI_SHARED_CDN):
             prefix += "/" + cloud_name
 
+    if shorten and resource_type == "image" and type == "upload":
+        resource_type = "iu"
+        type = ""          
     if source.find("/") >= 0 and not re.match(r'^https?:/', source) and  not re.match(r'^v[0-9]+', source) and  not version:
         version = "1"
     components = [prefix, resource_type, type, transformation, "v" + str(version) if version else "", source]

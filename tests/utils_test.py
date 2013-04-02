@@ -328,5 +328,14 @@ class TestUtils(unittest.TestCase):
         result, options = cloudinary.utils.cloudinary_url("v1234/test")
         self.assertEqual(result, "http://res.cloudinary.com/test123/image/upload/v1234/test")
 
+    def test_shorten(self):
+        result, options = cloudinary.utils.cloudinary_url("test", shorten=True)
+        self.assertEqual(options, {})
+        self.assertEqual(result, "http://res.cloudinary.com/test123/iu/test")
+
+        result, options = cloudinary.utils.cloudinary_url("test", shorten=True, type="private")
+        self.assertEqual(options, {})
+        self.assertEqual(result, "http://res.cloudinary.com/test123/image/private/test")
+
 if __name__ == '__main__':
     unittest.main()
