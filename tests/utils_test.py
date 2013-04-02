@@ -181,6 +181,13 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(options, {})
         self.assertEqual(result, "http://res.cloudinary.com/test123/image/fetch/http://blah.com/hello%3Fa%3Db" )
 
+    def test_http_escape(self):
+        """should escape http urls"""
+        options = {"type": "youtube"}
+        result, options = cloudinary.utils.cloudinary_url("http://www.youtube.com/watch?v=d9NF2edxy-M", **options)
+        self.assertEqual(options, {})
+        self.assertEqual(result, "http://res.cloudinary.com/test123/image/youtube/http://www.youtube.com/watch%3Fv%3Dd9NF2edxy%2DM" )
+
     def test_cname(self):
         """should support extenal cname"""
         options = {"cname": "hello.com"}
@@ -311,6 +318,15 @@ class TestUtils(unittest.TestCase):
         result, options = cloudinary.utils.cloudinary_url("test", **options)
         self.assertEqual(options, {})
         self.assertEqual(result, "http://res.cloudinary.com/test123/image/upload/fl_abc.def/test" )
+
+    def test_folder_version(self):
+        """should add version if public_id contains / """
+        result, options = cloudinary.utils.cloudinary_url("folder/test")
+        self.assertEqual(result, "http://res.cloudinary.com/test123/image/upload/v1/folder/test")
+        result, options = cloudinary.utils.cloudinary_url("folder/test", version=123)
+        self.assertEqual(result, "http://res.cloudinary.com/test123/image/upload/v123/folder/test")
+        result, options = cloudinary.utils.cloudinary_url("v1234/test")
+        self.assertEqual(result, "http://res.cloudinary.com/test123/image/upload/v1234/test")
 
 if __name__ == '__main__':
     unittest.main()

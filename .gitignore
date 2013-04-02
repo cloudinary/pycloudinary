@@ -4,3 +4,4 @@
 dist
 venv
 cloudinary/static
+*.egg

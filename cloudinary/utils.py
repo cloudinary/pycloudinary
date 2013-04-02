@@ -125,6 +125,8 @@ def cloudinary_url(source, **options):
         if not private_cdn or (secure and secure_distribution == cloudinary.AKAMAI_SHARED_CDN):
             prefix += "/" + cloud_name
 
+    if source.find("/") >= 0 and not re.match(r'^https?:/', source) and  not re.match(r'^v[0-9]+', source) and  not version:
+        version = "1"
     components = [prefix, resource_type, type, transformation, "v" + str(version) if version else "", source]
     source = re.sub(r'([^:])/+', r'\1/', "/".join(components))
     return (source, options)
