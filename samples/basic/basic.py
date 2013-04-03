@@ -25,7 +25,7 @@ def upload_files():
         format = response['format'],
         width = 200,
         height = 150,
-        crop = "fill",
+        crop = "fill"
     )
     print "Fill 200x150 url: " + url
     print
@@ -40,19 +40,19 @@ def upload_files():
         format = response['format'],
         width = 200,
         height = 150,
-        crop = "fit",
+        crop = "fit"
     )
     print "Fit into 200x150 url: " + url
     print
 
-    print "--- Upload a local file with eager trasnformation of scaling to 200x150"
+    print "--- Upload a local file with eager transformation of scaling to 200x150"
     response = upload("lake.jpg",
         tags = DEFAULT_TAG,
         public_id = "eager_custom_name",
         eager = dict(
             width = 200,
             height = 150,
-            crop = "scale",
+            crop = "scale"
         ),
     )
     dump_response(response)
@@ -65,7 +65,7 @@ def upload_files():
     print "scaling to 200x150 url: " + url
     print
 
-    print "--- Fetch an uploaded remote image"
+    print "--- Upload by fetching a remote image"
     response = upload("http://res.cloudinary.com/demo/image/upload/couple.jpg",
         tags = DEFAULT_TAG,
     )
@@ -98,7 +98,7 @@ def upload_files():
         radius = 10,
         effect = "sepia",
     )
-    print "Fill 200x150, round corners, apply the sepia effect url: " + url
+    print "Fill 200x150, round corners, apply the sepia effect, url: " + url
     print
 
 def cleanup():
@@ -120,4 +120,3 @@ else:
     print "    you can only one instead by passing 'upload' or 'cleanup' as an argument"
     print
     upload_files()
-    cleanup()

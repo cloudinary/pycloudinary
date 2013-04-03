@@ -1,4 +1,4 @@
-Cloudinary python sample project
+Cloudinary Python sample project
 ================================
 
 This sample is a synchronous script that shows the upload process from local file, remote URL, with different transformations and options.
@@ -25,6 +25,10 @@ This sample is a synchronous script that shows the upload process from local fil
 1. Run the script:
 
         $ python sample.py
+
+In order to delete the uploaded images using Cloudinary's Admin API, run the script:
+
+        $ python sample.py cleanup
 
 
 Good luck!
