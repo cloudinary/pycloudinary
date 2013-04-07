@@ -45,6 +45,7 @@ def build_upload_params(**options):
               "headers": build_custom_headers(options.get("headers")),
               "eager": build_eager(options.get("eager")),
               "use_filename": options.get("use_filename"),
+              "invalidate": options.get("invalidate"),
               "notification_url": options.get("notification_url"),
               "eager_notification_url": options.get("eager_notification_url"),
               "eager_async": options.get("eager_async"),
@@ -59,6 +60,7 @@ def destroy(public_id, **options):
     params = {
         "timestamp": utils.now(),
         "type": options.get("type"),
+        "invalidate": options.get("invalidate"),
         "public_id":    public_id
     }
     return call_api("destroy", params, **options)
