@@ -11,9 +11,6 @@ import urllib2
 
 _initialized = False
 
-def now():
-    return str(int(time.time()))
-
 def build_eager(transformations):
     eager = []
     for tr in utils.build_array(transformations):
@@ -34,7 +31,7 @@ def build_custom_headers(headers):
     return "\n".join(headers)
 
 def build_upload_params(**options):
-    params = {"timestamp": now(),
+    params = {"timestamp": utils.now(),
               "transformation": utils.generate_transformation_string(**options)[0],
               "public_id": options.get("public_id"),
               "callback": options.get("callback"),
@@ -60,7 +57,7 @@ def upload(file, **options):
 
 def destroy(public_id, **options):
     params = {
-        "timestamp": now(),
+        "timestamp": utils.now(),
         "type": options.get("type"),
         "public_id":    public_id
     }
@@ -68,7 +65,7 @@ def destroy(public_id, **options):
 
 def rename(from_public_id, to_public_id, **options):
     params = {
-        "timestamp": now(),
+        "timestamp": utils.now(),
         "type": options.get("type"),
         "overwrite": options.get("overwrite"),
         "from_public_id": from_public_id,
@@ -78,7 +75,7 @@ def rename(from_public_id, to_public_id, **options):
 
 def explicit(public_id, **options):
      params = {
-        "timestamp": now(),
+        "timestamp": utils.now(),
         "type": options.get("type"),
         "public_id": public_id,
         "callback": options.get("callback"),
@@ -89,7 +86,7 @@ def explicit(public_id, **options):
 
 def generate_sprite(tag, **options):
      params = {
-        "timestamp": now(),
+        "timestamp": utils.now(),
         "tag": tag,
         "async": options.get("async"),
         "notification_url": options.get("notification_url"),
@@ -99,7 +96,7 @@ def generate_sprite(tag, **options):
 
 def multi(tag, **options):
      params = {
-        "timestamp": now(),
+        "timestamp": utils.now(),
         "tag": tag,
         "format": options.get("format"),
         "async": options.get("async"),
@@ -110,7 +107,7 @@ def multi(tag, **options):
 
 def explode(public_id, **options):
      params = {
-        "timestamp": now(),
+        "timestamp": utils.now(),
         "public_id": public_id,
         "format": options.get("format"),
         "notification_url": options.get("notification_url"),
@@ -132,7 +129,7 @@ def replace_tag(tag, public_ids = [], **options):
 
 def call_tags_api(tag, command, public_ids = [], **options):
     params = {
-        "timestamp": now(),
+        "timestamp": utils.now(),
         "tag": tag,
         "public_ids": utils.build_array(public_ids),
         "command": command,
@@ -142,7 +139,7 @@ def call_tags_api(tag, command, public_ids = [], **options):
 
 TEXT_PARAMS = ["public_id", "font_family", "font_size", "font_color", "text_align", "font_weight", "font_style", "background", "opacity", "text_decoration"]
 def text(text, **options):
-    params = {"timestamp": now(), "text": text}
+    params = {"timestamp": utils.now(), "text": text}
     for key in TEXT_PARAMS:
         params[key] = options.get(key)
     return call_api("text", params, **options)
