@@ -14,7 +14,9 @@ register = template.Library()
 @register.simple_tag
 def cloudinary_url(source, options_dict={}, **options):
     options = dict(options_dict, **options)
-    return utils.cloudinary_url(source, **options)[0]
+    if not isinstance(source, CloudinaryImage):
+        source = CloudinaryImage(source)
+    return source.build_url(**options) 
 
 @register.simple_tag(name='cloudinary')
 def cloudinary_tag(image, options_dict={}, **options):
