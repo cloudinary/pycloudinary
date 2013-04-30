@@ -73,7 +73,7 @@ class CloudinaryImage(object):
         self.format = format or metadata.get('format')
         self.version = version or metadata.get('version')
         self.signature = signature or metadata.get('signature')
-        self.url_options = url_options or metadata.get('url_options')
+        self.url_options = url_options
 
     def __unicode__(self):
         return self.public_id
