@@ -39,10 +39,9 @@ class CloudinaryField(models.Field):
     def pre_save(self, model_instance, add):
         value = super(CloudinaryField, self).pre_save(model_instance, add)
         if isinstance(value, UploadedFile):
-            result = uploader.upload(value, **self.upload_options(model_instance))
-            value = self.get_prep_value(CloudinaryImage(result["public_id"], version=str(result["version"]), format=result["format"]))
-            setattr(model_instance, self.attname, value)
-            return value
+            instance_value = uploader.upload_image(value, **self.upload_options(model_instance))
+            setattr(model_instance, self.attname, instance_value)
+            return self.get_prep_value(instance_value)
         else:
             return value
 

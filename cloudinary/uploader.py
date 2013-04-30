@@ -1,5 +1,4 @@
 # Copyright Cloudinary
-import time
 import cloudinary
 from cloudinary import utils
 import json
@@ -55,6 +54,11 @@ def build_upload_params(**options):
 def upload(file, **options):
     params = build_upload_params(**options)
     return call_api("upload", params, file = file, **options)
+
+def upload_image(file, **options):
+    result = upload(file, **options)
+    return cloudinary.CloudinaryImage(result["public_id"], version=str(result["version"]),
+        format=result["format"], metadata=result)
 
 def destroy(public_id, **options):
     params = {

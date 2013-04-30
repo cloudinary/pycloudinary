@@ -64,12 +64,16 @@ def reset_config():
     _config = Config()
 
 class CloudinaryImage(object):
-    def __init__(self, public_id, format = None, version = None, signature = None, url_options = {}):
-        self.public_id = public_id
-        self.format = format
-        self.version = version
-        self.signature = signature
-        self.url_options = url_options
+    def __init__(self, public_id = None, format = None, version = None,
+            signature = None, url_options = {}, metadata = None):
+
+        self.metadata = metadata
+        metadata = metadata or {}
+        self.public_id = public_id or metadata.get('public_id')
+        self.format = format or metadata.get('format')
+        self.version = version or metadata.get('version')
+        self.signature = signature or metadata.get('signature')
+        self.url_options = url_options or metadata.get('url_options')
 
     def __unicode__(self):
         return self.public_id

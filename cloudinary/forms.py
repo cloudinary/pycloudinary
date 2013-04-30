@@ -104,7 +104,6 @@ class CloudinaryFileField(forms.FileField):
         if not value:
             return None;
         if self.autosave:
-            result = cloudinary.uploader.upload(value, **self.options)
-            return CloudinaryImage(result["public_id"], version=str(result["version"]), format=result["format"])
+            return cloudinary.uploader.upload_image(value, **self.options)
         else:
             return value
