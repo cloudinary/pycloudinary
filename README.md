@@ -201,8 +201,28 @@ The following tag generates an html form that can be used to upload the file dir
 Optional parameters:
 
     public_id - The name of the uploaded file in Cloudinary
+
+## Code samples
+
+### Basic Python sample
+
+This sample is a synchronous script that shows the upload process from local file, remote URL, with different transformations and options.
+
+The source code and more details are available here:
+
+[https://github.com/cloudinary/pycloudinary/tree/master/samples/basic](https://github.com/cloudinary/pycloudinary/tree/master/samples/basic)
+
+
+### Photo Album - Django Web application 
+
+A simple web application that allows you to uploads photos, maintain a database with references to them, list them with their metadata, and display them using various cloud-based transformations.
+
+The source code and more details are available here:
+
+[https://github.com/cloudinary/cloudinary-django-sample](https://github.com/cloudinary/cloudinary-django-sample)
+
   
-## Additional resources ##########################################################
+## Additional resources
 
 Additional resources are available at:
 
