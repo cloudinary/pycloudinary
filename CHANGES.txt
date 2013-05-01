@@ -13,3 +13,4 @@ v1.0.3, 2013-01-20 -- Open uploaded file in binary mode to solve python windows 
 v1.0.4, 2013-03-12 -- Fix tag handing methods of api, Support for sprite, multi and explode apis. Support for new async and notification params, Support for usage API call, Support js files needed for client side image processing in jquery direct upload, Support new image_metadata flag in upload and admin API, Use width/height even if crop is not given.
 v1.0.5, 2013-03-14 -- Akamai CDN support
 v1.0.6, 2013-03-25 -- Support Django 1.5, Add cloudinary_direct_upload_field, cloudinary_js_config, cloudinary_url templatetags, Add basic sample, Update documentation
+v1.0.7, 2013-05-01 -- Add metadata to CloudinaryImage in upload. Support CloudinaryImage in the cloudinary_url templatetag. Invalidate flags in upload and destroy. Private download link generator. Shorten URL support. Support for folders. Support unsafe transformation update. Support rename.

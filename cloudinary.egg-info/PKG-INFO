@@ -1,6 +1,6 @@
-Metadata-Version: 1.1
+Metadata-Version: 1.0
 Name: cloudinary
-Version: 1.0.6
+Version: 1.0.7
 Summary: Python interface to Cloudinary
 Home-page: http://cloudinary.com
 Author: Cloudinary
