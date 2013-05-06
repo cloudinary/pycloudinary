@@ -46,15 +46,14 @@ class CloudinaryJsFileField(forms.Field):
         'required': _(u"No image selected!")
     }
 
-    def __init__(self, *args, **kwargs):
-        self.autosave = kwargs.pop('autosave', True)
-        attrs = kwargs.get('attrs', {}).copy()
-        options = kwargs.get('options', {}).copy()
-        attrs["options"] = options
+    def __init__(self, attrs={}, options={}, autosave=True, *args, **kwargs):
+        self.autosave = autosave
+        attrs = attrs.copy()
+        attrs["options"] = options.copy()
 
-        options = {'widget': CloudinaryInput(attrs=attrs)}
-        options.update(kwargs)
-        super(CloudinaryJsFileField, self).__init__(*args, **options)
+        field_options = {'widget': CloudinaryInput(attrs=attrs)}
+        field_options.update(kwargs)
+        super(CloudinaryJsFileField, self).__init__(*args, **field_options)
 
     def enable_callback(self, request):
         from django.contrib.staticfiles.storage import staticfiles_storage
@@ -64,21 +63,22 @@ class CloudinaryJsFileField(forms.Field):
         "Convert to CloudinaryImage"
         if not value:
             return None;
-        m = re.search(r'^([^/]+)/upload/v(\d+)/([^/]+)#([^/]+)$', value)
+        m = re.search(r'^([^/]+)/([^/]+)/v(\d+)/([^#]+)#([^/]+)$', value)
         if not m:
             raise forms.ValidationError("Invalid format")
         resource_type = m.group(1)
         if resource_type != 'image':
             raise forms.ValidationError("Only images are supported")
-        version = m.group(2)
-        filename = m.group(3)
-        signature = m.group(4)
+        image_type = m.group(2)
+        version = m.group(3)
+        filename = m.group(4)
+        signature = m.group(5)
         m = re.search(r'(.*)\.(.*)', filename)
         if not m:
             raise forms.ValidationError("Invalid file name")
         public_id = m.group(1)
-        format = m.group(2)
-        return CloudinaryImage(public_id, format=format, version=version, signature=signature)
+        image_format = m.group(2)
+        return CloudinaryImage(public_id, format=image_format, version=version, signature=signature, type=image_type)
 
     def validate(self, value):
         "Validate the signature"
@@ -93,9 +93,7 @@ class CloudinaryFileField(forms.FileField):
         'required': _(u"No image selected!")
     }
     default_error_messages = dict(forms.FileField.default_error_messages.items() + my_default_error_messages.items())
-    def __init__(self, *args, **kwargs):
-        self.options = kwargs.get('options', {})
-        self.autosave = kwargs.pop('autosave', True)
+    def __init__(self, options={}, autosave=True, *args, **kwargs):
         super(CloudinaryFileField, self).__init__(*args, **kwargs)
 
     def to_python(self, value):

@@ -65,7 +65,7 @@ def reset_config():
 
 class CloudinaryImage(object):
     def __init__(self, public_id = None, format = None, version = None,
-            signature = None, url_options = {}, metadata = None):
+            signature = None, url_options = {}, metadata = None, type = None):
 
         self.metadata = metadata
         metadata = metadata or {}
@@ -73,6 +73,7 @@ class CloudinaryImage(object):
         self.format = format or metadata.get('format')
         self.version = version or metadata.get('version')
         self.signature = signature or metadata.get('signature')
+        self.type = type or metadata.get('type') or "upload"
         self.url_options = url_options
 
     def __unicode__(self):
@@ -86,13 +87,14 @@ class CloudinaryImage(object):
     def url(self):
         return self.build_url(**self.url_options)
 
-    def build_url(self, **options):
-        combined_options = dict(format = self.format, version = self.version)
+    def __build_url(self, **options):
+        combined_options = dict(format = self.format, version = self.version, type = self.type)
         combined_options.update(options)
-        return utils.cloudinary_url(self.public_id, **combined_options)[0]
+        return utils.cloudinary_url(self.public_id, **combined_options)        
+      
+    def build_url(self, **options):
+        return self.__build_url(**options)[0]
 
     def image(self, **options):
-        combined_options = dict(format = self.format, version = self.version)
-        combined_options.update(options)
-        src, attrs = utils.cloudinary_url(self.public_id, **combined_options)
+        src, attrs = self.__build_url(**options)
         return u"<img src='{0}' {1}/>".format(src, ' '.join(sorted([u"{0}='{1}'".format(key, value) for key, value in attrs.items() if value])))

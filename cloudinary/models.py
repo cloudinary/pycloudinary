@@ -13,6 +13,7 @@ class CloudinaryField(models.Field):
         options = {'max_length': 100}
         self.default_form_class = kwargs.pop("default_form_class", forms.CloudinaryFileField)
         options.update(kwargs)
+        self.type = options.pop("type", "upload")
         super(CloudinaryField, self).__init__(*args, **options)
 
     def get_internal_type(self):
@@ -31,7 +32,7 @@ class CloudinaryField(models.Field):
             return value
         else:
             m = re.search('(v(?P<version>\d+)/)?(?P<public_id>.*?)(\.(?P<format>[^.]+))?$', value)
-            return CloudinaryImage(**m.groupdict())
+            return CloudinaryImage(type = self.type, **m.groupdict())
 
     def upload_options(self, model_instance):
         return {}
@@ -39,7 +40,9 @@ class CloudinaryField(models.Field):
     def pre_save(self, model_instance, add):
         value = super(CloudinaryField, self).pre_save(model_instance, add)
         if isinstance(value, UploadedFile):
-            instance_value = uploader.upload_image(value, **self.upload_options(model_instance))
+            options = {"type": self.type}
+            options.update(self.upload_options(model_instance))
+            instance_value = uploader.upload_image(value, **options)
             setattr(model_instance, self.attname, instance_value)
             return self.get_prep_value(instance_value)
         else:
@@ -58,6 +61,8 @@ class CloudinaryField(models.Field):
             return value
 
     def formfield(self, **kwargs):
-        defaults = {'form_class': self.default_form_class}
+        options = {"type": "upload"}
+        options.update(kwargs.pop('options', {}))
+        defaults = {'form_class': self.default_form_class, 'options': options}
         defaults.update(kwargs)
         return super(CloudinaryField, self).formfield(autosave=False, **defaults)
