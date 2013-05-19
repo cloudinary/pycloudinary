@@ -44,6 +44,7 @@ def build_upload_params(**options):
               "headers": build_custom_headers(options.get("headers")),
               "eager": build_eager(options.get("eager")),
               "use_filename": options.get("use_filename"),
+              "discard_original_filename": options.get("discard_original_filename"),
               "invalidate": options.get("invalidate"),
               "notification_url": options.get("notification_url"),
               "eager_notification_url": options.get("eager_notification_url"),
