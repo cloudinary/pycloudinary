@@ -93,7 +93,9 @@ class CloudinaryFileField(forms.FileField):
         'required': _(u"No image selected!")
     }
     default_error_messages = dict(forms.FileField.default_error_messages.items() + my_default_error_messages.items())
-    def __init__(self, options={}, autosave=True, *args, **kwargs):
+    def __init__(self, options=None, autosave=True, *args, **kwargs):
+        self.autosave = autosave
+        self.options = options or {}
         super(CloudinaryFileField, self).__init__(*args, **kwargs)
 
     def to_python(self, value):
