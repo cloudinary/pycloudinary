@@ -68,7 +68,7 @@ def generate_transformation_string(**options):
                           "f": "fetch_format", "pg": "page", "dn": "density", "dl": "delay", "cs": "color_space"}.items():
         params[param] = options.pop(option, None)
 
-    transformations = [param + "_" + str(value) for param, value in params.items() if value or value == 0]
+    transformations = [param + "_" + str(value) for param, value in params.items() if (value or value == 0)]
     transformations.sort()
     transformation = ",".join(transformations)
     if "raw_transformation" in options:
