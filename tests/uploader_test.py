@@ -34,6 +34,15 @@ class TestUploader(unittest.TestCase):
         self.assertEqual(result["signature"], expected_signature)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_upload_data_uri(self):
+        """should successfully upload file by unicode url """
+        result = uploader.upload(u"data:image/png;base64,iVBORw0KGgoAA\nAANSUhEUgAAABAAAAAQAQMAAAAlPW0iAAAABlBMVEUAAAD///+l2Z/dAAAAM0l\nEQVR4nGP4/5/h/1+G/58ZDrAz3D/McH8yw83NDDeNGe4Ug9C9zwz3gVLMDA/A6\nP9/AFGGFyjOXZtQAAAAAElFTkSuQmCC")
+        self.assertEqual(result["width"], 16)
+        self.assertEqual(result["height"], 16)
+        expected_signature = utils.api_sign_request(dict(public_id=result["public_id"], version=result["version"]), cloudinary.config().api_secret)
+        self.assertEqual(result["signature"], expected_signature)
+
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_rename(self):
         """should successfully rename a file"""
         result = uploader.upload("tests/logo.png")
