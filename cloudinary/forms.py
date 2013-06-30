@@ -17,18 +17,9 @@ class CloudinaryInput(forms.TextInput):
     def render(self, name, value, attrs=None):
         self.build_attrs(attrs)
         options = self.attrs.pop('options', {})
-        api_key = options.get("api_key", cloudinary.config().api_key)
-        if not api_key: raise Exception("Must supply api_key")
-        api_secret = options.get("api_secret", cloudinary.config().api_secret)
-        if not api_secret: raise Exception("Must supply api_secret")
 
         params = cloudinary.uploader.build_upload_params(**options)
-        params['signature'] = cloudinary.utils.api_sign_request(params, api_secret)
-        params['api_key'] = api_key
-        # Remove blank parameters
-        for k, v in params.items():
-            if not v:
-                del params[k]
+        params = cloudinary.utils.sign_request(params, options)
 
         if 'resource_type' not in options: options['resource_type'] = 'auto'
         cloudinary_upload_url = cloudinary.utils.cloudinary_api_url("upload", **options)

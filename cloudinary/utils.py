@@ -76,6 +76,18 @@ def generate_transformation_string(**options):
     url = "/".join([trans for trans in base_transformations + [transformation] if trans])
     return (url, options)
 
+def sign_request(params, options):
+    api_key = options.get("api_key", cloudinary.config().api_key)
+    if not api_key: raise Exception("Must supply api_key")
+    api_secret = options.get("api_secret", cloudinary.config().api_secret)
+    if not api_secret: raise Exception("Must supply api_secret")
+
+    params = dict( [ (k,v) for (k,v) in params.items() if v] )    
+    params["signature"] = api_sign_request(params, api_secret)
+    params["api_key"] = api_key
+    
+    return params
+  
 def api_sign_request(params_to_sign, api_secret):
     to_sign = "&".join(sorted([(k+"="+(",".join(v) if isinstance(v, list) else str(v))) for k, v in params_to_sign.items() if v]))
     return hashlib.sha1(to_sign + api_secret).hexdigest()
@@ -161,26 +173,22 @@ def now():
   return str(int(time.time()))
   
 def private_download_url(public_id, format, **options):
-  api_key = options.get("api_key", cloudinary.config().api_key)
-  if not api_key: raise Exception("Must supply api_key")
-  api_secret = options.get("api_secret", cloudinary.config().api_secret)
-  if not api_secret: raise Exception("Must supply api_secret")
-
-  cloudinary_params = {
+  cloudinary_params = sign_request({
     "timestamp": now(), 
     "public_id": public_id, 
     "format": format, 
     "type": options.get("type"),
     "attachment": options.get("attachment"),
     "expires_at": options.get("expires_at")
-  }
-
-  # Remove blank parameters
-  for k, v in cloudinary_params.items():
-    if not v:
-      del cloudinary_params[k]
-
-  cloudinary_params["signature"] = api_sign_request(cloudinary_params, api_secret)
-  cloudinary_params["api_key"] = api_key
+  }, options)
 
   return cloudinary_api_url("download", **options) + "?" + urllib.urlencode(cloudinary_params)
+
+def zip_download_url(tag, **options):
+  cloudinary_params = sign_request({
+    "timestamp": now(), 
+    "tag": tag,
+    "transformation": generate_transformation_string(**options)[0] 
+  }, options)
+
+  return cloudinary_api_url("download_tag.zip", **options) + "?" + urllib.urlencode(cloudinary_params)
