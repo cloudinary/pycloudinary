@@ -14,3 +14,4 @@ v1.0.4, 2013-03-12 -- Fix tag handing methods of api, Support for sprite, multi 
 v1.0.5, 2013-03-14 -- Akamai CDN support
 v1.0.6, 2013-03-25 -- Support Django 1.5, Add cloudinary_direct_upload_field, cloudinary_js_config, cloudinary_url templatetags, Add basic sample, Update documentation
 v1.0.7, 2013-05-01 -- Add metadata to CloudinaryImage in upload. Support CloudinaryImage in the cloudinary_url templatetag. Invalidate flags in upload and destroy. Private download link generator. Shorten URL support. Support for folders. Support unsafe transformation update. Support rename.
+v1.0.8, 2013-07-01 -- Issue #18 - Support for other types in addition to 'upload', Fixed issue where a parameter may not be set to 0, Fixed bug with a couple ivars not being set in init, Support discard_original_filename, Support s3 and data:uri urls, Support for zip_download_url. Cleanup of signing code.
