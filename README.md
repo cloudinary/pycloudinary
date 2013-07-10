@@ -11,6 +11,10 @@ Cloudinary provides URL and HTTP based APIs that can be easily integrated with a
 
 For Python, Cloudinary provides an egg for simplifying the integration even further.
 
+## Getting started guide
+![](http://res.cloudinary.com/cloudinary/image/upload/see_more_bullet.png)  **Take a look at our [Getting started guide for Python & Django](http://cloudinary.com/documentation/django_integration#getting_started_guide)**.
+
+
 ## Setup ######################################################################
 
 You can install Cloudinary's module using either `easy_install` or `pip` package management tools. For example:
@@ -88,6 +92,8 @@ Same goes for Twitter:
 
     cloudinary.utils.cloudinary_url("billclinton.jpg", type = "twitter_name")
 
+![](http://res.cloudinary.com/cloudinary/image/upload/see_more_bullet.png) **See [our documentation](http://cloudinary.com/documentation/django_image_manipulation) for more information about displaying and transforming images in Python & Django**.                                         
+
 ### Upload
 
 Assuming you have your Cloudinary configuration parameters defined (`cloud_name`, `api_key`, `api_secret`), uploading to Cloudinary is very simple.
@@ -109,7 +115,10 @@ You can also specify your own public ID:
     cloudinary.utils.cloudinary_url("sample_remote.jpg")
 
     http://res.cloudinary.com/demo/image/upload/sample_remote.jpg
-        
+
+![](http://res.cloudinary.com/cloudinary/image/upload/see_more_bullet.png) **See [our documentation](http://cloudinary.com/documentation/django_image_upload) for plenty more options of uploading to the cloud from your Python & Django code or directly from the browser**.
+
+
 ## Django 
 
 ### cloudinary.CloudinaryImage
@@ -228,16 +237,19 @@ Additional resources are available at:
 
 * [Website](http://cloudinary.com)
 * [Documentation](http://cloudinary.com/documentation)
+* [Knowledge Base](http://support.cloudinary.com/forums) 
+* [Documentation for Django integration](http://cloudinary.com/documentation/django_integration)
+* [Django image upload documentation](http://cloudinary.com/documentation/django_image_upload)
+* [Django image manipulation documentation](http://cloudinary.com/documentation/django_image_manipulation)
 * [Image transformations documentation](http://cloudinary.com/documentation/image_transformations)
-* [Upload API documentation](http://cloudinary.com/documentation/upload_images)
 
 ## Support
 
 You can [open an issue through GitHub](https://github.com/cloudinary/cloudinary/issues).
 
-Contact us at [info@cloudinary.com](mailto:info@cloudinary.com)
+Contact us [http://cloudinary.com/contact](http://cloudinary.com/contact)
 
-Or via Twitter: [@cloudinary](https://twitter.com/#!/cloudinary)
+Stay tuned for updates, tips and tutorials: [Blog](http://cloudinary.com/blog), [Twitter](https://twitter.com/cloudinary), [Facebook](http://www.facebook.com/Cloudinary).
 
 ## License #######################################################################
 
