@@ -245,7 +245,7 @@ Additional resources are available at:
 
 ## Support
 
-You can [open an issue through GitHub](https://github.com/cloudinary/cloudinary/issues).
+You can [open an issue through GitHub](https://github.com/cloudinary/pycloudinary/issues).
 
 Contact us [http://cloudinary.com/contact](http://cloudinary.com/contact)
 
