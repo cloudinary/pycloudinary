@@ -124,9 +124,11 @@ def cloudinary_url(source, **options):
     if cloud_name.startswith("/"):
         prefix = "/res" + cloud_name
     else:
-        secure_distribution = secure_distribution or cloudinary.SHARED_CDN
-
-        if secure:
+        shared_domain =  not private_cdn
+        if secure:        
+            if not secure_distribution or secure_distribution == cloudinary.OLD_AKAMAI_SHARED_CDN:
+              secure_distribution = cloud_name + "-res.cloudinary.com" if private_cdn else cloudinary.SHARED_CDN
+            shared_domain = shared_domain or secure_distribution == cloudinary.SHARED_CDN
             prefix = "https://" + secure_distribution
         else:
             subdomain = "a" + str((zlib.crc32(source) & 0xffffffff)%5 + 1) + "." if cdn_subdomain else ""
@@ -137,7 +139,7 @@ def cloudinary_url(source, **options):
             else:
                 host = "res.cloudinary.com"
             prefix = "http://" + subdomain + host
-        if not private_cdn or (secure and secure_distribution == cloudinary.AKAMAI_SHARED_CDN):
+        if shared_domain:
             prefix += "/" + cloud_name
 
     if shorten and resource_type == "image" and type == "upload":

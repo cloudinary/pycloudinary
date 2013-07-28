@@ -4,7 +4,8 @@ import os
 from urlparse import urlparse
 
 CF_SHARED_CDN = "d3jpl91pxevbkh.cloudfront.net"
-AKAMAI_SHARED_CDN = "cloudinary-a.akamaihd.net"
+OLD_AKAMAI_SHARED_CDN = "cloudinary-a.akamaihd.net"
+AKAMAI_SHARED_CDN = "res.cloudinary.com"
 SHARED_CDN = AKAMAI_SHARED_CDN
 
 from cloudinary import utils

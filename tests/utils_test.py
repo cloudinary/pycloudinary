@@ -22,7 +22,7 @@ class TestUtils(unittest.TestCase):
         options = {"secure": True}
         result, options = cloudinary.utils.cloudinary_url("test", **options)
         self.assertEqual(options, {})
-        self.assertEqual(result, "https://cloudinary-a.akamaihd.net/test123/image/upload/test" )
+        self.assertEqual(result, "https://res.cloudinary.com/test123/image/upload/test" )
 
     def test_secure_distribution_overwrite(self):
         """should allow overwriting secure distribution if secure=True"""
@@ -44,7 +44,7 @@ class TestUtils(unittest.TestCase):
         options = {"secure": True, "private_cdn": True}
         result, options = cloudinary.utils.cloudinary_url("test", **options)
         self.assertEqual(options, {})
-        self.assertEqual(result, "https://cloudinary-a.akamaihd.net/test123/image/upload/test" )
+        self.assertEqual(result, "https://test123-res.cloudinary.com/image/upload/test" )
 
     def test_secure_non_akamai(self):
         """should not add cloud_name if private_cdn and secure non akamai secure_distribution"""
