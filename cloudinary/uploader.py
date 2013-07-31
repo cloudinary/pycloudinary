@@ -49,6 +49,8 @@ def build_upload_params(**options):
               "notification_url": options.get("notification_url"),
               "eager_notification_url": options.get("eager_notification_url"),
               "eager_async": options.get("eager_async"),
+              "proxy": options.get("proxy"),
+              "folder": options.get("folder"),
               "tags": options.get("tags") and ",".join(utils.build_array(options["tags"]))}
     return params
 
