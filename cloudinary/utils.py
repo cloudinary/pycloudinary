@@ -118,8 +118,10 @@ def cloudinary_url(source, **options):
         return (original_source, options)
     if re.match(r'^https?:', source):
         source = smart_escape(source)
-    elif format:
-        source = source + "." + format
+    else:
+        source = smart_escape(urllib.unquote(source).decode('utf8') )
+        if format:
+          source = source + "." + format
 
     if cloud_name.startswith("/"):
         prefix = "/res" + cloud_name
@@ -161,7 +163,7 @@ def cloudinary_api_url(action = 'upload', **options):
 # Based on ruby's CGI::unescape. In addition does not escape / :
 def smart_escape(string):
     pack = lambda m: '%' + "%".join(["%02X" % x for x in struct.unpack('B'*len(m.group(1)), m.group(1))]).upper()
-    return re.sub(r"([^ a-zA-Z0-9_.-\/:]+)", pack, string).replace(' ', '+')
+    return re.sub(r"([^a-zA-Z0-9_.\-\/:]+)", pack, string)
 
 def random_public_id():
     return base64.urlsafe_b64encode(hashlib.sha1(uuid.uuid4()).digest())[0:16]
