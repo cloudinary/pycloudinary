@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '1.0.9'
+version = '1.0.10'
 
 setup(name='cloudinary',
       version=version,
