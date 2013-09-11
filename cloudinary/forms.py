@@ -1,5 +1,6 @@
 from django import forms
-from cloudinary import CloudinaryImage
+from django.forms import widgets
+from cloudinary import CloudinaryImage, UPLOAD_FIELD_NAME
 import cloudinary.uploader
 import cloudinary.utils
 import re
@@ -11,8 +12,8 @@ def cl_init_js_callbacks(form, request):
         if (isinstance(field, CloudinaryJsFileField)):
             field.enable_callback(request)
 
-class CloudinaryInput(forms.TextInput):
-    input_type = 'file'
+class CloudinaryInput(forms.ClearableFileInput):
+    template_with_initial = u'<span class="initial-text">%(initial_text)s: </span><span class="initial-value">%(initial)s</span> %(clear_template)s<br />%(input_text)s: %(input)s'
 
     def render(self, name, value, attrs=None):
         self.build_attrs(attrs)
@@ -29,10 +30,24 @@ class CloudinaryInput(forms.TextInput):
         attrs["data-cloudinary-field"] = name
         attrs["class"] = " ".join(["cloudinary-fileupload", self.attrs.get("class", "")])
 
-        return super(CloudinaryInput, self).render("file", None, attrs=attrs)
+        return super(CloudinaryInput, self).render(UPLOAD_FIELD_NAME, value, attrs=attrs)
+
+    # From django.forms.widgets.ClearableFileInput
+    def value_from_datadict(self, data, files, name):
+        upload = widgets.Widget().value_from_datadict(data, files, name)
+        if not self.is_required and widgets.CheckboxInput().value_from_datadict(
+            data, files, self.clear_checkbox_name(name)):
+            if upload:
+                # If the user contradicts themselves (uploads a new file AND
+                # checks the "clear" checkbox), we return a unique marker
+                # object that FileField will turn into a ValidationError.
+                return widgets.FILE_INPUT_CONTRADICTION
+            # False signals to clear any existing value, as opposed to just None
+            return False
+        return upload
 
 
-class CloudinaryJsFileField(forms.Field):      
+class CloudinaryJsFileField(forms.FileField):
     default_error_messages = {
         'required': _(u"No image selected!")
     }
