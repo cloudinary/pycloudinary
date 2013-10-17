@@ -16,7 +16,8 @@ class CloudinaryInput(forms.TextInput):
 
     def render(self, name, value, attrs=None):
         self.build_attrs(attrs)
-        options = self.attrs.pop('options', {})
+        attrs = self.attrs.copy()
+        options = attrs.pop('options', {})
 
         params = cloudinary.uploader.build_upload_params(**options)
         params = cloudinary.utils.sign_request(params, options)
@@ -27,7 +28,7 @@ class CloudinaryInput(forms.TextInput):
         attrs["data-url"] = cloudinary_upload_url
         attrs["data-form-data"] = json.dumps(params)
         attrs["data-cloudinary-field"] = name
-        attrs["class"] = " ".join(["cloudinary-fileupload", self.attrs.get("class", "")])
+        attrs["class"] = " ".join(["cloudinary-fileupload", attrs.get("class", "")])
 
         return super(CloudinaryInput, self).render("file", None, attrs=attrs)
 
