@@ -40,6 +40,9 @@ def generate_transformation_string(**options):
     background = options.pop("background", None)
     if background:
         background = background.replace("#", "rgb:")
+    color = options.pop("color", None)
+    if color:
+        color = color.replace("#", "rgb:")
 
     base_transformations = build_array(options.pop("transformation", None))
     if any(isinstance(bs, dict) for bs in base_transformations):
@@ -62,7 +65,7 @@ def generate_transformation_string(**options):
 
     flags = ".".join(build_array(options.pop("flags", None)))
 
-    params = {"w": width, "h": height, "t": named_transformation, "b": background, "e": effect, "c": crop, "a": angle, "bo": border, "fl": flags}
+    params = {"w": width, "h": height, "t": named_transformation, "b": background, "co": color, "e": effect, "c": crop, "a": angle, "bo": border, "fl": flags}
     for param, option in {"q": "quality", "g": "gravity", "p": "prefix", "x": "x",
                           "y": "y", "r": "radius", "d": "default_image", "l": "overlay", "u": "underlay", "o": "opacity",
                           "f": "fetch_format", "pg": "page", "dn": "density", "dl": "delay", "cs": "color_space"}.items():

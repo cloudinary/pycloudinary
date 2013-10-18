@@ -18,9 +18,7 @@ cloudinary.egg-info/top_level.txt
 cloudinary/static/html/cloudinary_cors.html
 cloudinary/static/js/canvas-to-blob.min.js
 cloudinary/static/js/jquery.cloudinary.js
-cloudinary/static/js/jquery.fileupload-image.js
-cloudinary/static/js/jquery.fileupload-process.js
-cloudinary/static/js/jquery.fileupload-validate.js
+cloudinary/static/js/jquery.fileupload-fp.js
 cloudinary/static/js/jquery.fileupload.js
 cloudinary/static/js/jquery.iframe-transport.js
 cloudinary/static/js/jquery.ui.widget.js
