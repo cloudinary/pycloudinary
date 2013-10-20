@@ -17,5 +17,4 @@ v1.0.7, 2013-05-01 -- Add metadata to CloudinaryImage in upload. Support Cloudin
 v1.0.8, 2013-07-01 -- Issue #18 - Support for other types in addition to 'upload', Fixed issue where a parameter may not be set to 0, Fixed bug with a couple ivars not being set in init, Support discard_original_filename, Support s3 and data:uri urls, Support for zip_download_url. Cleanup of signing code.
 v1.0.9, 2013-07-30 -- Support raw data URI, Change secure urls to use *res.cloudinary.com.
 v1.0.10, 2013-08-07 -- Support ping to Admin API, Support folder and proxy upload parameters, Escape non-http public_ids. Correct escaping of space and '-'.
-
-
+v1.0.11, 2013-10-20 -- Fix issue when CloudinaryInput with options is rendered twice.
