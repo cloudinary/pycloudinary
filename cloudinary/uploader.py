@@ -44,6 +44,7 @@ def build_upload_params(**options):
               "headers": build_custom_headers(options.get("headers")),
               "eager": build_eager(options.get("eager")),
               "use_filename": options.get("use_filename"),
+              "unique_filename": options.get("unique_filename"),
               "discard_original_filename": options.get("discard_original_filename"),
               "invalidate": options.get("invalidate"),
               "notification_url": options.get("notification_url"),
@@ -52,7 +53,17 @@ def build_upload_params(**options):
               "proxy": options.get("proxy"),
               "folder": options.get("folder"),
               "tags": options.get("tags") and ",".join(utils.build_array(options["tags"]))}
+    params = dict( [ (k, __safe_value(v)) for (k,v) in params.items()] )
     return params
+
+def __safe_value(v):
+    if isinstance(v, (bool)):
+	if v:
+	    return "1"
+	else: 
+	    return "0"
+    else:
+	return v
 
 def upload(file, **options):
     params = build_upload_params(**options)

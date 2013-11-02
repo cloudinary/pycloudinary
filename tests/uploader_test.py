@@ -54,6 +54,14 @@ class TestUploader(unittest.TestCase):
         self.assertEqual(api.resource(result["public_id"]+"2")["format"], "ico")
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_use_filename(self):
+        """should successfully take use file name of uploaded file in public id if specified use_filename """
+        result = uploader.upload("tests/logo.png", use_filename = True)
+        self.assertRegexpMatches(result["public_id"], 'logo_[a-z0-9]{6}')
+        result = uploader.upload("tests/logo.png", use_filename = True, unique_filename = False)
+        self.assertEqual(result["public_id"], 'logo')
+    
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_explicit(self):
         """should support explicit """
         result = uploader.explicit("cloudinary", type="twitter_name", eager=[dict(crop="scale", width="2.0")])
