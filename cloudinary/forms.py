@@ -30,7 +30,9 @@ class CloudinaryInput(forms.TextInput):
         attrs["data-cloudinary-field"] = name
         attrs["class"] = " ".join(["cloudinary-fileupload", attrs.get("class", "")])
 
-        return super(CloudinaryInput, self).render("file", None, attrs=attrs)
+        widget = super(CloudinaryInput, self).render("file", None, attrs=attrs)
+        if value: widget += forms.HiddenInput().render(name, value) 
+        return widget
 
 
 class CloudinaryJsFileField(forms.Field):      
