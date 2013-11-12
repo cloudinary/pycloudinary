@@ -1,6 +1,7 @@
 # Copyright Cloudinary
 import cloudinary
 from cloudinary import utils
+from cloudinary.api import Error
 import json
 import re
 from poster.encode import multipart_encode
@@ -202,7 +203,7 @@ def call_api(action, params, **options):
         response = urllib2.urlopen(request).read()
     except urllib2.HTTPError, e:
         if not e.code in [200, 400, 500]:
-            raise Exception("Server returned unexpected status code - %d - %s" % (e.code, e.read()))
+            raise Error("Server returned unexpected status code - %d - %s" % (e.code, e.read()))
         code = e.code
         response = e.read()
 
@@ -210,13 +211,13 @@ def call_api(action, params, **options):
         result = json.loads(response)
     except Exception, e:
         # Error is parsing json
-        raise Exception("Error parsing server response (%d) - %s. Got - %s", code, response, e)
+        raise Error("Error parsing server response (%d) - %s. Got - %s", code, response, e)
 
     if "error" in result:
         if return_error:
             result["error"]["http_code"] = response.code
         else:
-            raise Exception(result["error"]["message"])
+            raise Error(result["error"]["message"])
 
     return result
 

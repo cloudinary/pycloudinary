@@ -49,7 +49,7 @@ class TestUploader(unittest.TestCase):
         uploader.rename(result["public_id"], result["public_id"]+"2")
         self.assertIsNotNone(api.resource(result["public_id"]+"2"))
         result2 = uploader.upload("tests/favicon.ico")
-        self.assertRaises(Exception, uploader.rename, (result2["public_id"], result["public_id"]+"2"))
+        self.assertRaises(api.Error, uploader.rename, (result2["public_id"], result["public_id"]+"2"))
         uploader.rename(result2["public_id"], result["public_id"]+"2", overwrite=True)
         self.assertEqual(api.resource(result["public_id"]+"2")["format"], "ico")
 
