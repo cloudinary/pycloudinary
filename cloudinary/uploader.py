@@ -52,6 +52,7 @@ def build_upload_params(**options):
               "eager_async": options.get("eager_async"),
               "proxy": options.get("proxy"),
               "folder": options.get("folder"),
+              "overwrite": options.get("overwrite"),
               "tags": options.get("tags") and ",".join(utils.build_array(options["tags"]))}
     params = dict( [ (k, __safe_value(v)) for (k,v) in params.items()] )
     return params

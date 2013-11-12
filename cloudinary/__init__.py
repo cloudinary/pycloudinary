@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
 import os
-from urlparse import urlparse
+from urlparse import urlparse,parse_qs
 
 CF_SHARED_CDN = "d3jpl91pxevbkh.cloudfront.net"
 OLD_AKAMAI_SHARED_CDN = "cloudinary-a.akamaihd.net"
@@ -35,6 +35,8 @@ class Config(object):
             )
         elif os.environ.get("CLOUDINARY_URL"):
             uri = urlparse(os.environ.get("CLOUDINARY_URL"))
+            for k, v in parse_qs(uri.query).items():
+                self.__dict__[k] = v[0]
             self.update(
               cloud_name = uri.hostname,
               api_key = uri.username,

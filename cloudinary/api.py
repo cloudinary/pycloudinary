@@ -50,7 +50,7 @@ def resources(**options):
 def resources_by_tag(tag, **options):
     resource_type = options.pop("resource_type", "image")
     uri = ["resources", resource_type, "tags", tag]
-    return call_api("get", uri, only(options, "next_cursor", "max_results"), **options)
+    return call_api("get", uri, only(options, "next_cursor", "max_results", "tags"), **options)
 
 def resource(public_id, **options):
     resource_type = options.pop("resource_type", "image")
@@ -63,13 +63,20 @@ def delete_resources(public_ids, **options):
     type = options.pop("type", "upload")
     uri = ["resources", resource_type, type]
     params = [("public_ids[]", public_id) for public_id in public_ids]
-    return call_api("delete", uri, params + only(options, "keep_original").items(), **options)
+    return call_api("delete", uri, params + only(options, "keep_original", "next_cursor").items(), **options)
 
 def delete_resources_by_prefix(prefix, **options):
     resource_type = options.pop("resource_type", "image")
     type = options.pop("type", "upload")
     uri = ["resources", resource_type, type]
-    return call_api("delete", uri, dict(only(options, "keep_original"), prefix=prefix), **options)
+    return call_api("delete", uri, dict(only(options, "keep_original", "next_cursor"), prefix=prefix), **options)
+
+def delete_all_resources(**options):
+    resource_type = options.pop("resource_type", "image")
+    type = options.pop("type", "upload")
+    uri = ["resources", resource_type, type]
+    return call_api("delete", uri, dict(only(options, "keep_original", "next_cursor"), all=True), **options)
+
 
 def delete_resources_by_tag(tag, **options):
     resource_type = options.pop("resource_type", "image")

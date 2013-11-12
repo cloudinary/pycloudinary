@@ -32,7 +32,9 @@ class TestApi(unittest.TestCase):
     def test01_resource_types(self):
         """ should allow listing resource_types """
         self.assertIn("image", api.resource_types()["resource_types"])
-
+    
+    test01_resource_types.tags = ['safe']
+    
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test02_resources(self):
         """ should allow listing resources """
@@ -204,4 +206,16 @@ class TestApi(unittest.TestCase):
     def test18_usage(self):
         """ should support usage API """
         self.assertIn("last_updated", api.usage())
+        
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test19_delete_derived(self):
+        """ should allow deleting all resource """
+        uploader.upload("tests/logo.png", public_id="api_test5", eager=[{"width": 101,"crop": "scale"}])
+        resource = api.resource("api_test5")
+        self.assertNotEqual(resource, None)
+        self.assertEqual(len(resource["derived"]), 1)
+        api.delete_all_resources(keep_original=True)
+        resource = api.resource("api_test5")
+        self.assertNotEqual(resource, None)
+        self.assertEqual(len(resource["derived"]), 0)
 
