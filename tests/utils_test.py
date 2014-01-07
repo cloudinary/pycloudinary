@@ -1,9 +1,10 @@
+import copy
 import cloudinary.utils
 import unittest
 
 class TestUtils(unittest.TestCase):
     def setUp(self):
-        cloudinary.config(cloud_name = "test123", secure_distribution = None, private_cdn = False)
+        cloudinary.config(cloud_name = "test123", api_secret = "b", secure_distribution = None, private_cdn = False)
 
     def test_cloud_name(self):
         """should use cloud_name from config"""
@@ -336,6 +337,33 @@ class TestUtils(unittest.TestCase):
         result, options = cloudinary.utils.cloudinary_url("test", shorten=True, type="private")
         self.assertEqual(options, {})
         self.assertEqual(result, "http://res.cloudinary.com/test123/image/private/test")
+    
+    def test_signed_url(self):
+        ooptions = {"version": 1234, "transformation": {"crop": "crop", "width": 10, "height": 20}, "sign_url": True}
+        options = copy.copy(ooptions)
+      	expected = "http://res.cloudinary.com/test123/image/upload/s--MaRXzoEC--/c_crop,h_20,w_10/v1234/image.jpg"
+      	actual, remaining = cloudinary.utils.cloudinary_url("image.jpg", **options)
+        self.assertEqual(remaining, {})
+      	self.assertEquals(expected, actual)
+
+      	expected = "http://res.cloudinary.com/test123/image/upload/s--ZlgFLQcO--/v1234/image.jpg"
+        options2 = copy.copy(ooptions)
+        options2.pop("transformation")
+      	actual, remaining = cloudinary.utils.cloudinary_url("image.jpg", **options2)
+        self.assertEqual(remaining, {})
+      	self.assertEquals(expected, actual)
+
+      	expected = "http://res.cloudinary.com/test123/image/upload/s--Ai4Znfl3--/c_crop,h_20,w_10/image.jpg"
+        options3 = copy.copy(ooptions)
+        options3.pop("version")
+      	actual, remaining = cloudinary.utils.cloudinary_url("image.jpg", **options3)
+        self.assertEqual(remaining, {})
+      	self.assertEquals(expected, actual)
+        
+      	expected = "http://res.cloudinary.com/test123/image/fetch/s--_GAUclyB--/v1234/http://google.com/path/to/image.png"
+      	actual, remaining = cloudinary.utils.cloudinary_url("http://google.com/path/to/image.png", type = "fetch", version = 1234, sign_url=  True)
+        self.assertEqual(remaining, {})
+      	self.assertEquals(expected, actual)
     
     def test_escape_public_id(self):
         """ should escape public_ids """

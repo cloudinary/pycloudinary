@@ -20,6 +20,15 @@ def build_array(arg):
     else:
         return [arg]
 
+def encode_double_array(arg):
+    return "|".join([",".join([str(i) for i in build_array(inner)]) for inner in build_array(arg)])
+
+def encode_dict(arg):
+    if isinstance(arg, dict):
+        return "|".join((k + "=" + v) for k, v in arg.iteritems())
+    else:
+        return arg
+
 def generate_transformation_string(**options):
     size = options.pop("size", None)
     if size:
@@ -116,6 +125,8 @@ def cloudinary_url(source, **options):
     secure = options.pop("secure", cloudinary.config().secure)
     private_cdn = options.pop("private_cdn", cloudinary.config().private_cdn)
     secure_distribution = options.pop("secure_distribution", cloudinary.config().secure_distribution)
+    sign_url = options.pop("sign_url", cloudinary.config().sign_url)
+    api_secret = options.pop("api_secret", cloudinary.config().api_secret)
 
     if (not source) or ((type == "upload" or type=="asset") and re.match(r'^https?:', source)):
         return (original_source, options)
@@ -152,7 +163,14 @@ def cloudinary_url(source, **options):
         type = ""          
     if source.find("/") >= 0 and not re.match(r'^https?:/', source) and  not re.match(r'^v[0-9]+', source) and  not version:
         version = "1"
-    components = [prefix, resource_type, type, transformation, "v" + str(version) if version else "", source]
+        
+    rest = "/".join(filter(lambda x: x, [transformation, "v" + str(version) if version else "", source]))
+    
+    if sign_url:
+        signature = base64.urlsafe_b64encode( hashlib.sha1(rest + api_secret).digest() )[0:8]
+        rest = "s--%(signature)s--/%(rest)s" % {"signature": signature, "rest": rest}
+    
+    components = [prefix, resource_type, type, rest]
     source = re.sub(r'([^:])/+', r'\1/', "/".join(components))
     return (source, options)
 

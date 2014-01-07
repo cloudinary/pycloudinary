@@ -54,7 +54,10 @@ def build_upload_params(**options):
               "proxy": options.get("proxy"),
               "folder": options.get("folder"),
               "overwrite": options.get("overwrite"),
-              "tags": options.get("tags") and ",".join(utils.build_array(options["tags"]))}
+              "tags": options.get("tags") and ",".join(utils.build_array(options["tags"])),
+              "allowed_formats": options.get("allowed_formats") and ",".join(utils.build_array(options["allowed_formats"])),
+              "face_coordinates": utils.encode_double_array(options.get("face_coordinates")),
+              "context": utils.encode_dict(options.get("context"))}
     params = dict( [ (k, __safe_value(v)) for (k,v) in params.items()] )
     return params
 
@@ -103,7 +106,8 @@ def explicit(public_id, **options):
         "callback": options.get("callback"),
         "headers": build_custom_headers(options.get("headers")),
         "eager": build_eager(options.get("eager")),
-        "tags": options.get("tags") and ",".join(utils.build_array(options["tags"]))}
+        "tags": options.get("tags") and ",".join(utils.build_array(options["tags"])),
+        "face_coordinates": utils.encode_double_array(options.get("face_coordinates"))}
      return call_api("explicit", params, **options)
 
 def generate_sprite(tag, **options):

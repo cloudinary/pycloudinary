@@ -25,8 +25,8 @@ class TestApi(unittest.TestCase):
             api.delete_transformation("api_test_transformation3")
         except:
             pass
-        uploader.upload("tests/logo.png", public_id="api_test", tags="api_test_tag", eager=[{"width": 100,"crop": "scale"}])
-        uploader.upload("tests/logo.png", public_id="api_test2", tags="api_test_tag", eager=[{"width": 100,"crop": "scale"}])
+        uploader.upload("tests/logo.png", public_id="api_test", tags="api_test_tag", context="key=value", eager=[{"width": 100,"crop": "scale"}])
+        uploader.upload("tests/logo.png", public_id="api_test2", tags="api_test_tag", context="key=value", eager=[{"width": 100,"crop": "scale"}])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test01_resource_types(self):
@@ -64,15 +64,30 @@ class TestApi(unittest.TestCase):
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test05_resources_prefix(self):
         """ should allow listing resources by prefix """
-        public_ids = [resource["public_id"] for resource in api.resources(type="upload", prefix="api_test")["resources"]]
+        resources = api.resources_by_ids(["api_test", "api_test2"], context = True, tags = True)["resources"]
+        public_ids = [resource["public_id"] for resource in resources]
         self.assertIn("api_test", public_ids)
         self.assertIn("api_test2", public_ids)
+        self.assertIn(["api_test_tag"], [resource["tags"] for resource in resources])
+        self.assertIn({"custom": {"key": "value"}}, [resource["context"] for resource in resources])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test06_resources_tag(self):
         """ should allow listing resources by tag """
-        resource = [resource for resource in api.resources_by_tag("api_test_tag")["resources"] if resource["public_id"] == "api_test"][0]
+        resources = api.resources_by_ids(["api_test", "api_test2"], context = True, tags = True)["resources"]
+        resource = [resource for resource in resources if resource["public_id"] == "api_test"][0]
         self.assertNotEqual(resource, None)
+        self.assertIn(["api_test_tag"], [resource["tags"] for resource in resources])
+        self.assertIn({"custom": {"key": "value"}}, [resource["context"] for resource in resources])
+        
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test06a_resources_by_ids(self):
+        """ should allow listing resources by public ids """
+        resources = api.resources_by_ids(["api_test", "api_test2"], context = True, tags = True)["resources"]
+        public_ids = [resource["public_id"] for resource in resources]
+        self.assertEqual(sorted(public_ids), ["api_test", "api_test2"])
+        self.assertIn(["api_test_tag"], [resource["tags"] for resource in resources])
+        self.assertIn({"custom": {"key": "value"}}, [resource["context"] for resource in resources])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test07_resource_metadata(self):
