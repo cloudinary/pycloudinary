@@ -142,6 +142,7 @@ def call_api(method, uri, params, **options):
     # Add authentication
     base64string = base64.encodestring('%s:%s' % (api_key, api_secret)).replace('\n', '')
     request.add_header("Authorization", "Basic %s" % base64string)
+    request.add_header("User-Agent", cloudinary.USER_AGENT)
     request.get_method = lambda: method.upper()
 
     try:

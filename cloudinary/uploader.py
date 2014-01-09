@@ -201,6 +201,7 @@ def call_api(action, params, **options):
         else:
             param_list.append(("file", file))
     request = urllib2.Request(api_url + "?" + urllib.urlencode(param_list), datagen, headers)
+    request.add_header("User-Agent", cloudinary.USER_AGENT)
 
     code = 200
     try:

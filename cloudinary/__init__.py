@@ -8,6 +8,9 @@ OLD_AKAMAI_SHARED_CDN = "cloudinary-a.akamaihd.net"
 AKAMAI_SHARED_CDN = "res.cloudinary.com"
 SHARED_CDN = AKAMAI_SHARED_CDN
 
+VERSION = "1.0.12"
+USER_AGENT = "cld-python-" + VERSION
+
 from cloudinary import utils
 
 def import_django_settings():
