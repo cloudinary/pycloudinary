@@ -223,6 +223,7 @@ class TestApi(unittest.TestCase):
         self.assertIn("last_updated", api.usage())
         
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    @unittest.skip("Skip delete all derived resources by default")
     def test19_delete_derived(self):
         """ should allow deleting all resource """
         uploader.upload("tests/logo.png", public_id="api_test5", eager=[{"width": 101,"crop": "scale"}])
