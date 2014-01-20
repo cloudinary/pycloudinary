@@ -45,12 +45,12 @@ def resources(**options):
     type = options.pop("type", None)
     uri = ["resources", resource_type]
     if type: uri.append(type)
-    return call_api("get", uri, only(options, "next_cursor", "max_results", "prefix", "tags", "context"), **options)
+    return call_api("get", uri, only(options, "next_cursor", "max_results", "prefix", "tags", "context", "direction"), **options)
 
 def resources_by_tag(tag, **options):
     resource_type = options.pop("resource_type", "image")
     uri = ["resources", resource_type, "tags", tag]
-    return call_api("get", uri, only(options, "next_cursor", "max_results", "tags", "context"), **options)
+    return call_api("get", uri, only(options, "next_cursor", "max_results", "tags", "context", "direction"), **options)
 
 def resources_by_ids(public_ids, **options):
     resource_type = options.pop("resource_type", "image")

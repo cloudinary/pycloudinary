@@ -5,3 +5,4 @@ dist
 venv
 cloudinary/static
 *.egg
+.DS_Store

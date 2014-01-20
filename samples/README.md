@@ -17,3 +17,12 @@ A simple web application that allows you to uploads photos, maintain a database 
 The source code and more details are available here:
 
 [https://github.com/cloudinary/cloudinary-django-sample](https://github.com/cloudinary/cloudinary-django-sample)
+
+
+## Basic Flask sample
+
+A simple Flask application that performs image upload and generates on the transformations of the uploaded image.
+
+The source code and more details are available here:
+
+[https://github.com/cloudinary/pycloudinary/tree/master/samples/basic_flask](https://github.com/cloudinary/pycloudinary/tree/master/samples/basic_flask)

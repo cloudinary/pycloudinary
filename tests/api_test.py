@@ -64,7 +64,7 @@ class TestApi(unittest.TestCase):
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test05_resources_prefix(self):
         """ should allow listing resources by prefix """
-        resources = api.resources_by_ids(["api_test", "api_test2"], context = True, tags = True)["resources"]
+        resources = api.resources(prefix = "api_test", context = True, tags = True, type = "upload")["resources"]
         public_ids = [resource["public_id"] for resource in resources]
         self.assertIn("api_test", public_ids)
         self.assertIn("api_test2", public_ids)
@@ -74,7 +74,7 @@ class TestApi(unittest.TestCase):
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test06_resources_tag(self):
         """ should allow listing resources by tag """
-        resources = api.resources_by_ids(["api_test", "api_test2"], context = True, tags = True)["resources"]
+        resources = api.resources_by_tag("api_test_tag", context = True, tags = True)["resources"]
         resource = [resource for resource in resources if resource["public_id"] == "api_test"][0]
         self.assertNotEqual(resource, None)
         self.assertIn(["api_test_tag"], [resource["tags"] for resource in resources])
@@ -88,6 +88,19 @@ class TestApi(unittest.TestCase):
         self.assertEqual(sorted(public_ids), ["api_test", "api_test2"])
         self.assertIn(["api_test_tag"], [resource["tags"] for resource in resources])
         self.assertIn({"custom": {"key": "value"}}, [resource["context"] for resource in resources])
+        
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test06b_resources_direction(self):
+        """ should allow listing resources in both directions """
+        asc_resources = api.resources(prefix = "api_test", direction = "asc", type = "upload")["resources"]
+        desc_resources = api.resources(prefix = "api_test", direction = "desc", type = "upload")["resources"]
+        asc_resources.reverse()
+        self.assertEquals(asc_resources, desc_resources)
+        asc_resources_alt = api.resources(prefix = "api_test", direction = 1, type = "upload")["resources"]
+        desc_resources_alt = api.resources(prefix = "api_test", direction = -1, type = "upload")["resources"]
+        asc_resources_alt.reverse()
+        self.assertEquals(asc_resources_alt, desc_resources_alt)
+        self.assertEquals(asc_resources_alt, asc_resources)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test07_resource_metadata(self):
