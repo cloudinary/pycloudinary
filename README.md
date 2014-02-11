@@ -254,3 +254,6 @@ Stay tuned for updates, tips and tutorials: [Blog](http://cloudinary.com/blog), 
 ## License #######################################################################
 
 Released under the MIT license. 
+
+Contains MIT licensed code from [poster](https://bitbucket.org/chrisatlee/poster).
+

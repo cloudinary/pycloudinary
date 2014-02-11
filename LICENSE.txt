@@ -1,2 +1,5 @@
 Released under the MIT license.
 
+Contains MIT licensed code from https://bitbucket.org/chrisatlee/poster
+
+

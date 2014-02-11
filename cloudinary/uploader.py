@@ -4,8 +4,8 @@ from cloudinary import utils
 from cloudinary.api import Error
 import json
 import re
-from poster.encode import multipart_encode
-from poster.streaminghttp import register_openers
+from cloudinary.poster.encode import multipart_encode
+from cloudinary.poster.streaminghttp import register_openers
 import urllib
 import urllib2
 

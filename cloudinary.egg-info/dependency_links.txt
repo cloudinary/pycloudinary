@@ -1,1 +1,1 @@
-https://bitbucket.org/cloudinary/poster/get/97d3c6fcb877.tar.gz#egg=poster-0.8.2
+

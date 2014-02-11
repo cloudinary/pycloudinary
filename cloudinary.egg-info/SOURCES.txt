@@ -13,8 +13,10 @@ cloudinary.egg-info/PKG-INFO
 cloudinary.egg-info/SOURCES.txt
 cloudinary.egg-info/dependency_links.txt
 cloudinary.egg-info/not-zip-safe
-cloudinary.egg-info/requires.txt
 cloudinary.egg-info/top_level.txt
+cloudinary/poster/__init__.py
+cloudinary/poster/encode.py
+cloudinary/poster/streaminghttp.py
 cloudinary/static/html/cloudinary_cors.html
 cloudinary/static/js/canvas-to-blob.min.js
 cloudinary/static/js/jquery.cloudinary.js
