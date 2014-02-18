@@ -37,7 +37,7 @@ class Config(object):
               private_cdn = os.environ.get("CLOUDINARY_PRIVATE_CDN") == 'true'
             )
         elif os.environ.get("CLOUDINARY_URL"):
-            uri = urlparse(os.environ.get("CLOUDINARY_URL"))
+            uri = urlparse(os.environ.get("CLOUDINARY_URL").replace("cloudinary://", "http://"))
             for k, v in parse_qs(uri.query).items():
                 self.__dict__[k] = v[0]
             self.update(

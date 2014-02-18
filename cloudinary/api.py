@@ -45,25 +45,41 @@ def resources(**options):
     type = options.pop("type", None)
     uri = ["resources", resource_type]
     if type: uri.append(type)
-    return call_api("get", uri, only(options, "next_cursor", "max_results", "prefix", "tags", "context", "direction"), **options)
+    return call_api("get", uri, only(options, "next_cursor", "max_results", "prefix", "tags", "context", "moderations", "direction"), **options)
 
 def resources_by_tag(tag, **options):
     resource_type = options.pop("resource_type", "image")
     uri = ["resources", resource_type, "tags", tag]
-    return call_api("get", uri, only(options, "next_cursor", "max_results", "tags", "context", "direction"), **options)
+    return call_api("get", uri, only(options, "next_cursor", "max_results", "tags", "context", "moderations", "direction"), **options)
+
+def resources_by_moderation(kind, status, **options):
+    resource_type = options.pop("resource_type", "image")
+    uri = ["resources", resource_type, "moderations", kind, status]
+    return call_api("get", uri, only(options, "next_cursor", "max_results", "tags", "context", "moderations", "direction"), **options)
 
 def resources_by_ids(public_ids, **options):
     resource_type = options.pop("resource_type", "image")
     type = options.pop("type", "upload")
     uri = ["resources", resource_type, type]
     params = [("public_ids[]", public_id) for public_id in public_ids]
-    return call_api("get", uri, params + only(options, "tags", "context").items(), **options)
+    return call_api("get", uri, params + only(options, "tags", "moderations", "context").items(), **options)
 
 def resource(public_id, **options):
     resource_type = options.pop("resource_type", "image")
     type = options.pop("type", "upload")
     uri = ["resources", resource_type, type, public_id]
     return call_api("get", uri, only(options, "exif", "faces", "colors", "image_metadata", "pages", "max_results"), **options)
+
+def update(public_id, **options):
+    resource_type = options.pop("resource_type", "image")
+    type = options.pop("type", "upload")
+    uri = ["resources", resource_type, type, public_id]
+    upload_options = only(options, "moderation_status", "raw_convert", "ocr", "categorization", "detection", "similarity_search")
+    if "tags" in options: upload_options["tags"] = ",".join(utils.build_array(options["tags"]))
+    if "face_coordinates" in options: upload_options["face_coordinates"] = utils.encode_double_array(options.get("face_coordinates")) 
+    if "context" in options: upload_options["context"] = utils.encode_dict(options.get("context")) 
+    if "auto_tagging" in options: upload_options["auto_tagging"] = float(options.get("auto_tagging"))
+    return call_api("post", uri, upload_options, **options)
 
 def delete_resources(public_ids, **options):
     resource_type = options.pop("resource_type", "image")

@@ -8,6 +8,8 @@ from cloudinary.poster.encode import multipart_encode
 from cloudinary.poster.streaminghttp import register_openers
 import urllib
 import urllib2
+import StringIO
+from os.path import basename
 
 _initialized = False
 
@@ -57,7 +59,14 @@ def build_upload_params(**options):
               "tags": options.get("tags") and ",".join(utils.build_array(options["tags"])),
               "allowed_formats": options.get("allowed_formats") and ",".join(utils.build_array(options["allowed_formats"])),
               "face_coordinates": utils.encode_double_array(options.get("face_coordinates")),
-              "context": utils.encode_dict(options.get("context"))}
+              "context": utils.encode_dict(options.get("context")),
+              "moderation": options.get("moderation"),
+              "raw_convert": options.get("raw_convert"),
+              "ocr": options.get("ocr"),
+              "categorization": options.get("categorization"),
+              "detection": options.get("detection"),
+              "similarity_search": options.get("similarity_search"),
+              "auto_tagging": options.get("auto_tagging") and float(options.get("auto_tagging"))}
     params = dict( [ (k, __safe_value(v)) for (k,v) in params.items()] )
     return params
 
@@ -78,6 +87,38 @@ def upload_image(file, **options):
     result = upload(file, **options)
     return cloudinary.CloudinaryImage(result["public_id"], version=str(result["version"]),
         format=result["format"], metadata=result)
+
+def upload_large(file, **options):
+    """ Upload large raw files. Note that public_id should include an extension for best results. """
+    with open(file, 'rb') as file_io:
+        upload = upload_id = None
+        index = 1
+        public_id = options.get("public_id")
+        chunk = file_io.read(20000000)
+        while (chunk):
+            chunk_io = StringIO.StringIO(chunk)
+            chunk_io.name = basename(file)
+            chunk = file_io.read(20000000)
+            upload = upload_large_part(chunk_io, public_id=public_id,
+                            upload_id=upload_id, part_number=index, final=chunk != "", **options)
+            upload_id = upload.get("upload_id")
+            public_id = upload.get("public_id")
+            index += 1
+        return upload
+
+def upload_large_part(file, **options):
+    """ Upload large raw files. Note that public_id should include an extension for best results. """
+    params = {
+        "timestamp": utils.now(),
+        "type": options.get("type"),
+        "backup": options.get("backup"),
+        "final": options.get("final"),
+        "part_number": options.get("part_number"),
+        "upload_id": options.get("upload_id"),
+        "public_id": options.get("public_id")
+    }
+    return call_api("upload_large", params, resource_type="raw", file=file, **options)
+
 
 def destroy(public_id, **options):
     params = {
