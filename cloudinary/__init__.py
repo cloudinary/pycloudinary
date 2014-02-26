@@ -8,7 +8,7 @@ OLD_AKAMAI_SHARED_CDN = "cloudinary-a.akamaihd.net"
 AKAMAI_SHARED_CDN = "res.cloudinary.com"
 SHARED_CDN = AKAMAI_SHARED_CDN
 
-VERSION = "1.0.14"
+VERSION = "1.0.15"
 USER_AGENT = "cld-python-" + VERSION
 
 from cloudinary import utils
