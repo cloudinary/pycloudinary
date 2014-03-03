@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
+import sys
 import os
-from urlparse import urlparse,parse_qs
 
 CF_SHARED_CDN = "d3jpl91pxevbkh.cloudfront.net"
 OLD_AKAMAI_SHARED_CDN = "cloudinary-a.akamaihd.net"
@@ -12,6 +12,7 @@ VERSION = "1.0.15"
 USER_AGENT = "cld-python-" + VERSION
 
 from cloudinary import utils
+from cloudinary.compat import urlparse, parse_qs
 
 def import_django_settings():
     try:
@@ -96,8 +97,8 @@ class CloudinaryImage(object):
     def __build_url(self, **options):
         combined_options = dict(format = self.format, version = self.version, type = self.type)
         combined_options.update(options)
-        return utils.cloudinary_url(self.public_id, **combined_options)        
-      
+        return utils.cloudinary_url(self.public_id, **combined_options)
+
     def build_url(self, **options):
         return self.__build_url(**options)[0]
 

@@ -2,6 +2,7 @@
 .project
 .pydevproject
 dist
+build
 venv
 cloudinary/static
 *.egg

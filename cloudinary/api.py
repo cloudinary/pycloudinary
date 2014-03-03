@@ -1,10 +1,13 @@
-import cloudinary
-from cloudinary import utils
-import urllib
-import urllib2
-import json
+# Copyright Cloudinary
 import base64
 import email.utils
+import json
+import sys
+import urllib
+
+import cloudinary
+from cloudinary import utils
+from cloudinary.compat import urllib2
 
 class Error(Exception): pass
 class NotFound(Error): pass
@@ -76,8 +79,8 @@ def update(public_id, **options):
     uri = ["resources", resource_type, type, public_id]
     upload_options = only(options, "moderation_status", "raw_convert", "ocr", "categorization", "detection", "similarity_search")
     if "tags" in options: upload_options["tags"] = ",".join(utils.build_array(options["tags"]))
-    if "face_coordinates" in options: upload_options["face_coordinates"] = utils.encode_double_array(options.get("face_coordinates")) 
-    if "context" in options: upload_options["context"] = utils.encode_dict(options.get("context")) 
+    if "face_coordinates" in options: upload_options["face_coordinates"] = utils.encode_double_array(options.get("face_coordinates"))
+    if "context" in options: upload_options["context"] = utils.encode_dict(options.get("context"))
     if "auto_tagging" in options: upload_options["auto_tagging"] = float(options.get("auto_tagging"))
     return call_api("post", uri, upload_options, **options)
 
@@ -134,7 +137,7 @@ def update_transformation(transformation, **options):
     uri = ["transformations", transformation_string(transformation)]
     updates = only(options, "allowed_for_strict")
     if "unsafe_update" in options:
-      updates["unsafe_update"] = transformation_string(options.get("unsafe_update")) 
+      updates["unsafe_update"] = transformation_string(options.get("unsafe_update"))
     if len(updates) == 0: raise Exception("No updates given")
 
     return call_api("put", uri, updates, **options)
@@ -164,17 +167,21 @@ def call_api(method, uri, params, **options):
     try:
         response = urllib2.urlopen(request)
         body = response.read()
-    except urllib2.HTTPError, e:
-        exception_class = EXCEPTION_CODES.get(e.code)
-        if exception_class:
-            response = e
-            body = response.read()
-        else:
-            raise GeneralError("Server returned unexpected status code - %d - %s" % (e.code, e.read()))
+    except Exception:
+        e = sys.exc_info()[1]
+        if isinstance(ex, urllib2.HTTPError):
+            exception_class = EXCEPTION_CODES.get(e.code)
+            if exception_class:
+                response = e
+                body = response.read()
+            else:
+                raise GeneralError("Server returned unexpected status code - %d - %s" % (e.code, e.read()))
+        raise
 
     try:
         result = json.loads(body)
-    except Exception, e:
+    except Exception:
+        e = sys.exc_info()[1]
         # Error is parsing json
         raise GeneralError("Error parsing server response (%d) - %s. Got - %s" % (response.code, body, e))
 

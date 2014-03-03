@@ -1,13 +1,14 @@
 # Copyright Cloudinary
-import zlib
+import base64
 import hashlib
 import re
 import struct
-import uuid
-import base64
-import cloudinary
 import time
-import urllib
+import uuid
+import zlib
+
+import cloudinary
+from cloudinary.compat import to_bytes, unquote, urlencode
 
 """ @deprecated: use cloudinary.SHARED_CDN """
 SHARED_CDN = cloudinary.SHARED_CDN
@@ -94,15 +95,16 @@ def sign_request(params, options):
     api_secret = options.get("api_secret", cloudinary.config().api_secret)
     if not api_secret: raise Exception("Must supply api_secret")
 
-    params = dict( [ (k,v) for (k,v) in params.items() if v] )    
+    params = dict( [ (k,v) for (k,v) in params.items() if v] )
     params["signature"] = api_sign_request(params, api_secret)
     params["api_key"] = api_key
-    
+
     return params
-  
+
 def api_sign_request(params_to_sign, api_secret):
     to_sign = "&".join(sorted([(k+"="+(",".join(v) if isinstance(v, list) else str(v))) for k, v in params_to_sign.items() if v]))
-    return hashlib.sha1(to_sign + api_secret).hexdigest()
+    value = to_bytes(to_sign + api_secret)
+    return hashlib.sha1(value).hexdigest()
 
 def cloudinary_url(source, **options):
     original_source = source
@@ -133,7 +135,7 @@ def cloudinary_url(source, **options):
     if re.match(r'^https?:', source):
         source = smart_escape(source)
     else:
-        source = smart_escape(urllib.unquote(source).decode('utf8') )
+        source = smart_escape(unquote(source).decode('utf8'))
         if format:
           source = source + "." + format
 
@@ -141,7 +143,7 @@ def cloudinary_url(source, **options):
         prefix = "/res" + cloud_name
     else:
         shared_domain =  not private_cdn
-        if secure:        
+        if secure:
             if not secure_distribution or secure_distribution == cloudinary.OLD_AKAMAI_SHARED_CDN:
               secure_distribution = cloud_name + "-res.cloudinary.com" if private_cdn else cloudinary.SHARED_CDN
             shared_domain = shared_domain or secure_distribution == cloudinary.SHARED_CDN
@@ -160,16 +162,16 @@ def cloudinary_url(source, **options):
 
     if shorten and resource_type == "image" and type == "upload":
         resource_type = "iu"
-        type = ""          
+        type = ""
     if source.find("/") >= 0 and not re.match(r'^https?:/', source) and  not re.match(r'^v[0-9]+', source) and  not version:
         version = "1"
-        
+
     rest = "/".join(filter(lambda x: x, [transformation, "v" + str(version) if version else "", source]))
-    
+
     if sign_url:
         signature = base64.urlsafe_b64encode( hashlib.sha1(rest + api_secret).digest() )[0:8]
         rest = "s--%(signature)s--/%(rest)s" % {"signature": signature, "rest": rest}
-    
+
     components = [prefix, resource_type, type, rest]
     source = re.sub(r'([^:])/+', r'\1/', "/".join(components))
     return (source, options)
@@ -196,24 +198,24 @@ def signed_preloaded_image(result):
 
 def now():
   return str(int(time.time()))
-  
+
 def private_download_url(public_id, format, **options):
   cloudinary_params = sign_request({
-    "timestamp": now(), 
-    "public_id": public_id, 
-    "format": format, 
+    "timestamp": now(),
+    "public_id": public_id,
+    "format": format,
     "type": options.get("type"),
     "attachment": options.get("attachment"),
     "expires_at": options.get("expires_at")
   }, options)
 
-  return cloudinary_api_url("download", **options) + "?" + urllib.urlencode(cloudinary_params)
+  return cloudinary_api_url("download", **options) + "?" + urlencode(cloudinary_params)
 
 def zip_download_url(tag, **options):
   cloudinary_params = sign_request({
-    "timestamp": now(), 
+    "timestamp": now(),
     "tag": tag,
-    "transformation": generate_transformation_string(**options)[0] 
+    "transformation": generate_transformation_string(**options)[0]
   }, options)
 
-  return cloudinary_api_url("download_tag.zip", **options) + "?" + urllib.urlencode(cloudinary_params)
+  return cloudinary_api_url("download_tag.zip", **options) + "?" + urlencode(cloudinary_params)

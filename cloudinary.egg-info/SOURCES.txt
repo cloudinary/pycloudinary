@@ -5,6 +5,7 @@ setup.cfg
 setup.py
 cloudinary/__init__.py
 cloudinary/api.py
+cloudinary/compat.py
 cloudinary/forms.py
 cloudinary/models.py
 cloudinary/uploader.py
@@ -17,16 +18,6 @@ cloudinary.egg-info/top_level.txt
 cloudinary/poster/__init__.py
 cloudinary/poster/encode.py
 cloudinary/poster/streaminghttp.py
-cloudinary/static/html/cloudinary_cors.html
-cloudinary/static/js/canvas-to-blob.min.js
-cloudinary/static/js/jquery.cloudinary.js
-cloudinary/static/js/jquery.fileupload-image.js
-cloudinary/static/js/jquery.fileupload-process.js
-cloudinary/static/js/jquery.fileupload-validate.js
-cloudinary/static/js/jquery.fileupload.js
-cloudinary/static/js/jquery.iframe-transport.js
-cloudinary/static/js/jquery.ui.widget.js
-cloudinary/static/js/load-image.min.js
 cloudinary/templates/cloudinary_direct_upload.html
 cloudinary/templates/cloudinary_includes.html
 cloudinary/templates/cloudinary_js_config.html
