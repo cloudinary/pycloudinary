@@ -27,7 +27,11 @@ def encode_double_array(arg):
 
 def encode_dict(arg):
     if isinstance(arg, dict):
-        return "|".join((k + "=" + v) for k, v in arg.iteritems())
+        if PY3:
+            items = arg.items()
+        else:
+            items = arg.iteritems()
+        return "|".join((k + "=" + v) for k, v in items)
     else:
         return arg
 

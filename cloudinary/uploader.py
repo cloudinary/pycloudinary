@@ -8,7 +8,7 @@ from os.path import basename
 import cloudinary
 from cloudinary import utils
 from cloudinary.api import Error
-from cloudinary.compat import (urllib2, StringIO, string_types, urlencode,
+from cloudinary.compat import (urllib2, BytesIO, string_types, urlencode,
     to_bytes, to_string)
 from cloudinary.poster.encode import multipart_encode
 from cloudinary.poster.streaminghttp import register_openers
@@ -98,7 +98,7 @@ def upload_large(file, **options):
         public_id = options.get("public_id")
         chunk = file_io.read(20000000)
         while (chunk):
-            chunk_io = StringIO.StringIO(chunk)
+            chunk_io = BytesIO(chunk)
             chunk_io.name = basename(file)
             chunk = file_io.read(20000000)
             upload = upload_large_part(chunk_io, public_id=public_id,
