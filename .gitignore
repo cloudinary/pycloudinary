@@ -6,4 +6,5 @@ build
 venv
 cloudinary/static
 *.egg
+*.swp
 .DS_Store
