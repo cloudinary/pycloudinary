@@ -1,13 +1,15 @@
 # Copyright Cloudinary
-import zlib
+import base64
 import hashlib
 import re
 import struct
-import uuid
-import base64
-import cloudinary
 import time
-import urllib
+import uuid
+import zlib
+
+import cloudinary
+from cloudinary.compat import (PY3, to_bytes, to_bytearray, to_string,
+    unquote, urlencode)
 
 """ @deprecated: use cloudinary.SHARED_CDN """
 SHARED_CDN = cloudinary.SHARED_CDN
@@ -25,7 +27,11 @@ def encode_double_array(arg):
 
 def encode_dict(arg):
     if isinstance(arg, dict):
-        return "|".join((k + "=" + v) for k, v in arg.iteritems())
+        if PY3:
+            items = arg.items()
+        else:
+            items = arg.iteritems()
+        return "|".join((k + "=" + v) for k, v in items)
     else:
         return arg
 
@@ -56,7 +62,7 @@ def generate_transformation_string(**options):
     base_transformations = build_array(options.pop("transformation", None))
     if any(isinstance(bs, dict) for bs in base_transformations):
         recurse = lambda bs: generate_transformation_string(**bs)[0] if isinstance(bs, dict) else generate_transformation_string(transformation=bs)[0]
-        base_transformations = map(recurse, base_transformations)
+        base_transformations = list(map(recurse, base_transformations))
         named_transformation = None
     else:
         named_transformation = ".".join(base_transformations)
@@ -66,7 +72,7 @@ def generate_transformation_string(**options):
     if isinstance(effect, list):
         effect = ":".join([str(x) for x in effect])
     elif isinstance(effect, dict):
-        effect = ":".join([str(x) for x in effect.items()[0]])
+        effect = ":".join([str(x) for x in list(effect.items())[0]])
 
     border = options.pop("border", None)
     if isinstance(border, dict):
@@ -85,7 +91,8 @@ def generate_transformation_string(**options):
     transformation = ",".join(transformations)
     if "raw_transformation" in options:
         transformation = transformation + "," + options.pop("raw_transformation")
-    url = "/".join([trans for trans in base_transformations + [transformation] if trans])
+    all_transformations = base_transformations + [transformation]
+    url = "/".join([trans for trans in all_transformations if trans])
     return (url, options)
 
 def sign_request(params, options):
@@ -94,15 +101,16 @@ def sign_request(params, options):
     api_secret = options.get("api_secret", cloudinary.config().api_secret)
     if not api_secret: raise Exception("Must supply api_secret")
 
-    params = dict( [ (k,v) for (k,v) in params.items() if v] )    
+    params = dict( [ (k,v) for (k,v) in params.items() if v] )
     params["signature"] = api_sign_request(params, api_secret)
     params["api_key"] = api_key
-    
+
     return params
-  
+
 def api_sign_request(params_to_sign, api_secret):
     to_sign = "&".join(sorted([(k+"="+(",".join(v) if isinstance(v, list) else str(v))) for k, v in params_to_sign.items() if v]))
-    return hashlib.sha1(to_sign + api_secret).hexdigest()
+    value = to_bytes(to_sign + api_secret)
+    return hashlib.sha1(value).hexdigest()
 
 def cloudinary_url(source, **options):
     original_source = source
@@ -133,21 +141,21 @@ def cloudinary_url(source, **options):
     if re.match(r'^https?:', source):
         source = smart_escape(source)
     else:
-        source = smart_escape(urllib.unquote(source).decode('utf8') )
+        source = smart_escape(unquote(source))
         if format:
           source = source + "." + format
 
     if cloud_name.startswith("/"):
         prefix = "/res" + cloud_name
     else:
-        shared_domain =  not private_cdn
-        if secure:        
+        shared_domain = not private_cdn
+        if secure:
             if not secure_distribution or secure_distribution == cloudinary.OLD_AKAMAI_SHARED_CDN:
               secure_distribution = cloud_name + "-res.cloudinary.com" if private_cdn else cloudinary.SHARED_CDN
             shared_domain = shared_domain or secure_distribution == cloudinary.SHARED_CDN
             prefix = "https://" + secure_distribution
         else:
-            subdomain = "a" + str((zlib.crc32(source) & 0xffffffff)%5 + 1) + "." if cdn_subdomain else ""
+            subdomain = "a" + str((zlib.crc32(to_bytearray(source)) & 0xffffffff)%5 + 1) + "." if cdn_subdomain else ""
             if cname:
                 host = cname
             elif private_cdn:
@@ -160,18 +168,22 @@ def cloudinary_url(source, **options):
 
     if shorten and resource_type == "image" and type == "upload":
         resource_type = "iu"
-        type = ""          
-    if source.find("/") >= 0 and not re.match(r'^https?:/', source) and  not re.match(r'^v[0-9]+', source) and  not version:
+        type = ""
+
+    if source.find("/") >= 0 and not re.match(r'^https?:/', source) and not re.match(r'^v[0-9]+', source) and not version:
         version = "1"
-        
+
     rest = "/".join(filter(lambda x: x, [transformation, "v" + str(version) if version else "", source]))
-    
+
     if sign_url:
-        signature = base64.urlsafe_b64encode( hashlib.sha1(rest + api_secret).digest() )[0:8]
+        value = to_bytes(rest + api_secret)
+        signature = base64.urlsafe_b64encode(hashlib.sha1(value).digest())[0:8]
+        signature = to_string(signature)
         rest = "s--%(signature)s--/%(rest)s" % {"signature": signature, "rest": rest}
-    
+
     components = [prefix, resource_type, type, rest]
     source = re.sub(r'([^:])/+', r'\1/', "/".join(components))
+
     return (source, options)
 
 def cloudinary_api_url(action = 'upload', **options):
@@ -183,8 +195,10 @@ def cloudinary_api_url(action = 'upload', **options):
 
 # Based on ruby's CGI::unescape. In addition does not escape / :
 def smart_escape(string):
-    pack = lambda m: '%' + "%".join(["%02X" % x for x in struct.unpack('B'*len(m.group(1)), m.group(1))]).upper()
-    return re.sub(r"([^a-zA-Z0-9_.\-\/:]+)", pack, string)
+    string = to_bytearray(string)
+    pack = lambda m: to_bytes('%' + "%".join(["%02X" % x for x in struct.unpack('B'*len(m.group(1)), m.group(1))]).upper())
+    pattern = to_bytes(r'([^a-zA-Z0-9_.\-\/:]+)')
+    return to_string(re.sub(pattern, pack, string))
 
 def random_public_id():
     return base64.urlsafe_b64encode(hashlib.sha1(uuid.uuid4()).digest())[0:16]
@@ -196,24 +210,24 @@ def signed_preloaded_image(result):
 
 def now():
   return str(int(time.time()))
-  
+
 def private_download_url(public_id, format, **options):
   cloudinary_params = sign_request({
-    "timestamp": now(), 
-    "public_id": public_id, 
-    "format": format, 
+    "timestamp": now(),
+    "public_id": public_id,
+    "format": format,
     "type": options.get("type"),
     "attachment": options.get("attachment"),
     "expires_at": options.get("expires_at")
   }, options)
 
-  return cloudinary_api_url("download", **options) + "?" + urllib.urlencode(cloudinary_params)
+  return cloudinary_api_url("download", **options) + "?" + urlencode(cloudinary_params)
 
 def zip_download_url(tag, **options):
   cloudinary_params = sign_request({
-    "timestamp": now(), 
+    "timestamp": now(),
     "tag": tag,
-    "transformation": generate_transformation_string(**options)[0] 
+    "transformation": generate_transformation_string(**options)[0]
   }, options)
 
-  return cloudinary_api_url("download_tag.zip", **options) + "?" + urllib.urlencode(cloudinary_params)
+  return cloudinary_api_url("download_tag.zip", **options) + "?" + urlencode(cloudinary_params)

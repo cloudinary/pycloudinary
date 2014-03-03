@@ -60,7 +60,7 @@ class TestUploader(unittest.TestCase):
         self.assertRegexpMatches(result["public_id"], 'logo_[a-z0-9]{6}')
         result = uploader.upload("tests/logo.png", use_filename = True, unique_filename = False)
         self.assertEqual(result["public_id"], 'logo')
-    
+
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_explicit(self):
         """should support explicit """
@@ -99,24 +99,24 @@ class TestUploader(unittest.TestCase):
         self.assertEqual(api.resource(result["public_id"])["tags"], ["tag2"])
         uploader.replace_tag("tag3", result["public_id"])
         self.assertEqual(api.resource(result["public_id"])["tags"], ["tag3"])
-    
+
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_allowed_formats(self):
-      	""" should allow whitelisted formats if allowed_formats """
-      	result = uploader.upload("tests/logo.png", allowed_formats = ['png'])
-      	self.assertEquals(result["format"], "png");
+        """ should allow whitelisted formats if allowed_formats """
+        result = uploader.upload("tests/logo.png", allowed_formats = ['png'])
+        self.assertEquals(result["format"], "png");
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_allowed_formats_with_illegal_format(self):
         """should prevent non whitelisted formats from being uploaded if allowed_formats is specified"""
         self.assertRaises(api.Error, uploader.upload, "tests/logo.png", allowed_formats = ['jpg'])
-    
+
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_allowed_formats_with_format(self):
-      	"""should allow non whitelisted formats if type is specified and convert to that type"""
+        """should allow non whitelisted formats if type is specified and convert to that type"""
         result = uploader.upload("tests/logo.png", allowed_formats = ['jpg'], format= 'jpg')
-      	self.assertEquals("jpg", result["format"])
-    
+        self.assertEquals("jpg", result["format"])
+
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_face_coordinates(self):
         """should allow sending face coordinates"""
@@ -128,63 +128,63 @@ class TestUploader(unittest.TestCase):
         uploader.explicit(result["public_id"], face_coordinates = different_coordinates, faces = True, type = "upload")
         info = api.resource(result["public_id"], faces = True)
         self.assertEquals(different_coordinates, info["faces"])
-    
+
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_context(self):
-      	"""should allow sending context"""
-      	context = {"caption": "some caption", "alt": "alternative"}
-      	result = uploader.upload("tests/logo.png", context = context)
-      	info = api.resource(result["public_id"], context = True)
-      	self.assertEquals({"custom": context}, info["context"])
+        """should allow sending context"""
+        context = {"caption": "some caption", "alt": "alternative"}
+        result = uploader.upload("tests/logo.png", context = context)
+        info = api.resource(result["public_id"], context = True)
+        self.assertEquals({"custom": context}, info["context"])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_manual_moderation(self):
         """ should support setting manual moderation status """
         resource = uploader.upload("tests/logo.png", moderation="manual")
-  
+
         self.assertEqual(resource["moderation"][0]["status"], "pending")
         self.assertEqual(resource["moderation"][0]["kind"], "manual")
-    
+
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_ocr_info(self):
         """ should support requesting ocr info """
-        with self.assertRaisesRegexp(api.Error, 'Illegal value'): 
+        with self.assertRaisesRegexp(api.Error, 'Illegal value'):
             uploader.upload("tests/logo.png", ocr="illegal")
-    
+
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_raw_conversion(self):
-        """ should support requesting raw_convert """ 
-        with self.assertRaisesRegexp(api.Error, 'Illegal value'): 
+        """ should support requesting raw_convert """
+        with self.assertRaisesRegexp(api.Error, 'Illegal value'):
             uploader.upload("tests/docx.docx", raw_convert="illegal", resource_type="raw")
-  
+
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_categorization(self):
         """ should support requesting categorization """
-        with self.assertRaisesRegexp(api.Error, 'Illegal value'): 
+        with self.assertRaisesRegexp(api.Error, 'Illegal value'):
             uploader.upload("tests/logo.png", categorization="illegal")
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_detection(self):
         """ should support requesting detection """
-        with self.assertRaisesRegexp(api.Error, 'Illegal value'): 
+        with self.assertRaisesRegexp(api.Error, 'Illegal value'):
             uploader.upload("tests/logo.png", detection="illegal")
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_similarity_search(self):
         """ should support requesting similarity_search """
-        with self.assertRaisesRegexp(api.Error, 'Illegal value'): 
+        with self.assertRaisesRegexp(api.Error, 'Illegal value'):
             uploader.upload("tests/logo.png", similarity_search="illegal")
-  
+
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_auto_tagging(self):
         """ should support requesting auto_tagging """
-        with self.assertRaisesRegexp(api.Error, 'Must use'): 
+        with self.assertRaisesRegexp(api.Error, 'Must use'):
             uploader.upload("tests/logo.png", auto_tagging=0.5)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_large(self):
-        """ should uploading large raw files """ 
-        uploader.upload_large("tests/docx.docx")  
+        """ should uploading large raw files """
+        uploader.upload_large("tests/docx.docx")
 
 
 if __name__ == '__main__':

@@ -1,6 +1,7 @@
+import unittest
+
 import cloudinary
 from cloudinary import uploader, utils, api
-import unittest
 
 class TestApi(unittest.TestCase):
     initialized = False
@@ -32,9 +33,9 @@ class TestApi(unittest.TestCase):
     def test01_resource_types(self):
         """ should allow listing resource_types """
         self.assertIn("image", api.resource_types()["resource_types"])
-    
+
     test01_resource_types.tags = ['safe']
-    
+
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test02_resources(self):
         """ should allow listing resources """
@@ -79,7 +80,7 @@ class TestApi(unittest.TestCase):
         self.assertNotEqual(resource, None)
         self.assertIn(["api_test_tag"], [resource["tags"] for resource in resources])
         self.assertIn({"custom": {"key": "value"}}, [resource["context"] for resource in resources])
-        
+
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test06a_resources_by_ids(self):
         """ should allow listing resources by public ids """
@@ -88,7 +89,7 @@ class TestApi(unittest.TestCase):
         self.assertEqual(sorted(public_ids), ["api_test", "api_test2"])
         self.assertIn(["api_test_tag"], [resource["tags"] for resource in resources])
         self.assertIn({"custom": {"key": "value"}}, [resource["context"] for resource in resources])
-        
+
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test06b_resources_direction(self):
         """ should allow listing resources in both directions """
@@ -234,7 +235,7 @@ class TestApi(unittest.TestCase):
     def test18_usage(self):
         """ should support usage API """
         self.assertIn("last_updated", api.usage())
-        
+
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     @unittest.skip("Skip delete all derived resources by default")
     def test19_delete_derived(self):
@@ -252,48 +253,51 @@ class TestApi(unittest.TestCase):
     def test20_manual_moderation(self):
         """ should support setting manual moderation status """
         resource = uploader.upload("tests/logo.png", moderation="manual")
-  
+
         self.assertEqual(resource["moderation"][0]["status"], "pending")
         self.assertEqual(resource["moderation"][0]["kind"], "manual")
-    
+
         api_result = api.update(resource["public_id"], moderation_status="approved")
         self.assertEqual(api_result["moderation"][0]["status"], "approved")
         self.assertEqual(api_result["moderation"][0]["kind"], "manual")
-    
+
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test21_ocr_info(self):
         """ should support requesting ocr info """
-        with self.assertRaisesRegexp(api.BadRequest, 'Illegal value'): 
+        with self.assertRaisesRegexp(api.BadRequest, 'Illegal value'):
             api.update("api_test", ocr="illegal")
-    
+
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test22_raw_conversion(self):
-        """ should support requesting raw_convert """ 
+        """ should support requesting raw_convert """
         resource = uploader.upload("tests/docx.docx", resource_type="raw")
-        with self.assertRaisesRegexp(api.BadRequest, 'Illegal value'): 
+        with self.assertRaisesRegexp(api.BadRequest, 'Illegal value'):
             api.update(resource["public_id"], raw_convert="illegal", resource_type="raw")
-  
+
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test23_categorization(self):
         """ should support requesting categorization """
-        with self.assertRaisesRegexp(api.BadRequest, 'Illegal value'): 
+        with self.assertRaisesRegexp(api.BadRequest, 'Illegal value'):
             api.update("api_test", categorization="illegal")
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test24_detection(self):
         """ should support requesting detection """
-        with self.assertRaisesRegexp(api.BadRequest, 'Illegal value'): 
+        with self.assertRaisesRegexp(api.BadRequest, 'Illegal value'):
             api.update("api_test", detection="illegal")
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test25_similarity_search(self):
         """ should support requesting similarity_search """
-        with self.assertRaisesRegexp(api.BadRequest, 'Illegal value'): 
+        with self.assertRaisesRegexp(api.BadRequest, 'Illegal value'):
             api.update("api_test", similarity_search="illegal")
-  
+
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test26_auto_tagging(self):
         """ should support requesting auto_tagging """
-        with self.assertRaisesRegexp(api.BadRequest, 'Must use'): 
+        with self.assertRaisesRegexp(api.BadRequest, 'Must use'):
             api.update("api_test", auto_tagging=0.5)
-  
+
+
+if __name__ == '__main__':
+    unittest.main()

@@ -2,7 +2,9 @@
 .project
 .pydevproject
 dist
+build
 venv
 cloudinary/static
 *.egg
+*.swp
 .DS_Store

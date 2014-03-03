@@ -1,10 +1,12 @@
-import cloudinary
-from cloudinary import utils
-import urllib
-import urllib2
-import json
+# Copyright Cloudinary
 import base64
 import email.utils
+import json
+import sys
+
+import cloudinary
+from cloudinary import utils
+from cloudinary.compat import urllib2, urlencode, to_string, to_bytes
 
 class Error(Exception): pass
 class NotFound(Error): pass
@@ -62,7 +64,8 @@ def resources_by_ids(public_ids, **options):
     type = options.pop("type", "upload")
     uri = ["resources", resource_type, type]
     params = [("public_ids[]", public_id) for public_id in public_ids]
-    return call_api("get", uri, params + only(options, "tags", "moderations", "context").items(), **options)
+    optional = list(only(options, 'tags', 'moderations', 'context').items())
+    return call_api("get", uri, params + optional, **options)
 
 def resource(public_id, **options):
     resource_type = options.pop("resource_type", "image")
@@ -76,8 +79,8 @@ def update(public_id, **options):
     uri = ["resources", resource_type, type, public_id]
     upload_options = only(options, "moderation_status", "raw_convert", "ocr", "categorization", "detection", "similarity_search")
     if "tags" in options: upload_options["tags"] = ",".join(utils.build_array(options["tags"]))
-    if "face_coordinates" in options: upload_options["face_coordinates"] = utils.encode_double_array(options.get("face_coordinates")) 
-    if "context" in options: upload_options["context"] = utils.encode_dict(options.get("context")) 
+    if "face_coordinates" in options: upload_options["face_coordinates"] = utils.encode_double_array(options.get("face_coordinates"))
+    if "context" in options: upload_options["context"] = utils.encode_dict(options.get("context"))
     if "auto_tagging" in options: upload_options["auto_tagging"] = float(options.get("auto_tagging"))
     return call_api("post", uri, upload_options, **options)
 
@@ -86,7 +89,8 @@ def delete_resources(public_ids, **options):
     type = options.pop("type", "upload")
     uri = ["resources", resource_type, type]
     params = [("public_ids[]", public_id) for public_id in public_ids]
-    return call_api("delete", uri, params + only(options, "keep_original", "next_cursor").items(), **options)
+    optional = list(only(options, 'keep_original', 'next_cursor').items())
+    return call_api("delete", uri, params + optional, **options)
 
 def delete_resources_by_prefix(prefix, **options):
     resource_type = options.pop("resource_type", "image")
@@ -134,7 +138,7 @@ def update_transformation(transformation, **options):
     uri = ["transformations", transformation_string(transformation)]
     updates = only(options, "allowed_for_strict")
     if "unsafe_update" in options:
-      updates["unsafe_update"] = transformation_string(options.get("unsafe_update")) 
+      updates["unsafe_update"] = transformation_string(options.get("unsafe_update"))
     if len(updates) == 0: raise Exception("No updates given")
 
     return call_api("put", uri, updates, **options)
@@ -152,11 +156,12 @@ def call_api(method, uri, params, **options):
     api_secret = options.pop("api_secret", cloudinary.config().api_secret)
     if not cloud_name: raise Exception("Must supply api_secret")
 
-    data = urllib.urlencode(params)
+    data = to_bytes(urlencode(params))
     api_url = "/".join([prefix, "v1_1", cloud_name] + uri)
     request = urllib2.Request(api_url, data)
     # Add authentication
-    base64string = base64.encodestring('%s:%s' % (api_key, api_secret)).replace('\n', '')
+    byte_value = to_bytes('%s:%s' % (api_key, api_secret))
+    base64string = to_string(base64.encodestring(byte_value)).replace('\n', '')
     request.add_header("Authorization", "Basic %s" % base64string)
     request.add_header("User-Agent", cloudinary.USER_AGENT)
     request.get_method = lambda: method.upper()
@@ -164,7 +169,8 @@ def call_api(method, uri, params, **options):
     try:
         response = urllib2.urlopen(request)
         body = response.read()
-    except urllib2.HTTPError, e:
+    except urllib2.HTTPError:
+        e = sys.exc_info()[1]
         exception_class = EXCEPTION_CODES.get(e.code)
         if exception_class:
             response = e
@@ -173,8 +179,10 @@ def call_api(method, uri, params, **options):
             raise GeneralError("Server returned unexpected status code - %d - %s" % (e.code, e.read()))
 
     try:
+        body = to_string(body)
         result = json.loads(body)
-    except Exception, e:
+    except Exception:
+        e = sys.exc_info()[1]
         # Error is parsing json
         raise GeneralError("Error parsing server response (%d) - %s. Got - %s" % (response.code, body, e))
 
