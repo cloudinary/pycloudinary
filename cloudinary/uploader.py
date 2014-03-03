@@ -233,7 +233,7 @@ def call_api(action, params, **options):
         # Register the streaming http handlers with urllib2
         register_openers()
 
-    datagen = ""
+    datagen = to_bytes('')
     headers = {}
     if "file" in options:
         file = options["file"]
@@ -243,8 +243,8 @@ def call_api(action, params, **options):
             datagen, headers = multipart_encode({'file': open(file, "rb")})
         else:
             param_list.append(("file", file))
-    byte_data = to_bytes(datagen)
-    request = urllib2.Request(api_url + "?" + urlencode(param_list), byte_data, headers)
+    url = api_url + '?' + urlencode(param_list)
+    request = urllib2.Request(url, datagen, headers)
     request.add_header("User-Agent", cloudinary.USER_AGENT)
 
     code = 200
