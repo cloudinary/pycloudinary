@@ -28,6 +28,8 @@ except ImportError:
         return sha.new(str(bits)).hexdigest()
 
 import urllib, re, os, mimetypes
+from cloudinary.compat import to_bytes
+
 try:
     from email.header import Header
 except ImportError:
@@ -39,19 +41,14 @@ def encode_and_quote(data):
     otherwise return urllib.quote_plus(data)"""
     if data is None:
         return None
-
-    if isinstance(data, unicode):
-        data = data.encode("utf-8")
-    return urllib.quote_plus(data)
+    return urllib.quote_plus(to_bytes(data))
 
 def _strify(s):
     """If s is a unicode string, encode it to UTF-8 and return the results,
     otherwise return str(s), or None if s is None"""
     if s is None:
         return None
-    if isinstance(s, unicode):
-        return s.encode("utf-8")
-    return str(s)
+    return to_bytes(s)
 
 class MultipartParam(object):
     """Represents a single parameter in a multipart/form-data request

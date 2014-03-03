@@ -167,16 +167,14 @@ def call_api(method, uri, params, **options):
     try:
         response = urllib2.urlopen(request)
         body = response.read()
-    except Exception:
+    except urllib2.HTTPError:
         e = sys.exc_info()[1]
-        if isinstance(ex, urllib2.HTTPError):
-            exception_class = EXCEPTION_CODES.get(e.code)
-            if exception_class:
-                response = e
-                body = response.read()
-            else:
-                raise GeneralError("Server returned unexpected status code - %d - %s" % (e.code, e.read()))
-        raise
+        exception_class = EXCEPTION_CODES.get(e.code)
+        if exception_class:
+            response = e
+            body = response.read()
+        else:
+            raise GeneralError("Server returned unexpected status code - %d - %s" % (e.code, e.read()))
 
     try:
         result = json.loads(body)

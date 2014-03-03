@@ -10,6 +10,7 @@ if PY3:
     from io import StringIO
     from urllib.parse import urlencode, unquote, urlparse, parse_qs
     to_bytes = lambda s: s.encode('utf8')
+    to_string = lambda b: b.decode('utf8')
     string_types = (str)
 else:
     import httplib
@@ -19,4 +20,5 @@ else:
     from urllib import urlencode, unquote
     from urlparse import urlparse, parse_qs
     to_bytes = str
+    to_string = str
     string_types = (str, unicode)

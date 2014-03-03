@@ -9,7 +9,7 @@ import cloudinary
 from cloudinary import utils
 from cloudinary.api import Error
 from cloudinary.compat import (urllib2, StringIO, string_types, urlencode,
-    to_bytes)
+    to_bytes, to_string)
 from cloudinary.poster.encode import multipart_encode
 from cloudinary.poster.streaminghttp import register_openers
 
@@ -243,24 +243,22 @@ def call_api(action, params, **options):
             datagen, headers = multipart_encode({'file': open(file, "rb")})
         else:
             param_list.append(("file", file))
-    request = urllib2.Request(api_url + "?" + urlencode(param_list), datagen, headers)
+    byte_data = to_bytes(datagen)
+    request = urllib2.Request(api_url + "?" + urlencode(param_list), byte_data, headers)
     request.add_header("User-Agent", cloudinary.USER_AGENT)
 
     code = 200
     try:
         response = urllib2.urlopen(request).read()
-    except Exception:
+    except urllib2.HTTPError:
         e = sys.exc_info()[1]
-        if isinstance(e, urllib2.HTTPError):
-            if not e.code in [200, 400, 500]:
-                raise Error("Server returned unexpected status code - %d - %s" % (e.code, e.read()))
-            code = e.code
-            response = e.read()
-        else:
-            raise
+        if not e.code in [200, 400, 500]:
+            raise Error("Server returned unexpected status code - %d - %s" % (e.code, e.read()))
+        code = e.code
+        response = e.read()
 
     try:
-        result = json.loads(response)
+        result = json.loads(to_string(response))
     except Exception:
         e = sys.exc_info()[1]
         # Error is parsing json
