@@ -1,16 +1,13 @@
 # Copyright Cloudinary
+import json, re, sys
+from os.path import basename
+import urllib
 import cloudinary
 from cloudinary import utils
 from cloudinary.api import Error
-import json
-import re
 from cloudinary.poster.encode import multipart_encode
 from cloudinary.poster.streaminghttp import register_openers
-import urllib
-import urllib2
-import StringIO
-from os.path import basename
-
+from cloudinary.compat import (urllib2, BytesIO, string_types, urlencode, to_bytes, to_string)
 _initialized = False
 
 def build_eager(transformations):
@@ -72,12 +69,12 @@ def build_upload_params(**options):
 
 def __safe_value(v):
     if isinstance(v, (bool)):
-	if v:
-	    return "1"
-	else: 
-	    return "0"
+        if v:
+            return "1"
+        else: 
+            return "0"
     else:
-	return v
+        return v
 
 def upload(file, **options):
     params = build_upload_params(**options)
@@ -96,7 +93,7 @@ def upload_large(file, **options):
         public_id = options.get("public_id")
         chunk = file_io.read(20000000)
         while (chunk):
-            chunk_io = StringIO.StringIO(chunk)
+            chunk_io = BytesIO(chunk)
             chunk_io.name = basename(file)
             chunk = file_io.read(20000000)
             upload = upload_large_part(chunk_io, public_id=public_id,
@@ -212,59 +209,65 @@ def text(text, **options):
     return call_api("text", params, **options)
 
 def call_api(action, params, **options):
-    return_error = options.get("return_error")
-    params = utils.sign_request(params, options)
-
-    param_list = []
-    for k, v in params.items():
-        if isinstance(v, list):          
-            for vv in v:
-              param_list.append((k+"[]", vv))
-        elif v:
-            param_list.append((k, v))            
-
-    api_url = utils.cloudinary_api_url(action, **options)
-
-    global _initialized
-    if not _initialized:
-        _initialized = True
-        # Register the streaming http handlers with urllib2
-        register_openers()
-
-    datagen = ""
-    headers = {}
-    if "file" in options:
-        file = options["file"]
-        if not isinstance(file, basestring):
-            datagen, headers = multipart_encode({'file': file})
-        elif not re.match(r'^https?:|^s3:|^data:[^;]*;base64,([a-zA-Z0-9\/+\n=]+)$', file):
-            datagen, headers = multipart_encode({'file': open(file, "rb")})
-        else:
-            param_list.append(("file", file))
-    request = urllib2.Request(api_url + "?" + urllib.urlencode(param_list), datagen, headers)
-    request.add_header("User-Agent", cloudinary.USER_AGENT)
-
-    code = 200
     try:
-        response = urllib2.urlopen(request).read()
-    except urllib2.HTTPError, e:
-        if not e.code in [200, 400, 500]:
-            raise Error("Server returned unexpected status code - %d - %s" % (e.code, e.read()))
-        code = e.code
-        response = e.read()
-
-    try:
-        result = json.loads(response)
-    except Exception, e:
-        # Error is parsing json
-        raise Error("Error parsing server response (%d) - %s. Got - %s", code, response, e)
-
-    if "error" in result:
-        if return_error:
-            result["error"]["http_code"] = response.code
-        else:
-            raise Error(result["error"]["message"])
-
-    return result
-
-
+        file_io = None
+        return_error = options.get("return_error")
+        params = utils.sign_request(params, options)
+    
+        param_list = []
+        for k, v in params.items():
+            if isinstance(v, list):          
+                for vv in v:
+                  param_list.append((k+"[]", vv))
+            elif v:
+                param_list.append((k, v))            
+    
+        api_url = utils.cloudinary_api_url(action, **options)
+    
+        global _initialized
+        if not _initialized:
+            _initialized = True
+            # Register the streaming http handlers with urllib2
+            register_openers()
+    
+        datagen = to_bytes("")
+        headers = {}
+        if "file" in options:
+            file = options["file"]
+            if not isinstance(file, string_types):
+                datagen, headers = multipart_encode({'file': file})
+            elif not re.match(r'^https?:|^s3:|^data:[^;]*;base64,([a-zA-Z0-9\/+\n=]+)$', file):
+                file_io = open(file, "rb")
+                datagen, headers = multipart_encode({'file': file_io})
+            else:
+                param_list.append(("file", file))
+        request = urllib2.Request(api_url + "?" + urlencode(param_list), datagen, headers)
+        request.add_header("User-Agent", cloudinary.USER_AGENT)
+    
+        code = 200
+        try:
+            response = urllib2.urlopen(request).read()
+        except urllib2.HTTPError:
+            e = sys.exc_info()[1]
+            if not e.code in [200, 400, 500]:
+                raise Error("Server returned unexpected status code - %d - %s" % (e.code, e.read()))
+            code = e.code
+            response = e.read()
+    
+        try:
+            result = json.loads(to_string(response))
+        except Exception:
+            e = sys.exc_info()[1]
+            # Error is parsing json
+            raise Error("Error parsing server response (%d) - %s. Got - %s", code, response, e)
+    
+        if "error" in result:
+            if return_error:
+                result["error"]["http_code"] = response.code
+            else:
+                raise Error(result["error"]["message"])
+    
+        return result
+    finally:
+        if file_io: file_io.close()    
+    

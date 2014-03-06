@@ -5,6 +5,7 @@ setup.cfg
 setup.py
 cloudinary/__init__.py
 cloudinary/api.py
+cloudinary/compat.py
 cloudinary/forms.py
 cloudinary/models.py
 cloudinary/uploader.py

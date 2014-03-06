@@ -1,12 +1,13 @@
+import unittest
 import cloudinary
 from cloudinary import uploader, utils, api
-import unittest
+from cloudinary.compat import PY3
 
-class TestApi(unittest.TestCase):
+class ApiTest(unittest.TestCase):
     initialized = False
     def setUp(self):
-        if TestApi.initialized: return
-        TestApi.initialized = True
+        if ApiTest.initialized: return
+        ApiTest.initialized = True
         cloudinary.reset_config()
         if not cloudinary.config().api_secret: return
         try:
@@ -95,12 +96,12 @@ class TestApi(unittest.TestCase):
         asc_resources = api.resources(prefix = "api_test", direction = "asc", type = "upload")["resources"]
         desc_resources = api.resources(prefix = "api_test", direction = "desc", type = "upload")["resources"]
         asc_resources.reverse()
-        self.assertEquals(asc_resources, desc_resources)
+        self.assertEqual(asc_resources, desc_resources)
         asc_resources_alt = api.resources(prefix = "api_test", direction = 1, type = "upload")["resources"]
         desc_resources_alt = api.resources(prefix = "api_test", direction = -1, type = "upload")["resources"]
         asc_resources_alt.reverse()
-        self.assertEquals(asc_resources_alt, desc_resources_alt)
-        self.assertEquals(asc_resources_alt, asc_resources)
+        self.assertEqual(asc_resources_alt, desc_resources_alt)
+        self.assertEqual(asc_resources_alt, asc_resources)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test07_resource_metadata(self):
@@ -296,4 +297,6 @@ class TestApi(unittest.TestCase):
         """ should support requesting auto_tagging """
         with self.assertRaisesRegexp(api.BadRequest, 'Must use'): 
             api.update("api_test", auto_tagging=0.5)
-  
+
+if __name__ == '__main__':
+    unittest.main() 

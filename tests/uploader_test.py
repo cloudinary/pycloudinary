@@ -1,8 +1,10 @@
 import cloudinary
 from cloudinary import uploader, utils, api
+from cloudinary.compat import PY3
 import unittest
 
-class TestUploader(unittest.TestCase):
+class UploaderTest(unittest.TestCase):
+
     def setUp(self):
         cloudinary.reset_config()
 
@@ -102,9 +104,9 @@ class TestUploader(unittest.TestCase):
     
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_allowed_formats(self):
-      	""" should allow whitelisted formats if allowed_formats """
-      	result = uploader.upload("tests/logo.png", allowed_formats = ['png'])
-      	self.assertEquals(result["format"], "png");
+        """ should allow whitelisted formats if allowed_formats """
+        result = uploader.upload("tests/logo.png", allowed_formats = ['png'])
+        self.assertEqual(result["format"], "png");
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_allowed_formats_with_illegal_format(self):
@@ -113,29 +115,29 @@ class TestUploader(unittest.TestCase):
     
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_allowed_formats_with_format(self):
-      	"""should allow non whitelisted formats if type is specified and convert to that type"""
+        """should allow non whitelisted formats if type is specified and convert to that type"""
         result = uploader.upload("tests/logo.png", allowed_formats = ['jpg'], format= 'jpg')
-      	self.assertEquals("jpg", result["format"])
+        self.assertEqual("jpg", result["format"])
     
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_face_coordinates(self):
         """should allow sending face coordinates"""
         coordinates = [[120, 30, 109, 150], [121, 31, 110, 151]]
         result = uploader.upload("tests/logo.png", face_coordinates = coordinates, faces = True)
-        self.assertEquals(coordinates, result["faces"])
+        self.assertEqual(coordinates, result["faces"])
 
         different_coordinates = [[122, 32, 111, 152]]
         uploader.explicit(result["public_id"], face_coordinates = different_coordinates, faces = True, type = "upload")
         info = api.resource(result["public_id"], faces = True)
-        self.assertEquals(different_coordinates, info["faces"])
+        self.assertEqual(different_coordinates, info["faces"])
     
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_context(self):
-      	"""should allow sending context"""
-      	context = {"caption": "some caption", "alt": "alternative"}
-      	result = uploader.upload("tests/logo.png", context = context)
-      	info = api.resource(result["public_id"], context = True)
-      	self.assertEquals({"custom": context}, info["context"])
+        """should allow sending context"""
+        context = {"caption": "some caption", "alt": "alternative"}
+        result = uploader.upload("tests/logo.png", context = context)
+        info = api.resource(result["public_id"], context = True)
+        self.assertEqual({"custom": context}, info["context"])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_manual_moderation(self):

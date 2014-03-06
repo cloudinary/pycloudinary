@@ -341,29 +341,29 @@ class TestUtils(unittest.TestCase):
     def test_signed_url(self):
         ooptions = {"version": 1234, "transformation": {"crop": "crop", "width": 10, "height": 20}, "sign_url": True}
         options = copy.copy(ooptions)
-      	expected = "http://res.cloudinary.com/test123/image/upload/s--MaRXzoEC--/c_crop,h_20,w_10/v1234/image.jpg"
-      	actual, remaining = cloudinary.utils.cloudinary_url("image.jpg", **options)
+        expected = "http://res.cloudinary.com/test123/image/upload/s--MaRXzoEC--/c_crop,h_20,w_10/v1234/image.jpg"
+        actual, remaining = cloudinary.utils.cloudinary_url("image.jpg", **options)
         self.assertEqual(remaining, {})
-      	self.assertEquals(expected, actual)
+        self.assertEquals(expected, actual)
 
-      	expected = "http://res.cloudinary.com/test123/image/upload/s--ZlgFLQcO--/v1234/image.jpg"
+        expected = "http://res.cloudinary.com/test123/image/upload/s--ZlgFLQcO--/v1234/image.jpg"
         options2 = copy.copy(ooptions)
         options2.pop("transformation")
-      	actual, remaining = cloudinary.utils.cloudinary_url("image.jpg", **options2)
+        actual, remaining = cloudinary.utils.cloudinary_url("image.jpg", **options2)
         self.assertEqual(remaining, {})
-      	self.assertEquals(expected, actual)
+        self.assertEquals(expected, actual)
 
-      	expected = "http://res.cloudinary.com/test123/image/upload/s--Ai4Znfl3--/c_crop,h_20,w_10/image.jpg"
+        expected = "http://res.cloudinary.com/test123/image/upload/s--Ai4Znfl3--/c_crop,h_20,w_10/image.jpg"
         options3 = copy.copy(ooptions)
         options3.pop("version")
-      	actual, remaining = cloudinary.utils.cloudinary_url("image.jpg", **options3)
+        actual, remaining = cloudinary.utils.cloudinary_url("image.jpg", **options3)
         self.assertEqual(remaining, {})
-      	self.assertEquals(expected, actual)
+        self.assertEquals(expected, actual)
         
-      	expected = "http://res.cloudinary.com/test123/image/fetch/s--_GAUclyB--/v1234/http://google.com/path/to/image.png"
-      	actual, remaining = cloudinary.utils.cloudinary_url("http://google.com/path/to/image.png", type = "fetch", version = 1234, sign_url=  True)
+        expected = "http://res.cloudinary.com/test123/image/fetch/s--_GAUclyB--/v1234/http://google.com/path/to/image.png"
+        actual, remaining = cloudinary.utils.cloudinary_url("http://google.com/path/to/image.png", type = "fetch", version = 1234, sign_url=  True)
         self.assertEqual(remaining, {})
-      	self.assertEquals(expected, actual)
+        self.assertEquals(expected, actual)
     
     def test_escape_public_id(self):
         """ should escape public_ids """

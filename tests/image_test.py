@@ -2,7 +2,7 @@ import cloudinary
 from cloudinary import CloudinaryImage
 import unittest
 
-class TestCloudinaryImage(unittest.TestCase):
+class ImageTest(unittest.TestCase):
     def setUp(self):
         cloudinary.config(cloud_name="test", api_secret="1234")
         self.image = CloudinaryImage("hello", format = "png")
