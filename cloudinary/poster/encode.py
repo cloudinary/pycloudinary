@@ -211,14 +211,14 @@ class MultipartParam(object):
 
         if self.filename:
             disposition = 'form-data; name="%s"; filename="%s"' % (self.name,
-                    self.filename)
+                    to_string(self.filename))
         else:
             disposition = 'form-data; name="%s"' % self.name
 
         headers.append("Content-Disposition: %s" % disposition)
 
         if self.filetype:
-            filetype = self.filetype
+            filetype = to_string(self.filetype)
         else:
             filetype = "text/plain; charset=utf-8"
 
