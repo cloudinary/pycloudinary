@@ -1,7 +1,7 @@
 # Copyright Cloudinary
 import sys
 
-PY3 = (sys.version_info.major == 3)
+PY3 = (sys.version_info[0] == 3)
 
 if PY3:
     import http.client as httplib
