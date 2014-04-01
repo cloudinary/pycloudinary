@@ -3,6 +3,13 @@ from cloudinary import CloudinaryImage, forms, uploader
 from django.db import models
 from django.core.files.uploadedfile import UploadedFile
 
+# Add introspection rules for South, if it's installed.
+try:
+    from south.modelsinspector import add_introspection_rules
+    add_introspection_rules([], ["^cloudinary.models.CloudinaryField"])
+except ImportError:
+    pass
+
 class CloudinaryField(models.Field):
 
     description = "An image stored in Cloudinary"
