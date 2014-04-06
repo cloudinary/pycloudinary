@@ -41,14 +41,14 @@ class CloudinaryField(models.Field):
             m = re.search('(v(?P<version>\d+)/)?(?P<public_id>.*?)(\.(?P<format>[^.]+))?$', value)
             return CloudinaryImage(type = self.type, **m.groupdict())
 
-    def upload_options(self, model_instance):
+    def upload_options(self, model_instance, filename):
         return {}
 
     def pre_save(self, model_instance, add):
         value = super(CloudinaryField, self).pre_save(model_instance, add)
         if isinstance(value, UploadedFile):
             options = {"type": self.type}
-            options.update(self.upload_options(model_instance))
+            options.update(self.upload_options(model_instance, value.name))
             instance_value = uploader.upload_image(value, **options)
             setattr(model_instance, self.attname, instance_value)
             return self.get_prep_value(instance_value)
