@@ -35,7 +35,7 @@ def cloudinary_direct_upload_field(field_name="image", request=None):
 """Deprecated - please use cloudinary_direct_upload_field, or a proper form"""
 @register.inclusion_tag('cloudinary_direct_upload.html')
 def cloudinary_direct_upload(callback_url, **options):
-    params = uploader.build_upload_params(callback=callback_url, **options)
+    params = utils.build_upload_params(callback=callback_url, **options)
     params = utils.sign_request(params, options)    
     
     api_url = utils.cloudinary_api_url("upload", resource_type=options.get("resource_type", "image"), upload_prefix=options.get("upload_prefix"))

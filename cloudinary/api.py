@@ -46,7 +46,7 @@ def resources(**options):
     type = options.pop("type", None)
     uri = ["resources", resource_type]
     if type: uri.append(type)
-    return call_api("get", uri, only(options, "next_cursor", "max_results", "prefix", "tags", "context", "moderations", "direction"), **options)
+    return call_api("get", uri, only(options, "next_cursor", "max_results", "prefix", "tags", "context", "moderations", "direction", "start_at"), **options)
 
 def resources_by_tag(tag, **options):
     resource_type = options.pop("resource_type", "image")
@@ -70,7 +70,7 @@ def resource(public_id, **options):
     resource_type = options.pop("resource_type", "image")
     type = options.pop("type", "upload")
     uri = ["resources", resource_type, type, public_id]
-    return call_api("get", uri, only(options, "exif", "faces", "colors", "image_metadata", "pages", "max_results"), **options)
+    return call_api("get", uri, only(options, "exif", "faces", "colors", "image_metadata", "pages", "phash", "max_results"), **options)
 
 def update(public_id, **options):
     resource_type = options.pop("resource_type", "image")
@@ -145,6 +145,32 @@ def update_transformation(transformation, **options):
 def create_transformation(name, definition, **options):
     uri = ["transformations", name]
     return call_api("post", uri, {"transformation": transformation_string(definition)}, **options)
+
+def upload_presets(**options):
+    uri = ["upload_presets"]
+    return call_api("get", uri, only(options, "next_cursor", "max_results"), **options)
+
+def upload_preset(name, **options):
+    uri = ["upload_presets", name]
+    return call_api("get", uri, only(options, "max_results"), **options)
+
+def delete_upload_preset(name, **options):
+    uri = ["upload_presets", name]
+    return call_api("delete", uri, {}, **options)
+
+def update_upload_preset(name, **options):
+    uri = ["upload_presets", name]
+    params = utils.build_upload_params(**options)
+    params = utils.cleanup_params(params)
+    params.update(only(options, "unsigned", "disallow_public_id"))
+    return call_api("put", uri, params, **options)
+
+def create_upload_preset(**options):
+    uri = ["upload_presets"]
+    params = utils.build_upload_params(**options)
+    params = utils.cleanup_params(params)
+    params.update(only(options, "unsigned", "disallow_public_id", "name"))
+    return call_api("post", uri, params, **options)
 
 def call_api(method, uri, params, **options):
     prefix = options.pop("upload_prefix", cloudinary.config().upload_prefix) or "https://api.cloudinary.com"

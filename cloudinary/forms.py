@@ -15,12 +15,15 @@ class CloudinaryInput(forms.TextInput):
     input_type = 'file'
 
     def render(self, name, value, attrs=None):
-        self.build_attrs(attrs)
-        attrs = self.attrs.copy()
-        options = attrs.pop('options', {})
+        attrs = self.build_attrs(attrs)
+        options = attrs.get('options', {})
+        attrs["options"] = ''
 
-        params = cloudinary.uploader.build_upload_params(**options)
-        params = cloudinary.utils.sign_request(params, options)
+        params = cloudinary.utils.build_upload_params(**options)
+        if options.get("unsigned"):
+          params = cloudinary.utils.cleanup_params(params)              
+        else:
+          params = cloudinary.utils.sign_request(params, options)      
 
         if 'resource_type' not in options: options['resource_type'] = 'auto'
         cloudinary_upload_url = cloudinary.utils.cloudinary_api_url("upload", **options)
@@ -81,6 +84,13 @@ class CloudinaryJsFileField(forms.Field):
         if not value: return
         if not value.validate():
             raise forms.ValidationError("Signature mismatch")
+
+class CloudinaryUnsignedJsFileField(CloudinaryJsFileField):
+
+    def __init__(self, upload_preset, attrs={}, options={}, autosave=True, *args, **kwargs):
+      options = options.copy()
+      options.update({"unsigned": True, "upload_preset": upload_preset})
+      super(CloudinaryUnsignedJsFileField, self).__init__(attrs, options, autosave, *args, **kwargs)      
 
 class CloudinaryFileField(forms.FileField):    
     my_default_error_messages = {

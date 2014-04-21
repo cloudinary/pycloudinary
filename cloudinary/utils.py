@@ -86,13 +86,16 @@ def generate_transformation_string(**options):
     url = "/".join([trans for trans in base_transformations + [transformation] if trans])
     return (url, options)
 
+def cleanup_params(params):
+    return dict( [ (k, __safe_value(v)) for (k,v) in params.items() if not v is None and not v == ""] )
+
 def sign_request(params, options):
     api_key = options.get("api_key", cloudinary.config().api_key)
     if not api_key: raise Exception("Must supply api_key")
     api_secret = options.get("api_secret", cloudinary.config().api_secret)
     if not api_secret: raise Exception("Must supply api_secret")
 
-    params = dict( [ (k,v) for (k,v) in params.items() if v] )    
+    params = cleanup_params(params)
     params["signature"] = api_sign_request(params, api_secret)
     params["api_key"] = api_key
     
@@ -217,3 +220,70 @@ def zip_download_url(tag, **options):
   }, options)
 
   return cloudinary_api_url("download_tag.zip", **options) + "?" + urlencode(cloudinary_params)
+
+def build_eager(transformations):
+    eager = []
+    for tr in build_array(transformations):
+        format = tr.get("format")
+        single_eager = "/".join([x for x in [generate_transformation_string(**tr)[0], format] if x])
+        eager.append(single_eager)
+    return "|".join(eager)
+
+def build_custom_headers(headers):
+    if headers == None:
+        return None
+    elif isinstance(headers, list):
+        pass
+    elif isinstance(headers, dict):
+        headers = [k + ": " + v for k, v in headers.items()]
+    else:
+        return headers
+    return "\n".join(headers)
+
+def build_upload_params(**options):
+    params = {"timestamp": now(),
+              "transformation": generate_transformation_string(**options)[0],
+              "public_id": options.get("public_id"),
+              "callback": options.get("callback"),
+              "format": options.get("format"),
+              "type": options.get("type"),
+              "backup": options.get("backup"),
+              "faces": options.get("faces"),
+              "image_metadata": options.get("image_metadata"),
+              "exif": options.get("exif"),
+              "colors": options.get("colors"),
+              "headers": build_custom_headers(options.get("headers")),
+              "eager": build_eager(options.get("eager")),
+              "use_filename": options.get("use_filename"),
+              "unique_filename": options.get("unique_filename"),
+              "discard_original_filename": options.get("discard_original_filename"),
+              "invalidate": options.get("invalidate"),
+              "notification_url": options.get("notification_url"),
+              "eager_notification_url": options.get("eager_notification_url"),
+              "eager_async": options.get("eager_async"),
+              "proxy": options.get("proxy"),
+              "folder": options.get("folder"),
+              "overwrite": options.get("overwrite"),
+              "tags": options.get("tags") and ",".join(build_array(options["tags"])),
+              "allowed_formats": options.get("allowed_formats") and ",".join(build_array(options["allowed_formats"])),
+              "face_coordinates": encode_double_array(options.get("face_coordinates")),
+              "context": encode_dict(options.get("context")),
+              "moderation": options.get("moderation"),
+              "raw_convert": options.get("raw_convert"),
+              "ocr": options.get("ocr"),
+              "categorization": options.get("categorization"),
+              "detection": options.get("detection"),
+              "similarity_search": options.get("similarity_search"),
+              "upload_preset": options.get("upload_preset"),
+              "phash": options.get("phash"),
+              "auto_tagging": options.get("auto_tagging") and float(options.get("auto_tagging"))}
+    return params
+
+def __safe_value(v):
+    if isinstance(v, (bool)):
+        if v:
+            return "1"
+        else: 
+            return "0"
+    else:
+        return v
