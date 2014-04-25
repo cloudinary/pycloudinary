@@ -17,9 +17,13 @@ from cloudinary.compat import urlparse, parse_qs
 def import_django_settings():
     try:
         import django.conf
-        if 'CLOUDINARY' in dir(django.conf.settings):
-            return django.conf.settings.CLOUDINARY
-        else:
+        from django.core.exceptions import ImproperlyConfigured
+        try:
+            if 'CLOUDINARY' in dir(django.conf.settings):
+                return django.conf.settings.CLOUDINARY
+            else:
+                return None
+        except ImproperlyConfigured:
             return None
     except ImportError:
         return None
