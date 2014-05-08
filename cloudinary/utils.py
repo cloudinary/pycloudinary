@@ -91,9 +91,9 @@ def cleanup_params(params):
 
 def sign_request(params, options):
     api_key = options.get("api_key", cloudinary.config().api_key)
-    if not api_key: raise Exception("Must supply api_key")
+    if not api_key: raise ValueError("Must supply api_key")
     api_secret = options.get("api_secret", cloudinary.config().api_secret)
-    if not api_secret: raise Exception("Must supply api_secret")
+    if not api_secret: raise ValueError("Must supply api_secret")
 
     params = cleanup_params(params)
     params["signature"] = api_sign_request(params, api_secret)
@@ -122,7 +122,7 @@ def cloudinary_url(source, **options):
 
     cloud_name = options.pop("cloud_name", cloudinary.config().cloud_name or None)
     if cloud_name == None:
-        raise Exception("Must supply cloud_name in tag or in configuration")
+        raise ValueError("Must supply cloud_name in tag or in configuration")
     secure = options.pop("secure", cloudinary.config().secure)
     private_cdn = options.pop("private_cdn", cloudinary.config().private_cdn)
     secure_distribution = options.pop("secure_distribution", cloudinary.config().secure_distribution)
@@ -180,7 +180,7 @@ def cloudinary_url(source, **options):
 def cloudinary_api_url(action = 'upload', **options):
     cloudinary_prefix = options.get("upload_prefix", cloudinary.config().upload_prefix) or "https://api.cloudinary.com"
     cloud_name = options.get("cloud_name", cloudinary.config().cloud_name)
-    if not cloud_name: raise Exception("Must supply cloud_name")
+    if not cloud_name: raise ValueError("Must supply cloud_name")
     resource_type = options.get("resource_type", "image")
     return "/".join([cloudinary_prefix, "v1_1", cloud_name, resource_type, action])
 
