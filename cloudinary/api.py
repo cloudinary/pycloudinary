@@ -3,6 +3,7 @@ import json
 import base64
 import sys
 import email.utils
+import socket
 import cloudinary
 from cloudinary.compat import urllib2, urlencode, to_string, to_bytes, PY3
 from cloudinary import utils
@@ -192,9 +193,15 @@ def call_api(method, uri, params, **options):
     request.add_header("User-Agent", cloudinary.USER_AGENT)
     request.get_method = lambda: method.upper()
 
+    kw = {}
+    if 'timeout' in options:
+        kw['timeout'] = options['timeout']
     try:
-        response = urllib2.urlopen(request)
+        response = urllib2.urlopen(request, **kw)
         body = response.read()
+    except socket.error:
+        e = sys.exc_info()[1]
+        raise GeneralError("Socket Error: %s" % (str(e)))
     except urllib2.HTTPError:
         e = sys.exc_info()[1]
         exception_class = EXCEPTION_CODES.get(e.code)
