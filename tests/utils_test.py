@@ -320,6 +320,13 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(options, {})
         self.assertEqual(result, "http://res.cloudinary.com/test123/image/upload/fl_abc.def/test" )
 
+    def test_dpr(self):
+        """should support dpr (device pixel radio)"""
+        options = {"dpr": "2.0"}
+        result, options = cloudinary.utils.cloudinary_url("test", **options)
+        self.assertEqual(options, {})
+        self.assertEqual(result, "http://res.cloudinary.com/test123/image/upload/dpr_2.0/test" )
+
     def test_folder_version(self):
         """should add version if public_id contains / """
         result, options = cloudinary.utils.cloudinary_url("folder/test")
