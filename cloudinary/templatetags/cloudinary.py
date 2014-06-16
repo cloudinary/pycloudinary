@@ -12,7 +12,9 @@ from cloudinary.forms import CloudinaryJsFileField, cl_init_js_callbacks
 register = template.Library()
 
 @register.simple_tag(takes_context=True)
-def cloudinary_url(context, source, options_dict={}, **options):
+def cloudinary_url(context, source, options_dict=None, **options):
+    if options_dict is None:
+         options_dict = {}
     options = dict(options_dict, **options)
     try:
         if context['request'].is_secure() and 'secure' not in options:
@@ -24,7 +26,9 @@ def cloudinary_url(context, source, options_dict={}, **options):
     return source.build_url(**options)
 
 @register.simple_tag(name='cloudinary', takes_context=True)
-def cloudinary_tag(context, image, options_dict={}, **options):
+def cloudinary_tag(context, image, options_dict=None, **options):
+    if options_dict is None:
+         options_dict = {}
     options = dict(options_dict, **options)
     try:
         if context['request'].is_secure() and 'secure' not in options:
