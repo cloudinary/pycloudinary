@@ -211,7 +211,7 @@ def call_api(action, params, **options):
     
         if "error" in result:
             if return_error:
-                result["error"]["http_code"] = response.code
+                result["error"]["http_code"] = code
             else:
                 raise Error(result["error"]["message"])
     
