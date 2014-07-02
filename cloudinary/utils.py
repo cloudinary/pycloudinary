@@ -285,6 +285,7 @@ def build_upload_params(**options):
               "categorization": options.get("categorization"),
               "detection": options.get("detection"),
               "similarity_search": options.get("similarity_search"),
+              "background_removal": options.get("background_removal"),
               "upload_preset": options.get("upload_preset"),
               "phash": options.get("phash"),
               "auto_tagging": options.get("auto_tagging") and float(options.get("auto_tagging"))}

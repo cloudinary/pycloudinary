@@ -348,5 +348,11 @@ class ApiTest(unittest.TestCase):
         self.assertEquals(preset["settings"], {"folder": "folder", "colors": True, "disallow_public_id": True})
         api.delete_upload_preset(name)
 
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test32_background_removal(self):
+        """ should support requesting background_removal """
+        with self.assertRaisesRegexp(api.BadRequest, 'Illegal value'): 
+            api.update("api_test", background_removal="illegal")
+
 if __name__ == '__main__':
     unittest.main() 

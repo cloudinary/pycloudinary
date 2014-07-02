@@ -184,5 +184,11 @@ class UploaderTest(unittest.TestCase):
         self.assertRegexpMatches(result["public_id"], '^upload_folder\/[a-z0-9]+$')
         api.delete_upload_preset(preset["name"])
 
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_background_removal(self):
+        """ should support requesting background_removal """
+        with self.assertRaisesRegexp(api.Error, 'illegal is not a valid'): 
+            uploader.upload("tests/logo.png", background_removal="illegal")
+
 if __name__ == '__main__':
     unittest.main()

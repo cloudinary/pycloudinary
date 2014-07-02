@@ -77,7 +77,7 @@ def update(public_id, **options):
     resource_type = options.pop("resource_type", "image")
     type = options.pop("type", "upload")
     uri = ["resources", resource_type, type, public_id]
-    upload_options = only(options, "moderation_status", "raw_convert", "ocr", "categorization", "detection", "similarity_search")
+    upload_options = only(options, "moderation_status", "raw_convert", "ocr", "categorization", "detection", "similarity_search", "background_removal")
     if "tags" in options: upload_options["tags"] = ",".join(utils.build_array(options["tags"]))
     if "face_coordinates" in options: upload_options["face_coordinates"] = utils.encode_double_array(options.get("face_coordinates")) 
     if "context" in options: upload_options["context"] = utils.encode_dict(options.get("context")) 
