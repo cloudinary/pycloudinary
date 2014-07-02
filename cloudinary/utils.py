@@ -6,6 +6,8 @@ from cloudinary.compat import (PY3, to_bytes, to_bytearray, to_string, unquote, 
 """ @deprecated: use cloudinary.SHARED_CDN """
 SHARED_CDN = cloudinary.SHARED_CDN
 
+DEFAULT_RESPONSIVE_WIDTH_TRANSFORMATION = {"width": "auto", "crop": "limit"}
+
 def build_array(arg):
     if isinstance(arg, list):
         return arg
@@ -28,6 +30,7 @@ def encode_dict(arg):
         return arg
 
 def generate_transformation_string(**options):
+    responsive_width = options.pop("responsive_width", cloudinary.config().responsive_width)
     size = options.pop("size", None)
     if size:
         options["width"], options["height"] = size.split("x")
@@ -37,9 +40,9 @@ def generate_transformation_string(**options):
 
     crop = options.pop("crop", None)
     angle = ".".join([str(value) for value in build_array(options.pop("angle", None))])
-    no_html_sizes = has_layer or angle or crop == "fit" or crop == "limit"
+    no_html_sizes = has_layer or angle or crop == "fit" or crop == "limit" or responsive_width
 
-    if width and (float(width) < 1 or no_html_sizes):
+    if width and (width == "auto" or float(width) < 1 or no_html_sizes):
         del options["width"]
     if height and (float(height) < 1 or no_html_sizes):
         del options["height"]
@@ -71,20 +74,27 @@ def generate_transformation_string(**options):
         border = "%(width)spx_solid_%(color)s" % {"color": border.get("color", "black").replace("#", "rgb:"), "width": str(border.get("width", 2))}
 
     flags = ".".join(build_array(options.pop("flags", None)))
+    dpr = options.pop("dpr", cloudinary.config().dpr)
 
-    params = {"w": width, "h": height, "t": named_transformation, "b": background, "co": color, "e": effect, "c": crop, "a": angle, "bo": border, "fl": flags}
+    params = {"w": width, "h": height, "t": named_transformation, "b": background, "co": color, "e": effect, "c": crop, "a": angle, "bo": border, "fl": flags, "dpr": dpr}
     for param, option in {"q": "quality", "g": "gravity", "p": "prefix", "x": "x",
                           "y": "y", "r": "radius", "d": "default_image", "l": "overlay", "u": "underlay", "o": "opacity",
-                          "f": "fetch_format", "pg": "page", "dn": "density", "dl": "delay", "cs": "color_space",
-                          "dpr": "dpr"}.items():
+                          "f": "fetch_format", "pg": "page", "dn": "density", "dl": "delay", "cs": "color_space"}.items():
         params[param] = options.pop(option, None)
 
-    transformations = [param + "_" + str(value) for param, value in params.items() if (value or value == 0)]
-    transformations.sort()
-    transformation = ",".join(transformations)
+    transformation = ",".join(sorted([param + "_" + str(value) for param, value in params.items() if (value or value == 0)]))
     if "raw_transformation" in options:
         transformation = transformation + "," + options.pop("raw_transformation")
-    url = "/".join([trans for trans in base_transformations + [transformation] if trans])
+    transformations = base_transformations + [transformation]
+    if responsive_width:
+      responsive_width_transformation = cloudinary.config().responsive_width_transformation or DEFAULT_RESPONSIVE_WIDTH_TRANSFORMATION
+      transformations += [generate_transformation_string(**responsive_width_transformation)[0]]
+    url = "/".join([trans for trans in transformations if trans])
+
+    if width == "auto" or responsive_width:
+      options["responsive"] = True
+    if dpr == "auto":
+      options["hidpi"] = True
     return (url, options)
 
 def cleanup_params(params):

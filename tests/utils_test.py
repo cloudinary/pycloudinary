@@ -384,5 +384,17 @@ class TestUtils(unittest.TestCase):
             result, options = cloudinary.utils.cloudinary_url(source)
             self.assertEquals("http://res.cloudinary.com/test123/image/upload/" + target, result)
 
+    def test_responsive_width(self):
+        """should support responsive width"""
+        options = {"width": 100, "height": 100, "crop": "crop", "responsive_width": True}
+        result, options = cloudinary.utils.cloudinary_url("test", **options)
+        self.assertEqual(options, {"responsive": True})
+        self.assertEqual(result, "http://res.cloudinary.com/test123/image/upload/c_crop,h_100,w_100/c_limit,w_auto/test" )
+        cloudinary.config(responsive_width_transformation={"width": "auto", "crop": "pad"})
+        options = {"width": 100, "height": 100, "crop": "crop", "responsive_width": True}
+        result, options = cloudinary.utils.cloudinary_url("test", **options)
+        self.assertEqual(options, {"responsive": True})
+        self.assertEqual(result, "http://res.cloudinary.com/test123/image/upload/c_crop,h_100,w_100/c_pad,w_auto/test" )
+
 if __name__ == '__main__':
     unittest.main()

@@ -17,7 +17,7 @@ class ImageTest(unittest.TestCase):
 
     def test_image(self):
         """should generate image """
-        self.assertEqual(self.image.image(), "<img src='http://res.cloudinary.com/test/image/upload/hello.png' />")
+        self.assertEqual(self.image.image(), "<img src='http://res.cloudinary.com/test/image/upload/hello.png'/>")
 
     def test_image_unicode(self):
         """should generate image with unicode arguments """
@@ -33,6 +33,17 @@ class ImageTest(unittest.TestCase):
         self.assertFalse(CloudinaryImage("hello", format = "png", version="1234", signature="1234").validate())
         self.assertTrue(CloudinaryImage("hello", format = "png", version="1234", signature="2aa73bf69fb50816e5509e32275b8c417dcb880d").validate())
 
+    def test_responsive_width(self):
+        """should add responsive width transformation"""
+        self.assertEqual(self.image.image(responsive_width = True), "<img class='cld-responsive' data-src='http://res.cloudinary.com/test/image/upload/c_limit,w_auto/hello.png'/>")
+
+    def test_width_auto(self):
+        """should support width=auto """
+        self.assertEqual(self.image.image(width = "auto", crop = "limit"), "<img class='cld-responsive' data-src='http://res.cloudinary.com/test/image/upload/c_limit,w_auto/hello.png'/>")
+
+    def test_dpr_auto(self):
+        """should support dpr=auto """
+        self.assertEqual(self.image.image(dpr = "auto"), "<img class='cld-hidpi' data-src='http://res.cloudinary.com/test/image/upload/dpr_auto/hello.png'/>")
 
 if __name__ == '__main__':
     unittest.main()

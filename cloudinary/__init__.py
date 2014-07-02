@@ -7,6 +7,7 @@ CF_SHARED_CDN = "d3jpl91pxevbkh.cloudfront.net"
 OLD_AKAMAI_SHARED_CDN = "cloudinary-a.akamaihd.net"
 AKAMAI_SHARED_CDN = "res.cloudinary.com"
 SHARED_CDN = AKAMAI_SHARED_CDN
+CL_BLANK = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
 
 VERSION = "1.0.17"
 USER_AGENT = "cld-python-" + VERSION
@@ -108,4 +109,17 @@ class CloudinaryImage(object):
 
     def image(self, **options):
         src, attrs = self.__build_url(**options)
-        return u"<img src='{0}' {1}/>".format(src, ' '.join(sorted([u"{0}='{1}'".format(key, value) for key, value in attrs.items() if value])))
+        responsive = attrs.pop("responsive", False)
+        hidpi = attrs.pop("hidpi", False)
+        if responsive or hidpi:
+            attrs["data-src"] = src
+            classes = "cld-responsive" if responsive else "cld-hidpi"
+            if "class" in attrs: classes += " " + attrs["class"] 
+            attrs["class"] = classes
+            src = attrs.pop("responsive_placeholder", config().responsive_placeholder)
+            if src == "blank": src = CL_BLANK 
+        
+        attrs = sorted(attrs.items())
+        if src: attrs.insert(0, ("src", src))
+
+        return u"<img {0}/>".format(' '.join([u"{0}='{1}'".format(key, value) for key, value in attrs if value]))
