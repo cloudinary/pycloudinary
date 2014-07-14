@@ -293,6 +293,7 @@ def build_upload_params(**options):
               "background_removal": options.get("background_removal"),
               "upload_preset": options.get("upload_preset"),
               "phash": options.get("phash"),
+              "return_delete_token": options.get("return_delete_token"),
               "auto_tagging": options.get("auto_tagging") and float(options.get("auto_tagging"))}
     return params
 
