@@ -28,7 +28,6 @@ cloudinary/static/js/jquery.fileupload.js
 cloudinary/static/js/jquery.iframe-transport.js
 cloudinary/static/js/jquery.ui.widget.js
 cloudinary/static/js/load-image.min.js
-cloudinary/static/samples/bootstrap.html
 cloudinary/templates/cloudinary_direct_upload.html
 cloudinary/templates/cloudinary_includes.html
 cloudinary/templates/cloudinary_js_config.html

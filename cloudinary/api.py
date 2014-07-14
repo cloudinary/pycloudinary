@@ -71,7 +71,7 @@ def resource(public_id, **options):
     resource_type = options.pop("resource_type", "image")
     type = options.pop("type", "upload")
     uri = ["resources", resource_type, type, public_id]
-    return call_api("get", uri, only(options, "exif", "faces", "colors", "image_metadata", "pages", "phash", "max_results"), **options)
+    return call_api("get", uri, only(options, "exif", "faces", "colors", "image_metadata", "pages", "phash", "coordinates", "max_results"), **options)
 
 def update(public_id, **options):
     resource_type = options.pop("resource_type", "image")
@@ -80,6 +80,7 @@ def update(public_id, **options):
     upload_options = only(options, "moderation_status", "raw_convert", "ocr", "categorization", "detection", "similarity_search", "background_removal")
     if "tags" in options: upload_options["tags"] = ",".join(utils.build_array(options["tags"]))
     if "face_coordinates" in options: upload_options["face_coordinates"] = utils.encode_double_array(options.get("face_coordinates")) 
+    if "custom_coordinates" in options: upload_options["custom_coordinates"] = utils.encode_double_array(options.get("custom_coordinates")) 
     if "context" in options: upload_options["context"] = utils.encode_dict(options.get("context")) 
     if "auto_tagging" in options: upload_options["auto_tagging"] = float(options.get("auto_tagging"))
     return call_api("post", uri, upload_options, **options)

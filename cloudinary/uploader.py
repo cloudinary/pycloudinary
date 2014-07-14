@@ -83,7 +83,8 @@ def explicit(public_id, **options):
         "headers": utils.build_custom_headers(options.get("headers")),
         "eager": utils.build_eager(options.get("eager")),
         "tags": options.get("tags") and ",".join(utils.build_array(options["tags"])),
-        "face_coordinates": utils.encode_double_array(options.get("face_coordinates"))}
+        "face_coordinates": utils.encode_double_array(options.get("face_coordinates")),
+        "custom_coordinates": utils.encode_double_array(options.get("custom_coordinates"))}
      return call_api("explicit", params, **options)
 
 def generate_sprite(tag, **options):

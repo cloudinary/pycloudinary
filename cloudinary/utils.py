@@ -16,8 +16,12 @@ def build_array(arg):
     else:
         return [arg]
 
-def encode_double_array(arg):
-    return "|".join([",".join([str(i) for i in build_array(inner)]) for inner in build_array(arg)])
+def encode_double_array(array):
+    array = build_array(array)
+    if len(array) > 0 and isinstance(array[0], list):
+      return "|".join([",".join([str(i) for i in build_array(inner)]) for inner in array])
+    else:
+      return ",".join([str(i) for i in array])
 
 def encode_dict(arg):
     if isinstance(arg, dict):
@@ -278,6 +282,7 @@ def build_upload_params(**options):
               "tags": options.get("tags") and ",".join(build_array(options["tags"])),
               "allowed_formats": options.get("allowed_formats") and ",".join(build_array(options["allowed_formats"])),
               "face_coordinates": encode_double_array(options.get("face_coordinates")),
+              "custom_coordinates": encode_double_array(options.get("custom_coordinates")),
               "context": encode_dict(options.get("context")),
               "moderation": options.get("moderation"),
               "raw_convert": options.get("raw_convert"),
