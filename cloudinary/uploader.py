@@ -21,7 +21,7 @@ def unsigned_upload(file, upload_preset, **options):
 def upload_image(file, **options):
     result = upload(file, **options)
     return cloudinary.CloudinaryImage(result["public_id"], version=str(result["version"]),
-        format=result["format"], metadata=result)
+        format=result.get("format"), metadata=result)
 
 def upload_large(file, **options):
     """ Upload large raw files. Note that public_id should include an extension for best results. """
