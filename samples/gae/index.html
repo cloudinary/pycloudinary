@@ -1,0 +1,18 @@
+<!doctype html>
+<title>Upload new Image</title>
+<h1>Upload new Image</h1>
+<form action="" method="post" enctype="multipart/form-data">
+  <p><input type="file" name="file">
+     <input type="submit" value="Upload">
+</form>
+{% if image_url %}
+  <h3>Upload API Result</h3>
+  <div>{{ image_url }}</div>
+  <h3>Thumbnails:</h3>
+  <div><a href="{{thumbnail_url1}}">{{thumbnail_url1}}</a></div>
+  <img src="{{ thumbnail_url1 }}"/>
+  <div><a href="{{thumbnail_url2}}">{{thumbnail_url2}}</a></div>
+  <img src="{{ thumbnail_url2 }}"/>
+  <h3>Original:</h3>
+  <img src="{{ image_url }}"/>
+{% endif %}

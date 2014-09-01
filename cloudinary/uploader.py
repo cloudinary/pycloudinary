@@ -172,7 +172,7 @@ def call_api(action, params, **options):
             # Register the streaming http handlers with urllib2
             register_openers()
     
-        datagen = to_bytes("")
+        datagen = []
         headers = {}
         if "file" in options:
             file = options["file"]
@@ -183,6 +183,11 @@ def call_api(action, params, **options):
                 datagen, headers = multipart_encode({'file': file_io})
             else:
                 param_list.append(("file", file))
+
+        if _is_gae():
+            # Might not be needed in the future but for now this is needed in GAE
+            datagen = "".join(datagen)
+
         request = urllib2.Request(api_url + "?" + urlencode(param_list), datagen, headers)
         request.add_header("User-Agent", cloudinary.USER_AGENT)
     
@@ -219,4 +224,7 @@ def call_api(action, params, **options):
         return result
     finally:
         if file_io: file_io.close()    
-    
+
+def _is_gae():
+   import httplib
+   return 'appengine' in str(httplib.HTTP)

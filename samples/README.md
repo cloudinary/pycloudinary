@@ -26,3 +26,11 @@ A simple Flask application that performs image upload and generates on the trans
 The source code and more details are available here:
 
 [https://github.com/cloudinary/pycloudinary/tree/master/samples/basic_flask](https://github.com/cloudinary/pycloudinary/tree/master/samples/basic_flask)
+
+## Basic Google App Engine sample
+
+A simple GAE application that performs image upload and generates on the transformations of the uploaded image. Note: It requires the pycloudinary > 1.0.18 to work.
+
+The source code and more details are available here:
+
+[https://github.com/cloudinary/pycloudinary/tree/master/samples/gae](https://github.com/cloudinary/pycloudinary/tree/master/samples/gae)
