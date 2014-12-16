@@ -65,7 +65,9 @@ class ApiTest(unittest.TestCase):
         public_ids = [resource["public_id"] for resource in resources]
         self.assertIn("api_test", public_ids)
         self.assertIn("api_test2", public_ids)
-        self.assertIn(["api_test_tag"], [resource["tags"] for resource in resources])
+        resources_tags = [resource["tags"] for resource in resources]
+        tags = [x for y in resources_tags for x in y]
+        self.assertIn("api_test_tag", tags)
         self.assertIn({"custom": {"key": "value"}}, [resource["context"] for resource in resources])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -74,7 +76,9 @@ class ApiTest(unittest.TestCase):
         resources = api.resources_by_tag("api_test_tag", context = True, tags = True)["resources"]
         resource = [resource for resource in resources if resource["public_id"] == "api_test"][0]
         self.assertNotEqual(resource, None)
-        self.assertIn(["api_test_tag"], [resource["tags"] for resource in resources])
+        resources_tags = [resource["tags"] for resource in resources]
+        tags = [x for y in resources_tags for x in y]
+        self.assertIn("api_test_tag", tags)
         self.assertIn({"custom": {"key": "value"}}, [resource["context"] for resource in resources])
         
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -83,7 +87,9 @@ class ApiTest(unittest.TestCase):
         resources = api.resources_by_ids(["api_test", "api_test2"], context = True, tags = True)["resources"]
         public_ids = [resource["public_id"] for resource in resources]
         self.assertEqual(sorted(public_ids), ["api_test", "api_test2"])
-        self.assertIn(["api_test_tag", ApiTest.timestamp_tag], [resource["tags"] for resource in resources])
+        resources_tags = [resource["tags"] for resource in resources]
+        tags = [x for y in resources_tags for x in y]
+        self.assertIn("api_test_tag", tags)
         self.assertIn({"custom": {"key": "value"}}, [resource["context"] for resource in resources])
         
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -354,6 +360,26 @@ class ApiTest(unittest.TestCase):
         """ should support requesting background_removal """
         with self.assertRaisesRegexp(api.BadRequest, 'Illegal value'): 
             api.update("api_test", background_removal="illegal")
+
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    @unittest.skip("For this test to work, 'Auto-create folders' should be enabled in the Upload Settings, " + 
+            "and the account should be empty of folders. " +
+            "Comment out this line if you really want to test it.")
+    def test_folder_listing(self):
+        """ should support listing folders """
+        uploader.upload("spec/logo.png", public_id = "test_folder1/item")
+        uploader.upload("spec/logo.png", public_id = "test_folder2/item")
+        uploader.upload("spec/logo.png", public_id = "test_folder1/test_subfolder1/item")
+        uploader.upload("spec/logo.png", public_id = "test_folder1/test_subfolder2/item")
+        result = api.root_folders
+        self.assertEquals(result["folders"][0]["name"], "test_folder1")
+        self.assertEquals(result["folders"][1]["name"], "test_folder2")
+        result = api.subfolders("test_folder1")
+        self.assertEquals(result["folders"][0]["path"], "test_folder1/test_subfolder1")
+        self.assertEquals(result["folders"][1]["path"], "test_folder1/test_subfolder2")
+        with self.assertRaisesRegexp(api.NotFound): 
+            api.subfolders("test_folder")
+        api.delete_resources_by_prefix("test_folder")
 
 if __name__ == '__main__':
     unittest.main() 

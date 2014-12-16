@@ -174,6 +174,12 @@ def create_upload_preset(**options):
     params.update(only(options, "unsigned", "disallow_public_id", "name"))
     return call_api("post", uri, params, **options)
 
+def root_folders(**options):
+    return call_api("get", ["folders"], {}, **options)
+
+def subfolders(of_folder_path, **options):
+    return call_api("get", ["folders", of_folder_path], {}, **options)
+
 def call_api(method, uri, params, **options):
     prefix = options.pop("upload_prefix", cloudinary.config().upload_prefix) or "https://api.cloudinary.com"
     cloud_name = options.pop("cloud_name", cloudinary.config().cloud_name)

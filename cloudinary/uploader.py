@@ -35,7 +35,7 @@ def upload_large(file, **options):
             chunk_io.name = basename(file)
             chunk = file_io.read(20000000)
             upload = upload_large_part(chunk_io, public_id=public_id,
-                            upload_id=upload_id, part_number=index, final=chunk != "", **options)
+                            upload_id=upload_id, part_number=index, final=chunk == "", **options)
             upload_id = upload.get("upload_id")
             public_id = upload.get("public_id")
             index += 1
@@ -50,6 +50,7 @@ def upload_large_part(file, **options):
         "final": options.get("final"),
         "part_number": options.get("part_number"),
         "upload_id": options.get("upload_id"),
+        "tags": options.get("tags") and ",".join(utils.build_array(options["tags"])),
         "public_id": options.get("public_id")
     }
     return call_api("upload_large", params, resource_type="raw", file=file, **options)

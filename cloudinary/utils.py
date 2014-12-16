@@ -120,6 +120,85 @@ def api_sign_request(params_to_sign, api_secret):
     to_sign = "&".join(sorted([(k+"="+(",".join(v) if isinstance(v, list) else str(v))) for k, v in params_to_sign.items() if v]))
     return hashlib.sha1(to_bytes(to_sign + api_secret)).hexdigest()
 
+def finalize_source(source, format, url_suffix):
+    source = re.sub(r'([^:])/+', r'\1/', source)
+    if re.match(r'^https?:/', source):
+        source = smart_escape(source)
+        source_to_sign = source
+    else:
+        source = unquote(source)
+        if not PY3: source = source.decode('utf8')
+        source = smart_escape(source)
+        source_to_sign = source
+        if url_suffix != None:
+            if re.search(r'[\./]', url_suffix): raise ValueError("url_suffix should not include . or /")
+            source = source + "/" + url_suffix
+        if format != None:
+            source = source + "." + format
+            source_to_sign = source_to_sign + "." + format
+
+    return (source, source_to_sign)
+
+def finalize_resource_type(resource_type, type, url_suffix, use_root_path, shorten):
+    type = type or "upload"
+    if url_suffix != None:
+        if resource_type == "image" and type == "upload":
+            resource_type = "images"
+            type = None
+        elif resource_type == "raw" and type == "upload":
+            resource_type = "files"
+            type = None
+        else:
+            raise ValueError("URL Suffix only supported for image/upload and raw/upload")
+
+    if use_root_path:
+        if (resource_type == "image" and type == "upload") or (resource_type == "images" and type == None):
+            resource_type = None
+            type = None
+        else:
+            raise ValueError("Root path only supported for image/upload")
+
+    if shorten and resource_type == "image" and type == "upload":
+        resource_type = "iu"
+        type = None
+
+    return (resource_type, type)
+
+def unsigned_download_url_prefix(source, cloud_name, private_cdn, cdn_subdomain, secure_cdn_subdomain, cname, secure, secure_distribution):
+  """cdn_subdomain and secure_cdn_subdomain
+  1) Customers in shared distribution (e.g. res.cloudinary.com)
+    if cdn_domain is true uses res-[1-5].cloudinary.com for both http and https. Setting secure_cdn_subdomain to false disables this for https.
+  2) Customers with private cdn 
+    if cdn_domain is true uses cloudname-res-[1-5].cloudinary.com for http
+    if secure_cdn_domain is true uses cloudname-res-[1-5].cloudinary.com for https (please contact support if you require this)
+  3) Customers with cname
+    if cdn_domain is true uses a[1-5].cname for http. For https, uses the same naming scheme as 1 for shared distribution and as 2 for private distribution."""
+  shared_domain = not private_cdn
+  shard = __crc(source)
+  if secure:
+      if secure_distribution == None or secure_distribution == cloudinary.OLD_AKAMAI_SHARED_CDN:
+          secure_distribution = cloud_name + "-res.cloudinary.com" if private_cdn else cloudinary.SHARED_CDN
+
+      shared_domain = shared_domain or secure_distribution == cloudinary.SHARED_CDN
+      if secure_cdn_subdomain == None and shared_domain:
+          secure_cdn_subdomain = cdn_subdomain
+
+      if secure_cdn_subdomain:
+          secure_distribution = re.sub('res.cloudinary.com', "res-" + shard + ".cloudinary.com", secure_distribution)
+
+      prefix = "https://" + secure_distribution
+  elif cname:
+      subdomain = "a" + shard + "." if cdn_subdomain else ""
+      prefix = "http://" + subdomain + cname
+  else:
+      subdomain = cloud_name + "-res" if private_cdn else "res"
+      if cdn_subdomain: subdomain = subdomain + "-" + shard
+      prefix = "http://" + subdomain + ".cloudinary.com"
+
+  if shared_domain: prefix += "/" + cloud_name
+
+  return prefix
+
 def cloudinary_url(source, **options):
     original_source = source
 
@@ -132,6 +211,7 @@ def cloudinary_url(source, **options):
     version = options.pop("version", None)
     format = options.pop("format", None)
     cdn_subdomain = options.pop("cdn_subdomain", cloudinary.config().cdn_subdomain)
+    secure_cdn_subdomain = options.pop("secure_cdn_subdomain", cloudinary.config().secure_cdn_subdomain)
     cname = options.pop("cname", cloudinary.config().cname)
     shorten = options.pop("shorten", cloudinary.config().shorten)
 
@@ -139,57 +219,39 @@ def cloudinary_url(source, **options):
     if cloud_name == None:
         raise ValueError("Must supply cloud_name in tag or in configuration")
     secure = options.pop("secure", cloudinary.config().secure)
-    private_cdn = options.pop("private_cdn", cloudinary.config().private_cdn)
+    private_cdn = options.pop("private_cdn", cloudinary.config().private_cdn or None)
     secure_distribution = options.pop("secure_distribution", cloudinary.config().secure_distribution)
     sign_url = options.pop("sign_url", cloudinary.config().sign_url)
     api_secret = options.pop("api_secret", cloudinary.config().api_secret)
+    url_suffix = options.pop("url_suffix", None)
+    use_root_path = options.pop("use_root_path", cloudinary.config().use_root_path)
 
-    if (not source) or ((type == "upload" or type=="asset") and re.match(r'^https?:', source)):
+    if private_cdn == None:
+        if url_suffix != None:
+            raise ValueError("URL Suffix only supported in private CDN")
+        if use_root_path:
+            raise ValueError("Root path only supported in private CDN")
+
+    if (not source) or type == "upload" and re.match(r'^https?:', source):
         return (original_source, options)
-    if re.match(r'^https?:', source):
-        source = smart_escape(source)
-    else:
-        source = unquote(source)
-        if not PY3: source = source.decode('utf8')
-        source = smart_escape(source)
-        if format:
-          source = source + "." + format
 
-    if cloud_name.startswith("/"):
-        prefix = "/res" + cloud_name
-    else:
-        shared_domain =  not private_cdn
-        if secure:        
-            if not secure_distribution or secure_distribution == cloudinary.OLD_AKAMAI_SHARED_CDN:
-              secure_distribution = cloud_name + "-res.cloudinary.com" if private_cdn else cloudinary.SHARED_CDN
-            shared_domain = shared_domain or secure_distribution == cloudinary.SHARED_CDN
-            prefix = "https://" + secure_distribution
-        else:
-            subdomain = "a" + str((zlib.crc32(to_bytearray(source)) & 0xffffffff)%5 + 1) + "." if cdn_subdomain else ""
-            if cname:
-                host = cname
-            elif private_cdn:
-                host = cloud_name + "-res.cloudinary.com"
-            else:
-                host = "res.cloudinary.com"
-            prefix = "http://" + subdomain + host
-        if shared_domain:
-            prefix += "/" + cloud_name
+    resource_type, type = finalize_resource_type(resource_type, type, url_suffix, use_root_path, shorten)
+    source, source_to_sign = finalize_source(source, format, url_suffix)
 
-    if shorten and resource_type == "image" and type == "upload":
-        resource_type = "iu"
-        type = ""          
-    if source.find("/") >= 0 and not re.match(r'^https?:/', source) and  not re.match(r'^v[0-9]+', source) and  not version:
+
+    if source_to_sign.find("/") >= 0 and not re.match(r'^https?:/', source_to_sign) and not re.match(r'^v[0-9]+', source_to_sign) and not version:
         version = "1"
-        
-    rest = "/".join(filter(lambda x: x, [transformation, "v" + str(version) if version else "", source]))
+    if version: version = "v" + str(version)
     
+    transformation = re.sub(r'([^:])/+', r'\1/', transformation)
+    
+    signature = None
     if sign_url:
-        signature = to_string(base64.urlsafe_b64encode( hashlib.sha1(to_bytes(rest + api_secret)).digest() )[0:8])
-        rest = "s--%(signature)s--/%(rest)s" % {"signature": signature, "rest": rest}
+        to_sign = "/".join(__compact([transformation, source_to_sign]))
+        signature = "s--" + to_string(base64.urlsafe_b64encode( hashlib.sha1(to_bytes(to_sign + api_secret)).digest() )[0:8]) + "--"
     
-    components = [prefix, resource_type, type, rest]
-    source = re.sub(r'([^:])/+', r'\1/', "/".join(components))
+    prefix = unsigned_download_url_prefix(source, cloud_name, private_cdn, cdn_subdomain, secure_cdn_subdomain, cname, secure, secure_distribution)
+    source = "/".join(__compact([prefix, resource_type, type, signature, transformation, version, source]))
     return (source, options)
 
 def cloudinary_api_url(action = 'upload', **options):
@@ -305,3 +367,9 @@ def __safe_value(v):
             return "0"
     else:
         return v
+def __crc(source):
+    return str((zlib.crc32(to_bytearray(source)) & 0xffffffff)%5 + 1)
+
+def __compact(array):
+    return filter(lambda x: x, array)
+
