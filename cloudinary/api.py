@@ -5,7 +5,7 @@ import sys
 import email.utils
 import socket
 import cloudinary
-from cloudinary.compat import urllib2, urlencode, to_string, to_bytes, PY3
+from cloudinary.compat import urllib2, urlencode, to_string, to_bytes, PY3, HTTPError
 from cloudinary import utils
 
 class Error(Exception): pass
@@ -206,10 +206,7 @@ def call_api(method, uri, params, **options):
     try:
         response = urllib2.urlopen(request, **kw)
         body = response.read()
-    except socket.error:
-        e = sys.exc_info()[1]
-        raise GeneralError("Socket Error: %s" % (str(e)))
-    except urllib2.HTTPError:
+    except HTTPError:
         e = sys.exc_info()[1]
         exception_class = EXCEPTION_CODES.get(e.code)
         if exception_class:
@@ -217,6 +214,9 @@ def call_api(method, uri, params, **options):
             body = response.read()
         else:
             raise GeneralError("Server returned unexpected status code - %d - %s" % (e.code, e.read()))
+    except socket.error:
+        e = sys.exc_info()[1]
+        raise GeneralError("Socket Error: %s" % (str(e)))
 
     try:
         body = to_string(body)

@@ -8,7 +8,7 @@ from cloudinary import utils
 from cloudinary.api import Error
 from cloudinary.poster.encode import multipart_encode
 from cloudinary.poster.streaminghttp import register_openers
-from cloudinary.compat import (urllib2, BytesIO, string_types, urlencode, to_bytes, to_string)
+from cloudinary.compat import urllib2, BytesIO, string_types, urlencode, to_bytes, to_string, PY3, HTTPError
 _initialized = False
 
 def upload(file, **options):
@@ -199,15 +199,15 @@ def call_api(action, params, **options):
         code = 200
         try:
             response = urllib2.urlopen(request, **kw).read()
-        except socket.error:
-            e = sys.exc_info()[1]
-            raise Error("Socket error: %s" % str(e))
-        except urllib2.HTTPError:
+        except HTTPError:
             e = sys.exc_info()[1]
             if not e.code in [200, 400, 500]:
                 raise Error("Server returned unexpected status code - %d - %s" % (e.code, e.read()))
             code = e.code
             response = e.read()
+        except socket.error:
+            e = sys.exc_info()[1]
+            raise Error("Socket error: %s" % str(e))
     
         try:
             result = json.loads(to_string(response))
@@ -227,5 +227,8 @@ def call_api(action, params, **options):
         if file_io: file_io.close()    
 
 def _is_gae():
-   import httplib
-   return 'appengine' in str(httplib.HTTP)
+    if PY3:
+        return False
+    else:
+        import httplib
+        return 'appengine' in str(httplib.HTTP)
