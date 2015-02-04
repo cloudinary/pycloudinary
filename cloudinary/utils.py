@@ -216,21 +216,19 @@ def cloudinary_url(source, **options):
     shorten = options.pop("shorten", cloudinary.config().shorten)
 
     cloud_name = options.pop("cloud_name", cloudinary.config().cloud_name or None)
-    if cloud_name == None:
+    if cloud_name is None:
         raise ValueError("Must supply cloud_name in tag or in configuration")
     secure = options.pop("secure", cloudinary.config().secure)
-    private_cdn = options.pop("private_cdn", cloudinary.config().private_cdn or None)
+    private_cdn = options.pop("private_cdn", cloudinary.config().private_cdn)
     secure_distribution = options.pop("secure_distribution", cloudinary.config().secure_distribution)
     sign_url = options.pop("sign_url", cloudinary.config().sign_url)
     api_secret = options.pop("api_secret", cloudinary.config().api_secret)
     url_suffix = options.pop("url_suffix", None)
     use_root_path = options.pop("use_root_path", cloudinary.config().use_root_path)
 
-    if private_cdn == None:
-        if url_suffix != None:
-            raise ValueError("URL Suffix only supported in private CDN")
-        if use_root_path:
-            raise ValueError("Root path only supported in private CDN")
+    if url_suffix and not private_cdn:
+        raise ValueError("URL Suffix only supported in private CDN")
+
 
     if (not source) or type == "upload" and re.match(r'^https?:', source):
         return (original_source, options)

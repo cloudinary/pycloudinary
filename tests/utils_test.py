@@ -255,6 +255,11 @@ class TestUtils(unittest.TestCase):
             cloudinary.utils.cloudinary_url("test", url_suffix = "hello")
 
 
+    def test_should_allow_explicit_private_cdn_false(self):
+        with self.assertRaises(ValueError):
+            cloudinary.utils.cloudinary_url("test", url_suffix = "hello", private_cdn = False)
+
+
     def test_disallow_url_suffix_in_non_upload_types(self):
         with self.assertRaises(ValueError):
             cloudinary.utils.cloudinary_url("test", url_suffix = "hello", private_cdn = True, type = "facebook")
@@ -290,9 +295,9 @@ class TestUtils(unittest.TestCase):
         self.__test_cloudinary_url(options = {"url_suffix": "hello", "private_cdn": True, "resource_type": "raw"}, expected_url = "http://test123-res.cloudinary.com/files/test/hello")
 
 
-    def test_disllow_use_root_path_in_shared_distribution(self):
-        with self.assertRaises(ValueError):
-            cloudinary.utils.cloudinary_url("test", use_root_path = True)
+    def test_support_use_root_path_for_shared_cdn(self):
+        self.__test_cloudinary_url(options = {"use_root_path": True, "private_cdn": False}, expected_url = "http://res.cloudinary.com/test123/test")
+        self.__test_cloudinary_url(options = {"use_root_path": True, "private_cdn": False, "angle": 0}, expected_url = "http://res.cloudinary.com/test123/a_0/test")
 
 
     def test_support_use_root_path_for_private_cdn(self):
@@ -304,7 +309,7 @@ class TestUtils(unittest.TestCase):
         self.__test_cloudinary_url(options = {"use_root_path": True, "url_suffix": "hello", "private_cdn": True}, expected_url = "http://test123-res.cloudinary.com/test/hello")
 
 
-    def test_disllow_use_root_path_if_not_image_upload(self):
+    def test_disallow_use_root_path_if_not_image_upload(self):
         with self.assertRaises(ValueError):
             cloudinary.utils.cloudinary_url("test", use_root_path = True, private_cdn = True, type = "facebook")
         with self.assertRaises(ValueError):
@@ -327,7 +332,8 @@ class TestUtils(unittest.TestCase):
             "a+b": "a%2Bb",
             "a%20b": "a%20b",
             "a-b": "a-b",
-            "a??b": "a%3F%3Fb"};
+            "a??b": "a%3F%3Fb"
+        }
         for source, target in tests.items():
             result, options = cloudinary.utils.cloudinary_url(source)
             self.assertEquals("http://res.cloudinary.com/test123/image/upload/" + target, result)
