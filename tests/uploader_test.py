@@ -20,7 +20,7 @@ class UploaderTest(unittest.TestCase):
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_url(self):
         """should successfully upload file by url """
-        result = uploader.upload("http://cloudinary.com/images/logo.png")
+        result = uploader.upload("http://cloudinary.com/images/old_logo.png")
         self.assertEqual(result["width"], 241)
         self.assertEqual(result["height"], 51)
         expected_signature = utils.api_sign_request(dict(public_id=result["public_id"], version=result["version"]), cloudinary.config().api_secret)
@@ -29,7 +29,7 @@ class UploaderTest(unittest.TestCase):
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_unicode_url(self):
         """should successfully upload file by unicode url """
-        result = uploader.upload(u"http://cloudinary.com/images/logo.png")
+        result = uploader.upload(u"http://cloudinary.com/images/old_logo.png")
         self.assertEqual(result["width"], 241)
         self.assertEqual(result["height"], 51)
         expected_signature = utils.api_sign_request(dict(public_id=result["public_id"], version=result["version"]), cloudinary.config().api_secret)
