@@ -91,6 +91,9 @@ class CloudinaryImage(object):
     def __unicode__(self):
         return self.public_id
 
+    def __len__(self):
+        return len(self.public_id)
+
     def validate(self):
         expected = utils.api_sign_request({"public_id": self.public_id, "version": self.version}, config().api_secret)
         return self.signature == expected

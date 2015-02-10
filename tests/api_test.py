@@ -381,5 +381,16 @@ class ApiTest(unittest.TestCase):
             api.subfolders("test_folder")
         api.delete_resources_by_prefix("test_folder")
 
+    def test_CloudinaryImage_len(self):
+        """Tests the __len__ function on CloudinaryImage"""
+        metadata = {
+                "public_id": "test_id",
+                "format": "tst",
+                "version": "1234",
+                "signature": "5678",
+                }
+        myCloudinaryImage = cloudinary.CloudinaryImage(metadata=metadata)
+        self.assertEquals(len(myCloudinaryImage), len(metadata["public_id"]))
+
 if __name__ == '__main__':
     unittest.main() 
