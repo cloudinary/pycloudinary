@@ -9,7 +9,7 @@ AKAMAI_SHARED_CDN = "res.cloudinary.com"
 SHARED_CDN = AKAMAI_SHARED_CDN
 CL_BLANK = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
 
-VERSION = "1.0.20"
+VERSION = "1.0.21"
 USER_AGENT = "cld-python-" + VERSION
 
 from cloudinary import utils

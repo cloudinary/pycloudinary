@@ -27,4 +27,4 @@ v1.0.17, 2014-04-29 -- Support upload_presets. Support unsigned uploads. Support
 v1.0.18, 2014-07-07 -- Support for density pixel ratio (dpr) transformation parameter. Support auto width, auto dpr and responsive width. Support for background_removal parameter in upload and update. Upgrade jQuery plugin to v1.0.18. Support timeouts in API requests. Fix return_error mode when calling api. Allow user to override secure setting. Replace Exception with ValueError. Support auto-securing URLs if django request is enabled and the current page is being served over HTTPS. 
 v1.0.19, 2014-12-21 -- Folder listing. Support tags in upload_large. URL suffix, root URL and secure domain sharding. Support invalidate in bulk delete. GAE support. Allow uploader.upload_image to work on raw files. Support return_delete_token flag in upload. Support custom_coordinates in upload, explicit and update, coordinates flag in resource details. Update jQuery plugin to v1.0.21.
 v1.0.20, 2015-01-01 -- Solve python3 incomptibility errors.
-
+v1.0.21, 2015-02-12 -- Allow root path for shared CDN.
