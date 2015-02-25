@@ -269,7 +269,7 @@ def random_public_id():
 
 def signed_preloaded_image(result):
     filename = ".".join([x for x in [result["public_id"], result["format"]] if x])
-    path = "/".join([result["resource_type"], "upload", "v" + result["version"], filename])
+    path = "/".join([result["resource_type"], "upload", "v" + str(result["version"]), filename])
     return path + "#" + result["signature"]
 
 def now():
