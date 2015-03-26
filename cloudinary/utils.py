@@ -8,6 +8,9 @@ SHARED_CDN = cloudinary.SHARED_CDN
 
 DEFAULT_RESPONSIVE_WIDTH_TRANSFORMATION = {"width": "auto", "crop": "limit"}
 
+RANGE_VALUE_RE = r'^(?P<value>(\d+\.)?\d+)(?P<modifier>[%pP])?$'
+RANGE_RE = r'^(\d+\.)?\d+[%pP]?\.\.(\d+\.)?\d+[%pP]?$'
+
 def build_array(arg):
     if isinstance(arg, list):
         return arg
@@ -79,11 +82,57 @@ def generate_transformation_string(**options):
 
     flags = ".".join(build_array(options.pop("flags", None)))
     dpr = options.pop("dpr", cloudinary.config().dpr)
+    duration = norm_range_value(options.pop("duration", None))
+    start_offset = norm_range_value(options.pop("start_offset", None))
+    end_offset = norm_range_value(options.pop("end_offset", None))
+    offset = split_range(options.pop("offset", None))
+    if (offset):
+        start_offset = norm_range_value(offset[0])
+        end_offset = norm_range_value(offset[1])  
+    
+    video_codec = process_video_codec_param(options.pop("video_codec", None));
 
-    params = {"w": width, "h": height, "t": named_transformation, "b": background, "co": color, "e": effect, "c": crop, "a": angle, "bo": border, "fl": flags, "dpr": dpr}
-    for param, option in {"q": "quality", "g": "gravity", "p": "prefix", "x": "x",
-                          "y": "y", "r": "radius", "d": "default_image", "l": "overlay", "u": "underlay", "o": "opacity",
-                          "f": "fetch_format", "pg": "page", "dn": "density", "dl": "delay", "cs": "color_space"}.items():
+    params = {
+        "a"  : angle, 
+        "b"  : background, 
+        "bo" : border, 
+        "c"  : crop, 
+        "co" : color, 
+        "dpr": dpr,
+        "du" : duration,
+        "e"  : effect, 
+        "eo" : end_offset,
+        "fl" : flags, 
+        "h"  : height, 
+        "so" : start_offset,
+        "t"  : named_transformation,
+        "vc" : video_codec,
+        "w"  : width
+    }
+    simple_params = {
+        "ac": "audio_codec",
+        "af": "audio_frequency",
+        "br": "bit_rate",
+        "cs": "color_space",
+        "d" : "default_image",
+        "dl": "delay",
+        "dn": "density",
+        "f" : "fetch_format",
+        "g" : "gravity",
+        "l" : "overlay",
+        "o" : "opacity",
+        "p" : "prefix",
+        "pg": "page",
+        "q" : "quality",
+        "r" : "radius",
+        "u" : "underlay",
+        "vs": "video_sampling",
+        "x" : "x",
+        "y" : "y",
+        "z" : "zoom"
+    }
+
+    for param, option in simple_params.items():
         params[param] = options.pop(option, None)
 
     transformation = ",".join(sorted([param + "_" + str(value) for param, value in params.items() if (value or value == 0)]))
@@ -100,6 +149,38 @@ def generate_transformation_string(**options):
     if dpr == "auto":
       options["hidpi"] = True
     return (url, options)
+
+def split_range(range):
+    if (isinstance(range, list) or isinstance(range, tuple)) and len(range) >= 2:
+        return [range[0], range[-1]]
+    elif isinstance(range, basestring) and re.match(RANGE_RE, range):
+        return range.split("..", 1)
+    else:
+        return None
+
+def norm_range_value(value):
+    if value is None:
+      return None
+    
+    match = re.match(RANGE_VALUE_RE, str(value))
+    
+    if match is None:
+      return None
+
+    modifier = '';
+    if match.group('modifier') is not None:
+      modifier = 'p';
+    return match.group('value') + modifier
+
+def process_video_codec_param(param):
+    out_param = param
+    if isinstance(out_param, dict):
+      out_param = param['codec']
+      if 'profile' in param:
+          out_param = out_param + ':' + param['profile']
+          if 'level' in param:
+              out_param = out_param + ':' + param['level']
+    return out_param
 
 def cleanup_params(params):
     return dict( [ (k, __safe_value(v)) for (k,v) in params.items() if not v is None and not v == ""] )
@@ -356,6 +437,9 @@ def build_upload_params(**options):
               "return_delete_token": options.get("return_delete_token"),
               "auto_tagging": options.get("auto_tagging") and float(options.get("auto_tagging"))}
     return params
+
+def html_attrs(attrs, only=None):
+  return ' '.join(sorted([u"{0}='{1}'".format(key, value) for key, value in attrs if value and (only is None or key in only)]))
 
 def __safe_value(v):
     if isinstance(v, (bool)):
