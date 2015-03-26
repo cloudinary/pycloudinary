@@ -1,5 +1,5 @@
 import re
-from cloudinary import CloudinaryImage, forms, uploader
+from cloudinary import CloudinaryResource, forms, uploader
 from django.db import models
 from django.core.files.uploadedfile import UploadedFile
 
@@ -10,9 +10,11 @@ try:
 except ImportError:
     pass
 
+CLOUDINARY_FIELD_DB_RE = r'((?:(?P<resource_type>image|raw|video)/(?P<type>upload|private|authenticated)/)?v(?P<version>\d+)/)?(?P<public_id>.*?)(\.(?P<format>[^.]+))?$'
+
 class CloudinaryField(models.Field):
 
-    description = "An image stored in Cloudinary"
+    description = "A resource stored in Cloudinary"
 
     __metaclass__ = models.SubfieldBase
 
@@ -21,6 +23,7 @@ class CloudinaryField(models.Field):
         self.default_form_class = kwargs.pop("default_form_class", forms.CloudinaryFileField)
         options.update(kwargs)
         self.type = options.pop("type", "upload")
+        self.resource_type = options.pop("resource_type", "image")
         super(CloudinaryField, self).__init__(*args, **options)
 
     def get_internal_type(self):
@@ -31,15 +34,17 @@ class CloudinaryField(models.Field):
         return self.get_prep_value(value)
 
     def to_python(self, value):
-        if isinstance(value, CloudinaryImage):
+        if isinstance(value, CloudinaryResource):
             return value
         elif isinstance(value, UploadedFile):
             return value
         elif not value:
             return value
         else:
-            m = re.search('(v(?P<version>\d+)/)?(?P<public_id>.*?)(\.(?P<format>[^.]+))?$', value)
-            return CloudinaryImage(type = self.type, **m.groupdict())
+            m = re.match(CLOUDINARY_FIELD_DB_RE, value)
+            resource_type = m.group('resource_type') or self.resource_type
+            type = m.group('type') or self.type
+            return CloudinaryResource(type=type,resource_type=resource_type,version=m.group('version'),public_id=m.group('public_id'),format=m.group('format'))
 
     def upload_options_with_filename(self, model_instance, filename):
         return self.upload_options(model_instance);
@@ -50,9 +55,9 @@ class CloudinaryField(models.Field):
     def pre_save(self, model_instance, add):
         value = super(CloudinaryField, self).pre_save(model_instance, add)
         if isinstance(value, UploadedFile):
-            options = {"type": self.type}
+            options = {"type": self.type, "resource_type": self.resource_type}
             options.update(self.upload_options_with_filename(model_instance, value.name))
-            instance_value = uploader.upload_image(value, **options)
+            instance_value = uploader.upload_resource(value, **options)
             setattr(model_instance, self.attname, instance_value)
             return self.get_prep_value(instance_value)
         else:
@@ -62,7 +67,8 @@ class CloudinaryField(models.Field):
         prep = ''
         if not value:
             return None
-        if isinstance(value, CloudinaryImage):
+        if isinstance(value, CloudinaryResource):
+            prep = prep + value.resource_type + '/' + value.type + '/'
             if value.version: prep = prep + 'v' + str(value.version) + '/'
             prep = prep + value.public_id
             if value.format: prep = prep + '.' + value.format
@@ -71,7 +77,7 @@ class CloudinaryField(models.Field):
             return value
 
     def formfield(self, **kwargs):
-        options = {"type": "upload"}
+        options = {"type": self.type, "resource_type": self.resource_type}
         options.update(kwargs.pop('options', {}))
         defaults = {'form_class': self.default_form_class, 'options': options}
         defaults.update(kwargs)

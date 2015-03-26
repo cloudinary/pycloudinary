@@ -75,10 +75,10 @@ def reset_config():
     global _config
     _config = Config()
 
-class CloudinaryImage(object):
+class CloudinaryResource(object):
     def __init__(self, public_id = None, format = None, version = None,
-            signature = None, url_options = {}, metadata = None, type = None):
-
+            signature = None, url_options = {}, metadata = None, type = None, resource_type = None,
+            default_resource_type="image"):
         self.metadata = metadata
         metadata = metadata or {}
         self.public_id = public_id or metadata.get('public_id')
@@ -86,6 +86,7 @@ class CloudinaryImage(object):
         self.version = version or metadata.get('version')
         self.signature = signature or metadata.get('signature')
         self.type = type or metadata.get('type') or "upload"
+        self.resource_type = resource_type or metadata.get('resource_type') or default_resource_type
         self.url_options = url_options
 
     def __unicode__(self):
@@ -100,7 +101,7 @@ class CloudinaryImage(object):
         return self.build_url(**self.url_options)
 
     def __build_url(self, **options):
-        combined_options = dict(format = self.format, version = self.version, type = self.type)
+        combined_options = dict(format = self.format, version = self.version, type = self.type, resource_type = self.resource_type)
         combined_options.update(options)
         return utils.cloudinary_url(self.public_id, **combined_options)        
       
@@ -119,7 +120,15 @@ class CloudinaryImage(object):
             src = attrs.pop("responsive_placeholder", config().responsive_placeholder)
             if src == "blank": src = CL_BLANK 
         
-        attrs = sorted(attrs.items())
-        if src: attrs.insert(0, ("src", src))
+        if src: attrs["src"] = src
 
-        return u"<img {0}/>".format(' '.join([u"{0}='{1}'".format(key, value) for key, value in attrs if value]))
+        return u"<img {0}/>".format(utils.html_attrs(attrs))
+
+class CloudinaryImage(CloudinaryResource):
+    def __init__(self, public_id=None, **kwargs):
+        super(CloudinaryImage, self).__init__(public_id=public_id, default_resource_type="image", **kwargs)
+
+class CloudinaryVideo(CloudinaryResource):
+    def __init__(self, public_id=None, **kwargs):
+        super(CloudinaryVideo, self).__init__(public_id=public_id, default_resource_type="video", **kwargs)
+

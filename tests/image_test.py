@@ -21,11 +21,11 @@ class ImageTest(unittest.TestCase):
 
     def test_image_unicode(self):
         """should generate image with unicode arguments """
-        self.assertEqual(self.image.image(alt=u"\ua000abcd\u07b4"), u"<img src='http://res.cloudinary.com/test/image/upload/hello.png' alt='\ua000abcd\u07b4'/>")
+        self.assertEqual(self.image.image(alt=u"\ua000abcd\u07b4"), u"<img alt='\ua000abcd\u07b4' src='http://res.cloudinary.com/test/image/upload/hello.png'/>")
 
     def test_scale(self):
         """should accept scale crop and pass width/height to image tag """
-        self.assertEqual(self.image.image(crop='scale', width=100, height=100), "<img src='http://res.cloudinary.com/test/image/upload/c_scale,h_100,w_100/hello.png' height='100' width='100'/>")
+        self.assertEqual(self.image.image(crop='scale', width=100, height=100), "<img height='100' src='http://res.cloudinary.com/test/image/upload/c_scale,h_100,w_100/hello.png' width='100'/>")
 
     def test_validate(self):
         """should validate signature """

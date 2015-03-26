@@ -26,11 +26,14 @@ class CloudinaryInput(forms.TextInput):
           params = cloudinary.utils.sign_request(params, options)      
 
         if 'resource_type' not in options: options['resource_type'] = 'auto'
-        cloudinary_upload_url = cloudinary.utils.cloudinary_api_url("upload", **options)
+        chunk_size = options.get("chunk_size", None)
+        endpoint = "upload" if chunk_size is None else "upload_chunked"
+        cloudinary_upload_url = cloudinary.utils.cloudinary_api_url(endpoint, **options)
 
         attrs["data-url"] = cloudinary_upload_url
         attrs["data-form-data"] = json.dumps(params)
         attrs["data-cloudinary-field"] = name
+        if chunk_size: attrs["data-max-chunk-size"] = chunk_size
         attrs["class"] = " ".join(["cloudinary-fileupload", attrs.get("class", "")])
 
         widget = super(CloudinaryInput, self).render("file", None, attrs=attrs)
@@ -40,7 +43,7 @@ class CloudinaryInput(forms.TextInput):
 
 class CloudinaryJsFileField(forms.Field):      
     default_error_messages = {
-        'required': _(u"No image selected!")
+        'required': _(u"No file selected!")
     }
 
     def __init__(self, attrs={}, options={}, autosave=True, *args, **kwargs):
@@ -64,9 +67,7 @@ class CloudinaryJsFileField(forms.Field):
         if not m:
             raise forms.ValidationError("Invalid format")
         resource_type = m.group(1)
-        if resource_type != 'image':
-            raise forms.ValidationError("Only images are supported")
-        image_type = m.group(2)
+        type = m.group(2)
         version = m.group(3)
         filename = m.group(4)
         signature = m.group(5)
@@ -75,7 +76,7 @@ class CloudinaryJsFileField(forms.Field):
             raise forms.ValidationError("Invalid file name")
         public_id = m.group(1)
         image_format = m.group(2)
-        return CloudinaryImage(public_id, format=image_format, version=version, signature=signature, type=image_type)
+        return CloudinaryResource(public_id, format=image_format, version=version, signature=signature, type=type, resource_type=resource_type)
 
     def validate(self, value):
         "Validate the signature"
@@ -94,7 +95,7 @@ class CloudinaryUnsignedJsFileField(CloudinaryJsFileField):
 
 class CloudinaryFileField(forms.FileField):    
     my_default_error_messages = {
-        'required': _(u"No image selected!")
+        'required': _(u"No file selected!")
     }
     default_error_messages = forms.FileField.default_error_messages.copy()
     default_error_messages.update(my_default_error_messages)
@@ -104,7 +105,7 @@ class CloudinaryFileField(forms.FileField):
         super(CloudinaryFileField, self).__init__(*args, **kwargs)
 
     def to_python(self, value):
-        "Upload and convert to CloudinaryImage"
+        "Upload and convert to CloudinaryResource"
         value = super(CloudinaryFileField, self).to_python(value)
         if not value:
             return None;

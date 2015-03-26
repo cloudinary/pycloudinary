@@ -439,7 +439,7 @@ def build_upload_params(**options):
     return params
 
 def html_attrs(attrs, only=None):
-  return ' '.join(sorted([u"{0}='{1}'".format(key, value) for key, value in attrs if value and (only is None or key in only)]))
+  return ' '.join(sorted([u"{0}='{1}'".format(key, value) for key, value in attrs.items() if value and (only is None or key in only)]))
 
 def __safe_value(v):
     if isinstance(v, (bool)):
