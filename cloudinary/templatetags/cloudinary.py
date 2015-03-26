@@ -6,7 +6,7 @@ from django import template
 from django.forms import Form
 
 import cloudinary
-from cloudinary import CloudinaryImage, utils, uploader
+from cloudinary import CloudinaryResource, utils, uploader
 from cloudinary.forms import CloudinaryJsFileField, cl_init_js_callbacks
 
 register = template.Library()
@@ -19,8 +19,8 @@ def cloudinary_url(context, source, options_dict={}, **options):
             options['secure'] = True
     except KeyError:
         pass
-    if not isinstance(source, CloudinaryImage):
-        source = CloudinaryImage(source)
+    if not isinstance(source, CloudinaryResource):
+        source = CloudinaryResource(source)
     return source.build_url(**options)
 
 @register.simple_tag(name='cloudinary', takes_context=True)
@@ -31,8 +31,8 @@ def cloudinary_tag(context, image, options_dict={}, **options):
             options['secure'] = True
     except KeyError:
         pass
-    if not isinstance(image, CloudinaryImage):
-        image = CloudinaryImage(image)
+    if not isinstance(image, CloudinaryResource):
+        image = CloudinaryResource(image)
     return image.image(**options)
 
 @register.simple_tag

@@ -310,7 +310,6 @@ def cloudinary_url(source, **options):
     if url_suffix and not private_cdn:
         raise ValueError("URL Suffix only supported in private CDN")
 
-
     if (not source) or type == "upload" and re.match(r'^https?:', source):
         return (original_source, options)
 

@@ -1,5 +1,5 @@
 from django import forms
-from cloudinary import CloudinaryImage
+from cloudinary import CloudinaryResource
 import cloudinary.uploader
 import cloudinary.utils
 import re
@@ -60,7 +60,7 @@ class CloudinaryJsFileField(forms.Field):
         self.widget.attrs["options"]["callback"] = request.build_absolute_uri(staticfiles_storage.url("html/cloudinary_cors.html"))
 
     def to_python(self, value):
-        "Convert to CloudinaryImage"
+        "Convert to CloudinaryResource"
         if not value:
             return None;
         m = re.search(r'^([^/]+)/([^/]+)/v(\d+)/([^#]+)#([^/]+)$', value)
