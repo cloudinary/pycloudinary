@@ -1,5 +1,5 @@
 # Copyright Cloudinary
-import zlib, hashlib, re, struct, uuid, base64, time
+import zlib, hashlib, re, struct, uuid, base64, time, random, string
 import cloudinary
 from cloudinary.compat import (PY3, to_bytes, to_bytearray, to_string, unquote, urlencode)
 
@@ -346,7 +346,7 @@ def smart_escape(string):
     return to_string(re.sub(to_bytes(r"([^a-zA-Z0-9_.\-\/:]+)"), pack, to_bytes(string)))
 
 def random_public_id():
-    return base64.urlsafe_b64encode(hashlib.sha1(uuid.uuid4()).digest())[0:16]
+    return ''.join(random.SystemRandom().choice(string.ascii_lowercase + string.digits) for _ in range(16))
 
 def signed_preloaded_image(result):
     filename = ".".join([x for x in [result["public_id"], result["format"]] if x])

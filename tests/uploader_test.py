@@ -2,6 +2,9 @@ import cloudinary
 from cloudinary import uploader, utils, api
 from cloudinary.compat import PY3
 import unittest
+import tempfile
+import os
+import urllib2
 
 class UploaderTest(unittest.TestCase):
 
@@ -175,9 +178,26 @@ class UploaderTest(unittest.TestCase):
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_large(self):
-        """ should uploading large raw files """ 
-        resource = uploader.upload_large("tests/docx.docx", tags="upload_large_tag")
-        self.assertEqual(["upload_large_tag"], resource["tags"])
+        """ should support uploading large files """ 
+        temp_file = tempfile.NamedTemporaryFile()
+        temp_file_name = temp_file.name
+        temp_file.write("BMJ\xB9Y\x00\x00\x00\x00\x00\x8A\x00\x00\x00|\x00\x00\x00x\x05\x00\x00x\x05\x00\x00\x01\x00\x18\x00\x00\x00\x00\x00\xC0\xB8Y\x00a\x0F\x00\x00a\x0F\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xFF\x00\x00\xFF\x00\x00\xFF\x00\x00\x00\x00\x00\x00\xFFBGRs\x00\x00\x00\x00\x00\x00\x00\x00T\xB8\x1E\xFC\x00\x00\x00\x00\x00\x00\x00\x00fff\xFC\x00\x00\x00\x00\x00\x00\x00\x00\xC4\xF5(\xFF\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00");
+        for i in range(0, 588000):
+          temp_file.write("\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF")
+
+        temp_file.flush()
+        self.assertEqual(5880138, os.path.getsize(temp_file_name))
+
+        resource = uploader.upload_large(temp_file_name, chunk_size = 5243000, tags = ["upload_large_tag"])
+        self.assertEqual(resource["tags"], ["upload_large_tag"]);
+        self.assertEqual(resource["resource_type"], "raw");
+
+        resource = uploader.upload_large(temp_file_name, chunk_size = 5243000, tags = ["upload_large_tag"], resource_type = "image")
+        self.assertEqual(resource["tags"], ["upload_large_tag"])
+        self.assertEqual(resource["resource_type"], "image");
+        self.assertEqual(resource["width"], 1400);
+        self.assertEqual(resource["height"], 1400);
+        temp_file.close()
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_preset(self):
@@ -192,6 +212,11 @@ class UploaderTest(unittest.TestCase):
         """ should support requesting background_removal """
         with self.assertRaisesRegexp(api.Error, 'is invalid'): 
             uploader.upload("tests/logo.png", background_removal="illegal")
+
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_upload_timeout(self):
+        with self.assertRaisesRegexp(urllib2.URLError, 'urlopen error timed out'): 
+            uploader.upload("tests/logo.png", timeout=0.001)
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,6 +1,6 @@
 # Copyright Cloudinary
 import json, re, sys
-from os.path import basename
+from os.path import basename, getsize
 import urllib
 import cloudinary
 import socket
@@ -29,37 +29,29 @@ def upload_resource(file, **options):
         format=result.get("format"), type=result["type"], resource_type=result["resource_type"], metadata=result)
 
 def upload_large(file, **options):
-    """ Upload large raw files. Note that public_id should include an extension for best results. """
+    """ Upload large files. """
+    upload_id = utils.random_public_id()
     with open(file, 'rb') as file_io:
         upload = upload_id = None
-        index = 1
-        public_id = options.get("public_id")
-        chunk = file_io.read(20000000)
+        current_loc = 0
+        chunk_size = options.get("chunk_size", 20000000)
+        file_size = getsize(file)
+        chunk = file_io.read(chunk_size)        
         while (chunk):
             chunk_io = BytesIO(chunk)
             chunk_io.name = basename(file)
-            chunk = file_io.read(20000000)
-            upload = upload_large_part(chunk_io, public_id=public_id,
-                            upload_id=upload_id, part_number=index, final=chunk == "", **options)
-            upload_id = upload.get("upload_id")
-            public_id = upload.get("public_id")
-            index += 1
+            range = "bytes {0}-{1}/{2}".format(current_loc, current_loc + len(chunk) - 1, file_size)
+            current_loc += len(chunk)
+            upload = upload_large_part(chunk_io, http_headers={"Content-Range": range, "X-Unique-Upload-Id": upload_id}, **options)
+            options["public_id"] = upload.get("public_id")
+            chunk = file_io.read(chunk_size)
         return upload
 
 def upload_large_part(file, **options):
-    """ Upload large raw files. Note that public_id should include an extension for best results. """
-    params = {
-        "timestamp": utils.now(),
-        "type": options.get("type"),
-        "backup": options.get("backup"),
-        "final": options.get("final"),
-        "part_number": options.get("part_number"),
-        "upload_id": options.get("upload_id"),
-        "tags": options.get("tags") and ",".join(utils.build_array(options["tags"])),
-        "public_id": options.get("public_id")
-    }
-    return call_api("upload_large", params, resource_type="raw", file=file, **options)
-
+    """ Upload large files. """
+    params = utils.build_upload_params(**options)
+    if 'resource_type' not in options: options['resource_type'] = "raw"
+    return call_api("upload_chunked", params, file=file, **options)
 
 def destroy(public_id, **options):
     params = {
@@ -155,11 +147,10 @@ def text(text, **options):
         params[key] = options.get(key)
     return call_api("text", params, **options)
 
-def call_api(action, params, **options):
+def call_api(action, params, http_headers={}, return_error=False, unsigned=False, file=None, timeout=None, **options):
     try:
         file_io = None
-        return_error = options.get("return_error")
-        if options.get("unsigned"):
+        if unsigned:
           params = utils.cleanup_params(params)
         else:
           params = utils.sign_request(params, options)
@@ -182,8 +173,7 @@ def call_api(action, params, **options):
     
         datagen = []
         headers = {}
-        if "file" in options:
-            file = options["file"]
+        if file:
             if not isinstance(file, string_types):
                 datagen, headers = multipart_encode({'file': file})
             elif not re.match(r'^ftp:|https?:|^s3:|^data:[^;]*;base64,([a-zA-Z0-9\/+\n=]+)$', file):
@@ -197,11 +187,13 @@ def call_api(action, params, **options):
             datagen = "".join(datagen)
 
         request = urllib2.Request(api_url + "?" + urlencode(param_list), datagen, headers)
-        request.add_header("User-Agent", cloudinary.USER_AGENT)
+        request.add_header("User-Agent", cloudinary.USER_AGENT)        
+        for k, v in http_headers.items():
+            request.add_header(k, v)
     
         kw = {}
-        if 'timeout' in options:
-            kw['timeout'] = options['timeout']
+        if timeout is not None:
+            kw['timeout'] = timeout
 
         code = 200
         try:
