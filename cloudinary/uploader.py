@@ -88,6 +88,8 @@ def explicit(public_id, **options):
         "callback": options.get("callback"),
         "headers": utils.build_custom_headers(options.get("headers")),
         "eager": utils.build_eager(options.get("eager")),
+        "eager_notification_url": options.get("eager_notification_url"),
+        "eager_async": options.get("eager_async"),
         "tags": options.get("tags") and ",".join(utils.build_array(options["tags"])),
         "face_coordinates": utils.encode_double_array(options.get("face_coordinates")),
         "custom_coordinates": utils.encode_double_array(options.get("custom_coordinates"))}
