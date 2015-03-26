@@ -438,8 +438,16 @@ def build_upload_params(**options):
               "auto_tagging": options.get("auto_tagging") and float(options.get("auto_tagging"))}
     return params
 
+def __join_pair(key, value):
+    if value is None or value == "":
+        return None
+    elif value is True:
+        return key
+    else:
+        return u"{0}=\"{1}\"".format(key, value)
+
 def html_attrs(attrs, only=None):
-  return ' '.join(sorted([u"{0}='{1}'".format(key, value) for key, value in attrs.items() if value and (only is None or key in only)]))
+    return ' '.join(sorted([__join_pair(key, value) for key, value in attrs.items() if only is None or key in only]))
 
 def __safe_value(v):
     if isinstance(v, (bool)):
