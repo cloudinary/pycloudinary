@@ -33,8 +33,8 @@ class VideoTest(unittest.TestCase):
     def test_video_tag_with_attributes(self):
         """ test video attributes """
         expected_url = VIDEO_UPLOAD_PATH + "movie"
-        self.assertEqual(self.video.video(autoplay = 1, controls = True, loop = True, muted = "true", preload = True), 
-          "<video autoplay=\"1\" controls loop muted=\"true\" poster=\"" + expected_url + ".jpg\" preload>" +
+        self.assertEqual(self.video.video(autoplay = 1, controls = True, loop = True, muted = "true", preload = True, style = "border: 1px"), 
+          "<video autoplay=\"1\" controls loop muted=\"true\" poster=\"" + expected_url + ".jpg\" preload style=\"border: 1px\">" +
           "<source src=\"" + expected_url + ".webm\" type=\"video/webm\">" +
           "<source src=\"" + expected_url + ".mp4\" type=\"video/mp4\">" +
           "<source src=\"" + expected_url + ".ogv\" type=\"video/ogg\">" +

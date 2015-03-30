@@ -157,8 +157,6 @@ class CloudinaryResource(object):
         public_id = options.get('public_id', self.public_id)
         source = re.sub("\.{0}$".format("|".join(self.default_source_types())), '', public_id)
 
-        video_attributes = ['autoplay', 'controls', 'loop', 'muted', 'poster', 'preload', 'width', 'height']
-
         source_types          = options.pop('source_types', [])
         source_transformation = options.pop('source_transformation', {})
         fallback              = options.pop('fallback_content', '')
@@ -183,15 +181,15 @@ class CloudinaryResource(object):
 
         nested_source_types = isinstance(source_types, list) and len(source_types) > 1 
         if not nested_source_types:
-            video_attributes.append('src')
             source = source + '.' + utils.build_array(source_types)[0];
 
         video_url = utils.cloudinary_url(source, **video_options)
         video_options = video_url[1]
-        video_options['src'] = video_url[0]
-        if 'html_width' in video_options: video_options['width'] = video_options['html_width']
-        if 'html_height' in video_options: video_options['height'] = video_options['html_height']
-        html = html + utils.html_attrs(video_options, video_attributes ) + '>'
+        if not nested_source_types:
+            video_options['src'] = video_url[0]
+        if 'html_width' in video_options: video_options['width'] = video_options.pop('html_width')
+        if 'html_height' in video_options: video_options['height'] = video_options.pop('html_height')
+        html = html + utils.html_attrs(video_options) + '>'
 
         if nested_source_types:
             for source_type in source_types:
