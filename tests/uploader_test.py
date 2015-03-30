@@ -197,6 +197,11 @@ class UploaderTest(unittest.TestCase):
         self.assertEqual(resource["resource_type"], "image");
         self.assertEqual(resource["width"], 1400);
         self.assertEqual(resource["height"], 1400);
+
+        resource = uploader.upload_large(temp_file_name, chunk_size = 5880138, tags = ["upload_large_tag"])
+        self.assertEqual(resource["tags"], ["upload_large_tag"]);
+        self.assertEqual(resource["resource_type"], "raw");
+
         temp_file.close()
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
