@@ -36,7 +36,7 @@ def upload_large(file, **options):
         current_loc = 0
         chunk_size = options.get("chunk_size", 20000000)
         file_size = getsize(file)
-        chunk = file_io.read(chunk_size)        
+        chunk = file_io.read(chunk_size)
         while (chunk):
             chunk_io = BytesIO(chunk)
             chunk_io.name = basename(file)
@@ -154,23 +154,23 @@ def call_api(action, params, http_headers={}, return_error=False, unsigned=False
           params = utils.cleanup_params(params)
         else:
           params = utils.sign_request(params, options)
-    
+
         param_list = []
         for k, v in params.items():
-            if isinstance(v, list):          
+            if isinstance(v, list):
                 for vv in v:
                   param_list.append((k+"[]", vv))
             elif v:
-                param_list.append((k, v))            
-    
+                param_list.append((k, v))
+
         api_url = utils.cloudinary_api_url(action, **options)
-    
+
         global _initialized
         if not _initialized:
             _initialized = True
             # Register the streaming http handlers with urllib2
             register_openers()
-    
+
         datagen = []
         headers = {}
         if file:
@@ -181,16 +181,17 @@ def call_api(action, params, http_headers={}, return_error=False, unsigned=False
                 datagen, headers = multipart_encode({'file': file_io})
             else:
                 param_list.append(("file", file))
+                headers['Content-Length'] = '0'
 
         if _is_gae():
             # Might not be needed in the future but for now this is needed in GAE
             datagen = "".join(datagen)
 
         request = urllib2.Request(api_url + "?" + urlencode(param_list), datagen, headers)
-        request.add_header("User-Agent", cloudinary.USER_AGENT)        
+        request.add_header("User-Agent", cloudinary.USER_AGENT)
         for k, v in http_headers.items():
             request.add_header(k, v)
-    
+
         kw = {}
         if timeout is not None:
             kw['timeout'] = timeout
@@ -207,23 +208,23 @@ def call_api(action, params, http_headers={}, return_error=False, unsigned=False
         except socket.error:
             e = sys.exc_info()[1]
             raise Error("Socket error: %s" % str(e))
-    
+
         try:
             result = json.loads(to_string(response))
         except Exception:
             e = sys.exc_info()[1]
             # Error is parsing json
             raise Error("Error parsing server response (%d) - %s. Got - %s", code, response, e)
-    
+
         if "error" in result:
             if return_error:
                 result["error"]["http_code"] = code
             else:
                 raise Error(result["error"]["message"])
-    
+
         return result
     finally:
-        if file_io: file_io.close()    
+        if file_io: file_io.close()
 
 def _is_gae():
     if PY3:
