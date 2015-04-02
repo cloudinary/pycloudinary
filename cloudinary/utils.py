@@ -1,7 +1,7 @@
 # Copyright Cloudinary
 import zlib, hashlib, re, struct, uuid, base64, time, random, string
 import cloudinary
-from cloudinary.compat import (PY3, to_bytes, to_bytearray, to_string, unquote, urlencode)
+from cloudinary.compat import (PY3, to_bytes, to_bytearray, to_string, string_types, unquote, urlencode)
 
 """ @deprecated: use cloudinary.SHARED_CDN """
 SHARED_CDN = cloudinary.SHARED_CDN
@@ -153,7 +153,7 @@ def generate_transformation_string(**options):
 def split_range(range):
     if (isinstance(range, list) or isinstance(range, tuple)) and len(range) >= 2:
         return [range[0], range[-1]]
-    elif isinstance(range, basestring) and re.match(RANGE_RE, range):
+    elif isinstance(range, string_types) and re.match(RANGE_RE, range):
         return range.split("..", 1)
     else:
         return None

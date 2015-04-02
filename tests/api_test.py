@@ -297,8 +297,8 @@ class ApiTest(unittest.TestCase):
         response = uploader.upload("tests/logo.png")
         api_repsonse = api.resources(type="upload", start_at=start_at, direction="asc")
         resources = api_repsonse["resources"];
-        self.assertEquals(len(resources), 1)
-        self.assertEquals(resources[0]["public_id"], response["public_id"])
+        self.assertEqual(len(resources), 1)
+        self.assertEqual(resources[0]["public_id"], response["public_id"])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test28_create_list_upload_presets(self):
@@ -310,9 +310,9 @@ class ApiTest(unittest.TestCase):
         api_response = api.upload_presets()
         presets = api_response["presets"]
         self.assertGreaterEqual(len(presets), 3)
-        self.assertEquals(presets[0]["name"], "api_test_upload_preset3")
-        self.assertEquals(presets[1]["name"], "api_test_upload_preset2")
-        self.assertEquals(presets[2]["name"], "api_test_upload_preset")
+        self.assertEqual(presets[0]["name"], "api_test_upload_preset3")
+        self.assertEqual(presets[1]["name"], "api_test_upload_preset2")
+        self.assertEqual(presets[2]["name"], "api_test_upload_preset")
         api.delete_upload_preset("api_test_upload_preset")
         api.delete_upload_preset("api_test_upload_preset2")
         api.delete_upload_preset("api_test_upload_preset3")
@@ -323,13 +323,13 @@ class ApiTest(unittest.TestCase):
         result = api.create_upload_preset(unsigned=True, folder="folder", width=100, crop="scale", tags=["a","b","c"], context={"a": "b","c": "d"})
         name = result["name"]
         preset = api.upload_preset(name)
-        self.assertEquals(preset["name"], name)
-        self.assertEquals(preset["unsigned"], True)
+        self.assertEqual(preset["name"], name)
+        self.assertEqual(preset["unsigned"], True)
         settings = preset["settings"]
-        self.assertEquals(settings["folder"], "folder")
-        self.assertEquals(settings["transformation"], [{"width": 100, "crop": "scale"}])
-        self.assertEquals(settings["context"], {"a": "b","c": "d"})
-        self.assertEquals(settings["tags"], ["a","b","c"])
+        self.assertEqual(settings["folder"], "folder")
+        self.assertEqual(settings["transformation"], [{"width": 100, "crop": "scale"}])
+        self.assertEqual(settings["context"], {"a": "b","c": "d"})
+        self.assertEqual(settings["tags"], ["a","b","c"])
         api.delete_upload_preset(name)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -351,8 +351,8 @@ class ApiTest(unittest.TestCase):
         settings.update({"colors": True, "unsigned": True, "disallow_public_id": True})
         api.update_upload_preset(name, **settings)
         preset = api.upload_preset(name)
-        self.assertEquals(preset["unsigned"], True)
-        self.assertEquals(preset["settings"], {"folder": "folder", "colors": True, "disallow_public_id": True})
+        self.assertEqual(preset["unsigned"], True)
+        self.assertEqual(preset["settings"], {"folder": "folder", "colors": True, "disallow_public_id": True})
         api.delete_upload_preset(name)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -372,11 +372,11 @@ class ApiTest(unittest.TestCase):
         uploader.upload("spec/logo.png", public_id = "test_folder1/test_subfolder1/item")
         uploader.upload("spec/logo.png", public_id = "test_folder1/test_subfolder2/item")
         result = api.root_folders
-        self.assertEquals(result["folders"][0]["name"], "test_folder1")
-        self.assertEquals(result["folders"][1]["name"], "test_folder2")
+        self.assertEqual(result["folders"][0]["name"], "test_folder1")
+        self.assertEqual(result["folders"][1]["name"], "test_folder2")
         result = api.subfolders("test_folder1")
-        self.assertEquals(result["folders"][0]["path"], "test_folder1/test_subfolder1")
-        self.assertEquals(result["folders"][1]["path"], "test_folder1/test_subfolder2")
+        self.assertEqual(result["folders"][0]["path"], "test_folder1/test_subfolder1")
+        self.assertEqual(result["folders"][1]["path"], "test_folder1/test_subfolder2")
         with self.assertRaisesRegexp(api.NotFound): 
             api.subfolders("test_folder")
         api.delete_resources_by_prefix("test_folder")

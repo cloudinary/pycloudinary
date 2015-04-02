@@ -32,7 +32,7 @@ def upload_large(file, **options):
     """ Upload large files. """
     upload_id = utils.random_public_id()
     with open(file, 'rb') as file_io:
-        upload = upload_id = None
+        upload = None
         current_loc = 0
         chunk_size = options.get("chunk_size", 20000000)
         file_size = getsize(file)
@@ -171,8 +171,7 @@ def call_api(action, params, http_headers={}, return_error=False, unsigned=False
             # Register the streaming http handlers with urllib2
             register_openers()
     
-        datagen = []
-        headers = {}
+        datagen, headers = multipart_encode({})
         if file:
             if not isinstance(file, string_types):
                 datagen, headers = multipart_encode({'file': file})
@@ -204,6 +203,9 @@ def call_api(action, params, http_headers={}, return_error=False, unsigned=False
                 raise Error("Server returned unexpected status code - %d - %s" % (e.code, e.read()))
             code = e.code
             response = e.read()
+        except urllib2.URLError:
+            e = sys.exc_info()[1]
+            raise Error("Error - %s" % str(e))
         except socket.error:
             e = sys.exc_info()[1]
             raise Error("Socket error: %s" % str(e))

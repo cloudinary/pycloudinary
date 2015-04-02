@@ -340,7 +340,7 @@ class TestUtils(unittest.TestCase):
         }
         for source, target in tests.items():
             result, options = cloudinary.utils.cloudinary_url(source)
-            self.assertEquals(DEFAULT_UPLOAD_PATH + "" + target, result)
+            self.assertEqual(DEFAULT_UPLOAD_PATH + "" + target, result)
 
     def test_responsive_width(self):
         """should support responsive width"""
