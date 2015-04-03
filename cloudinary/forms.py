@@ -26,13 +26,12 @@ class CloudinaryInput(forms.TextInput):
           params = cloudinary.utils.sign_request(params, options)      
 
         if 'resource_type' not in options: options['resource_type'] = 'auto'
-        chunk_size = options.get("chunk_size", None)
-        endpoint = "upload" if chunk_size is None else "upload_chunked"
-        cloudinary_upload_url = cloudinary.utils.cloudinary_api_url(endpoint, **options)
+        cloudinary_upload_url = cloudinary.utils.cloudinary_api_url("upload", **options)
 
         attrs["data-url"] = cloudinary_upload_url
         attrs["data-form-data"] = json.dumps(params)
         attrs["data-cloudinary-field"] = name
+        chunk_size = options.get("chunk_size", None)
         if chunk_size: attrs["data-max-chunk-size"] = chunk_size
         attrs["class"] = " ".join(["cloudinary-fileupload", attrs.get("class", "")])
 

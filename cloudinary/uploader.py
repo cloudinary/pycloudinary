@@ -51,7 +51,7 @@ def upload_large_part(file, **options):
     """ Upload large files. """
     params = utils.build_upload_params(**options)
     if 'resource_type' not in options: options['resource_type'] = "raw"
-    return call_api("upload_chunked", params, file=file, **options)
+    return call_api("upload", params, file=file, **options)
 
 def destroy(public_id, **options):
     params = {
