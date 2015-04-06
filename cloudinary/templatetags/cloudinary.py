@@ -8,6 +8,7 @@ from django.forms import Form
 import cloudinary
 from cloudinary import CloudinaryResource, utils, uploader
 from cloudinary.forms import CloudinaryJsFileField, cl_init_js_callbacks
+from cloudinary.compat import PY3
 
 register = template.Library()
 
@@ -40,7 +41,10 @@ def cloudinary_direct_upload_field(field_name="image", request=None):
     form = type("OnTheFlyForm", (Form,), {field_name : CloudinaryJsFileField() })()
     if request:
         cl_init_js_callbacks(form, request)
-    return unicode(form[field_name])
+    value = form[field_name]
+    if not PY3:
+        value = unicode(value)
+    return value
 
 """Deprecated - please use cloudinary_direct_upload_field, or a proper form"""
 @register.inclusion_tag('cloudinary_direct_upload.html')
