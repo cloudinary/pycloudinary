@@ -155,7 +155,7 @@ class CloudinaryResource(object):
     #   CloudinaryResource("mymovie.webm").video(source_types = ['webm', 'mp4'], poster = {'effect': 'sepia'})
     def video(self, **options):
         public_id = options.get('public_id', self.public_id)
-        source = re.sub("\.{0}$".format("|".join(self.default_source_types())), '', public_id)
+        source = re.sub("\.({0})$".format("|".join(self.default_source_types())), '', public_id)
 
         source_types          = options.pop('source_types', [])
         source_transformation = options.pop('source_transformation', {})
