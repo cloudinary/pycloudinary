@@ -28,3 +28,4 @@ v1.0.18, 2014-07-07 -- Support for density pixel ratio (dpr) transformation para
 v1.0.19, 2014-12-21 -- Folder listing. Support tags in upload_large. URL suffix, root URL and secure domain sharding. Support invalidate in bulk delete. GAE support. Allow uploader.upload_image to work on raw files. Support return_delete_token flag in upload. Support custom_coordinates in upload, explicit and update, coordinates flag in resource details. Update jQuery plugin to v1.0.21.
 v1.0.20, 2015-01-01 -- Solve python3 incomptibility errors.
 v1.0.21, 2015-02-12 -- Allow root path for shared CDN.
+v1.1.0,  2015-04-07 -- Support saving non-image resource types in CloudinaryField. Support storing type information in database. Support video tag and video thumbnail generation. Support video transformation parameters. Support eager_notification_url and eager_async in explicit. Support ftp urls in upload. upload large enhancements. Python3 compatibility fixes.
