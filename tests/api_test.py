@@ -68,7 +68,7 @@ class ApiTest(unittest.TestCase):
         resources_tags = [resource["tags"] for resource in resources]
         tags = [x for y in resources_tags for x in y]
         self.assertIn("api_test_tag", tags)
-        self.assertIn({"custom": {"key": "value"}}, [resource["context"] for resource in resources])
+        self.assertIn({"custom": {"key": "value"}}, [resource.get("context") for resource in resources])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test06_resources_tag(self):
@@ -79,7 +79,7 @@ class ApiTest(unittest.TestCase):
         resources_tags = [resource["tags"] for resource in resources]
         tags = [x for y in resources_tags for x in y]
         self.assertIn("api_test_tag", tags)
-        self.assertIn({"custom": {"key": "value"}}, [resource["context"] for resource in resources])
+        self.assertIn({"custom": {"key": "value"}}, [resource.get("context") for resource in resources])
         
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test06a_resources_by_ids(self):
@@ -90,7 +90,7 @@ class ApiTest(unittest.TestCase):
         resources_tags = [resource["tags"] for resource in resources]
         tags = [x for y in resources_tags for x in y]
         self.assertIn("api_test_tag", tags)
-        self.assertIn({"custom": {"key": "value"}}, [resource["context"] for resource in resources])
+        self.assertIn({"custom": {"key": "value"}}, [resource.get("context") for resource in resources])
         
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test06b_resources_direction(self):
