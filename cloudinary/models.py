@@ -12,11 +12,19 @@ except ImportError:
 
 CLOUDINARY_FIELD_DB_RE = r'((?:(?P<resource_type>image|raw|video)/(?P<type>upload|private|authenticated)/)?v(?P<version>\d+)/)?(?P<public_id>.*?)(\.(?P<format>[^.]+))?$'
 
-class CloudinaryField(models.Field):
+# Taken from six - https://pythonhosted.org/six/
+def with_metaclass(meta, *bases):
+    """Create a base class with a metaclass."""
+    # This requires a bit of explanation: the basic idea is to make a dummy
+    # metaclass for one level of class instantiation that replaces itself with
+    # the actual metaclass.
+    class metaclass(meta):
+        def __new__(cls, name, this_bases, d):
+            return meta(name, bases, d)
+    return type.__new__(metaclass, 'temporary_class', (), {})
 
+class CloudinaryField(with_metaclass(models.SubfieldBase, models.Field)):
     description = "A resource stored in Cloudinary"
-
-    __metaclass__ = models.SubfieldBase
 
     def __init__(self, *args, **kwargs):
         options = {'max_length': 100}
@@ -79,6 +87,6 @@ class CloudinaryField(models.Field):
     def formfield(self, **kwargs):
         options = {"type": self.type, "resource_type": self.resource_type}
         options.update(kwargs.pop('options', {}))
-        defaults = {'form_class': self.default_form_class, 'options': options}
+        defaults = {'form_class': self.default_form_class, 'options': options, 'autosave': False}
         defaults.update(kwargs)
-        return super(CloudinaryField, self).formfield(autosave=False, **defaults)
+        return super(CloudinaryField, self).formfield(**defaults)
