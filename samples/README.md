@@ -1,4 +1,4 @@
-Cloudinary Python & Djano Sample Projects
+Cloudinary Python & Django Sample Projects
 =========================================
 
 ## Basic sample
