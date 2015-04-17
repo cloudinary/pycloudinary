@@ -29,3 +29,4 @@ v1.0.19, 2014-12-21 -- Folder listing. Support tags in upload_large. URL suffix,
 v1.0.20, 2015-01-01 -- Solve python3 incomptibility errors.
 v1.0.21, 2015-02-12 -- Allow root path for shared CDN.
 v1.1.0,  2015-04-07 -- Support saving non-image resource types in CloudinaryField. Support storing type information in database. Support video tag and video thumbnail generation. Support video transformation parameters. Support eager_notification_url and eager_async in explicit. Support ftp urls in upload. upload large enhancements. Python3 compatibility fixes.
+v1.1.1,  2015-04-17 -- Solve python3 incomptibility errors in django integration. Solve backward compatibility issues in CloudinaryResource.
