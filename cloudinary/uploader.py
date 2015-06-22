@@ -186,7 +186,7 @@ def call_api(action, params, http_headers={}, return_error=False, unsigned=False
             datagen = "".join(datagen)
 
         request = urllib2.Request(api_url + "?" + urlencode(param_list), datagen, headers)
-        request.add_header("User-Agent", cloudinary.USER_AGENT)        
+        request.add_header("User-Agent", cloudinary.get_user_agent())
         for k, v in http_headers.items():
             request.add_header(k, v)
     

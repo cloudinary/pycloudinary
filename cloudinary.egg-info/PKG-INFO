@@ -1,6 +1,6 @@
 Metadata-Version: 1.1
 Name: cloudinary
-Version: 1.1.0
+Version: 1.1.2
 Summary: Python interface to Cloudinary
 Home-page: http://cloudinary.com
 Author: Cloudinary
@@ -11,6 +11,6 @@ Keywords: cloudinary image upload transformation cdn
 Platform: UNKNOWN
 Classifier: License :: OSI Approved :: MIT License
 Classifier: Programming Language :: Python
-Classifier: Development Status :: 4 - Beta
+Classifier: Development Status :: 5 - Production/Stable
 Classifier: Intended Audience :: Developers
 Classifier: Topic :: Internet :: WWW/HTTP

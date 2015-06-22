@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '1.1.1'
+version = '1.1.2'
 
 setup(name='cloudinary',
       version=version,
@@ -15,7 +15,7 @@ setup(name='cloudinary',
       classifiers=[
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python",
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "Topic :: Internet :: WWW/HTTP",
       ],

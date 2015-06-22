@@ -4,17 +4,44 @@ import os
 import sys
 import re
 
+
 CF_SHARED_CDN = "d3jpl91pxevbkh.cloudfront.net"
 OLD_AKAMAI_SHARED_CDN = "cloudinary-a.akamaihd.net"
 AKAMAI_SHARED_CDN = "res.cloudinary.com"
 SHARED_CDN = AKAMAI_SHARED_CDN
 CL_BLANK = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
 
-VERSION = "1.1.1"
-USER_AGENT = "cld-python-" + VERSION
+VERSION = "1.1.2"
+USER_AGENT = "CloudinaryPython/" + VERSION
+""" :const: USER_AGENT """
+
+USER_PLATFORM = ""
+"""
+Additional information to be passed with the USER_AGENT, e.g. "CloudinaryMagento/1.0.1". This value is set in platform-specific
+implementations that use cloudinary_php.
+
+The format of the value should be <ProductName>/Version[ (comment)].
+@see http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.43
+
+**Do not set this value in application code!**
+"""
 
 from cloudinary import utils
 from cloudinary.compat import urlparse, parse_qs
+
+
+def get_user_agent():
+    """Provides the `USER_AGENT` string that is passed to the Cloudinary servers.
+    Prepends  `USER_PLATFORM` if it is defined.
+
+    :returns: the user agent
+    :rtype: str
+    """
+
+    if USER_PLATFORM == "":
+        return USER_AGENT
+    else:
+        return USER_PLATFORM + " " + USER_AGENT
 
 def import_django_settings():
     try:

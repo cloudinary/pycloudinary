@@ -1,4 +1,3 @@
-import copy
 import cloudinary.utils
 import unittest
 import re
@@ -431,6 +430,16 @@ class TestUtils(unittest.TestCase):
         }
         for transformation, offset in test_cases.items():
           self.__test_cloudinary_url(public_id="video_id", options={'resource_type': 'video', 'offset': offset}, expected_url=VIDEO_UPLOAD_PATH + transformation + "/video_id")
+
+    def test_user_agent(self):
+        agent = cloudinary.get_user_agent()
+        platform = 'MyPlatform/1.2.3 (Test code)'
+        self.assertRegexpMatches(agent, 'CloudinaryPython/\d\.\d+\.\d+')
+        temp = cloudinary.USER_PLATFORM
+        cloudinary.USER_PLATFORM = platform
+        result = cloudinary.get_user_agent()
+        cloudinary.USER_PLATFORM = temp  # restore value before assertion
+        self.assertEqual(result, platform + ' ' + agent)
 
 if __name__ == '__main__':
     unittest.main()

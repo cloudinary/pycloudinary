@@ -197,7 +197,7 @@ def call_api(method, uri, params, **options):
     encoded_value = base64.encodebytes(byte_value) if PY3 else base64.encodestring(byte_value)
     base64string = to_string(encoded_value).replace('\n', '')
     request.add_header("Authorization", "Basic %s" % base64string)
-    request.add_header("User-Agent", cloudinary.USER_AGENT)
+    request.add_header("User-Agent", cloudinary.get_user_agent())
     request.get_method = lambda: method.upper()
 
     kw = {}
