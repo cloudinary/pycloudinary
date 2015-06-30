@@ -1,4 +1,3 @@
-CHANGES.txt
 LICENSE.txt
 MANIFEST.in
 setup.cfg

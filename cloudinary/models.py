@@ -1,3 +1,4 @@
+import cloudinary
 import re
 from cloudinary import CloudinaryResource, forms, uploader
 from django.db import models
@@ -27,7 +28,7 @@ class CloudinaryField(with_metaclass(models.SubfieldBase, models.Field)):
     description = "A resource stored in Cloudinary"
 
     def __init__(self, *args, **kwargs):
-        options = {}
+        options = {'max_length': 255}
         self.default_form_class = kwargs.pop("default_form_class", forms.CloudinaryFileField)
         options.update(kwargs)
         self.type = options.pop("type", "upload")
