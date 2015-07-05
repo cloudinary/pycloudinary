@@ -1,4 +1,15 @@
 
+1.1.3 / 2015-07-05
+==================
+
+  * Increment version to 1.1.3
+  * Add `max_length` to settings.
+
+1.1.2 / 2015-06-22
+==================
+
+  * Update USER_AGENT. Remove max_length restriction from CloudianryField. Rename and reformat CHANGES.txt.   * Version 1.1.2   * Update `USER_AGENT` format and allow the setting of `USER_PLATFORM`   * Remove `max_length` restriction from `CloudinaryField`   * Reformat CHANGES.txt and rename it to CHANGELOG.md   * Change PyPI package classifier to "Development Status :: 5 - Production/Stable"
+
 1.1.2 / 2015-06-22
 ==================
 
