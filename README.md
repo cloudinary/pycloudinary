@@ -145,7 +145,7 @@ Usage:
 
     class Poll(models.Model):
       # ...
-      image = cloudinary.models.CloudinaryField('image')
+      image = cloudinary.models.CloudinaryField('image', max_length=100)
 
 ### Forms
 
