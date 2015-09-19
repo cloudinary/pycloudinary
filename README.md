@@ -99,8 +99,8 @@ cloudinary.utils.cloudinary_url("billclinton.jpg",
                                 width = 90,
                                 height = 130,
                                 type = "facebook",
-                                crop => "fill",
-                                gravity => "north_west")
+                                crop = "fill",
+                                gravity = "north_west")
 
 
 ```
