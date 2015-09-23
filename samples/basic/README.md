@@ -24,11 +24,11 @@ This sample is a synchronous script that shows the upload process from local fil
 
 1. Run the script:
 
-        $ python sample.py
+        $ python basic.py
 
 In order to delete the uploaded images using Cloudinary's Admin API, run the script:
 
-        $ python sample.py cleanup
+        $ python basic.py cleanup
 
 
 Good luck!
