@@ -28,7 +28,7 @@ def upload_files():
         crop = "fill"
     )
     print("Fill 200x150 url: " + url)
-    print()
+    print("")
 
     print("--- Upload a local file with custom public ID")
     response = upload("pizza.jpg",
@@ -43,7 +43,7 @@ def upload_files():
         crop = "fit"
     )
     print("Fit into 200x150 url: " + url)
-    print()
+    print("")
 
     print("--- Upload a local file with eager transformation of scaling to 200x150")
     response = upload("lake.jpg",
@@ -63,7 +63,7 @@ def upload_files():
         crop = "scale",
     )
     print("scaling to 200x150 url: " + url)
-    print()
+    print("")
 
     print("--- Upload by fetching a remote image")
     response = upload("http://res.cloudinary.com/demo/image/upload/couple.jpg",
@@ -78,7 +78,7 @@ def upload_files():
         gravity = "faces",
     )
     print("Face detection based 200x150 thumbnail url: " + url)
-    print()
+    print("")
 
     print("--- Fetch an uploaded remote image, fitting it into 500x500 and reducing saturation")
     response = upload("http://res.cloudinary.com/demo/image/upload/couple.jpg",
@@ -99,7 +99,7 @@ def upload_files():
         effect = "sepia",
     )
     print("Fill 200x150, round corners, apply the sepia effect, url: " + url)
-    print()
+    print("")
 
 def cleanup():
     response = resources_by_tag(DEFAULT_TAG)
@@ -118,5 +118,5 @@ if len(sys.argv) > 1:
 else:
     print("--- Uploading files and then cleaning up")
     print("    you can only one instead by passing 'upload' or 'cleanup' as an argument")
-    print()
+    print("")
     upload_files()
