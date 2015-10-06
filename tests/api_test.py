@@ -296,7 +296,7 @@ class ApiTest(unittest.TestCase):
         time.sleep(2)
         response = uploader.upload("tests/logo.png")
         api_repsonse = api.resources(type="upload", start_at=start_at, direction="asc")
-        resources = api_repsonse["resources"];
+        resources = api_repsonse["resources"]
         self.assertEqual(len(resources), 1)
         self.assertEqual(resources[0]["public_id"], response["public_id"])
 
@@ -367,10 +367,10 @@ class ApiTest(unittest.TestCase):
             "Comment out this line if you really want to test it.")
     def test_folder_listing(self):
         """ should support listing folders """
-        uploader.upload("spec/logo.png", public_id = "test_folder1/item")
-        uploader.upload("spec/logo.png", public_id = "test_folder2/item")
-        uploader.upload("spec/logo.png", public_id = "test_folder1/test_subfolder1/item")
-        uploader.upload("spec/logo.png", public_id = "test_folder1/test_subfolder2/item")
+        uploader.upload("tests/logo.png", public_id = "test_folder1/item")
+        uploader.upload("tests/logo.png", public_id = "test_folder2/item")
+        uploader.upload("tests/logo.png", public_id = "test_folder1/test_subfolder1/item")
+        uploader.upload("tests/logo.png", public_id = "test_folder1/test_subfolder2/item")
         result = api.root_folders
         self.assertEqual(result["folders"][0]["name"], "test_folder1")
         self.assertEqual(result["folders"][1]["name"], "test_folder2")
@@ -391,6 +391,26 @@ class ApiTest(unittest.TestCase):
                 }
         myCloudinaryImage = cloudinary.CloudinaryImage(metadata=metadata)
         self.assertEquals(len(myCloudinaryImage), len(metadata["public_id"]))
+    
+    def test_restore(self):
+        """ should support restoring resources """
+        uploader.upload("tests/logo.png", public_id = "api_test_restore", backup = True)
+        resource = api.resource("api_test_restore")
+        self.assertNotEqual(resource, None)
+        self.assertEqual(resource["bytes"], 3381)
+        api.delete_resources(["api_test_restore"])
+        resource = api.resource("api_test_restore")
+        self.assertNotEqual(resource, None)
+        self.assertEqual(resource["bytes"], 0)
+        self.assertEqual(resource["placeholder"], True)
+        response = api.restore(["api_test_restore"])
+        info = response["api_test_restore"]
+        self.assertNotEqual(info, None)
+        self.assertEqual(info["bytes"], 3381)
+        resource = api.resource("api_test_restore")
+        self.assertNotEqual(resource, None)
+        self.assertEqual(resource["bytes"], 3381)
+
 
 if __name__ == '__main__':
     unittest.main() 

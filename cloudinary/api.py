@@ -180,6 +180,13 @@ def root_folders(**options):
 def subfolders(of_folder_path, **options):
     return call_api("get", ["folders", of_folder_path], {}, **options)
 
+def restore(public_ids, **options):
+    resource_type = options.pop("resource_type", "image")
+    type = options.pop("type", "upload")
+    uri = ["resources", resource_type, type, "restore"]
+    params = [("public_ids[]", public_id) for public_id in public_ids]
+    return call_api("post", uri, params, **options)
+
 def call_api(method, uri, params, **options):
     prefix = options.pop("upload_prefix", cloudinary.config().upload_prefix) or "https://api.cloudinary.com"
     cloud_name = options.pop("cloud_name", cloudinary.config().cloud_name)
