@@ -67,6 +67,7 @@ def rename(from_public_id, to_public_id, **options):
         "timestamp": utils.now(),
         "type": options.get("type"),
         "overwrite": options.get("overwrite"),
+        "invalidate": options.get("invalidate"),
         "from_public_id": from_public_id,
         "to_public_id": to_public_id
     }
@@ -84,7 +85,9 @@ def explicit(public_id, **options):
         "eager_async": options.get("eager_async"),
         "tags": options.get("tags") and ",".join(utils.build_array(options["tags"])),
         "face_coordinates": utils.encode_double_array(options.get("face_coordinates")),
-        "custom_coordinates": utils.encode_double_array(options.get("custom_coordinates"))}
+        "custom_coordinates": utils.encode_double_array(options.get("custom_coordinates")),
+        "invalidate": options.get("invalidate"),
+        "context": utils.encode_dict(options.get("context"))}
      return call_api("explicit", params, **options)
 
 def generate_sprite(tag, **options):
