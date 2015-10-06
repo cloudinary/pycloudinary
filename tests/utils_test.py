@@ -1,6 +1,7 @@
 import cloudinary.utils
 import unittest
 import re
+from fractions import Fraction
 
 DEFAULT_ROOT_PATH = 'http://res.cloudinary.com/test123/'
 DEFAULT_UPLOAD_PATH = 'http://res.cloudinary.com/test123/image/upload/'
@@ -440,6 +441,20 @@ class TestUtils(unittest.TestCase):
         result = cloudinary.get_user_agent()
         cloudinary.USER_PLATFORM = temp  # restore value before assertion
         self.assertEqual(result, platform + ' ' + agent)
+
+    def test_aspect_ratio(self):
+        self.__test_cloudinary_url(
+            public_id = "test",
+            options = {"aspect_ratio": "1.0"}, 
+            expected_url = DEFAULT_UPLOAD_PATH + "ar_1.0/test")
+        self.__test_cloudinary_url(
+            public_id = "test",
+            options = {"aspect_ratio": "3:2"}, 
+            expected_url = DEFAULT_UPLOAD_PATH + "ar_3:2/test")
+        self.__test_cloudinary_url(
+            public_id = "test",
+            options = {"aspect_ratio": Fraction(3.0/4)}, 
+            expected_url = DEFAULT_UPLOAD_PATH + "ar_3:4/test")
 
 if __name__ == '__main__':
     unittest.main()

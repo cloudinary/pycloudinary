@@ -1,5 +1,6 @@
 # Copyright Cloudinary
 import zlib, hashlib, re, struct, uuid, base64, time, random, string
+from fractions import Fraction
 import cloudinary
 from cloudinary.compat import (PY3, to_bytes, to_bytearray, to_string, string_types, unquote, urlencode)
 
@@ -91,9 +92,14 @@ def generate_transformation_string(**options):
         end_offset = norm_range_value(offset[1])  
     
     video_codec = process_video_codec_param(options.pop("video_codec", None));
+    
+    aspect_ratio = options.pop("aspect_ratio", None)
+    if isinstance(aspect_ratio, Fraction):
+        aspect_ratio = str(aspect_ratio.numerator) + ":" + str(aspect_ratio.denominator)
 
     params = {
         "a"  : angle, 
+        "ar" : aspect_ratio, 
         "b"  : background, 
         "bo" : border, 
         "c"  : crop, 
