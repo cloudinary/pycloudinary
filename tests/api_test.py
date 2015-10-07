@@ -411,6 +411,22 @@ class ApiTest(unittest.TestCase):
         self.assertNotEqual(resource, None)
         self.assertEqual(resource["bytes"], 3381)
 
+    def test_upload_mapping(self):
+        try:
+            api.delete_upload_mapping("api_test_upload_mapping")
+        except:
+            pass
+        api.create_upload_mapping("api_test_upload_mapping", template = "http://cloudinary.com")
+        result = api.upload_mapping("api_test_upload_mapping")
+        self.assertEqual(result["template"], "http://cloudinary.com")
+        api.update_upload_mapping("api_test_upload_mapping", template = "http://res.cloudinary.com")
+        result = api.upload_mapping("api_test_upload_mapping")
+        self.assertEqual(result["template"], "http://res.cloudinary.com")
+        result = api.upload_mappings()
+        self.assertIn({"folder": "api_test_upload_mapping", "template": "http://res.cloudinary.com"}, result["mappings"])
+        api.delete_upload_mapping("api_test_upload_mapping")
+        result = api.upload_mappings()
+        self.assertNotIn("api_test_upload_mapping", [mapping.get("folder") for mapping in result["mappings"]])
 
 if __name__ == '__main__':
     unittest.main() 

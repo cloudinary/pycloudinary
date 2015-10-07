@@ -187,6 +187,32 @@ def restore(public_ids, **options):
     params = [("public_ids[]", public_id) for public_id in public_ids]
     return call_api("post", uri, params, **options)
 
+def upload_mappings(**options):
+    uri = ["upload_mappings"]
+    return call_api("get", uri, only(options, "next_cursor", "max_results"), **options)
+  
+def upload_mapping(name, **options):
+    uri = ["upload_mappings"]    
+    params = dict(folder = name)
+    return call_api("get", uri, params, **options)
+  
+def delete_upload_mapping(name, **options):
+    uri = ["upload_mappings"]
+    params = dict(folder = name)
+    return call_api("delete", uri, params, **options)
+    
+def update_upload_mapping(name, **options):
+    uri = ["upload_mappings"]
+    params = dict(folder = name)
+    params.update(only(options, "template"))
+    return call_api("put", uri, params, **options)
+  
+def create_upload_mapping(name, **options):
+    uri = ["upload_mappings"]
+    params = dict(folder = name)
+    params.update(only(options, "template"))
+    return call_api("post", uri, params, **options)
+
 def call_api(method, uri, params, **options):
     prefix = options.pop("upload_prefix", cloudinary.config().upload_prefix) or "https://api.cloudinary.com"
     cloud_name = options.pop("cloud_name", cloudinary.config().cloud_name)
