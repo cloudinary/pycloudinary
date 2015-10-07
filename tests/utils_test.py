@@ -170,6 +170,8 @@ class TestUtils(unittest.TestCase):
         # Should not pass width height to HTML with overlay
         self.__test_cloudinary_url(options = {"overlay": "text:hello", "height": 100, "width": 100}, expected_url =  DEFAULT_UPLOAD_PATH + "h_100,l_text:hello,w_100/test" )
 
+        self.__test_cloudinary_url(options = {"overlay": {"font_family": "arial", "font_size": 20, "text": "hello"}, "height": 100, "width": 100}, expected_url =  DEFAULT_UPLOAD_PATH + "h_100,l_text:arial_20:hello,w_100/test" )
+
     def test_underlay(self):
         """should support underlay"""
         self.__test_cloudinary_url(options = {"underlay": "text:hello"}, expected_url =  DEFAULT_UPLOAD_PATH + "u_text:hello/test" )
@@ -455,6 +457,36 @@ class TestUtils(unittest.TestCase):
             public_id = "test",
             options = {"aspect_ratio": Fraction(3.0/4)}, 
             expected_url = DEFAULT_UPLOAD_PATH + "ar_3:4/test")
+
+    def test_overlay_options(self):
+        tests = [
+            dict(public_id = "logo"),"logo",
+            dict(public_id = "folder/logo"),"folder:logo",
+            dict(public_id = "logo",type = "private"),"private:logo",
+            dict(public_id = "logo",format = "png"),"logo.png",
+            dict(resource_type = "video",public_id = "cat"),"video:cat",
+            dict(text = "Hello World, Nice to meet you?", font_family = "Arial", font_size = "18"),"text:Arial_18:Hello%20World%E2%80%9A%20Nice%20to%20meet%20you%3F",
+            dict(text = "Hello World, Nice to meet you?", font_family = "Arial", font_size = "18", font_weight = "bold", font_style = "italic", letter_spacing = 4),"text:Arial_18_bold_italic_letter_spacing_4:Hello%20World%E2%80%9A%20Nice%20to%20meet%20you%3F",
+            dict(resource_type = "subtitles",public_id = "sample_sub_en.srt"),"subtitles:sample_sub_en.srt",
+            dict(resource_type = "subtitles",public_id = "sample_sub_he.srt", font_family = "Arial", font_size = 40),"subtitles:Arial_40:sample_sub_he.srt"
+        ]
+
+        for i in xrange(0, len(tests), 2):
+            options = tests[i]
+            expected = tests[i + 1]
+            result = cloudinary.utils.process_layer(options, "overlay")
+            self.assertEqual(result, expected)
+
+    def test_overlay_error_1(self):
+        """ Must supply font_family for text in overlay """
+        with self.assertRaises(ValueError):
+            cloudinary.utils.cloudinary_url("test", overlay = dict(text = "text", font_style = "italic"))
+
+    def test_overlay_error_2(self):
+        """ Must supply public_id for for non-text underlay """
+        with self.assertRaises(ValueError):
+            cloudinary.utils.cloudinary_url("test", underlay = dict(resource_type = "video"))
+
 
 if __name__ == '__main__':
     unittest.main()

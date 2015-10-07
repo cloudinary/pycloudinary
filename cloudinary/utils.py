@@ -11,11 +11,12 @@ DEFAULT_RESPONSIVE_WIDTH_TRANSFORMATION = {"width": "auto", "crop": "limit"}
 
 RANGE_VALUE_RE = r'^(?P<value>(\d+\.)?\d+)(?P<modifier>[%pP])?$'
 RANGE_RE = r'^(\d+\.)?\d+[%pP]?\.\.(\d+\.)?\d+[%pP]?$'
+__LAYER_KEYWORD_PARAMS = dict(font_weight = "normal", font_style = "normal", text_decoration = "none", text_align = None, stroke = "none")
 
 def build_array(arg):
     if isinstance(arg, list):
         return arg
-    elif arg == None:
+    elif arg is None:
         return []
     else:
         return [arg]
@@ -97,6 +98,9 @@ def generate_transformation_string(**options):
     if isinstance(aspect_ratio, Fraction):
         aspect_ratio = str(aspect_ratio.numerator) + ":" + str(aspect_ratio.denominator)
 
+    overlay = process_layer(options.pop("overlay", None), "overlay")
+    underlay = process_layer(options.pop("underlay", None), "underlay")
+
     params = {
         "a"  : angle, 
         "ar" : aspect_ratio, 
@@ -109,9 +113,11 @@ def generate_transformation_string(**options):
         "e"  : effect, 
         "eo" : end_offset,
         "fl" : flags, 
-        "h"  : height, 
+        "h"  : height,
+        "l"  : overlay, 
         "so" : start_offset,
         "t"  : named_transformation,
+        "u"  : underlay, 
         "vc" : video_codec,
         "w"  : width
     }
@@ -125,13 +131,11 @@ def generate_transformation_string(**options):
         "dn": "density",
         "f" : "fetch_format",
         "g" : "gravity",
-        "l" : "overlay",
         "o" : "opacity",
         "p" : "prefix",
         "pg": "page",
         "q" : "quality",
         "r" : "radius",
-        "u" : "underlay",
         "vs": "video_sampling",
         "x" : "x",
         "y" : "y",
@@ -239,7 +243,7 @@ def finalize_resource_type(resource_type, type, url_suffix, use_root_path, short
             raise ValueError("URL Suffix only supported for image/upload and raw/upload")
 
     if use_root_path:
-        if (resource_type == "image" and type == "upload") or (resource_type == "images" and type == None):
+        if (resource_type == "image" and type == "upload") or (resource_type == "images" and type is None):
             resource_type = None
             type = None
         else:
@@ -263,11 +267,11 @@ def unsigned_download_url_prefix(source, cloud_name, private_cdn, cdn_subdomain,
   shared_domain = not private_cdn
   shard = __crc(source)
   if secure:
-      if secure_distribution == None or secure_distribution == cloudinary.OLD_AKAMAI_SHARED_CDN:
+      if secure_distribution is None or secure_distribution == cloudinary.OLD_AKAMAI_SHARED_CDN:
           secure_distribution = cloud_name + "-res.cloudinary.com" if private_cdn else cloudinary.SHARED_CDN
 
       shared_domain = shared_domain or secure_distribution == cloudinary.SHARED_CDN
-      if secure_cdn_subdomain == None and shared_domain:
+      if secure_cdn_subdomain is None and shared_domain:
           secure_cdn_subdomain = cdn_subdomain
 
       if secure_cdn_subdomain:
@@ -391,7 +395,7 @@ def build_eager(transformations):
     return "|".join(eager)
 
 def build_custom_headers(headers):
-    if headers == None:
+    if headers is None:
         return None
     elif isinstance(headers, list):
         pass
@@ -442,6 +446,85 @@ def build_upload_params(**options):
               "return_delete_token": options.get("return_delete_token"),
               "auto_tagging": options.get("auto_tagging") and float(options.get("auto_tagging"))}
     return params
+
+    
+    
+def __process_text_options(layer, layer_parameter):
+    font_family = layer.get("font_family")
+    font_size = layer.get("font_size")
+    keywords = []
+    for attr, default_value in __LAYER_KEYWORD_PARAMS.iteritems():
+        attr_value =layer.get(attr)
+        if (attr_value != default_value and attr_value is not None):
+            keywords.append(attr_value)
+
+    letter_spacing = layer.get("letter_spacing")
+    if letter_spacing != None:
+        keywords.append("letter_spacing_" + str(letter_spacing))
+
+    if font_size is None and font_family is None and len(keywords) == 0:
+        return None
+
+    if font_family is None:
+        raise ValueError("Must supply font_family for text in " + layer_parameter)
+
+    if font_size is None:
+        raise ValueError("Must supply font_size for text in " + layer_parameter)
+
+    keywords.insert(0, font_size)
+    keywords.insert(0, font_family)
+    
+    return '_'.join([str(k) for k in keywords])
+
+def process_layer(layer, layer_parameter):
+    if not isinstance(layer, dict):
+        return layer
+
+    resource_type = layer.get("resource_type")
+    text = layer.get("text")
+    type = layer.get("type")
+    public_id = layer.get("public_id")
+    format = layer.get("format")
+    components = list()
+    
+    if text != None and resource_type is None:
+        resource_type = "text"
+    
+    if public_id is not None and format is not None:
+        public_id = public_id + "." + format
+    
+    if public_id is None and resource_type != "text":
+        raise ValueError("Must supply public_id for for non-text " + layer_parameter)
+    
+    if resource_type is not None and resource_type != "image":
+        components.append(resource_type)
+    
+    if type is not None and type != "upload":
+        components.append(type)
+    
+    if resource_type == "text" or resource_type == "subtitles":
+        if public_id is None and text is None:
+            raise ValueError("Must supply either text or public_id in " + layer_parameter)
+    
+        text_options = __process_text_options(layer, layer_parameter)
+    
+        if text_options is not None:
+            components.append(text_options)
+    
+        if public_id is not None:
+            public_id = public_id.replace("/",':')
+            components.append(public_id)
+    
+        if text is not None:
+            text = smart_escape(text)
+            text = text.replace("%2C", "%E2%80%9A")
+            text = text.replace("/", "%E2%81%84")
+            components.append(text)
+    else:
+        public_id = public_id.replace("/",':')
+        components.append(public_id)
+    
+    return ':'.join(components)
 
 def __join_pair(key, value):
     if value is None or value == "":
