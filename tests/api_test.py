@@ -392,6 +392,7 @@ class ApiTest(unittest.TestCase):
         myCloudinaryImage = cloudinary.CloudinaryImage(metadata=metadata)
         self.assertEquals(len(myCloudinaryImage), len(metadata["public_id"]))
     
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_restore(self):
         """ should support restoring resources """
         uploader.upload("tests/logo.png", public_id = "api_test_restore", backup = True)
@@ -411,6 +412,7 @@ class ApiTest(unittest.TestCase):
         self.assertNotEqual(resource, None)
         self.assertEqual(resource["bytes"], 3381)
 
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_mapping(self):
         try:
             api.delete_upload_mapping("api_test_upload_mapping")
