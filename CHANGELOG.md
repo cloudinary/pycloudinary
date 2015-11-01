@@ -1,4 +1,26 @@
 
+1.2.0 / 2015-11-01
+==================
+
+  * Merge pull request #60 from nloadholtes/nloadholtes_python3
+  * support easy overlay/underlay construction
+  * skip test_restore and test_upload_mapping if no api_key/api_secret
+  * support upload_mappings api
+  * support restore api
+  * support 'invalidate' in rename and 'invalidate' and 'context' in explicit
+  * support aspect ratio transformation param
+  * Adding double quotes to prevent python 2.x from printing empty parens
+  * Adding parens to print for python 3 compatibility
+  * Merge pull request #59 from nloadholtes/patch-1
+  * Doc update
+  * Merge pull request #58 from netman92/patch-1
+  * Fixed typo in readme.md
+  * Merge pull request #46 from rtrajano/master
+  * Merge branch 'ZeroCater-master'
+  * get_prep_value returns default instead of None
+  * Added __len__ function to CloudinaryImage
+  * Add version script
+
 1.1.3 / 2015-07-05
 ==================
 
