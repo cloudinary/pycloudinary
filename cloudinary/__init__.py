@@ -10,6 +10,7 @@ logger.addHandler(ch)
 import os
 import re
 
+from django.utils.safestring import mark_safe
 from six import python_2_unicode_compatible
 
 from cloudinary import utils
@@ -222,7 +223,7 @@ class CloudinaryResource(object):
 
         if src: attrs["src"] = src
 
-        return u"<img {0}/>".format(utils.html_attrs(attrs))
+        return mark_safe(u"<img {0}/>".format(utils.html_attrs(attrs)))
 
     def video_thumbnail(self, **options):
         self.default_poster_options(options)
@@ -289,7 +290,7 @@ class CloudinaryResource(object):
 
         html = "<video {attributes}>{sources}{fallback}</video>".format(
             attributes=utils.html_attrs(video_options), sources=sources, fallback=fallback)
-        return html
+        return mark_safe(html)
 
 
 class CloudinaryImage(CloudinaryResource):
