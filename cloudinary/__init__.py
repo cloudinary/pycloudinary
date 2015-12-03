@@ -114,8 +114,7 @@ class CloudinaryResource(object):
         self.version = version or metadata.get('version')
         self.signature = signature or metadata.get('signature')
         self.type = type or metadata.get('type') or "upload"
-        self.resource_type = resource_type or metadata.get('resource_type')
-        self.default_resource_type = default_resource_type
+        self.resource_type = resource_type or metadata.get('resource_type') or default_resource_type
         self.url_options = url_options
 
     def __unicode__(self):
@@ -133,9 +132,9 @@ class CloudinaryResource(object):
         return self.build_url(**self.url_options)
 
     def __build_url(self, **options):
-        combined_options = dict(format = self.format, version = self.version, type = self.type, resource_type = self.resource_type or self.default_resource_type or "image")
+        combined_options = dict(format = self.format, version = self.version, type = self.type, resource_type = self.resource_type or "image")
         combined_options.update(options)
-        public_id = combined_options.get('public_id') or  self.public_id
+        public_id = combined_options.get('public_id') or self.public_id
         return utils.cloudinary_url(public_id, **combined_options)
       
     def build_url(self, **options):
@@ -148,7 +147,7 @@ class CloudinaryResource(object):
         return ['webm', 'mp4', 'ogv']
 
     def image(self, **options):
-        if options.get("resource_type", self.resource_type or self.default_resource_type) == "video":
+        if options.get("resource_type", self.resource_type) == "video":
             self.default_poster_options(options)
         src, attrs = self.__build_url(**options)
         responsive = attrs.pop("responsive", False)
@@ -190,7 +189,7 @@ class CloudinaryResource(object):
         source_types          = options.pop('source_types', [])
         source_transformation = options.pop('source_transformation', {})
         fallback              = options.pop('fallback_content', '')
-        options['resource_type'] = options.pop('resource_type', self.resource_type or self.default_resource_type or 'video')
+        options['resource_type'] = options.pop('resource_type', self.resource_type or 'video')
 
         if len(source_types) == 0: source_types = self.default_source_types()
         video_options = options.copy()
