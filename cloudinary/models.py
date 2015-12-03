@@ -11,7 +11,7 @@ try:
 except ImportError:
     pass
 
-CLOUDINARY_FIELD_DB_RE = r'((?:(?P<resource_type>image|raw|video)/(?P<type>upload|private|authenticated)/)?v(?P<version>\d+)/)?(?P<public_id>.*?)(\.(?P<format>[^.]+))?$'
+CLOUDINARY_FIELD_DB_RE = r'(?:(?P<resource_type>image|raw|video)/(?P<type>upload|private|authenticated)/)?(?:v(?P<version>\d+)/)?(?P<public_id>.*?)(\.(?P<format>[^.]+))?$'
 
 # Taken from six - https://pythonhosted.org/six/
 def with_metaclass(meta, *bases):
