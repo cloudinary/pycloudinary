@@ -37,6 +37,8 @@ class CloudinaryField(models.Field):
         options.update(kwargs)
         self.type = options.pop("type", "upload")
         self.resource_type = options.pop("resource_type", "image")
+        self.width_field = options.pop("width_field", None)
+        self.height_field = options.pop("height_field", None)
         super(CloudinaryField, self).__init__(*args, **options)
 
     def get_internal_type(self):
@@ -86,6 +88,10 @@ class CloudinaryField(models.Field):
             options.update(self.upload_options_with_filename(model_instance, value.name))
             instance_value = uploader.upload_resource(value, **options)
             setattr(model_instance, self.attname, instance_value)
+            if self.width_field:
+                setattr(model_instance, self.width_field, instance_value.metadata['width'])
+            if self.height_field:
+                setattr(model_instance, self.height_field, instance_value.metadata['height'])
             return self.get_prep_value(instance_value)
         else:
             return value
