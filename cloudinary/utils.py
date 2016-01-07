@@ -399,6 +399,51 @@ def zip_download_url(tag, **options):
 
   return cloudinary_api_url("download_tag.zip", **options) + "?" + urlencode(cloudinary_params)
 
+def bracketize_seq(params):
+    url_params = dict()
+    for param_name in params:
+        param_value = params[param_name]
+        if isinstance(param_value, list):
+            param_name += "[]"
+        url_params[param_name] = param_value
+    return url_params
+
+def download_archive_url(**options):
+    params = options.copy()
+    params.update(mode = "download")
+    cloudinary_params = sign_request(archive_params(**params), options)
+    return cloudinary_api_url("generate_archive") + "?" + urlencode(bracketize_seq(cloudinary_params), True)
+
+def download_zip_url(**options):
+    new_options = options.copy()
+    new_options.update(target_format = "zip")
+    return download_archive_url(**new_options)
+
+def archive_params(**options):
+    if options.get("timestamp") is None:
+        timestamp = now()
+    else:
+        timestamp = options.get("timestamp")
+    params = {
+        "timestamp": timestamp,
+        "type": options.get("type"),
+        "mode": options.get("mode"),
+        "target_format": options.get("target_format"),
+        "target_public_id": options.get("target_public_id"),
+        "flatten_folders": options.get("flatten_folders"),
+        "flatten_transformations": options.get("flatten_transformations"),
+        "use_original_filename": options.get("use_original_filename"),
+        "async": options.get("async"),
+        "notification_url": options.get("notification_url"),
+        "target_tags": options.get("target_tags") and build_array(options.get("target_tags")),
+        "keep_derived": options.get("keep_derived"),
+        "tags": options.get("tags") and build_array(options.get("tags")),
+        "public_ids": options.get("public_ids") and build_array(options.get("public_ids")),
+        "prefixes": options.get("prefixes") and build_array(options.get("prefixes")),
+        "transformations": build_eager(options.get("transformations"))
+    }
+    return params
+
 def build_eager(transformations):
     eager = []
     for tr in build_array(transformations):

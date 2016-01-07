@@ -91,6 +91,15 @@ def explicit(public_id, **options):
         "responsive_breakpoints": utils.generate_responsive_breakpoints_string(options.get("responsive_breakpoints"))}
      return call_api("explicit", params, **options)
 
+def create_archive(**options):
+    params = utils.archive_params(**options)
+    if options.get("target_format") is not None:
+        params["target_format"] = options.get("target_format")
+    return call_api("generate_archive", params, **options)
+
+def create_zip(**options):
+    return create_archive(target_format="zip", **options)
+
 def generate_sprite(tag, **options):
      params = {
         "timestamp": utils.now(),
