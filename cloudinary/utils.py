@@ -476,6 +476,10 @@ def __process_text_options(layer, layer_parameter):
     if letter_spacing != None:
         keywords.append("letter_spacing_" + str(letter_spacing))
 
+    line_spacing = layer.get("line_spacing")
+    if line_spacing != None:
+        keywords.append("line_spacing_" + str(line_spacing))
+
     if font_size is None and font_family is None and len(keywords) == 0:
         return None
 

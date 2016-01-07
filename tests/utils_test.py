@@ -466,7 +466,7 @@ class TestUtils(unittest.TestCase):
             dict(public_id = "logo",format = "png"),"logo.png",
             dict(resource_type = "video",public_id = "cat"),"video:cat",
             dict(text = "Hello World, Nice to meet you?", font_family = "Arial", font_size = "18"),"text:Arial_18:Hello%20World%E2%80%9A%20Nice%20to%20meet%20you%3F",
-            dict(text = "Hello World, Nice to meet you?", font_family = "Arial", font_size = "18", font_weight = "bold", font_style = "italic", letter_spacing = 4),"text:Arial_18_bold_italic_letter_spacing_4:Hello%20World%E2%80%9A%20Nice%20to%20meet%20you%3F",
+            dict(text = "Hello World, Nice to meet you?", font_family = "Arial", font_size = "18", font_weight = "bold", font_style = "italic", letter_spacing = 4, line_spacing = 3),"text:Arial_18_bold_italic_letter_spacing_4_line_spacing_3:Hello%20World%E2%80%9A%20Nice%20to%20meet%20you%3F",
             dict(resource_type = "subtitles",public_id = "sample_sub_en.srt"),"subtitles:sample_sub_en.srt",
             dict(resource_type = "subtitles",public_id = "sample_sub_he.srt", font_family = "Arial", font_size = 40),"subtitles:Arial_40:sample_sub_he.srt"
         ]
