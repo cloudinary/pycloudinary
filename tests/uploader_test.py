@@ -222,5 +222,30 @@ class UploaderTest(unittest.TestCase):
         with self.assertRaisesRegexp(cloudinary.api.Error, 'urlopen error timed out'): 
             uploader.upload("tests/logo.png", timeout=0.001)
 
+    @unittest.skipUnless(cloudinary.config().api_secret,"requires api_key/api_secret")
+    def test_responsive_breakpoints(self):
+        result = uploader.upload(
+            "tests/logo.png",
+            responsive_breakpoints=dict(create_derived=False,
+                                        transformation=dict(angle=90)))
+        
+        self.assertIsNotNone(result["responsive_breakpoints"])
+        self.assertEqual(result["responsive_breakpoints"][0]["transformation"],
+                         "a_90")
+        
+        result = uploader.explicit(
+            result["public_id"],
+            type="upload",
+            responsive_breakpoints=[dict(create_derived=False,
+                                         transformation=dict(angle=90)),
+                                    dict(create_derived=False,
+                                         transformation=dict(angle=45))])
+        
+        self.assertIsNotNone(result["responsive_breakpoints"])
+        self.assertEqual(result["responsive_breakpoints"][0]["transformation"],
+                         "a_90")
+        self.assertEqual(result["responsive_breakpoints"][1]["transformation"],
+                         "a_45")
+
 if __name__ == '__main__':
     unittest.main()

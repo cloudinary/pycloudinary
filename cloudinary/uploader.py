@@ -87,7 +87,8 @@ def explicit(public_id, **options):
         "face_coordinates": utils.encode_double_array(options.get("face_coordinates")),
         "custom_coordinates": utils.encode_double_array(options.get("custom_coordinates")),
         "invalidate": options.get("invalidate"),
-        "context": utils.encode_dict(options.get("context"))}
+        "context": utils.encode_dict(options.get("context")),
+        "responsive_breakpoints": utils.generate_responsive_breakpoints_string(options.get("responsive_breakpoints"))}
      return call_api("explicit", params, **options)
 
 def generate_sprite(tag, **options):

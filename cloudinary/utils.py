@@ -1,5 +1,5 @@
 # Copyright Cloudinary
-import zlib, hashlib, re, struct, uuid, base64, time, random, string
+import zlib, hashlib, re, struct, uuid, base64, time, random, string, json, copy
 from fractions import Fraction
 import cloudinary
 from cloudinary.compat import (PY3, to_bytes, to_bytearray, to_string, string_types, unquote, urlencode)
@@ -210,6 +210,19 @@ def sign_request(params, options):
 def api_sign_request(params_to_sign, api_secret):
     to_sign = "&".join(sorted([(k+"="+(",".join(v) if isinstance(v, list) else str(v))) for k, v in params_to_sign.items() if v]))
     return hashlib.sha1(to_bytes(to_sign + api_secret)).hexdigest()
+
+def breakpoint_settings_mapper(breakpoint_settings):
+    breakpoint_settings = copy.deepcopy(breakpoint_settings)
+    transformation = breakpoint_settings.get("transformation")
+    if transformation is not None:
+        breakpoint_settings["transformation"], _ = generate_transformation_string(**transformation)
+    return breakpoint_settings
+
+def generate_responsive_breakpoints_string(breakpoints):
+    if breakpoints is None:
+        return None
+    breakpoints = build_array(breakpoints)
+    return json.dumps(map(breakpoint_settings_mapper, breakpoints))
 
 def finalize_source(source, format, url_suffix):
     source = re.sub(r'([^:])/+', r'\1/', source)
@@ -444,7 +457,8 @@ def build_upload_params(**options):
               "upload_preset": options.get("upload_preset"),
               "phash": options.get("phash"),
               "return_delete_token": options.get("return_delete_token"),
-              "auto_tagging": options.get("auto_tagging") and float(options.get("auto_tagging"))}
+              "auto_tagging": options.get("auto_tagging") and float(options.get("auto_tagging")),
+              "responsive_breakpoints": generate_responsive_breakpoints_string(options.get("responsive_breakpoints"))}
     return params
 
     
