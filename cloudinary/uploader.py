@@ -175,21 +175,22 @@ def call_api(action, params, http_headers={}, return_error=False, unsigned=False
             # Register the streaming http handlers with urllib2
             register_openers()
     
-        datagen, headers = multipart_encode({})
         if file:
             if not isinstance(file, string_types):
-                datagen, headers = multipart_encode({'file': file})
+                param_list.append(("file", file))
             elif not re.match(r'ftp:|https?:|s3:|data:[^;]*;base64,([a-zA-Z0-9\/+\n=]+)$', file):
                 file_io = open(file, "rb")
-                datagen, headers = multipart_encode({'file': file_io})
+                param_list.append(('file', file_io))
             else:
                 param_list.append(("file", file))
 
+        datagen, headers = multipart_encode(param_list)
+        
         if _is_gae():
             # Might not be needed in the future but for now this is needed in GAE
             datagen = "".join(datagen)
 
-        request = urllib2.Request(api_url + "?" + urlencode(param_list), datagen, headers)
+        request = urllib2.Request(api_url, datagen, headers)
         request.add_header("User-Agent", cloudinary.get_user_agent())
         for k, v in http_headers.items():
             request.add_header(k, v)
