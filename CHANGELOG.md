@@ -1,4 +1,15 @@
 
+1.3.0 / 2016-01-18
+==================
+
+  * Archive generation support
+  * Support line spacing in text overlay
+  * Put uploader params in multipart body rather than url
+  * Support responsive_breakpoints parameter
+  * Update static assets based on new cloudinary_js repository structure.
+  * Allow saving and retrieving cloudinary field without version
+  * Fix default resource type handling when saving models
+
 1.2.0 / 2015-11-01
 ==================
 
