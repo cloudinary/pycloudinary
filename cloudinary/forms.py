@@ -36,7 +36,12 @@ class CloudinaryInput(forms.TextInput):
         attrs["class"] = " ".join(["cloudinary-fileupload", attrs.get("class", "")])
 
         widget = super(CloudinaryInput, self).render("file", None, attrs=attrs)
-        if value: widget += forms.HiddenInput().render(name, value) 
+        if value:
+            if isinstance(value, CloudinaryResource):
+                value_string = value.get_presigned()
+            else:
+                value_string = value
+            widget += forms.HiddenInput().render(name, value_string) 
         return widget
 
 

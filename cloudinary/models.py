@@ -73,15 +73,10 @@ class CloudinaryField(with_metaclass(models.SubfieldBase, models.Field)):
             return value
 
     def get_prep_value(self, value):
-        prep = ''
         if not value:
             return self.get_default()
         if isinstance(value, CloudinaryResource):
-            prep = prep + value.resource_type + '/' + value.type + '/'
-            if value.version: prep = prep + 'v' + str(value.version) + '/'
-            prep = prep + value.public_id
-            if value.format: prep = prep + '.' + value.format
-            return prep
+            return value.get_prep_value()
         else:
             return value
 
