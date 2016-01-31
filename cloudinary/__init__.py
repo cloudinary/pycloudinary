@@ -124,8 +124,21 @@ class CloudinaryResource(object):
         return len(self.public_id)
 
     def validate(self):
-        expected = utils.api_sign_request({"public_id": self.public_id, "version": self.version}, config().api_secret)
-        return self.signature == expected
+        return self.signature == self.get_expected_signature()
+
+    def get_prep_value(self):
+        prep = ''
+        prep = prep + self.resource_type + '/' + self.type + '/'
+        if self.version: prep = prep + 'v' + str(self.version) + '/'
+        prep = prep + self.public_id
+        if self.format: prep = prep + '.' + self.format
+        return prep
+
+    def get_presigned(self):
+        return self.get_prep_value() + '#' + self.get_expected_signature()
+
+    def get_expected_signature(self):
+        return utils.api_sign_request({"public_id": self.public_id, "version": self.version}, config().api_secret)
 
     @property
     def url(self):
