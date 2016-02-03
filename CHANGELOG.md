@@ -1,4 +1,10 @@
 
+1.3.1 / 2016-02-03
+==================
+
+  * Support python 2/3, and Django 1.7/1.9
+  * Fix rendering of CloudinaryJsFileField for field update
+
 1.3.0 / 2016-01-18
 ==================
 
