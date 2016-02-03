@@ -15,6 +15,7 @@ if PY3:
     to_bytearray = lambda s: bytearray(s, 'utf8')
     to_string = lambda b: b.decode('utf8')
     string_types = (str)
+
 else:
     import httplib
     from httplib import NotConnected
@@ -28,6 +29,12 @@ else:
     to_bytearray = str
     to_string = str
     string_types = (str, unicode)
+
+try:
+    cldrange = xrange
+except NameError:
+    def cldrange(*args, **kwargs):
+        return iter(range(*args, **kwargs))
 
 try:
     advance_iterator = next

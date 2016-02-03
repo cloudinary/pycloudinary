@@ -11,7 +11,7 @@ DEFAULT_RESPONSIVE_WIDTH_TRANSFORMATION = {"width": "auto", "crop": "limit"}
 
 RANGE_VALUE_RE = r'^(?P<value>(\d+\.)?\d+)(?P<modifier>[%pP])?$'
 RANGE_RE = r'^(\d+\.)?\d+[%pP]?\.\.(\d+\.)?\d+[%pP]?$'
-__LAYER_KEYWORD_PARAMS = dict(font_weight = "normal", font_style = "normal", text_decoration = "none", text_align = None, stroke = "none")
+__LAYER_KEYWORD_PARAMS = [("font_weight", "normal"), ("font_style", "normal"), ("text_decoration", "none"), ("text_align", None), ("stroke", "none")]
 
 def build_array(arg):
     if isinstance(arg, list):
@@ -222,7 +222,7 @@ def generate_responsive_breakpoints_string(breakpoints):
     if breakpoints is None:
         return None
     breakpoints = build_array(breakpoints)
-    return json.dumps(map(breakpoint_settings_mapper, breakpoints))
+    return json.dumps(list(map(breakpoint_settings_mapper, breakpoints)))
 
 def finalize_source(source, format, url_suffix):
     source = re.sub(r'([^:])/+', r'\1/', source)
@@ -512,7 +512,7 @@ def __process_text_options(layer, layer_parameter):
     font_family = layer.get("font_family")
     font_size = layer.get("font_size")
     keywords = []
-    for attr, default_value in __LAYER_KEYWORD_PARAMS.iteritems():
+    for attr, default_value in __LAYER_KEYWORD_PARAMS:
         attr_value =layer.get(attr)
         if (attr_value != default_value and attr_value is not None):
             keywords.append(attr_value)

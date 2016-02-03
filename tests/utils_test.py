@@ -2,6 +2,7 @@ import cloudinary.utils
 import unittest
 import re
 from fractions import Fraction
+from cloudinary.compat import cldrange
 
 DEFAULT_ROOT_PATH = 'http://res.cloudinary.com/test123/'
 DEFAULT_UPLOAD_PATH = 'http://res.cloudinary.com/test123/image/upload/'
@@ -471,11 +472,11 @@ class TestUtils(unittest.TestCase):
             dict(resource_type = "subtitles",public_id = "sample_sub_he.srt", font_family = "Arial", font_size = 40),"subtitles:Arial_40:sample_sub_he.srt"
         ]
 
-        for i in xrange(0, len(tests), 2):
+        for i in cldrange(0, len(tests), 2):
             options = tests[i]
             expected = tests[i + 1]
             result = cloudinary.utils.process_layer(options, "overlay")
-            self.assertEqual(result, expected)
+            self.assertEqual(expected, result)
 
     def test_overlay_error_1(self):
         """ Must supply font_family for text in overlay """

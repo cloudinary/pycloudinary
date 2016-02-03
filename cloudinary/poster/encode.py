@@ -56,7 +56,13 @@ if PY3:
     def _strify(s):
         if s is None:
             return None
-        return to_bytes(s)
+        elif isinstance(s, bytes):
+            return s
+        else:
+            try:
+                return to_bytes(s)
+            except AttributeError:
+                return to_bytes(str(s))
 else:
     def _strify(s):
         """If s is a unicode string, encode it to UTF-8 and return the results, otherwise return str(s), or None if s is None"""
@@ -236,10 +242,10 @@ class MultipartParam(object):
         else:
             value = self.value
 
-        if re.search("^--%s$" % re.escape(boundary), value, re.M):
+        if re.search(to_bytes("^--%s$" % re.escape(boundary)), value, re.M):
             raise ValueError("boundary found in encoded string")
 
-        return "%s%s\r\n" % (self.encode_hdr(boundary), value)
+        return to_bytes(self.encode_hdr(boundary)) + value + b"\r\n"
 
     def iter_encode(self, boundary, blocksize=4096):
         """Yields the encoding of this parameter
@@ -248,7 +254,7 @@ class MultipartParam(object):
         total = self.get_size(boundary)
         current = 0
         if self.value is not None:
-            block = to_bytes(self.encode(boundary))
+            block = self.encode(boundary)
             current += len(block)
             yield block
             if self.cb:
