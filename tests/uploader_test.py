@@ -15,6 +15,10 @@ class UploaderTest(unittest.TestCase):
     def setUp(self):
         cloudinary.reset_config()
 
+    @classmethod
+    def tearDownClass(cls):
+        cloudinary.api.delete_resources_by_tag(TEST_TAG)
+
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload(self):
         """should successfully upload file """
