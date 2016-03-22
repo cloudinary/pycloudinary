@@ -100,6 +100,7 @@ def generate_transformation_string(**options):
 
     overlay = process_layer(options.pop("overlay", None), "overlay")
     underlay = process_layer(options.pop("underlay", None), "underlay")
+    conditional = process_conditional(options.pop("if", None))
 
     params = {
         "a"  : angle, 
@@ -145,7 +146,10 @@ def generate_transformation_string(**options):
     for param, option in simple_params.items():
         params[param] = options.pop(option, None)
 
-    transformation = ",".join(sorted([param + "_" + str(value) for param, value in params.items() if (value or value == 0)]))
+    sorted_params = sorted([param + "_" + str(value) for param, value in params.items() if (value or value == 0)])
+    if conditional is not None:
+        sorted_params.insert(0, "if_" + str(conditional))
+    transformation = ",".join(sorted_params)
     if "raw_transformation" in options:
         transformation = transformation + "," + options.pop("raw_transformation")
     transformations = base_transformations + [transformation]
@@ -588,6 +592,36 @@ def process_layer(layer, layer_parameter):
         components.append(public_id)
     
     return ':'.join(components)
+
+IF_TRANSLATIONS = {
+    "=": 'eq',
+    "!=": 'ne',
+    "<": 'lt',
+    ">": 'gt',
+    "<=": 'lte',
+    ">=": 'gte',
+    "&&": 'and',
+    "||": 'or',
+    "width": 'w',
+    "height": 'h',
+    "page_count": "pc",
+    "face_count": "fc",
+}
+
+def process_conditional(conditional):
+    if conditional is None:
+        return conditional
+    conditional = conditional.replace("aspect_ratio", "ar")
+    conditional = conditional.replace("page_count", "pc")
+    conditional = conditional.replace("face_count", "fc")
+    components = re.split('[ _]+', conditional)
+    l = []
+    for v in components:
+        value = IF_TRANSLATIONS.get(v)
+        if value is None:
+            value = v
+        l.append(value)
+    return "_".join(l)
 
 def __join_pair(key, value):
     if value is None or value == "":

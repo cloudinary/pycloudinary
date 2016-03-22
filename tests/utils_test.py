@@ -489,5 +489,20 @@ class TestUtils(unittest.TestCase):
             cloudinary.utils.cloudinary_url("test", underlay = dict(resource_type = "video"))
 
 
+    def test_translate_if(self):
+        all_operators = "if_"
+        all_operators += "w_eq_0_and" 
+        all_operators += "_h_ne_0_or"
+        all_operators += "_ar_lt_0_and"
+        all_operators += "_pc_gt_0_and"
+        all_operators += "_fc_lte_0_and"
+        all_operators += "_w_gte_0"
+        all_operators += ",e_grayscale"
+        condition = "width = 0 && height != 0 || aspect_ratio < 0 && page_count > 0 and face_count <= 0 and width >= 0"
+        options = {"if": condition, "effect": "grayscale"}
+        transformation, options = cloudinary.utils.generate_transformation_string(**options)
+        self.assertEqual({}, options)
+        self.assertEqual(all_operators, transformation)
+
 if __name__ == '__main__':
     unittest.main()
