@@ -100,7 +100,7 @@ def generate_transformation_string(**options):
 
     overlay = process_layer(options.pop("overlay", None), "overlay")
     underlay = process_layer(options.pop("underlay", None), "underlay")
-    conditional = process_conditional(options.pop("if", None))
+    if_value = process_conditional(options.pop("if", None))
 
     params = {
         "a"  : angle, 
@@ -147,8 +147,8 @@ def generate_transformation_string(**options):
         params[param] = options.pop(option, None)
 
     sorted_params = sorted([param + "_" + str(value) for param, value in params.items() if (value or value == 0)])
-    if conditional is not None:
-        sorted_params.insert(0, "if_" + str(conditional))
+    if if_value is not None:
+        sorted_params.insert(0, "if_" + str(if_value))
     transformation = ",".join(sorted_params)
     if "raw_transformation" in options:
         transformation = transformation + "," + options.pop("raw_transformation")
@@ -593,7 +593,7 @@ def process_layer(layer, layer_parameter):
     
     return ':'.join(components)
 
-IF_TRANSLATIONS = {
+IF_OPERATORS = {
     "=": 'eq',
     "!=": 'ne',
     "<": 'lt',
@@ -601,27 +601,29 @@ IF_TRANSLATIONS = {
     "<=": 'lte',
     ">=": 'gte',
     "&&": 'and',
-    "||": 'or',
+    "||": 'or'
+}
+IF_PARAMETERS = {
     "width": 'w',
     "height": 'h',
     "page_count": "pc",
     "face_count": "fc",
+    "aspect_ratio": "ar"
 }
+
+replaceRE = "(" + "|".join(IF_PARAMETERS.keys()) + "|[=<>&|!]+)"
+
+def translate_if(match):
+    name = match.group(0)
+    return IF_OPERATORS.get(name,
+                            IF_PARAMETERS.get(name,
+                                              name))
 
 def process_conditional(conditional):
     if conditional is None:
         return conditional
-    conditional = conditional.replace("aspect_ratio", "ar")
-    conditional = conditional.replace("page_count", "pc")
-    conditional = conditional.replace("face_count", "fc")
-    components = re.split('[ _]+', conditional)
-    l = []
-    for v in components:
-        value = IF_TRANSLATIONS.get(v)
-        if value is None:
-            value = v
-        l.append(value)
-    return "_".join(l)
+    result = re.sub('[ _]+', '_', conditional)
+    return re.sub(replaceRE, translate_if, result)
 
 def __join_pair(key, value):
     if value is None or value == "":
