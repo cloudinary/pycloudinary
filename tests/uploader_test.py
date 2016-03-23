@@ -170,7 +170,7 @@ class UploaderTest(unittest.TestCase):
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_categorization(self):
         """ should support requesting categorization """
-        with self.assertRaisesRegexp(api.Error, 'illegal is not a valid'): 
+        with self.assertRaisesRegexp(api.Error, 'invalid'):
             uploader.upload(TEST_IMAGE, categorization="illegal", tags=TEST_TAG)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
