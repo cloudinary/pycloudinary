@@ -1,4 +1,21 @@
 
+1.3.2 / 2016-03-23
+==================
+
+New functionality and features
+------------------------------
+
+  * Support conditional transformations via the if parameter
+  * Process all upload parameters for explicit API.
+
+Other Changes
+-------------
+
+  * Fix categorization test criteria
+  * Delete resources by tag after tests
+  * Replace `ARCHIVE_TAG` with `TEST_TAG`
+  * Add `TEST_IMAGE` and `TEST_TAG`
+
 1.3.1 / 2016-02-03
 ==================
 
