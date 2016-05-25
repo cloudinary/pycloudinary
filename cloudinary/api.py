@@ -128,7 +128,7 @@ def transformations(**options):
 
 def transformation(transformation, **options):
     uri = ["transformations", transformation_string(transformation)]
-    return call_api("get", uri, only(options, "max_results"), **options)
+    return call_api("get", uri, only(options, "next_cursor", "max_results"), **options)
 
 def delete_transformation(transformation, **options):
     uri = ["transformations", transformation_string(transformation)]
