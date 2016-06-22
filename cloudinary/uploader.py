@@ -233,4 +233,4 @@ def _is_gae():
         return False
     else:
         import httplib
-        return 'appengine' in str(httplib.HTTP)
+        return 'gae_override' in str(httplib.HTTP)
