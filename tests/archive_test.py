@@ -1,3 +1,5 @@
+import random
+
 import cloudinary
 from cloudinary import uploader, utils, api
 from cloudinary.compat import PY3, urllib2
@@ -6,7 +8,7 @@ import tempfile
 import os
 import zipfile
 
-TEST_TAG = "pycloudinary_test"
+TEST_TAG = "pycloudinary_test" + str(random.randint(10000, 99999))
 
 class ArchiveTest(unittest.TestCase):
     @classmethod

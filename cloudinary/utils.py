@@ -51,7 +51,7 @@ def generate_transformation_string(**options):
     angle = ".".join([str(value) for value in build_array(options.pop("angle", None))])
     no_html_sizes = has_layer or angle or crop == "fit" or crop == "limit" or responsive_width
 
-    if width and (width == "auto" or float(width) < 1 or no_html_sizes):
+    if width and (str(width).startswith("auto") or float(width) < 1 or no_html_sizes):
         del options["width"]
     if height and (float(height) < 1 or no_html_sizes):
         del options["height"]
@@ -158,7 +158,7 @@ def generate_transformation_string(**options):
       transformations += [generate_transformation_string(**responsive_width_transformation)[0]]
     url = "/".join([trans for trans in transformations if trans])
 
-    if width == "auto" or responsive_width:
+    if str(width).startswith("auto") or responsive_width:
       options["responsive"] = True
     if dpr == "auto":
       options["hidpi"] = True

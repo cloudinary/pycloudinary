@@ -78,6 +78,38 @@ class TestUtils(unittest.TestCase):
         """should use x, y, radius, prefix, gravity and quality from options"""
         self.__test_cloudinary_url(options = {"x": 1, "y": 2, "opacity": 20, "radius": 3, "gravity": "center", "quality": 0.4, "prefix": "a"}, expected_url =  DEFAULT_UPLOAD_PATH + "g_center,o_20,p_a,q_0.4,r_3,x_1,y_2/test" )
 
+    def test_should_support_auto_width(self):
+        """should support auto width"""
+        self.__test_cloudinary_url(options = { "width": "auto:20", "crop": 'fill' }, 
+                                   expected_url = DEFAULT_UPLOAD_PATH + "c_fill,w_auto:20/test",
+                                   expected_options= {'responsive': True})
+        self.__test_cloudinary_url(options = { "width": "auto:20:350", "crop": 'fill' }, 
+                                   expected_url = DEFAULT_UPLOAD_PATH + "c_fill,w_auto:20:350/test",
+                                   expected_options= {'responsive': True})
+        self.__test_cloudinary_url(options = { "width": "auto:breakpoints", "crop": 'fill' }, 
+                                   expected_url = DEFAULT_UPLOAD_PATH + "c_fill,w_auto:breakpoints/test",
+                                   expected_options= {'responsive': True})
+        self.__test_cloudinary_url(options = { "width": "auto:breakpoints_100_1900_20_15", "crop": 'fill' }, 
+                                   expected_url = DEFAULT_UPLOAD_PATH + "c_fill,w_auto:breakpoints_100_1900_20_15/test",
+                                   expected_options= {'responsive': True})
+        self.__test_cloudinary_url(options = { "width": "auto:breakpoints:json", "crop": 'fill' }, 
+                                   expected_url = DEFAULT_UPLOAD_PATH + "c_fill,w_auto:breakpoints:json/test",
+                                   expected_options= {'responsive': True})
+
+    def test_support_a_percent_value(self):
+        """quality support a percent value"""
+        self.__test_cloudinary_url(options = {"x": 1, "y": 2, "radius": 3, "gravity": "center", "quality": 80, "prefix": "a"}, 
+                                   expected_url = DEFAULT_UPLOAD_PATH + "g_center,p_a,q_80,r_3,x_1,y_2/test")
+        self.__test_cloudinary_url(options = {"x": 1, "y": 2, "radius": 3, "gravity": "center", "quality": "80:444", "prefix": "a"}, 
+                                   expected_url = DEFAULT_UPLOAD_PATH + "g_center,p_a,q_80:444,r_3,x_1,y_2/test")
+    def test_should_support_auto_value(self):
+        """quality should support auto value"""
+        self.__test_cloudinary_url(options = {"x": 1, "y": 2, "radius": 3, "gravity": "center", "quality": "auto", "prefix": "a"}, 
+                                   expected_url = DEFAULT_UPLOAD_PATH + "g_center,p_a,q_auto,r_3,x_1,y_2/test")
+        self.__test_cloudinary_url(options = {"x": 1, "y": 2, "radius": 3, "gravity": "center", "quality": "auto:good", "prefix": "a"}, 
+                                   expected_url = DEFAULT_UPLOAD_PATH + "g_center,p_a,q_auto:good,r_3,x_1,y_2/test")
+
+
     def test_transformation_simple(self):
         """should support named tranformation"""
         self.__test_cloudinary_url(options = {"transformation": "blip"}, expected_url =  DEFAULT_UPLOAD_PATH + "t_blip/test" )

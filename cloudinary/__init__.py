@@ -163,9 +163,10 @@ class CloudinaryResource(object):
         if options.get("resource_type", self.resource_type) == "video":
             self.default_poster_options(options)
         src, attrs = self.__build_url(**options)
+        client_hints = attrs.pop("client_hints", config().client_hints)
         responsive = attrs.pop("responsive", False)
         hidpi = attrs.pop("hidpi", False)
-        if responsive or hidpi:
+        if (responsive or hidpi) and not client_hints:
             attrs["data-src"] = src
             classes = "cld-responsive" if responsive else "cld-hidpi"
             if "class" in attrs: classes += " " + attrs["class"] 
