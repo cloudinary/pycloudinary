@@ -11,6 +11,7 @@ DEFAULT_RESPONSIVE_WIDTH_TRANSFORMATION = {"width": "auto", "crop": "limit"}
 
 RANGE_VALUE_RE = r'^(?P<value>(\d+\.)?\d+)(?P<modifier>[%pP])?$'
 RANGE_RE = r'^(\d+\.)?\d+[%pP]?\.\.(\d+\.)?\d+[%pP]?$'
+FLOAT_RE = r'^(\d+)\.(\d+)?$'
 __LAYER_KEYWORD_PARAMS = [("font_weight", "normal"), ("font_style", "normal"), ("text_decoration", "none"), ("text_align", None), ("stroke", "none")]
 
 def build_array(arg):
@@ -51,9 +52,9 @@ def generate_transformation_string(**options):
     angle = ".".join([str(value) for value in build_array(options.pop("angle", None))])
     no_html_sizes = has_layer or angle or crop == "fit" or crop == "limit" or responsive_width
 
-    if width and (str(width).startswith("auto") or float(width) < 1 or no_html_sizes):
+    if width and (str(width).startswith("auto") or str(width) == "ow" or is_fraction(width) or no_html_sizes):
         del options["width"]
-    if height and (float(height) < 1 or no_html_sizes):
+    if height and (str(height) == "oh" or is_fraction(height) or no_html_sizes):
         del options["height"]
 
     background = options.pop("background", None)
@@ -163,6 +164,12 @@ def generate_transformation_string(**options):
     if dpr == "auto":
       options["hidpi"] = True
     return (url, options)
+
+
+def is_fraction(width):
+    width = str(width)
+    return (re.match(FLOAT_RE, width) and float(width) < 1)
+
 
 def split_range(range):
     if (isinstance(range, list) or isinstance(range, tuple)) and len(range) >= 2:

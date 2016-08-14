@@ -97,6 +97,12 @@ class TestUtils(unittest.TestCase):
                                    expected_url = DEFAULT_UPLOAD_PATH + "c_fill,w_auto:breakpoints:json/test",
                                    expected_options= {'responsive': True})
 
+    def test_original_width_and_height(self):
+        """should support original width and height"""
+        self.__test_cloudinary_url(options = {"crop": "crop", "width": "ow", "height": "oh"}, 
+                                   expected_url = DEFAULT_UPLOAD_PATH + "c_crop,h_oh,w_ow/test",
+                                   )
+
     def test_support_a_percent_value(self):
         """quality support a percent value"""
         self.__test_cloudinary_url(options = {"x": 1, "y": 2, "radius": 3, "gravity": "center", "quality": 80, "prefix": "a"}, 
