@@ -77,6 +77,7 @@ class TestUtils(unittest.TestCase):
     def test_various_options(self):
         """should use x, y, radius, prefix, gravity and quality from options"""
         self.__test_cloudinary_url(options = {"x": 1, "y": 2, "opacity": 20, "radius": 3, "gravity": "center", "quality": 0.4, "prefix": "a"}, expected_url =  DEFAULT_UPLOAD_PATH + "g_center,o_20,p_a,q_0.4,r_3,x_1,y_2/test" )
+        self.__test_cloudinary_url(options = {"gravity": "auto", "width": 0.5, "crop": "crop"}, expected_url =  DEFAULT_UPLOAD_PATH + "c_crop,g_auto,w_0.5/test" )
 
     def test_should_support_auto_width(self):
         """should support auto width"""
