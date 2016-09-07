@@ -61,8 +61,13 @@ class UploaderTest(unittest.TestCase):
         result = uploader.upload(TEST_IMAGE, tags=TEST_TAG)
         uploader.rename(result["public_id"], result["public_id"]+"2")
         self.assertIsNotNone(api.resource(result["public_id"]+"2"))
+        self.assertRaises(api.Error, uploader.rename, result["public_id"], result["public_id"]+"2")
+        self.assertDictEqual(uploader.rename(result["public_id"], result["public_id"]+"2", return_error=True),
+                {"error": {"http_code": 404, "message": "Resource not found - %s" % result["public_id"]}})
         result2 = uploader.upload("tests/favicon.ico", tags=TEST_TAG)
         self.assertRaises(api.Error, uploader.rename, result2["public_id"], result["public_id"]+"2")
+        self.assertDictEqual(uploader.rename(result2["public_id"], result["public_id"]+"2", return_error=True),
+                {"error": {"http_code": 400, "message": "to_public_id %s already exists" % (result["public_id"]+"2")}})
         uploader.rename(result2["public_id"], result["public_id"]+"2", overwrite=True)
         self.assertEqual(api.resource(result["public_id"]+"2")["format"], "ico")
 
