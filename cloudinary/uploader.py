@@ -200,7 +200,7 @@ def call_api(action, params, http_headers={}, return_error=False, unsigned=False
             response = urllib2.urlopen(request, **kw).read()
         except HTTPError:
             e = sys.exc_info()[1]
-            if not e.code in [200, 400, 500]:
+            if not e.code in [200, 400, 404, 500]:
                 raise Error("Server returned unexpected status code - %d - %s" % (e.code, e.read()))
             code = e.code
             response = e.read()
