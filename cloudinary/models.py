@@ -1,8 +1,9 @@
-import cloudinary
 import re
+
 from cloudinary import CloudinaryResource, forms, uploader
-from django.db import models
+
 from django.core.files.uploadedfile import UploadedFile
+from django.db import models
 
 # Add introspection rules for South, if it's installed.
 try:
@@ -12,6 +13,7 @@ except ImportError:
     pass
 
 CLOUDINARY_FIELD_DB_RE = r'(?:(?P<resource_type>image|raw|video)/(?P<type>upload|private|authenticated)/)?(?:v(?P<version>\d+)/)?(?P<public_id>.*?)(\.(?P<format>[^.]+))?$'
+
 
 # Taken from six - https://pythonhosted.org/six/
 def with_metaclass(meta, *bases):
@@ -24,7 +26,8 @@ def with_metaclass(meta, *bases):
             return meta(name, bases, d)
     return type.__new__(metaclass, 'temporary_class', (), {})
 
-class CloudinaryField(with_metaclass(models.SubfieldBase, models.Field)):
+
+class CloudinaryField(models.Field):
     description = "A resource stored in Cloudinary"
 
     def __init__(self, *args, **kwargs):
@@ -42,18 +45,32 @@ class CloudinaryField(with_metaclass(models.SubfieldBase, models.Field)):
         value = self._get_val_from_obj(obj)
         return self.get_prep_value(value)
 
+    def parse_cloudinary_resource(self, value):
+        m = re.match(CLOUDINARY_FIELD_DB_RE, value)
+        resource_type = m.group('resource_type') or self.resource_type
+        type = m.group('type') or self.type
+        return CloudinaryResource(
+            type=type,
+            resource_type=resource_type,
+            version=m.group('version'),
+            public_id=m.group('public_id'),
+            format=m.group('format')
+        )
+
+    def from_db_value(self, value, expression, connection, context):
+        if value is None:
+            return value
+        return self.parse_cloudinary_resource(value)
+
     def to_python(self, value):
         if isinstance(value, CloudinaryResource):
             return value
         elif isinstance(value, UploadedFile):
             return value
-        elif not value:
+        elif value is None:
             return value
         else:
-            m = re.match(CLOUDINARY_FIELD_DB_RE, value)
-            resource_type = m.group('resource_type') or self.resource_type
-            type = m.group('type') or self.type
-            return CloudinaryResource(type=type,resource_type=resource_type,version=m.group('version'),public_id=m.group('public_id'),format=m.group('format'))
+            return self.parse_cloudinary_resource(value)
 
     def upload_options_with_filename(self, model_instance, filename):
         return self.upload_options(model_instance)
