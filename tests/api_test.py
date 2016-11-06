@@ -3,6 +3,8 @@ import time
 import cloudinary
 from cloudinary import uploader, api, utils
 
+
+
 class ApiTest(unittest.TestCase):
     initialized = False
     def setUp(self):
@@ -40,7 +42,7 @@ class ApiTest(unittest.TestCase):
         self.assertIn("image", api.resource_types()["resource_types"])
     
     test01_resource_types.tags = ['safe']
-    
+
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test02_resources(self):
         """ should allow listing resources """
@@ -89,7 +91,7 @@ class ApiTest(unittest.TestCase):
         tags = [x for y in resources_tags for x in y]
         self.assertIn("api_test_tag", tags)
         self.assertIn({"custom": {"key": "value"}}, [resource.get("context") for resource in resources])
-        
+
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test06a_resources_by_ids(self):
         """ should allow listing resources by public ids """
@@ -100,7 +102,7 @@ class ApiTest(unittest.TestCase):
         tags = [x for y in resources_tags for x in y]
         self.assertIn("api_test_tag", tags)
         self.assertIn({"custom": {"key": "value"}}, [resource.get("context") for resource in resources])
-        
+
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test06b_resources_direction(self):
         """ should allow listing resources in both directions """
@@ -246,7 +248,7 @@ class ApiTest(unittest.TestCase):
     def test18_usage(self):
         """ should support usage API """
         self.assertIn("last_updated", api.usage())
-        
+
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     @unittest.skip("Skip delete all derived resources by default")
     def test19_delete_derived(self):
@@ -264,21 +266,21 @@ class ApiTest(unittest.TestCase):
     def test20_manual_moderation(self):
         """ should support setting manual moderation status """
         resource = uploader.upload("tests/logo.png", moderation="manual")
-  
+
         self.assertEqual(resource["moderation"][0]["status"], "pending")
         self.assertEqual(resource["moderation"][0]["kind"], "manual")
-    
+
         api_result = api.update(resource["public_id"], moderation_status="approved")
         self.assertEqual(api_result["moderation"][0]["status"], "approved")
         self.assertEqual(api_result["moderation"][0]["kind"], "manual")
-        
+
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test22_raw_conversion(self):
         """ should support requesting raw_convert """ 
         resource = uploader.upload("tests/docx.docx", resource_type="raw")
         with self.assertRaisesRegex(api.BadRequest, 'Illegal value'): 
             api.update(resource["public_id"], raw_convert="illegal", resource_type="raw")
-  
+
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test23_categorization(self):
         """ should support requesting categorization """
@@ -290,7 +292,7 @@ class ApiTest(unittest.TestCase):
         """ should support requesting detection """
         with self.assertRaisesRegex(api.BadRequest, 'Illegal value'): 
             api.update("api_test", detection="illegal")
-  
+
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test26_auto_tagging(self):
         """ should support requesting auto_tagging """
@@ -400,7 +402,7 @@ class ApiTest(unittest.TestCase):
                 }
         myCloudinaryImage = cloudinary.CloudinaryImage(metadata=metadata)
         self.assertEqual(len(myCloudinaryImage), len(metadata["public_id"]))
-    
+
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_restore(self):
         """ should support restoring resources """

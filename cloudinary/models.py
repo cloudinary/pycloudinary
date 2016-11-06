@@ -56,7 +56,7 @@ class CloudinaryField(with_metaclass(models.SubfieldBase, models.Field)):
             return CloudinaryResource(type=type,resource_type=resource_type,version=m.group('version'),public_id=m.group('public_id'),format=m.group('format'))
 
     def upload_options_with_filename(self, model_instance, filename):
-        return self.upload_options(model_instance);
+        return self.upload_options(model_instance)
 
     def upload_options(self, model_instance):
         return {}

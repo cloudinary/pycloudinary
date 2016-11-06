@@ -11,7 +11,7 @@ setup(name='cloudinary',
       author_email='info@cloudinary.com',
       url='http://cloudinary.com',
       license='MIT',
-      packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
+      packages=find_packages(exclude=['ez_setup', 'examples', 'tests', 'django_tests']),
       classifiers=[
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python",
