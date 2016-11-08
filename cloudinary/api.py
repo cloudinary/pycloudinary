@@ -4,9 +4,12 @@ import base64
 import sys
 import email.utils
 import socket
+import urllib3
 import cloudinary
-from cloudinary.compat import urllib2, urlencode, to_string, to_bytes, PY3, HTTPError
+from cloudinary.compat import urllib2, urlencode, to_string, to_bytes, PY3
 from cloudinary import utils
+from urllib3.exceptions import HTTPError
+
 
 class Error(Exception): pass
 class NotFound(Error): pass
@@ -23,7 +26,8 @@ EXCEPTION_CODES = {
     403: NotAllowed,
     404: NotFound,
     409: AlreadyExists,
-    420: RateLimited
+    420: RateLimited,
+    500: GeneralError
 }
 
 class Response(dict):
@@ -221,7 +225,7 @@ def call_api(method, uri, params, **options):
     if not api_key: raise Exception("Must supply api_key")
     api_secret = options.pop("api_secret", cloudinary.config().api_secret)
     if not cloud_name: raise Exception("Must supply api_secret")
-
+    exception_class = None
     data = to_bytes(urlencode(params))
     api_url = "/".join([prefix, "v1_1", cloud_name] + uri)
     request = urllib2.Request(api_url, data)
@@ -229,35 +233,37 @@ def call_api(method, uri, params, **options):
     byte_value = to_bytes('%s:%s' % (api_key, api_secret))
     encoded_value = base64.encodebytes(byte_value) if PY3 else base64.encodestring(byte_value)
     base64string = to_string(encoded_value).replace('\n', '')
-    request.add_header("Authorization", "Basic %s" % base64string)
-    request.add_header("User-Agent", cloudinary.get_user_agent())
-    request.get_method = lambda: method.upper()
+    headers = urllib3.make_headers(basic_auth="{0}:{1}".format(api_key, api_secret), user_agent=cloudinary.get_user_agent())
+    # headers = {
+    #     "Authorization": "Basic %s" % base64string,
+    #     "User-Agent": cloudinary.get_user_agent()
+    # }
 
     kw = {}
     if 'timeout' in options:
         kw['timeout'] = options['timeout']
     try:
-        response = urllib2.urlopen(request, **kw)
-        body = response.read()
-    except HTTPError:
+        http = urllib3.PoolManager()
+        response = http.request(method.upper(), api_url, params, headers, **kw)
+        body = response.data
+    except HTTPError as he:
         e = sys.exc_info()[1]
         exception_class = EXCEPTION_CODES.get(e.code)
         if exception_class:
             response = e
             body = response.read()
         else:
-            raise GeneralError("Server returned unexpected status code - %d - %s" % (e.code, e.read()))
+            raise GeneralError("Unexpected error {0}", e.message)
     except socket.error:
         e = sys.exc_info()[1]
         raise GeneralError("Socket Error: %s" % (str(e)))
 
     try:
-        body = to_string(body)
-        result = json.loads(body)
+        result = json.loads(body.decode('utf-8'))
     except Exception:
         # Error is parsing json
         e = sys.exc_info()[1]
-        raise GeneralError("Error parsing server response (%d) - %s. Got - %s" % (response.code, body, e))
+        raise GeneralError("Error parsing server response (%d) - %s. Got - %s" % (response.status, body, e))
 
     if "error" in result:
         exception_class = exception_class or Exception

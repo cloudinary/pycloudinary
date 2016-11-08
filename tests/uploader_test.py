@@ -5,6 +5,8 @@ import unittest
 import tempfile
 import os
 
+from urllib3.util import parse_url
+
 TEST_IMAGE = "tests/logo.png"
 TEST_IMAGE_HEIGHT = 51
 TEST_IMAGE_WIDTH = 241
@@ -79,7 +81,11 @@ class UploaderTest(unittest.TestCase):
         """should support explicit """
         result = uploader.explicit("cloudinary", type="twitter_name", eager=[dict(crop="scale", width="2.0")])
         url = utils.cloudinary_url("cloudinary", type="twitter_name", crop="scale", width="2.0", format="png", version=result["version"])[0]
-        self.assertEqual(result["eager"][0]["url"], url)
+        if result["eager"][0]["url"].startswith("/res/"):
+            actual = result["eager"][0]["url"][4:]
+        else:
+            actual = result["eager"][0]["url"]
+        self.assertEqual(actual, parse_url(url).path)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_eager(self):
@@ -229,7 +235,7 @@ class UploaderTest(unittest.TestCase):
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_timeout(self):
-        with self.assertRaisesRegexp(cloudinary.api.Error, 'urlopen error timed out'): 
+        with self.assertRaisesRegexp(cloudinary.api.Error, 'timed out'): 
             uploader.upload(TEST_IMAGE, timeout=0.001, tags=TEST_TAG)
 
     @unittest.skipUnless(cloudinary.config().api_secret,"requires api_key/api_secret")

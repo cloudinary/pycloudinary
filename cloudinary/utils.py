@@ -513,7 +513,7 @@ def build_upload_params(**options):
               "upload_preset": options.get("upload_preset"),
               "phash": options.get("phash"),
               "return_delete_token": options.get("return_delete_token"),
-              "auto_tagging": options.get("auto_tagging") and float(options.get("auto_tagging")),
+              "auto_tagging": options.get("auto_tagging") and str(options.get("auto_tagging")),
               "responsive_breakpoints": generate_responsive_breakpoints_string(options.get("responsive_breakpoints"))}
     return params
 

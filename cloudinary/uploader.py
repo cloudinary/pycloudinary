@@ -1,14 +1,16 @@
 # Copyright Cloudinary
 import json, re, sys
 from os.path import basename, getsize
-import urllib
+import urllib3
 import cloudinary
 import socket
 from cloudinary import utils
 from cloudinary.api import Error
-from cloudinary.poster.encode import multipart_encode
-from cloudinary.poster.streaminghttp import register_openers
-from cloudinary.compat import urllib2, BytesIO, string_types, urlencode, to_bytes, to_string, PY3, HTTPError
+from cloudinary.compat import string_types, PY3
+from urllib3.exceptions import HTTPError
+
+from urllib3.packages.ordered_dict import OrderedDict
+
 _initialized = False
 
 def upload(file, **options):
@@ -38,11 +40,12 @@ def upload_large(file, **options):
         file_size = getsize(file)
         chunk = file_io.read(chunk_size)        
         while (chunk):
-            chunk_io = BytesIO(chunk)
-            chunk_io.name = basename(file)
+            # chunk_io = BytesIO(chunk)
+            # chunk_io.name = basename(file)
             range = "bytes {0}-{1}/{2}".format(current_loc, current_loc + len(chunk) - 1, file_size)
             current_loc += len(chunk)
-            upload = upload_large_part(chunk_io, http_headers={"Content-Range": range, "X-Unique-Upload-Id": upload_id}, **options)
+            
+            upload = upload_large_part((file,chunk), http_headers={"Content-Range": range, "X-Unique-Upload-Id": upload_id}, **options)
             options["public_id"] = upload.get("public_id")
             chunk = file_io.read(chunk_size)
         return upload
@@ -141,6 +144,7 @@ def call_tags_api(tag, command, public_ids = [], **options):
     return call_api("tags", params, **options)
 
 TEXT_PARAMS = ["public_id", "font_family", "font_size", "font_color", "text_align", "font_weight", "font_style", "background", "opacity", "text_decoration"]
+
 def text(text, **options):
     params = {"timestamp": utils.now(), "text": text}
     for key in TEXT_PARAMS:
@@ -154,57 +158,46 @@ def call_api(action, params, http_headers={}, return_error=False, unsigned=False
           params = utils.cleanup_params(params)
         else:
           params = utils.sign_request(params, options)
-    
-        param_list = []
+
+        param_list = OrderedDict()
         for k, v in params.items():
             if isinstance(v, list):          
-                for vv in v:
-                  param_list.append((k+"[]", vv))
+                for i in range(len(v)):
+                  param_list["{0}[{1}]".format(k, i )]= v[i]
             elif v:
-                param_list.append((k, v))            
-    
+                param_list[k]= v            
+
         api_url = utils.cloudinary_api_url(action, **options)
-    
-        global _initialized
-        if not _initialized:
-            _initialized = True
-            # Register the streaming http handlers with urllib2
-            register_openers()
-    
+
         if file:
             if not isinstance(file, string_types):
-                param_list.append(("file", file))
+                param_list["file"]=( file)
             elif not re.match(r'ftp:|https?:|s3:|data:[^;]*;base64,([a-zA-Z0-9\/+\n=]+)$', file):
                 file_io = open(file, "rb")
-                param_list.append(('file', file_io))
+                param_list['file']= (file, file_io.read())
             else:
-                param_list.append(("file", file))
+                param_list["file"]=(file)
 
-        datagen, headers = multipart_encode(param_list)
-        
-        if _is_gae():
-            # Might not be needed in the future but for now this is needed in GAE
-            datagen = "".join(datagen)
+        http = urllib3.PoolManager()
 
-        request = urllib2.Request(api_url, datagen, headers)
-        request.add_header("User-Agent", cloudinary.get_user_agent())
-        for k, v in http_headers.items():
-            request.add_header(k, v)
-    
+        headers = {"User-Agent": cloudinary.get_user_agent()}
+        headers.update(http_headers)
+
         kw = {}
         if timeout is not None:
             kw['timeout'] = timeout
 
         code = 200
         try:
-            response = urllib2.urlopen(request, **kw).read()
+            response = http.request("POST", api_url, param_list, headers, **kw)
+            # response = urllib2.urlopen(request, **kw).read()
         except HTTPError:
             e = sys.exc_info()[1]
-            if not e.code in [200, 400, 500]:
-                raise Error("Server returned unexpected status code - %d - %s" % (e.code, e.read()))
-            code = e.code
+            if not response.status in [200, 400, 401, 403, 404, 500]:
+                raise Error("Server returned unexpected status code - %d - %s" % (response.status, e.read()))
+            code = response.status
             response = e.read()
-        except urllib2.URLError:
+        except urllib3.exceptions.HTTPError:
             e = sys.exc_info()[1]
             raise Error("Error - %s" % str(e))
         except socket.error:
@@ -212,7 +205,7 @@ def call_api(action, params, http_headers={}, return_error=False, unsigned=False
             raise Error("Socket error: %s" % str(e))
     
         try:
-            result = json.loads(to_string(response))
+            result = json.loads(response.data.decode('utf-8'))
         except Exception:
             e = sys.exc_info()[1]
             # Error is parsing json
@@ -227,10 +220,3 @@ def call_api(action, params, http_headers={}, return_error=False, unsigned=False
         return result
     finally:
         if file_io: file_io.close()    
-
-def _is_gae():
-    if PY3:
-        return False
-    else:
-        import httplib
-        return 'appengine' in str(httplib.HTTP)
