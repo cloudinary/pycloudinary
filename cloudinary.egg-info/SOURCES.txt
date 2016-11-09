@@ -13,6 +13,7 @@ cloudinary.egg-info/PKG-INFO
 cloudinary.egg-info/SOURCES.txt
 cloudinary.egg-info/dependency_links.txt
 cloudinary.egg-info/not-zip-safe
+cloudinary.egg-info/requires.txt
 cloudinary.egg-info/top_level.txt
 cloudinary/poster/__init__.py
 cloudinary/poster/encode.py
