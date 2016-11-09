@@ -37,6 +37,8 @@ class Response(dict):
         self.rate_limit_reset_at = email.utils.parsedate(response.headers["x-featureratelimit-reset"])
         self.rate_limit_remaining = int(response.headers["x-featureratelimit-remaining"])
 
+_http = urllib3.PoolManager()
+
 def ping(**options):
     return call_api("get", ["ping"], {}, **options)
 
@@ -86,7 +88,7 @@ def update(public_id, **options):
     if "face_coordinates" in options: upload_options["face_coordinates"] = utils.encode_double_array(options.get("face_coordinates")) 
     if "custom_coordinates" in options: upload_options["custom_coordinates"] = utils.encode_double_array(options.get("custom_coordinates")) 
     if "context" in options: upload_options["context"] = utils.encode_dict(options.get("context")) 
-    if "auto_tagging" in options: upload_options["auto_tagging"] = float(options.get("auto_tagging"))
+    if "auto_tagging" in options: upload_options["auto_tagging"] = str(options.get("auto_tagging"))
     return call_api("post", uri, upload_options, **options)
 
 def delete_resources(public_ids, **options):
@@ -243,8 +245,8 @@ def call_api(method, uri, params, **options):
     if 'timeout' in options:
         kw['timeout'] = options['timeout']
     try:
-        http = urllib3.PoolManager()
-        response = http.request(method.upper(), api_url, params, headers, **kw)
+        # _http = urllib3.PoolManager() if _http is None
+        response = _http.request(method.upper(), api_url, params, headers, **kw)
         body = response.data
     except HTTPError as e:
         raise GeneralError("Unexpected error {0}", e.message)

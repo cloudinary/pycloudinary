@@ -9,9 +9,12 @@ from cloudinary.api import Error
 from cloudinary.compat import string_types, PY3
 from urllib3.exceptions import HTTPError
 
-from urllib3.packages.ordered_dict import OrderedDict
+try:  # Python 2.7+
+    from collections import OrderedDict
+except ImportError:
+    from urllib3.packages.ordered_dict import OrderedDict
 
-_initialized = False
+_http = urllib3.PoolManager()
 
 def upload(file, **options):
     params = utils.build_upload_params(**options)
@@ -178,8 +181,6 @@ def call_api(action, params, http_headers={}, return_error=False, unsigned=False
             else:
                 param_list["file"]=(file)
 
-        http = urllib3.PoolManager()
-
         headers = {"User-Agent": cloudinary.get_user_agent()}
         headers.update(http_headers)
 
@@ -189,7 +190,7 @@ def call_api(action, params, http_headers={}, return_error=False, unsigned=False
 
         code = 200
         try:
-            response = http.request("POST", api_url, param_list, headers, **kw)
+            response = _http.request("POST", api_url, param_list, headers, **kw)
             # response = urllib2.urlopen(request, **kw).read()
         except HTTPError as e:
             raise Error("Unexpected error - {0!r}".format(e))
