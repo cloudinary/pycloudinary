@@ -2,7 +2,10 @@
 import zlib, hashlib, re, struct, uuid, base64, time, random, string, json, copy
 from fractions import Fraction
 import cloudinary
-from cloudinary.compat import (PY3, to_bytes, to_bytearray, to_string, string_types, unquote, urlencode)
+from cloudinary.compat import PY3, to_bytes, to_bytearray, to_string, string_types
+import six.moves.urllib.parse
+urlencode = six.moves.urllib.parse.urlencode
+unquote = six.moves.urllib.parse.unquote
 
 """ @deprecated: use cloudinary.SHARED_CDN """
 SHARED_CDN = cloudinary.SHARED_CDN

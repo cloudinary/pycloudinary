@@ -3,6 +3,7 @@ import unittest
 import re
 from fractions import Fraction
 from cloudinary.compat import cldrange
+import six
 
 DEFAULT_ROOT_PATH = 'http://res.cloudinary.com/test123/'
 DEFAULT_UPLOAD_PATH = 'http://res.cloudinary.com/test123/image/upload/'
@@ -477,7 +478,7 @@ class TestUtils(unittest.TestCase):
     def test_user_agent(self):
         agent = cloudinary.get_user_agent()
         platform = 'MyPlatform/1.2.3 (Test code)'
-        self.assertRegexpMatches(agent, 'CloudinaryPython/\d\.\d+\.\d+')
+        six.assertRegex(self, agent, 'CloudinaryPython/\d\.\d+\.\d+')
         temp = cloudinary.USER_PLATFORM
         cloudinary.USER_PLATFORM = platform
         result = cloudinary.get_user_agent()

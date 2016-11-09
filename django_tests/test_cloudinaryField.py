@@ -10,7 +10,6 @@ from .models import Poll
 class TestCloudinaryField(TestCase):
 
     def setup(self):
-        print("\n\n---------------django----------\n\n")
         self.poll = Poll(question="What?", image="sample")
 
     def test_get_internal_type(self):

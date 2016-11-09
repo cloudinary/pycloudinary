@@ -1,6 +1,7 @@
 import cloudinary
 from cloudinary import CloudinaryImage
 import unittest
+import six
 
 class ImageTest(unittest.TestCase):
     def setUp(self):
@@ -50,16 +51,16 @@ class ImageTest(unittest.TestCase):
     def shared_client_hints(self, **options):
         """should not use data-src or set responsive class"""
         tag = CloudinaryImage('sample.jpg').image(**options)
-        self.assertRegexpMatches(tag, '<img.*>', "should not use data-src or set responsive class" )
+        six.assertRegex(self, tag, '<img.*>', "should not use data-src or set responsive class" )
         self.assertNotRegexpMatches(tag, '<.* class.*>', "should not use data-src or set responsive class")
         self.assertNotRegexpMatches(tag, '\bdata-src\b', "should not use data-src or set responsive class" )
-        self.assertRegexpMatches(tag, 'src=["\']http://res.cloudinary.com/test/image/upload/c_scale,dpr_auto,w_auto/sample.jpg["\']', "should not use data-src or set responsive class")
+        six.assertRegex(self, tag, 'src=["\']http://res.cloudinary.com/test/image/upload/c_scale,dpr_auto,w_auto/sample.jpg["\']', "should not use data-src or set responsive class")
         cloudinary.config(responsive= True)
         tag = CloudinaryImage('sample.jpg').image(**options)
-        self.assertRegexpMatches(tag, '<img.*>' )
+        six.assertRegex(self, tag, '<img.*>' )
         self.assertNotRegexpMatches(tag, '<.* class.*>', "should override responsive")
         self.assertNotRegexpMatches(tag, '\bdata-src\b', "should override responsive" )
-        self.assertRegexpMatches(tag, 'src=["\']http://res.cloudinary.com/test/image/upload/c_scale,dpr_auto,w_auto/sample.jpg["\']', "should override responsive")
+        six.assertRegex(self, tag, 'src=["\']http://res.cloudinary.com/test/image/upload/c_scale,dpr_auto,w_auto/sample.jpg["\']', "should override responsive")
         
     def test_client_hints_as_options(self):
         self.shared_client_hints( dpr= "auto", cloud_name= "test", width= "auto", crop= "scale", client_hints= True)
@@ -71,13 +72,13 @@ class ImageTest(unittest.TestCase):
         """should use normal responsive behaviour"""
         cloudinary.config(responsive = True)
         tag = CloudinaryImage('sample.jpg').image(width= "auto", crop= "scale", cloud_name= "test", client_hints= False)
-        self.assertRegexpMatches(tag, '<img.*>')
-        self.assertRegexpMatches(tag, 'class=["\']cld-responsive["\']')
-        self.assertRegexpMatches(tag, 'data-src=["\']http://res.cloudinary.com/test/image/upload/c_scale,w_auto/sample.jpg["\']')
+        six.assertRegex(self, tag, '<img.*>')
+        six.assertRegex(self, tag, 'class=["\']cld-responsive["\']')
+        six.assertRegex(self, tag, 'data-src=["\']http://res.cloudinary.com/test/image/upload/c_scale,w_auto/sample.jpg["\']')
     def test_width_auto_breakpoints(self):
         """supports auto width"""
         tag = CloudinaryImage( 'sample.jpg').image( crop= "scale", dpr= "auto", cloud_name= "test", width= "auto=breakpoints", client_hints= True)
-        self.assertRegexpMatches(tag, 'src=["\']http://res.cloudinary.com/test/image/upload/c_scale,dpr_auto,w_auto=breakpoints/sample.jpg["\']')
+        six.assertRegex(self, tag, 'src=["\']http://res.cloudinary.com/test/image/upload/c_scale,dpr_auto,w_auto=breakpoints/sample.jpg["\']')
 
 if __name__ == "__main__":
     unittest.main()

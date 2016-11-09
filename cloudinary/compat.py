@@ -1,31 +1,24 @@
 # Copyright Cloudinary
-import sys
-import urllib3
+import six.moves.urllib.parse
+urlencode = six.moves.urllib.parse.urlencode
+unquote = six.moves.urllib.parse.unquote
+urlparse = six.moves.urllib.parse.urlparse
+parse_qs = six.moves.urllib.parse.parse_qs
+quote_plus = six.moves.urllib.parse.quote_plus
+import six.moves.http_client as httplib
+from io import StringIO, BytesIO
+from six import PY3, string_types
 
-PY3 = (sys.version_info[0] == 3)
 
 if PY3:
-    import http.client as httplib
-    import urllib.request as urllib2
-    import urllib.error
-    from io import StringIO, BytesIO
-    from urllib.parse import urlencode, unquote, urlparse, parse_qs, quote_plus
     to_bytes = lambda s: s.encode('utf8')
     to_bytearray = lambda s: bytearray(s, 'utf8')
     to_string = lambda b: b.decode('utf8')
-    string_types = (str)
 
 else:
-    import httplib
-    from io import BytesIO
-    import StringIO
-    import urllib2
-    from urllib import urlencode, unquote, quote_plus
-    from urlparse import urlparse, parse_qs
     to_bytes = str
     to_bytearray = str
     to_string = str
-    string_types = (str, unicode)
 
 try:
     cldrange = xrange

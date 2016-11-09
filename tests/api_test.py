@@ -2,16 +2,12 @@ import unittest
 import time
 import cloudinary
 from cloudinary import uploader, api, utils
-
+import six
 
 
 class ApiTest(unittest.TestCase):
     initialized = False
     def setUp(self):
-        try:
-            self.assertRaisesRegex
-        except AttributeError:
-            self.assertRaisesRegex = self.assertRaisesRegexp
 
         if ApiTest.initialized: return
         ApiTest.initialized = True
@@ -40,7 +36,7 @@ class ApiTest(unittest.TestCase):
     def test01_resource_types(self):
         """ should allow listing resource_types """
         self.assertIn("image", api.resource_types()["resource_types"])
-    
+
     test01_resource_types.tags = ['safe']
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -278,25 +274,25 @@ class ApiTest(unittest.TestCase):
     def test22_raw_conversion(self):
         """ should support requesting raw_convert """ 
         resource = uploader.upload("tests/docx.docx", resource_type="raw")
-        with self.assertRaisesRegex(api.BadRequest, 'Illegal value'): 
+        with six.assertRaisesRegex(self, api.BadRequest, 'Illegal value'): 
             api.update(resource["public_id"], raw_convert="illegal", resource_type="raw")
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test23_categorization(self):
         """ should support requesting categorization """
-        with self.assertRaisesRegex(api.BadRequest, 'Illegal value'): 
+        with six.assertRaisesRegex(self, api.BadRequest, 'Illegal value'): 
             api.update("api_test", categorization="illegal")
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test24_detection(self):
         """ should support requesting detection """
-        with self.assertRaisesRegex(api.BadRequest, 'Illegal value'): 
+        with six.assertRaisesRegex(self, api.BadRequest, 'Illegal value'): 
             api.update("api_test", detection="illegal")
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test26_auto_tagging(self):
         """ should support requesting auto_tagging """
-        with self.assertRaisesRegex(api.BadRequest, 'Must use'): 
+        with six.assertRaisesRegex(self, api.BadRequest, 'Must use'): 
             api.update("api_test", auto_tagging=0.5)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -369,7 +365,7 @@ class ApiTest(unittest.TestCase):
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test32_background_removal(self):
         """ should support requesting background_removal """
-        with self.assertRaisesRegex(api.BadRequest, 'Illegal value'): 
+        with six.assertRaisesRegex(self, api.BadRequest, 'Illegal value'): 
             api.update("api_test", background_removal="illegal")
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -388,7 +384,7 @@ class ApiTest(unittest.TestCase):
         result = api.subfolders("test_folder1")
         self.assertEqual(result["folders"][0]["path"], "test_folder1/test_subfolder1")
         self.assertEqual(result["folders"][1]["path"], "test_folder1/test_subfolder2")
-        with self.assertRaisesRegex(api.NotFound): 
+        with six.assertRaisesRegex(self, api.NotFound): 
             api.subfolders("test_folder")
         api.delete_resources_by_prefix("test_folder")
 

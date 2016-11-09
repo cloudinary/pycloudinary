@@ -6,7 +6,7 @@ import email.utils
 import socket
 import urllib3
 import cloudinary
-from cloudinary.compat import urllib2, urlencode, to_string, to_bytes, PY3
+from cloudinary.compat import urlencode, to_string, to_bytes, PY3
 from cloudinary import utils
 from urllib3.exceptions import HTTPError
 
@@ -227,25 +227,14 @@ def call_api(method, uri, params, **options):
     if not api_key: raise Exception("Must supply api_key")
     api_secret = options.pop("api_secret", cloudinary.config().api_secret)
     if not cloud_name: raise Exception("Must supply api_secret")
-    exception_class = None
-    data = to_bytes(urlencode(params))
     api_url = "/".join([prefix, "v1_1", cloud_name] + uri)
-    request = urllib2.Request(api_url, data)
     # Add authentication
-    byte_value = to_bytes('%s:%s' % (api_key, api_secret))
-    encoded_value = base64.encodebytes(byte_value) if PY3 else base64.encodestring(byte_value)
-    base64string = to_string(encoded_value).replace('\n', '')
     headers = urllib3.make_headers(basic_auth="{0}:{1}".format(api_key, api_secret), user_agent=cloudinary.get_user_agent())
-    # headers = {
-    #     "Authorization": "Basic %s" % base64string,
-    #     "User-Agent": cloudinary.get_user_agent()
-    # }
 
     kw = {}
     if 'timeout' in options:
         kw['timeout'] = options['timeout']
     try:
-        # _http = urllib3.PoolManager() if _http is None
         response = _http.request(method.upper(), api_url, params, headers, **kw)
         body = response.data
     except HTTPError as e:

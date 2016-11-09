@@ -1,9 +1,9 @@
 import cloudinary
 from cloudinary import uploader, utils, api
-from cloudinary.compat import PY3, urllib2
 import unittest
 import tempfile
 import os
+import six
 
 from urllib3.util import parse_url
 
@@ -72,7 +72,7 @@ class UploaderTest(unittest.TestCase):
     def test_use_filename(self):
         """should successfully take use file name of uploaded file in public id if specified use_filename """
         result = uploader.upload(TEST_IMAGE, use_filename = True, tags=TEST_TAG)
-        self.assertRegexpMatches(result["public_id"], 'logo_[a-z0-9]{6}')
+        six.assertRegex(self, result["public_id"], 'logo_[a-z0-9]{6}')
         result = uploader.upload(TEST_IMAGE, use_filename = True, unique_filename = False, tags=TEST_TAG)
         self.assertEqual(result["public_id"], 'logo')
     
@@ -170,25 +170,25 @@ class UploaderTest(unittest.TestCase):
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_raw_conversion(self):
         """ should support requesting raw_convert """ 
-        with self.assertRaisesRegexp(api.Error, 'illegal is not a valid'): 
+        with six.assertRaisesRegex(self, api.Error, 'illegal is not a valid'): 
             uploader.upload("tests/docx.docx", raw_convert="illegal", resource_type="raw", tags=TEST_TAG)
   
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_categorization(self):
         """ should support requesting categorization """
-        with self.assertRaisesRegexp(api.Error, 'invalid'):
+        with six.assertRaisesRegex(self, api.Error, 'invalid'):
             uploader.upload(TEST_IMAGE, categorization="illegal", tags=TEST_TAG)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_detection(self):
         """ should support requesting detection """
-        with self.assertRaisesRegexp(api.Error, 'illegal is not a valid'): 
+        with six.assertRaisesRegex(self, api.Error, 'illegal is not a valid'): 
             uploader.upload(TEST_IMAGE, detection="illegal", tags=TEST_TAG)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_auto_tagging(self):
         """ should support requesting auto_tagging """
-        with self.assertRaisesRegexp(api.Error, 'Must use'): 
+        with six.assertRaisesRegex(self, api.Error, 'Must use'): 
             uploader.upload(TEST_IMAGE, auto_tagging=0.5, tags=TEST_TAG)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -224,18 +224,18 @@ class UploaderTest(unittest.TestCase):
         """ should support unsigned uploading using presets """
         preset = api.create_upload_preset(folder="upload_folder", unsigned=True)
         result = uploader.unsigned_upload(TEST_IMAGE, preset["name"])
-        self.assertRegexpMatches(result["public_id"], '^upload_folder\/[a-z0-9]+$')
+        six.assertRegex(self, result["public_id"], '^upload_folder\/[a-z0-9]+$')
         api.delete_upload_preset(preset["name"])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_background_removal(self):
         """ should support requesting background_removal """
-        with self.assertRaisesRegexp(api.Error, 'is invalid'): 
+        with six.assertRaisesRegex(self, api.Error, 'is invalid'): 
             uploader.upload(TEST_IMAGE, background_removal="illegal", tags=TEST_TAG)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_timeout(self):
-        with self.assertRaisesRegexp(cloudinary.api.Error, 'timed out'): 
+        with six.assertRaisesRegex(self, cloudinary.api.Error, 'timed out'): 
             uploader.upload(TEST_IMAGE, timeout=0.001, tags=TEST_TAG)
 
     @unittest.skipUnless(cloudinary.config().api_secret,"requires api_key/api_secret")

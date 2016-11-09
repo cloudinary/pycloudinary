@@ -1,12 +1,12 @@
 # Copyright Cloudinary
 import json, re, sys
-from os.path import basename, getsize
+from os.path import getsize
 import urllib3
 import cloudinary
 import socket
 from cloudinary import utils
 from cloudinary.api import Error
-from cloudinary.compat import string_types, PY3
+from cloudinary.compat import string_types
 from urllib3.exceptions import HTTPError
 
 try:  # Python 2.7+
@@ -164,11 +164,11 @@ def call_api(action, params, http_headers={}, return_error=False, unsigned=False
 
         param_list = OrderedDict()
         for k, v in params.items():
-            if isinstance(v, list):          
+            if isinstance(v, list):
                 for i in range(len(v)):
                   param_list["{0}[{1}]".format(k, i )]= v[i]
             elif v:
-                param_list[k]= v            
+                param_list[k]= v
 
         api_url = utils.cloudinary_api_url(action, **options)
 
@@ -191,18 +191,17 @@ def call_api(action, params, http_headers={}, return_error=False, unsigned=False
         code = 200
         try:
             response = _http.request("POST", api_url, param_list, headers, **kw)
-            # response = urllib2.urlopen(request, **kw).read()
         except HTTPError as e:
             raise Error("Unexpected error - {0!r}".format(e))
         except socket.error as e:
             raise Error("Socket error: {0!r}".format(e))
-    
+
         try:
             result = json.loads(response.data.decode('utf-8'))
         except Exception as e:
             # Error is parsing json
             raise Error("Error parsing server response (%d) - %s. Got - %s", response.status, response, e)
-    
+
         if "error" in result:
             if not response.status in [200, 400, 401, 403, 404, 500]:
                 code = response.status
@@ -210,7 +209,7 @@ def call_api(action, params, http_headers={}, return_error=False, unsigned=False
                     result["error"]["http_code"] = code
             else:
                 raise Error(result["error"]["message"])
-    
+
         return result
     finally:
         if file_io: file_io.close()    
