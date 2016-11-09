@@ -246,28 +246,21 @@ def call_api(method, uri, params, **options):
         http = urllib3.PoolManager()
         response = http.request(method.upper(), api_url, params, headers, **kw)
         body = response.data
-    except HTTPError as he:
-        e = sys.exc_info()[1]
-        exception_class = EXCEPTION_CODES.get(e.code)
-        if exception_class:
-            response = e
-            body = response.read()
-        else:
-            raise GeneralError("Unexpected error {0}", e.message)
-    except socket.error:
-        e = sys.exc_info()[1]
+    except HTTPError as e:
+        raise GeneralError("Unexpected error {0}", e.message)
+    except socket.error as e:
         raise GeneralError("Socket Error: %s" % (str(e)))
 
     try:
         result = json.loads(body.decode('utf-8'))
-    except Exception:
+    except Exception as e:
         # Error is parsing json
-        e = sys.exc_info()[1]
         raise GeneralError("Error parsing server response (%d) - %s. Got - %s" % (response.status, body, e))
 
     if "error" in result:
-        exception_class = exception_class or Exception
-        raise exception_class(result["error"]["message"])
+        exception_class = EXCEPTION_CODES.get(response.status) or Exception
+        exception_class = exception_class 
+        raise exception_class("Error {0} - {1}".format(response.status, result["error"]["message"]))
 
     return Response(result, response)
 

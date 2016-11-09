@@ -191,29 +191,22 @@ def call_api(action, params, http_headers={}, return_error=False, unsigned=False
         try:
             response = http.request("POST", api_url, param_list, headers, **kw)
             # response = urllib2.urlopen(request, **kw).read()
-        except HTTPError:
-            e = sys.exc_info()[1]
-            if not response.status in [200, 400, 401, 403, 404, 500]:
-                raise Error("Server returned unexpected status code - %d - %s" % (response.status, e.read()))
-            code = response.status
-            response = e.read()
-        except urllib3.exceptions.HTTPError:
-            e = sys.exc_info()[1]
-            raise Error("Error - %s" % str(e))
-        except socket.error:
-            e = sys.exc_info()[1]
-            raise Error("Socket error: %s" % str(e))
+        except HTTPError as e:
+            raise Error("Unexpected error - {0!r}".format(e))
+        except socket.error as e:
+            raise Error("Socket error: {0!r}".format(e))
     
         try:
             result = json.loads(response.data.decode('utf-8'))
-        except Exception:
-            e = sys.exc_info()[1]
+        except Exception as e:
             # Error is parsing json
-            raise Error("Error parsing server response (%d) - %s. Got - %s", code, response, e)
+            raise Error("Error parsing server response (%d) - %s. Got - %s", response.status, response, e)
     
         if "error" in result:
+            if not response.status in [200, 400, 401, 403, 404, 500]:
+                code = response.status
             if return_error:
-                result["error"]["http_code"] = code
+                    result["error"]["http_code"] = code
             else:
                 raise Error(result["error"]["message"])
     
