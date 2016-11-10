@@ -219,6 +219,29 @@ def create_upload_mapping(name, **options):
     params.update(only(options, "template"))
     return call_api("post", uri, params, **options)
 
+def list_streaming_profiles(**options):
+    uri = ["streaming_profiles"]
+    return call_api('GET', uri, {}, **options)
+
+def get_streaming_profile(name, **options):
+    uri = ["streaming_profiles", name]
+    return call_api('GET', uri, {}, **options)
+
+def delete_streaming_profile(name, **options):
+    uri = ["streaming_profiles", name]
+    return call_api('DELETE', uri, {}, **options)
+
+def create_streaming_profile(name, **options):
+    uri = ["streaming_profiles"]
+    params = __prepare_streaming_profile_params(**options)
+    params["name"] = name
+    return call_api('POST', uri, params, **options)
+
+def update_streaming_profile(name, **options):
+    uri = ["streaming_profiles", name]
+    params = __prepare_streaming_profile_params(**options)
+    return call_api('PUT', uri, params, **options)
+
 def call_api(method, uri, params, **options):
     prefix = options.pop("upload_prefix", cloudinary.config().upload_prefix) or "https://api.cloudinary.com"
     cloud_name = options.pop("cloud_name", cloudinary.config().cloud_name)
@@ -264,3 +287,9 @@ def only(hash, *keys):
 def transformation_string(transformation):
     return transformation if isinstance(transformation, str) else cloudinary.utils.generate_transformation_string(**transformation)[0]
 
+def __prepare_streaming_profile_params(**options):
+    params = only(options, "display_name")
+    if "representations" in options:
+        representations = [{"transformation": transformation_string(transformation)} for transformation in options["representations"]]
+        params["representations"] = json.dumps(representations)
+    return params
