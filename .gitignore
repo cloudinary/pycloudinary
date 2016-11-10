@@ -91,3 +91,7 @@ ENV/
 
 .DS_Store
 *.swp
+
+.project
+.pydevproject
+cloudinary/static/
