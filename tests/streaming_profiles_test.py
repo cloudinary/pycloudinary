@@ -5,11 +5,10 @@ from cloudinary import uploader, api, utils
 import six
 
 
-
 class StreamingProfilesTest(unittest.TestCase):
     initialized = False
-    def setUp(self):
 
+    def setUp(self):
         if StreamingProfilesTest.initialized: return
         StreamingProfilesTest.initialized = True
         cloudinary.reset_config()
@@ -22,19 +21,19 @@ class StreamingProfilesTest(unittest.TestCase):
     def test_create_streaming_profile(self):
         """should create a streaming profile with representations"""
         name = StreamingProfilesTest.test_id + "_streaming_profile"
-        result = api.create_streaming_profile(name, 
-          representations = [
-            { "transformation": {"bit_rate": "5m", "height": 1200, "width": 1200, "crop": "limit"}}])
+        result = api.create_streaming_profile(
+            name,
+            representations=[
+                {"transformation": {"bit_rate": "5m", "height": 1200, "width": 1200, "crop": "limit"}}])
         self.assertIn("representations", result["data"])
         reps = result["data"]["representations"]
         self.assertIsInstance(reps, list)
         """should return transformation as an array"""
         self.assertIsInstance(reps[0]["transformation"], list)
-        
+
         tr = reps[0]["transformation"][0]
         expected = {"bit_rate": "5m", "height": 1200, "width": 1200, "crop": "limit"}
         self.assertDictEqual(expected, tr)
-        
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_list_streaming_profiles(self):
@@ -62,9 +61,8 @@ class StreamingProfilesTest(unittest.TestCase):
         self.assertIn("crop", tr)
 
     def test_update_delete_streaming_profile(self):
-        
         name = StreamingProfilesTest.test_id + "_streaming_profile_delete"
-        result = api.create_streaming_profile(
+        api.create_streaming_profile(
             name,
             representations=[
                 {"transformation": {"bit_rate": "5m", "height": 1200, "width": 1200, "crop": "limit"}}])
@@ -77,11 +75,11 @@ class StreamingProfilesTest(unittest.TestCase):
         self.assertIsInstance(reps, list)
         """transformation is returned as an array"""
         self.assertIsInstance(reps[0]["transformation"], list)
-        
+
         tr = reps[0]["transformation"][0]
-        expected = {"bit_rate" :  "5m", "height" :  1000, "width" :  1000, "crop" :  "scale"}
+        expected = {"bit_rate": "5m", "height": 1000, "width": 1000, "crop": "scale"}
         self.assertDictEqual(expected, tr)
-        
-        result = api.delete_streaming_profile(name)
+
+        api.delete_streaming_profile(name)
         result = api.list_streaming_profiles()
         self.assertNotIn(name, [p["name"] for p in result["data"]])

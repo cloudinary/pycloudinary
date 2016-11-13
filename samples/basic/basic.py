@@ -8,7 +8,7 @@ from cloudinary.api import delete_resources_by_tag, resources_by_tag
 # config
 os.chdir(os.path.join(os.path.dirname(sys.argv[0]), '.'))
 if os.path.exists('settings.py'):
-    execfile('settings.py')
+    exec(open('settings.py').read())
 
 DEFAULT_TAG = "python_sample_basic"
 
@@ -103,11 +103,11 @@ def upload_files():
 
 def cleanup():
     response = resources_by_tag(DEFAULT_TAG)
-    count = len(response.get('resources', []))
-    if (count == 0):
+    resources = response.get('resources', [])
+    if not resources:
         print("No images found")
         return
-    print("Deleting %d images..." % (count,))
+    print("Deleting {0:d} images...".format(len(resources)))
     delete_resources_by_tag(DEFAULT_TAG)
     print("Done!")
     pass

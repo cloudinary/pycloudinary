@@ -16,10 +16,11 @@
 #
 import webapp2
 import os
-import StringIO
+from cloudinary.compat import StringIO
 from google.appengine.ext.webapp import template
 from cloudinary.uploader import upload
 from cloudinary.utils import cloudinary_url
+
 
 class MainHandler(webapp2.RequestHandler):
     def get(self):
@@ -35,14 +36,16 @@ class MainHandler(webapp2.RequestHandler):
         image_url = None
         thumbnail_url1 = None
         thumbnail_url2 = None
-        file = self.request.get('file')
-        if file:
-            str_file = StringIO.StringIO(file)
+        file_to_upload = self.request.get('file')
+        if file_to_upload:
+            str_file = StringIO.StringIO(file_to_upload)
             str_file.name = 'file'
             upload_result = upload(str_file)
             image_url = upload_result['url']
-            thumbnail_url1, options = cloudinary_url(upload_result['public_id'], format = "jpg", crop = "fill", width = 100, height = 100)
-            thumbnail_url2, options = cloudinary_url(upload_result['public_id'], format = "jpg", crop = "fill", width = 200, height = 100, radius = 20, effect = "sepia")
+            thumbnail_url1, options = cloudinary_url(upload_result['public_id'], format="jpg", crop="fill", width=100,
+                                                     height=100)
+            thumbnail_url2, options = cloudinary_url(upload_result['public_id'], format="jpg", crop="fill", width=200,
+                                                     height=100, radius=20, effect="sepia")
         template_values = {
             'image_url': image_url,
             'thumbnail_url1': thumbnail_url1,

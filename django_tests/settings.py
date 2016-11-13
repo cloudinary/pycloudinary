@@ -28,5 +28,4 @@ CACHES = {
 }
 
 
-
 ROOT_URLCONF = 'django_tests.urls'

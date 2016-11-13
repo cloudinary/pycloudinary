@@ -49,9 +49,9 @@ class CloudinaryField(models.Field):
     def parse_cloudinary_resource(self, value):
         m = re.match(CLOUDINARY_FIELD_DB_RE, value)
         resource_type = m.group('resource_type') or self.resource_type
-        type = m.group('type') or self.type
+        upload_type = m.group('type') or self.type
         return CloudinaryResource(
-            type=type,
+            type=upload_type,
             resource_type=resource_type,
             version=m.group('version'),
             public_id=m.group('public_id'),
