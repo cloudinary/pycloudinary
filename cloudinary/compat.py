@@ -5,10 +5,10 @@ unquote = six.moves.urllib.parse.unquote
 urlparse = six.moves.urllib.parse.urlparse
 parse_qs = six.moves.urllib.parse.parse_qs
 quote_plus = six.moves.urllib.parse.quote_plus
-import six.moves.http_client as httplib
-from io import StringIO, BytesIO
-from six import PY3, string_types
-
+httplib = six.moves.http_client
+from six import PY3, string_types, StringIO, BytesIO
+urllib2 = six.moves.urllib.request
+NotConnected = six.moves.http_client.NotConnected
 
 if PY3:
     to_bytes = lambda s: s.encode('utf8')
