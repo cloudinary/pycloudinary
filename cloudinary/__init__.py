@@ -3,8 +3,6 @@ from __future__ import absolute_import
 import os
 import re
 
-from cloudinary import utils
-from cloudinary.compat import urlparse, parse_qs
 
 
 CF_SHARED_CDN = "d3jpl91pxevbkh.cloudfront.net"
@@ -27,6 +25,8 @@ The format of the value should be <ProductName>/Version[ (comment)].
 
 **Do not set this value in application code!**
 """
+from cloudinary import utils
+from cloudinary.compat import urlparse, parse_qs
 
 def get_user_agent():
     """Provides the `USER_AGENT` string that is passed to the Cloudinary servers.
