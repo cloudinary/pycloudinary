@@ -192,6 +192,8 @@ def text(text, **options):
 
 
 def call_api(action, params, http_headers=None, return_error=False, unsigned=False, file=None, timeout=None, **options):
+    if http_headers is None:
+        http_headers = {}
     file_io = None
     try:
         if unsigned:
