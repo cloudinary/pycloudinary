@@ -154,8 +154,9 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
     def test_face_coordinates(self):
         """should allow sending face coordinates"""
         coordinates = [[120, 30, 109, 150], [121, 31, 110, 151]]
+        result_coordinates = [[120, 30, 109, 51], [121, 31, 110, 51]]
         result = uploader.upload(TEST_IMAGE, face_coordinates=coordinates, faces=True, tags=TEST_TAG)
-        self.assertEqual(coordinates, result["faces"])
+        self.assertEqual(result_coordinates, result["faces"])
 
         different_coordinates = [[122, 32, 111, 152]]
         custom_coordinates = [1, 2, 3, 4]
