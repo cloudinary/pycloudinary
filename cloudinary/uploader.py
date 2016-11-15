@@ -52,8 +52,6 @@ def upload_large(file, **options):
         file_size = getsize(file)
         chunk = file_io.read(chunk_size)
         while chunk:
-            # chunk_io = BytesIO(chunk)
-            # chunk_io.name = basename(file)
             range = "bytes {0}-{1}/{2}".format(current_loc, current_loc + len(chunk) - 1, file_size)
             current_loc += len(chunk)
 
@@ -210,15 +208,30 @@ def call_api(action, params, http_headers=None, return_error=False, unsigned=Fal
                 param_list[k] = v
 
         api_url = utils.cloudinary_api_url(action, **options)
-
         if file:
-            if not isinstance(file, string_types):
-                param_list["file"]=(file)
-            elif not re.match(r'ftp:|https?:|s3:|data:[^;]*;base64,([a-zA-Z0-9\/+\n=]+)$', file):
-                file_io = open(file, "rb")
-                param_list['file']= (file, file_io.read())
+            if isinstance(file, string_types):
+                if re.match(r'ftp:|https?:|s3:|data:[^;]*;base64,([a-zA-Z0-9\/+\n=]+)$', file):
+                    # URL
+                    name = None
+                    data = file
+                else:
+                    # file path
+                    name = file
+                    with open(file, "rb") as opened:
+                        data = opened.read()
+            elif hasattr(file, 'read') and callable(file.read):
+                # stream
+                data = file.read()
+                name = file.name if hasattr(file, 'name') else "stream"
+            elif isinstance(file, tuple):
+                name = None
+                data = file
             else:
-                param_list["file"]=(file)
+                # Not a string, not a stream
+                name = "file"
+                data = file
+
+            param_list["file"] = (name, data) if name else data
 
         headers = {"User-Agent": cloudinary.get_user_agent()}
         headers.update(http_headers)

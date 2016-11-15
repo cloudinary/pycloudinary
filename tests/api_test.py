@@ -9,7 +9,7 @@ class ApiTest(unittest.TestCase):
     initialized = False
 
     def setUp(self):
-
+        self.timestamp_tag = "api_test_tag_{0}".format(utils.now())
         if ApiTest.initialized: return
         ApiTest.initialized = True
         cloudinary.reset_config()
@@ -29,7 +29,7 @@ class ApiTest(unittest.TestCase):
                 api.delete_upload_preset(transformation)
             except Exception:
                 pass
-        self.timestamp_tag = "api_test_tag_{0}".format(utils.now())
+        
         for id in ["api_test", "api_test2"]:
             uploader.upload("tests/logo.png",
                             public_id=id, tags=["api_test_tag", self.timestamp_tag],
