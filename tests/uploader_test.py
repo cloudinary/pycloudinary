@@ -54,7 +54,7 @@ class UploaderTest(unittest.TestCase):
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_data_uri(self):
-        """should successfully upload file by unicode url """
+        """should successfully upload file by data url """
         result = uploader.upload(
             u"""\
 data:image/png;base64,iVBORw0KGgoAA
