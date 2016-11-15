@@ -107,8 +107,8 @@ def generate_transformation_string(**options):
 
     border = options.pop("border", None)
     if isinstance(border, dict):
-        color = border.get("color", "black").replace("#", "rgb:")
-        border = "%(width)spx_solid_%(color)s" % {"color": color,
+        border_color = border.get("color", "black").replace("#", "rgb:")
+        border = "%(width)spx_solid_%(color)s" % {"color": border_color,
                                                   "width": str(border.get("width", 2))}
 
     flags = ".".join(build_array(options.pop("flags", None)))
@@ -304,7 +304,7 @@ def finalize_resource_type(resource_type, type, url_suffix, use_root_path, short
             raise ValueError("URL Suffix only supported for image/upload and raw/upload")
 
     if use_root_path:
-        if resource_type == "image" and (upload_type == "upload" or upload_type is None):
+        if (resource_type == "image" and upload_type == "upload") or (resource_type == "images" and upload_type is None):
             resource_type = None
             upload_type = None
         else:
