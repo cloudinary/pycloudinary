@@ -494,22 +494,26 @@ def archive_params(**options):
     else:
         timestamp = options.get("timestamp")
     params = {
-        "timestamp": timestamp,
-        "type": options.get("type"),
-        "mode": options.get("mode"),
-        "target_format": options.get("target_format"),
-        "target_public_id": options.get("target_public_id"),
+        "allow_missing": options.get("allow_missing"),
+        "async": options.get("async"),
+        "expires_at": options.get("expires_at"),
         "flatten_folders": options.get("flatten_folders"),
         "flatten_transformations": options.get("flatten_transformations"),
-        "use_original_filename": options.get("use_original_filename"),
-        "async": options.get("async"),
-        "notification_url": options.get("notification_url"),
-        "target_tags": options.get("target_tags") and build_array(options.get("target_tags")),
         "keep_derived": options.get("keep_derived"),
-        "tags": options.get("tags") and build_array(options.get("tags")),
-        "public_ids": options.get("public_ids") and build_array(options.get("public_ids")),
+        "mode": options.get("mode"),
+        "notification_url": options.get("notification_url"),
+        "phash": options.get("phash"),
         "prefixes": options.get("prefixes") and build_array(options.get("prefixes")),
-        "transformations": build_eager(options.get("transformations"))
+        "public_ids": options.get("public_ids") and build_array(options.get("public_ids")),
+        "skip_transformation_name": options.get("skip_transformation_name"),
+        "tags": options.get("tags") and build_array(options.get("tags")),
+        "target_format": options.get("target_format"),
+        "target_public_id": options.get("target_public_id"),
+        "target_tags": options.get("target_tags") and build_array(options.get("target_tags")),
+        "timestamp": timestamp,
+        "transformations": build_eager(options.get("transformations")),
+        "type": options.get("type"),
+        "use_original_filename": options.get("use_original_filename"),
     }
     return params
 
