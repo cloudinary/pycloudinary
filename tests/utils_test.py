@@ -278,6 +278,16 @@ class TestUtils(unittest.TestCase):
         self.__test_cloudinary_url(options={"effect": ["sepia", 10]},
                                    expected_url=DEFAULT_UPLOAD_PATH + "e_sepia:10/test")
 
+    def test_keyframe_interval(self):
+        """should support keyframe_interval"""
+        self.__test_cloudinary_url(options={"keyframe_interval": 10},
+                                   expected_url=DEFAULT_UPLOAD_PATH + "ki_10/test")
+
+    def test_streaming_profile(self):
+        """should support streaming_profile"""
+        self.__test_cloudinary_url(options={"streaming_profile": "some-profile"},
+                                   expected_url=DEFAULT_UPLOAD_PATH + "sp_some-profile/test")
+
     def test_density(self):
         """should support density"""
         self.__test_cloudinary_url(options={"density": 150}, expected_url=DEFAULT_UPLOAD_PATH + "dn_150/test")
