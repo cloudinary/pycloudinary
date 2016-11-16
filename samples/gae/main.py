@@ -16,7 +16,7 @@
 #
 import webapp2
 import os
-from cloudinary.compat import StringIO
+from cloudinary.compat import  StringIO
 from google.appengine.ext.webapp import template
 from cloudinary.uploader import upload
 from cloudinary.utils import cloudinary_url
@@ -38,7 +38,7 @@ class MainHandler(webapp2.RequestHandler):
         thumbnail_url2 = None
         file_to_upload = self.request.get('file')
         if file_to_upload:
-            str_file = StringIO.StringIO(file_to_upload)
+            str_file = StringIO(file_to_upload)
             str_file.name = 'file'
             upload_result = upload(str_file)
             image_url = upload_result['url']

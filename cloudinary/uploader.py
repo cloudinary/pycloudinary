@@ -10,13 +10,25 @@ from cloudinary import utils
 from cloudinary.api import Error
 from cloudinary.compat import string_types
 from urllib3.exceptions import HTTPError
+from urllib3 import PoolManager
+
+try:
+    from urllib3.contrib.appengine import AppEngineManager, is_appengine_sandbox
+except Exception:
+    def is_appengine_sandbox():
+        return False
 
 try:  # Python 2.7+
     from collections import OrderedDict
 except ImportError:
     from urllib3.packages.ordered_dict import OrderedDict
 
-_http = urllib3.PoolManager()
+if is_appengine_sandbox():
+    # AppEngineManager uses AppEngine's URLFetch API behind the scenes
+    _http = AppEngineManager()
+else:
+    # PoolManager uses a socket-level API behind the scenes
+    _http = PoolManager()
 
 
 def upload(file, **options):
