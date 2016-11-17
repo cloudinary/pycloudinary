@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '1.4.0'
+version = '1.5.0'
 
 with open('README.rst') as file:
     long_description = file.read()
@@ -19,7 +19,7 @@ setup(name='cloudinary',
           "Development Status :: 5 - Production/Stable",
           "Environment :: Web Environment",
           "Framework :: Django",
-          "Framework :: Django :: 1.9"
+          "Framework :: Django :: 1.9",
           "Framework :: Django :: 1.10",
           "Intended Audience :: Developers",
           "License :: OSI Approved :: MIT License",

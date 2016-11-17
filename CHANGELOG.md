@@ -1,4 +1,44 @@
 
+1.5.0 / 2016-11-17
+==================
+
+New functionality and features
+------------------------------
+
+  * Add streaming profiles admin API
+  * Add Django tests
+  * Add tox configuration
+  * Django110 support
+  * Use urllib3
+  * Add Archive parameters `allow-missing`, `expires_at`, `phash` and `skip_transformation_name`
+  * Add `keyframe_interval` and `streaming_profile` transformation parameters
+
+
+Other Changes
+-------------
+
+  * Use restructuredText instead of markdown in README. Update setup.py.
+  * Add support for Google App Engine.
+  * Handle file types including streams in upload
+  * Fix typo in tests
+  * Fix refactoring bug
+  * Fix `face_coordinates` test
+  * Fix default value for http headers
+  * Fix imports
+  * Import util after defining constants
+  * PEP 008 and style / refactoring
+  * Add classifiers to `setup.py`. Fixes #72
+  * Update gitignore
+  * Remove django_tests from the package
+  * Use compatibility methods from six.
+  * Use the same pool in each API call.
+  * Modify error handling to match urllib3
+  * Update `.gitignore` from https://github.com/github/gitignore/blob/master/Python.gitignore
+  * Merge branch 'master' into feature/add-django-tests
+  * Merge pull request #69 from jarekwg/upgrade/django110
+  * Support original width and height ("`ow`", "`oh`")
+  * Add a tests for `"gravity": "auto"`
+
 1.4.0 / 2016-06-22
 ==================
 
