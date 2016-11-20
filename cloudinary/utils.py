@@ -656,8 +656,8 @@ def process_layer(layer, layer_parameter):
 
         if text is not None:
             text = smart_escape(text)
-            text = text.replace("%2C", "%E2%80%9A")
-            text = text.replace("/", "%E2%81%84")
+            text = text.replace("%2C", "%252C")
+            text = text.replace("/", "%252F")
             components.append(text)
     else:
         public_id = public_id.replace("/", ':')
