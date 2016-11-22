@@ -3,6 +3,8 @@ from __future__ import absolute_import
 import os
 import re
 
+from django.utils.safestring import mark_safe
+
 
 
 CF_SHARED_CDN = "d3jpl91pxevbkh.cloudfront.net"
@@ -182,7 +184,7 @@ class CloudinaryResource(object):
 
         if src: attrs["src"] = src
 
-        return u"<img {0}/>".format(utils.html_attrs(attrs))
+        return mark_safe(u"<img {0}/>".format(utils.html_attrs(attrs)))
 
     def video_thumbnail(self, **options):
         self.default_poster_options(options)
@@ -250,7 +252,7 @@ class CloudinaryResource(object):
                 html = html + '<source ' + utils.html_attrs({'src': src, 'type': mime_type}) + '>'
         html = html + fallback
         html = html + '</video>'
-        return html
+        return mark_safe(html)
 
 
 class CloudinaryImage(CloudinaryResource):
