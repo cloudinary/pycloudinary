@@ -1,8 +1,13 @@
-import unittest
 import time
+import unittest
+
 import cloudinary
-from cloudinary import uploader, api, utils
 import six
+from cloudinary import uploader, api, utils
+
+from urllib3 import disable_warnings
+
+disable_warnings()
 
 
 class ApiTest(unittest.TestCase):

@@ -3,6 +3,9 @@ import time
 import cloudinary
 from cloudinary import uploader, api, utils
 import six
+from urllib3 import disable_warnings
+
+disable_warnings()
 
 
 class StreamingProfilesTest(unittest.TestCase):

@@ -1,14 +1,17 @@
 import random
+import tempfile
+import time
+import unittest
+import zipfile
 
 import cloudinary
+import cloudinary.poster.streaminghttp
 from cloudinary import uploader, utils, api
-import time
 
 import urllib3
-import unittest
-import tempfile
-import zipfile
-import cloudinary.poster.streaminghttp
+from urllib3 import disable_warnings
+
+disable_warnings()
 
 TEST_TAG = "pycloudinary_test" + str(random.randint(10000, 99999))
 

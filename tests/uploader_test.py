@@ -1,17 +1,22 @@
-import cloudinary
-from cloudinary import uploader, utils, api
-import unittest
-import tempfile
 import os
-import six
+import random
+import tempfile
+import unittest
 
+import cloudinary
+import six
+from cloudinary import uploader, utils, api
+
+from urllib3 import disable_warnings
 from urllib3.util import parse_url
+
+disable_warnings()
 
 TEST_IMAGE = "tests/logo.png"
 TEST_IMAGE_HEIGHT = 51
 TEST_IMAGE_WIDTH = 241
-TEST_TAG = "pycloudinary_test"
-
+SUFFIX = random.randint(10000, 99999)
+TEST_TAG = "pycloudinary_test_{0}".format(SUFFIX)
 
 class UploaderTest(unittest.TestCase):
 
@@ -94,11 +99,8 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         result = uploader.explicit("cloudinary", type="twitter_name", eager=[dict(crop="scale", width="2.0")])
         url = utils.cloudinary_url("cloudinary", type="twitter_name", crop="scale", width="2.0", format="png",
                                    version=result["version"])[0]
-        if result["eager"][0]["url"].startswith("/res/"):
-            actual = result["eager"][0]["url"][4:]
-        else:
-            actual = result["eager"][0]["url"]
-        self.assertEqual(actual, parse_url(url).path)
+        actual = result["eager"][0]["url"]
+        self.assertEqual(parse_url(actual).path, parse_url(url).path)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_eager(self):
