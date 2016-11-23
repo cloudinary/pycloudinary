@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-
+from six import python_2_unicode_compatible
 import os
 import re
 
@@ -107,7 +107,7 @@ def reset_config():
     global _config
     _config = Config()
 
-
+@python_2_unicode_compatible
 class CloudinaryResource(object):
     def __init__(self, public_id=None, format=None, version=None,
                  signature=None, url_options={}, metadata=None, type=None, resource_type=None,
@@ -122,16 +122,20 @@ class CloudinaryResource(object):
         self.resource_type = resource_type or metadata.get('resource_type') or default_resource_type
         self.url_options = url_options
 
-    def __unicode__(self):
+    def __str__(self):
         return self.public_id
 
     def __len__(self):
-        return len(self.public_id)
+        return len(self.public_id) if self.public_id is not None else 0
 
     def validate(self):
         return self.signature == self.get_expected_signature()
 
     def get_prep_value(self):
+        if None in [self.public_id,
+                    self.type,
+                    self.resource_type]:
+            return None
         prep = ''
         prep = prep + self.resource_type + '/' + self.type + '/'
         if self.version: prep = prep + 'v' + str(self.version) + '/'
