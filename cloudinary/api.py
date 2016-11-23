@@ -4,6 +4,8 @@ import json
 import socket
 
 import cloudinary
+from six import string_types
+
 import urllib3
 from cloudinary import utils
 from urllib3.exceptions import HTTPError
@@ -339,7 +341,7 @@ def only(source, *keys):
 
 
 def transformation_string(transformation):
-    if isinstance(transformation, str):
+    if isinstance(transformation, string_types):
         return transformation
     else:
         return cloudinary.utils.generate_transformation_string(**transformation)[0]
