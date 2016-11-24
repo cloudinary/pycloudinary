@@ -1,9 +1,12 @@
 from __future__ import absolute_import
-from six import python_2_unicode_compatible
+
 import os
 import re
 
+from six import python_2_unicode_compatible
 
+from cloudinary import utils
+from cloudinary.compat import urlparse, parse_qs
 
 CF_SHARED_CDN = "d3jpl91pxevbkh.cloudfront.net"
 OLD_AKAMAI_SHARED_CDN = "cloudinary-a.akamaihd.net"
@@ -17,16 +20,15 @@ USER_AGENT = "CloudinaryPython/" + VERSION
 
 USER_PLATFORM = ""
 """
-Additional information to be passed with the USER_AGENT, e.g. "CloudinaryMagento/1.0.1". This value is set in platform-specific
-implementations that use cloudinary_php.
+Additional information to be passed with the USER_AGENT, e.g. "CloudinaryMagento/1.0.1".
+This value is set in platform-specific implementations that use cloudinary_php.
 
 The format of the value should be <ProductName>/Version[ (comment)].
 @see http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.43
 
 **Do not set this value in application code!**
 """
-from cloudinary import utils
-from cloudinary.compat import urlparse, parse_qs
+
 
 def get_user_agent():
     """Provides the `USER_AGENT` string that is passed to the Cloudinary servers.
@@ -107,10 +109,11 @@ def reset_config():
     global _config
     _config = Config()
 
+
 @python_2_unicode_compatible
 class CloudinaryResource(object):
     def __init__(self, public_id=None, format=None, version=None,
-                 signature=None, url_options={}, metadata=None, type=None, resource_type=None,
+                 signature=None, url_options=None, metadata=None, type=None, resource_type=None,
                  default_resource_type=None):
         self.metadata = metadata
         metadata = metadata or {}
@@ -120,7 +123,7 @@ class CloudinaryResource(object):
         self.signature = signature or metadata.get('signature')
         self.type = type or metadata.get('type') or "upload"
         self.resource_type = resource_type or metadata.get('resource_type') or default_resource_type
-        self.url_options = url_options
+        self.url_options = url_options or {}
 
     def __str__(self):
         return self.public_id
@@ -230,8 +233,6 @@ class CloudinaryResource(object):
 
         if not video_options['poster']: del video_options['poster']
 
-        html = '<video '
-
         nested_source_types = isinstance(source_types, list) and len(source_types) > 1
         if not nested_source_types:
             source = source + '.' + utils.build_array(source_types)[0]
@@ -242,8 +243,8 @@ class CloudinaryResource(object):
             video_options['src'] = video_url[0]
         if 'html_width' in video_options: video_options['width'] = video_options.pop('html_width')
         if 'html_height' in video_options: video_options['height'] = video_options.pop('html_height')
-        html = html + utils.html_attrs(video_options) + '>'
 
+        sources = ""
         if nested_source_types:
             for source_type in source_types:
                 transformation = options.copy()
@@ -251,9 +252,10 @@ class CloudinaryResource(object):
                 src = utils.cloudinary_url(source, format=source_type, **transformation)[0]
                 video_type = "ogg" if source_type == 'ogv' else source_type
                 mime_type = "video/" + video_type
-                html = html + '<source ' + utils.html_attrs({'src': src, 'type': mime_type}) + '>'
-        html = html + fallback
-        html = html + '</video>'
+                sources += "<source {attributes}>".format(attributes=utils.html_attrs({'src': src, 'type': mime_type}))
+
+        html = "<video {attributes}>{sources}{fallback}</video>".format(
+            attributes=utils.html_attrs(video_options), sources=sources, fallback=fallback)
         return html
 
 

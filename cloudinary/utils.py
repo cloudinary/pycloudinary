@@ -19,7 +19,7 @@ urlencode = six.moves.urllib.parse.urlencode
 unquote = six.moves.urllib.parse.unquote
 
 """ @deprecated: use cloudinary.SHARED_CDN """
-SHARED_CDN = cloudinary.SHARED_CDN
+SHARED_CDN = "res.cloudinary.com"
 
 DEFAULT_RESPONSIVE_WIDTH_TRANSFORMATION = {"width": "auto", "crop": "limit"}
 
