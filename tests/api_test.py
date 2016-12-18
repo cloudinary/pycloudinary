@@ -50,7 +50,7 @@ class ApiTest(unittest.TestCase):
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test02_resources(self):
         """ should allow listing resources """
-        resource = [resource for resource in api.resources()["resources"] if resource["public_id"] == "api_test"][0]
+        resource = [resource for resource in api.resources(max_results=500)["resources"] if resource["public_id"] == "api_test"][0]
         self.assertNotEqual(resource, None)
         self.assertEqual(resource["type"], "upload")
 
@@ -70,14 +70,14 @@ class ApiTest(unittest.TestCase):
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test04_resources_types(self):
         """ should allow listing resources by type """
-        resources = api.resources(type="upload")["resources"]
+        resources = api.resources(type="upload", max_results=500)["resources"]
         public_ids = [resource["public_id"] for resource in resources]
         self.assertIn("api_test", public_ids)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test05_resources_prefix(self):
         """ should allow listing resources by prefix """
-        resources = api.resources(prefix="api_test", context=True, tags=True, type="upload")["resources"]
+        resources = api.resources(prefix="api_test", context=True, tags=True, type="upload", max_results=500)["resources"]
         public_ids = [resource["public_id"] for resource in resources]
         self.assertIn("api_test", public_ids)
         self.assertIn("api_test2", public_ids)
