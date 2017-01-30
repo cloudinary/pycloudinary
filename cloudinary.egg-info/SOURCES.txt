@@ -4,6 +4,7 @@ README.rst
 setup.cfg
 setup.py
 cloudinary/__init__.py
+cloudinary/akamai_token.py
 cloudinary/api.py
 cloudinary/compat.py
 cloudinary/forms.py

@@ -11,6 +11,7 @@ from cloudinary.compat import urlparse, parse_qs
 CF_SHARED_CDN = "d3jpl91pxevbkh.cloudfront.net"
 OLD_AKAMAI_SHARED_CDN = "cloudinary-a.akamaihd.net"
 AKAMAI_SHARED_CDN = "res.cloudinary.com"
+AKAMAI_TOKEN_NAME = "__cld_token__"
 SHARED_CDN = AKAMAI_SHARED_CDN
 CL_BLANK = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
 
