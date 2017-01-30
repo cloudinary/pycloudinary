@@ -1,4 +1,24 @@
 
+1.6.0 / 2017-01-30
+==================
+
+New functionality and features
+------------------------------
+
+  * Add Akamai token generator
+
+Other Changes
+-------------
+
+  * Add `max_results=500` to `api.resources` invocation in tests
+  * Double encode `,` and `/` in text layers
+  * Handle empty CloudinaryField values. Fixes #81, Related to #82
+  * Revert to in-memory database for tests
+  * Support passing parameters to both `setup.py test` and `django-admin.py test`
+  * Set `DJANGO_SETTINGS_MODULE` only in Django tests
+  * Test for string_types instead of str.
+  * Use `disable_warning()` in network tests.
+
 1.5.0 / 2016-11-17
 ==================
 
