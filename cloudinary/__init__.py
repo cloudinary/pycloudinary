@@ -11,7 +11,6 @@ from cloudinary.compat import urlparse, parse_qs
 CF_SHARED_CDN = "d3jpl91pxevbkh.cloudfront.net"
 OLD_AKAMAI_SHARED_CDN = "cloudinary-a.akamaihd.net"
 AKAMAI_SHARED_CDN = "res.cloudinary.com"
-AKAMAI_TOKEN_NAME = "__cld_token__"
 SHARED_CDN = AKAMAI_SHARED_CDN
 CL_BLANK = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
 
@@ -74,17 +73,24 @@ class Config(object):
                 private_cdn=os.environ.get("CLOUDINARY_PRIVATE_CDN") == 'true'
             )
         elif os.environ.get("CLOUDINARY_URL"):
-            uri = urlparse(os.environ.get("CLOUDINARY_URL").replace("cloudinary://", "http://"))
-            for k, v in parse_qs(uri.query).items():
+            cloudinary_url = os.environ.get("CLOUDINARY_URL")
+            self._parse_cloudinary_url(cloudinary_url)
+
+    def _parse_cloudinary_url(self, cloudinary_url):
+        uri = urlparse(cloudinary_url.replace("cloudinary://", "http://"))
+        for k, v in parse_qs(uri.query).items():
+            if self._is_nested_key(k):
+                self._put_nested_key(k, v)
+            else:
                 self.__dict__[k] = v[0]
-            self.update(
-                cloud_name=uri.hostname,
-                api_key=uri.username,
-                api_secret=uri.password,
-                private_cdn=uri.path != ''
-            )
-            if uri.path != '':
-                self.update(secure_distribution=uri.path[1:])
+        self.update(
+            cloud_name=uri.hostname,
+            api_key=uri.username,
+            api_secret=uri.password,
+            private_cdn=uri.path != ''
+        )
+        if uri.path != '':
+            self.update(secure_distribution=uri.path[1:])
 
     def __getattr__(self, i):
         if i in self.__dict__:
@@ -96,7 +102,25 @@ class Config(object):
         for k, v in keywords.items():
             self.__dict__[k] = v
 
+    def _is_nested_key(self, key):
+        return re.match(r'\w+\[\w+\]', key)
 
+    def _put_nested_key(self, key, value):
+        chain = re.split(r'[\[\]]+', key)
+        chain = [key for key in chain if key]
+        outer = self.__dict__
+        last_key = chain.pop()
+        for inner_key in chain:
+            if inner_key in outer:
+                inner = outer[inner_key]
+            else:
+                inner = dict()
+                outer[inner_key] = inner
+            outer = inner
+        if isinstance(value, list):
+            value = value[0]
+        outer[last_key] = value
+        
 _config = Config()
 
 
