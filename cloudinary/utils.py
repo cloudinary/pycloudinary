@@ -13,7 +13,8 @@ from fractions import Fraction
 
 import cloudinary
 import six.moves.urllib.parse
-from cloudinary.compat import PY3, to_bytes, to_bytearray, to_string, string_types
+from cloudinary.compat import PY3, to_bytes, to_bytearray, to_string, string_types, urlparse
+import auth_token
 
 urlencode = six.moves.urllib.parse.urlencode
 unquote = six.moves.urllib.parse.unquote
@@ -356,6 +357,17 @@ def unsigned_download_url_prefix(source, cloud_name, private_cdn, cdn_subdomain,
     return prefix
 
 
+def merge(*dict_args):
+    result = None
+    for dictionary in dict_args:
+        if dictionary is not None:
+            if result is None:
+                result = dictionary.copy()
+            else:
+                result.update(dictionary)
+    return result
+
+
 def cloudinary_url(source, **options):
     original_source = source
 
@@ -382,6 +394,9 @@ def cloudinary_url(source, **options):
     api_secret = options.pop("api_secret", cloudinary.config().api_secret)
     url_suffix = options.pop("url_suffix", None)
     use_root_path = options.pop("use_root_path", cloudinary.config().use_root_path)
+    auth_token = options.pop("auth_token", None)
+    if auth_token is not False:
+        auth_token = merge(cloudinary.config().auth_token, auth_token)
 
     if url_suffix and not private_cdn:
         raise ValueError("URL Suffix only supported in private CDN")
@@ -402,7 +417,7 @@ def cloudinary_url(source, **options):
     transformation = re.sub(r'([^:])/+', r'\1/', transformation)
 
     signature = None
-    if sign_url:
+    if sign_url and not auth_token:
         to_sign = "/".join(__compact([transformation, source_to_sign]))
         signature = "s--" + to_string(
             base64.urlsafe_b64encode(hashlib.sha1(to_bytes(to_sign + api_secret)).digest())[0:8]) + "--"
@@ -410,6 +425,10 @@ def cloudinary_url(source, **options):
     prefix = unsigned_download_url_prefix(source, cloud_name, private_cdn, cdn_subdomain, secure_cdn_subdomain, cname,
                                           secure, secure_distribution)
     source = "/".join(__compact([prefix, resource_type, type, signature, transformation, version, source]))
+    if sign_url and auth_token:
+        path = urlparse(source).path
+        token = cloudinary.auth_token.generate( **merge(auth_token, {"url": path}))
+        source = "%s?%s" % (source, token)
     return source, options
 
 
@@ -487,6 +506,9 @@ def download_zip_url(**options):
     new_options.update(target_format="zip")
     return download_archive_url(**new_options)
 
+def generate_auth_token(**options):
+    token_options = merge(cloudinary.config().auth_token, options)
+    return auth_token.generate(**token_options)
 
 def archive_params(**options):
     if options.get("timestamp") is None:

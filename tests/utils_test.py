@@ -633,6 +633,14 @@ class TestUtils(unittest.TestCase):
         self.assertEqual({}, options)
         self.assertEqual(all_operators, transformation)
 
-
+    def test_merge(self):
+        a = {"foo": "foo", "bar": "foo"}
+        b = {"foo": "bar"}
+        self.assertIsNone(cloudinary.utils.merge( None,None))
+        self.assertDictEqual(a, cloudinary.utils.merge(a, None))
+        self.assertDictEqual(a, cloudinary.utils.merge(None, a))
+        self.assertDictEqual({"foo": "bar", "bar": "foo"}, cloudinary.utils.merge(a, b))
+        self.assertDictEqual(a, cloudinary.utils.merge(b, a))
+        
 if __name__ == '__main__':
     unittest.main()
