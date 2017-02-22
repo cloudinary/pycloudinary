@@ -3,7 +3,7 @@ import hmac
 import re
 import time
 from binascii import a2b_hex
-from urllib import quote_plus
+from cloudinary.compat import quote_plus
 
 AUTH_TOKEN_NAME = "__cld_token__"
 

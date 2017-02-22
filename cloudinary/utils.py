@@ -14,7 +14,7 @@ from fractions import Fraction
 import cloudinary
 import six.moves.urllib.parse
 from cloudinary.compat import PY3, to_bytes, to_bytearray, to_string, string_types, urlparse
-import auth_token
+from cloudinary import auth_token
 
 urlencode = six.moves.urllib.parse.urlencode
 unquote = six.moves.urllib.parse.unquote
