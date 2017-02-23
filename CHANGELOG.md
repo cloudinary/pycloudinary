@@ -1,4 +1,12 @@
 
+1.6.1 / 2017-02-23
+==================
+
+  * Add support for URL token.
+  * Rename `auth_token`.
+  * Support nested values in `CLOUDINARY_URL`.
+  * Refactor imports
+
 1.6.0 / 2017-01-30
 ==================
 
