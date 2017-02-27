@@ -234,7 +234,7 @@ def call_api(action, params, http_headers=None, return_error=False, unsigned=Fal
             elif hasattr(file, 'read') and callable(file.read):
                 # stream
                 data = file.read()
-                name = file.name if hasattr(file, 'name') else "stream"
+                name = file.name if hasattr(file, 'name') and isinstance(file.name, str) else "stream"
             elif isinstance(file, tuple):
                 name = None
                 data = file
