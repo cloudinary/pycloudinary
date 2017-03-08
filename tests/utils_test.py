@@ -12,6 +12,7 @@ VIDEO_UPLOAD_PATH = 'http://res.cloudinary.com/test123/video/upload/'
 
 class TestUtils(unittest.TestCase):
     def setUp(self):
+        
         cloudinary.config(cloud_name="test123",
                           api_key="a", api_secret="b",
                           secure_distribution=None,
@@ -641,6 +642,28 @@ class TestUtils(unittest.TestCase):
         self.assertDictEqual(a, cloudinary.utils.merge(None, a))
         self.assertDictEqual({"foo": "bar", "bar": "foo"}, cloudinary.utils.merge(a, b))
         self.assertDictEqual(a, cloudinary.utils.merge(b, a))
-        
+
+    def test_array_should_define_a_set_of_variables(self):
+        options = { "if":  "face_count > 2", "variables" : [ ["$z", 5], ["$foo", "$z * 2"] ], "crop" : "scale", "width" : "$foo * 200" }
+        transformation, options = cloudinary.utils.generate_transformation_string(**options)
+        self.assertEqual('if_fc_gt_2,$z_5,$foo_$z_mul_2,c_scale,w_$foo_mul_200', transformation)
+
+    def test_dollar_key_should_define_a_varialbe(self):
+        options = { "transformation":[ {"$foo":10 }, {"if":"face_count > 2"}, {"crop":"scale", "width":"$foo * 200 / face_count"}, {"if":"end"} ] }
+        transformation, options = cloudinary.utils.generate_transformation_string(**options)
+        self.assertEqual('$foo_10/if_fc_gt_2/c_scale,w_$foo_mul_200_div_fc/if_end', transformation)
+
+    def test_should_support_text_values(self):
+        public_id = "sample"
+        options =  {"effect":"$efname:100", "$efname":"!blur!"}
+        url, options = cloudinary.utils.cloudinary_url(public_id, **options)
+        self.assertEqual(DEFAULT_UPLOAD_PATH+"$efname_!blur!,e_$efname:100/sample",url)
+
+    def test_should_support_string_interpolation(self):
+        public_id = "sample"
+        options = { "crop":"scale", "overlay":{"text":"$(start)Hello $(name)$(ext), $(no ) $( no)$(end)", "font_family":"Arial", "font_size":"18"}}
+        url, options = cloudinary.utils.cloudinary_url(public_id, **options)
+        self.assertEqual(DEFAULT_UPLOAD_PATH+"c_scale,l_text:Arial_18:$(start)Hello%20$(name)$(ext)%252C%20%24%28no%20%29%20%24%28%20no%29$(end)/sample",url)
+
 if __name__ == '__main__':
     unittest.main()

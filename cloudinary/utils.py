@@ -133,24 +133,30 @@ def generate_transformation_string(**options):
     if_value = process_conditional(options.pop("if", None))
 
     params = {
-        "a": angle,
-        "ar": aspect_ratio,
+        "a": normalize_expression(angle),
+        "ar": normalize_expression(aspect_ratio),
         "b": background,
         "bo": border,
         "c": crop,
         "co": color,
-        "dpr": dpr,
-        "du": duration,
-        "e": effect,
-        "eo": end_offset,
+        "dpr": normalize_expression(dpr),
+        "du": normalize_expression(duration),
+        "e": normalize_expression(effect),
+        "eo": normalize_expression(end_offset),
         "fl": flags,
-        "h": height,
+        "h": normalize_expression(height),
         "l": overlay,
-        "so": start_offset,
+        "o": normalize_expression(options.pop('opacity',None)),
+        "q": normalize_expression(options.pop('quality',None)),
+        "r": normalize_expression(options.pop('radius',None)),
+        "so": normalize_expression(start_offset),
         "t": named_transformation,
         "u": underlay,
+        "w": normalize_expression(width),
+        "x": normalize_expression(options.pop('x',None)),
+        "y": normalize_expression(options.pop('y',None)),
         "vc": video_codec,
-        "w": width
+        "z": normalize_expression(options.pop('zoom',None))
     }
     simple_params = {
         "ac": "audio_codec",
@@ -163,22 +169,34 @@ def generate_transformation_string(**options):
         "f": "fetch_format",
         "g": "gravity",
         "ki": "keyframe_interval",
-        "o": "opacity",
         "p": "prefix",
         "pg": "page",
-        "q": "quality",
-        "r": "radius",
         "sp": "streaming_profile",
         "vs": "video_sampling",
-        "x": "x",
-        "y": "y",
-        "z": "zoom"
     }
 
     for param, option in simple_params.items():
         params[param] = options.pop(option, None)
 
+    variables = options.pop('variables',{})
+    var_params = []
+    for key,value in options.items():
+        if re.match(r'^\$', key):
+            var_params.append(u"{0}_{1}".format(key, normalize_expression(str(value))))
+
+    var_params.sort()
+
+    if variables:
+        for var in variables:
+            var_params.append(u"{0}_{1}".format(var[0], normalize_expression(str(var[1]))))
+
+
+    variables = ','.join(var_params)
+
     sorted_params = sorted([param + "_" + str(value) for param, value in params.items() if (value or value == 0)])
+    if variables:
+        sorted_params.insert(0, str(variables))
+
     if if_value is not None:
         sorted_params.insert(0, "if_" + str(if_value))
     transformation = ",".join(sorted_params)
@@ -441,10 +459,10 @@ def cloudinary_api_url(action='upload', **options):
 
 
 # Based on ruby's CGI::unescape. In addition does not escape / :
-def smart_escape(source):
+def smart_escape(source,unsafe = r"([^a-zA-Z0-9_.\-\/:]+)"):
     def pack(m):
         return to_bytes('%' + "%".join(["%02X" % x for x in struct.unpack('B' * len(m.group(1)), m.group(1))]).upper())
-    return to_string(re.sub(to_bytes(r"([^a-zA-Z0-9_.\-\/:]+)"), pack, to_bytes(source)))
+    return to_string(re.sub(to_bytes(unsafe), pack, to_bytes(source)))
 
 
 def random_public_id():
@@ -666,7 +684,7 @@ def process_layer(layer, layer_parameter):
     if resource_type == "text" or resource_type == "subtitles":
         if public_id is None and text is None:
             raise ValueError("Must supply either text or public_id in " + layer_parameter)
-
+        
         text_options = __process_text_options(layer, layer_parameter)
 
         if text_options is not None:
@@ -677,9 +695,20 @@ def process_layer(layer, layer_parameter):
             components.append(public_id)
 
         if text is not None:
-            text = smart_escape(text)
-            text = text.replace("%2C", "%252C")
-            text = text.replace("/", "%252F")
+            var_pattern = r'(\$\([a-zA-Z]\w+\))'
+            match = re.findall(var_pattern,text)
+
+            parts= filter(lambda p: p is not None, re.split(var_pattern,text))
+            encoded_text = []
+            for part in parts:
+                if re.match(var_pattern,part):
+                    encoded_text.append(part)
+                else:
+                    encoded_text.append(smart_escape(smart_escape(part, r"([,/])")))
+
+            text = ''.join(encoded_text)
+            # text = text.replace("%2C", "%252C")
+            # text = text.replace("/", "%252F")
             components.append(text)
     else:
         public_id = public_id.replace("/", ':')
@@ -695,32 +724,55 @@ IF_OPERATORS = {
     "<=": 'lte',
     ">=": 'gte',
     "&&": 'and',
-    "||": 'or'
-}
-IF_PARAMETERS = {
-    "width": 'w',
-    "height": 'h',
-    "page_count": "pc",
-    "face_count": "fc",
-    "aspect_ratio": "ar"
+    "||": 'or',
+    "*": 'mul',
+    "/": 'div',
+    "+": 'add',
+    "-": 'min'
 }
 
-replaceRE = "(" + "|".join(IF_PARAMETERS.keys()) + "|[=<>&|!]+)"
+PREDEFINED_VARS = {
+    "aspect_ratio": "ar",
+    "current_page": "cp",
+    "face_count": "fc",
+    "height": "h",
+    "initial_aspect_ratio": "iar",
+    "initial_height": "ih",
+    "initial_width": "iw",
+    "page_count": "pc",
+    "page_x": "px",
+    "page_y": "py",
+    "tags": "tags",
+    "width": "w"
+}
+
+replaceRE = "(" + "|".join(PREDEFINED_VARS.keys())+  "|[=<>&|!]+)"
+replaceIF = "(" + '|'.join(map( lambda key: re.escape(key),IF_OPERATORS.keys()))+ ")"
 
 
 def translate_if(match):
     name = match.group(0)
     return IF_OPERATORS.get(name,
-                            IF_PARAMETERS.get(name,
+                            PREDEFINED_VARS.get(name,
                                               name))
-
 
 def process_conditional(conditional):
     if conditional is None:
         return conditional
-    result = re.sub('[ _]+', '_', conditional)
-    return re.sub(replaceRE, translate_if, result)
+    result = normalize_expression(conditional)
+    return result
 
+def normalize_expression(expression):
+    if re.match(r'^!.+!$',str(expression)): # quoted string
+        return expression
+    elif expression:
+        result = str(expression)
+        result = re.sub(replaceRE, translate_if, result)
+        result = re.sub(replaceIF, translate_if, result)
+        result = re.sub('[ _]+', '_', result)
+        return result
+    else:
+        return expression
 
 def __join_pair(key, value):
     if value is None or value == "":
