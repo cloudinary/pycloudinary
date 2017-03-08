@@ -93,9 +93,9 @@ class ImageTest(unittest.TestCase):
     def test_width_auto_breakpoints(self):
         """supports auto width"""
         tag = CloudinaryImage('sample.jpg')\
-            .image(crop="scale", dpr="auto", cloud_name="test", width="auto=breakpoints", client_hints=True)
+            .image(crop="scale", dpr="auto", cloud_name="test", width="auto:breakpoints", client_hints=True)
         six.assertRegex(self, tag,
-                        'src=["\']http://res.cloudinary.com/test/image/upload/c_scale,dpr_auto,w_auto=breakpoints/sample.jpg["\']')
+                        'src=["\']http://res.cloudinary.com/test/image/upload/c_scale,dpr_auto,w_auto:breakpoints/sample.jpg["\']')
 
 if __name__ == "__main__":
     unittest.main()
