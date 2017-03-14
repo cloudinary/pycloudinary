@@ -648,7 +648,7 @@ class TestUtils(unittest.TestCase):
         transformation, options = cloudinary.utils.generate_transformation_string(**options)
         self.assertEqual('if_fc_gt_2,$z_5,$foo_$z_mul_2,c_scale,w_$foo_mul_200', transformation)
 
-    def test_dollar_key_should_define_a_varialbe(self):
+    def test_dollar_key_should_define_a_variable(self):
         options = { "transformation":[ {"$foo":10 }, {"if":"face_count > 2"}, {"crop":"scale", "width":"$foo * 200 / face_count"}, {"if":"end"} ] }
         transformation, options = cloudinary.utils.generate_transformation_string(**options)
         self.assertEqual('$foo_10/if_fc_gt_2/c_scale,w_$foo_mul_200_div_fc/if_end', transformation)
