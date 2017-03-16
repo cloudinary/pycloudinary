@@ -16,6 +16,8 @@ import six.moves.urllib.parse
 from cloudinary.compat import PY3, to_bytes, to_bytearray, to_string, string_types, urlparse
 from cloudinary import auth_token
 
+VAR_NAME_RE = r'(\$\([a-zA-Z]\w+\))'
+
 urlencode = six.moves.urllib.parse.urlencode
 unquote = six.moves.urllib.parse.unquote
 
@@ -695,7 +697,7 @@ def process_layer(layer, layer_parameter):
             components.append(public_id)
 
         if text is not None:
-            var_pattern = r'(\$\([a-zA-Z]\w+\))'
+            var_pattern = VAR_NAME_RE
             match = re.findall(var_pattern,text)
 
             parts= filter(lambda p: p is not None, re.split(var_pattern,text))
@@ -728,7 +730,7 @@ IF_OPERATORS = {
     "*": 'mul',
     "/": 'div',
     "+": 'add',
-    "-": 'min'
+    "-": 'sub'
 }
 
 PREDEFINED_VARS = {
@@ -746,8 +748,7 @@ PREDEFINED_VARS = {
     "width": "w"
 }
 
-replaceRE = "(" + "|".join(PREDEFINED_VARS.keys())+  "|[=<>&|!]+)"
-replaceIF = "(" + '|'.join(map( lambda key: re.escape(key),IF_OPERATORS.keys()))+ ")"
+replaceRE = "((\\|\\||>=|<=|&&|!=|>|=|<|/|-|\\+|\\*)(?=[ _])|" + '|'.join(PREDEFINED_VARS.keys())+ ")"
 
 
 def translate_if(match):
@@ -768,7 +769,6 @@ def normalize_expression(expression):
     elif expression:
         result = str(expression)
         result = re.sub(replaceRE, translate_if, result)
-        result = re.sub(replaceIF, translate_if, result)
         result = re.sub('[ _]+', '_', result)
         return result
     else:

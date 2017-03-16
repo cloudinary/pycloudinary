@@ -271,8 +271,8 @@ class TestUtils(unittest.TestCase):
 
     def test_effect_with_dict(self):
         """should support effect with dict"""
-        self.__test_cloudinary_url(options={"effect": {"sepia": 10}},
-                                   expected_url=DEFAULT_UPLOAD_PATH + "e_sepia:10/test")
+        self.__test_cloudinary_url(options={"effect": {"sepia": -10}},
+                                   expected_url=DEFAULT_UPLOAD_PATH + "e_sepia:-10/test")
 
     def test_effect_with_array(self):
         """should support effect with array"""
@@ -652,6 +652,16 @@ class TestUtils(unittest.TestCase):
         options = { "transformation":[ {"$foo":10 }, {"if":"face_count > 2"}, {"crop":"scale", "width":"$foo * 200 / face_count"}, {"if":"end"} ] }
         transformation, options = cloudinary.utils.generate_transformation_string(**options)
         self.assertEqual('$foo_10/if_fc_gt_2/c_scale,w_$foo_mul_200_div_fc/if_end', transformation)
+
+    def test_should_sort_defined_variable(self):
+        options = { "$second": 1, "$first": 2}
+        transformation, options = cloudinary.utils.generate_transformation_string(**options)
+        self.assertEqual('$first_2,$second_1', transformation)
+
+    def test_should_place_defined_variables_before_ordered(self):
+        options = {"variables" : [ ["$z", 5], ["$foo", "$z * 2"] ], "$second": 1, "$first": 2}
+        transformation, options = cloudinary.utils.generate_transformation_string(**options)
+        self.assertEqual('$first_2,$second_1,$z_5,$foo_$z_mul_2', transformation)
 
     def test_should_support_text_values(self):
         public_id = "sample"

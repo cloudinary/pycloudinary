@@ -187,7 +187,7 @@ class ApiTest(unittest.TestCase):
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test12_transformations(self):
         """ should allow listing transformations """
-        transformations = api.transformations()["transformations"]
+        transformations = api.transformations(max_results=500)["transformations"]
         transformation = [tr for tr in transformations if tr["name"] == "c_scale,w_100"][0]
 
         self.assertIsNotNone(transformation)
