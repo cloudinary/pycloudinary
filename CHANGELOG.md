@@ -1,4 +1,10 @@
 
+1.7.0 / 2017-03-16
+==================
+
+  * Add User Defined Variables
+  * Add migration to remove pub_date in django_tests
+
 1.6.1 / 2017-02-23
 ==================
 
