@@ -301,7 +301,7 @@ def finalize_source(source, format, url_suffix):
         source_to_sign = source
     else:
         source = unquote(source)
-        if not PY3: source = source.decode('utf8')
+        if not PY3: source = source.encode('utf8')
         source = smart_escape(source)
         source_to_sign = source
         if url_suffix is not None:
