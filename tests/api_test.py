@@ -326,17 +326,15 @@ class ApiTest(unittest.TestCase):
         params = mocker.call_args[0][2]
         self.assertEqual(params['ocr'], 'adv_ocr')
 
+    @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
-    def test27_start_at(self):
+    def test27_start_at(self, mocker):
         """ should allow listing resources by start date """
-        time.sleep(2)
+        mocker.return_value = MOCK_RESPONSE
         start_at = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime())
-        time.sleep(2)
-        response = uploader.upload("tests/logo.png")
         api_repsonse = api.resources(type="upload", start_at=start_at, direction="asc")
-        resources = api_repsonse["resources"]
-        self.assertEqual(len(resources), 1)
-        self.assertEqual(resources[0]["public_id"], response["public_id"])
+        params = mocker.call_args[0][2]
+        self.assertEqual(params['start_at'], start_at)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test28_create_list_upload_presets(self):
