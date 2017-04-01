@@ -145,6 +145,18 @@ class TestUtils(unittest.TestCase):
         self.__test_cloudinary_url(
             options={"x": 1, "y": 2, "radius": 3, "gravity": "center", "quality": "auto:good", "prefix": "a"},
             expected_url=DEFAULT_UPLOAD_PATH + "g_center,p_a,q_auto:good,r_3,x_1,y_2/test")
+        self.__test_cloudinary_url(
+            options={"width":100, "height":100, "crop":'crop', "gravity":"auto:ocr_text"},
+            expected_url=DEFAULT_UPLOAD_PATH + "c_crop,g_auto:ocr_text,h_100,w_100/test",
+            expected_options={"width": 100, "height": 100})
+        self.__test_cloudinary_url(
+            options={"width":100, "height":100, "crop":'crop', "gravity":"ocr_text"},
+            expected_url=DEFAULT_UPLOAD_PATH + "c_crop,g_ocr_text,h_100,w_100/test",
+            expected_options={"width": 100, "height": 100})
+        self.__test_cloudinary_url(
+            options={"width":100, "height":100, "crop":'crop', "gravity":"ocr_text:adv_ocr"},
+            expected_url=DEFAULT_UPLOAD_PATH + "c_crop,g_ocr_text:adv_ocr,h_100,w_100/test",
+            expected_options={"width": 100, "height": 100})
 
     def test_transformation_simple(self):
         """should support named transformation"""
