@@ -3,12 +3,18 @@ import random
 import tempfile
 import unittest
 
+from mock import patch
 import cloudinary
 import six
 from cloudinary import uploader, utils, api
 
-from urllib3 import disable_warnings
+from urllib3 import disable_warnings, HTTPResponse
 from urllib3.util import parse_url
+
+if six.PY2:
+    MOCK_RESPONSE = HTTPResponse(body='{"foo":"bar"}')
+else:
+    MOCK_RESPONSE = HTTPResponse(body='{"foo":"bar"}'.encode("UTF-8"))
 
 disable_warnings()
 
@@ -36,6 +42,15 @@ class UploaderTest(unittest.TestCase):
         expected_signature = utils.api_sign_request(dict(public_id=result["public_id"], version=result["version"]),
                                                     cloudinary.config().api_secret)
         self.assertEqual(result["signature"], expected_signature)
+
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_ocr(self, mocker):
+        """should pass ocr value """
+        mocker.return_value = MOCK_RESPONSE
+        result = uploader.upload(TEST_IMAGE, tags=TEST_TAG, ocr='adv_ocr')
+        params = mocker.call_args[0][2]
+        self.assertEqual(params['ocr'], 'adv_ocr')
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_url(self):
