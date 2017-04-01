@@ -1,11 +1,23 @@
 import time
 import unittest
 
+from mock import patch
+from urllib3._collections import HTTPHeaderDict
+
 import cloudinary
 import six
 from cloudinary import uploader, api, utils
 
-from urllib3 import disable_warnings
+from urllib3 import disable_warnings, HTTPResponse
+
+
+MOCK_HEADERS = HTTPHeaderDict({"x-featureratelimit-limit": '0', "x-featureratelimit-reset": 'Sat, 01 Apr 2017 22:00:00 GMT',
+                          "x-featureratelimit-remaining": '0', })
+
+if six.PY2:
+    MOCK_RESPONSE = HTTPResponse(body='{"foo":"bar"}', headers=MOCK_HEADERS)
+else:
+    MOCK_RESPONSE = HTTPResponse(body='{"foo":"bar"}'.encode("UTF-8"), headers=MOCK_HEADERS)
 
 disable_warnings()
 
@@ -304,6 +316,15 @@ class ApiTest(unittest.TestCase):
         """ should support requesting auto_tagging """
         with six.assertRaisesRegex(self, api.BadRequest, 'Must use'):
             api.update("api_test", auto_tagging=0.5)
+
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test26_1_ocr(self, mocker):
+        """ should support requesting ocr """
+        mocker.return_value = MOCK_RESPONSE
+        api.update("api_test", ocr='adv_ocr')
+        params = mocker.call_args[0][2]
+        self.assertEqual(params['ocr'], 'adv_ocr')
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test27_start_at(self):
