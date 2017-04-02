@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import cloudinary.utils
 import unittest
 import re
@@ -448,6 +450,9 @@ class TestUtils(unittest.TestCase):
         for source, target in tests.items():
             result, options = cloudinary.utils.cloudinary_url(source)
             self.assertEqual(DEFAULT_UPLOAD_PATH + "" + target, result)
+
+    def test_escape_public_id_with_non_ascii_characters(self):
+        self.__test_cloudinary_url(u"ß", expected_url=DEFAULT_UPLOAD_PATH + "%C3%9F")
 
     def test_responsive_width(self):
         """should support responsive width"""
