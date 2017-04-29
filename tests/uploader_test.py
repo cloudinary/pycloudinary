@@ -1,5 +1,4 @@
 import os
-import random
 import tempfile
 import unittest
 
@@ -10,6 +9,7 @@ from cloudinary import uploader, utils, api
 
 from urllib3 import disable_warnings, HTTPResponse
 from urllib3.util import parse_url
+from tests.test_helper import TEST_TAG, TEST_IMAGE
 
 if six.PY2:
     MOCK_RESPONSE = HTTPResponse(body='{"foo":"bar"}')
@@ -18,11 +18,8 @@ else:
 
 disable_warnings()
 
-TEST_IMAGE = "tests/logo.png"
 TEST_IMAGE_HEIGHT = 51
 TEST_IMAGE_WIDTH = 241
-SUFFIX = random.randint(10000, 99999)
-TEST_TAG = "pycloudinary_test_{0}".format(SUFFIX)
 
 class UploaderTest(unittest.TestCase):
 
