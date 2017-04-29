@@ -10,6 +10,7 @@ import urllib3
 from cloudinary import utils
 from urllib3.exceptions import HTTPError
 
+logger = cloudinary.logger
 
 class Error(Exception): pass
 class NotFound(Error): pass
@@ -296,7 +297,17 @@ def update_streaming_profile(name, **options):
     return call_api('PUT', uri, params, **options)
 
 
+def call_json_api(method, uri, jsonBody, **options):
+    logger.debug(jsonBody)
+    data = json.dumps(jsonBody).encode('utf-8')
+    return _call_api(method, uri, body=data, headers={'Content-Type': 'application/json'}, **options)
+
+
 def call_api(method, uri, params, **options):
+    return _call_api(method, uri, params=params, **options)
+
+
+def _call_api(method, uri, params=None, body=None, headers=None, **options):
     prefix = options.pop("upload_prefix", cloudinary.config().upload_prefix) or "https://api.cloudinary.com"
     cloud_name = options.pop("cloud_name", cloudinary.config().cloud_name)
     if not cloud_name: raise Exception("Must supply cloud_name")
@@ -306,16 +317,19 @@ def call_api(method, uri, params, **options):
     if not cloud_name: raise Exception("Must supply api_secret")
     api_url = "/".join([prefix, "v1_1", cloud_name] + uri)
     # Add authentication
-    headers = urllib3.make_headers(
+    req_headers = urllib3.make_headers(
         basic_auth="{0}:{1}".format(api_key, api_secret),
         user_agent=cloudinary.get_user_agent()
     )
-
+    if headers is not None:
+        req_headers.update(headers)
     kw = {}
     if 'timeout' in options:
         kw['timeout'] = options['timeout']
+    if body is not None:
+        kw['body'] = body
     try:
-        response = _http.request(method.upper(), api_url, params, headers, **kw)
+        response = _http.request(method.upper(), api_url, params, req_headers, **kw)
         body = response.data
     except HTTPError as e:
         raise GeneralError("Unexpected error {0}", e.message)
