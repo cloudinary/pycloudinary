@@ -9,6 +9,7 @@ cloudinary/auth_token.py
 cloudinary/compat.py
 cloudinary/forms.py
 cloudinary/models.py
+cloudinary/search.py
 cloudinary/uploader.py
 cloudinary/utils.py
 cloudinary.egg-info/PKG-INFO

@@ -14,6 +14,7 @@ from six import python_2_unicode_compatible
 
 from cloudinary import utils
 from cloudinary.compat import urlparse, parse_qs
+from cloudinary.search import Search
 
 CF_SHARED_CDN = "d3jpl91pxevbkh.cloudfront.net"
 OLD_AKAMAI_SHARED_CDN = "cloudinary-a.akamaihd.net"
