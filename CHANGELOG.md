@@ -1,4 +1,25 @@
 
+1.8.0 / 2017-05-03
+==================
+
+New functionality and features
+------------------------------
+
+  * Add Search API
+
+Other Changes
+-------------
+
+  * Add `test_helper.py`
+  * Add `call_json_api` to `api.py`.
+  * Add `logger` to cloudinary.
+  * Mock start_at param test
+  * Add mocked test for ocr param in update
+  * Add gravity ocr value tests
+  * Add mocked test for ocr param in upload
+  * Merge pull request #94 from rubengrill/fix-unicode-encode-error-cloudinary-url
+  * Fix UnicodeEncodeError in utils.cloudinary_url
+
 1.7.0 / 2017-03-16
 ==================
 
