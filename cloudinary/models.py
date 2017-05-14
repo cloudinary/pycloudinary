@@ -59,7 +59,7 @@ class CloudinaryField(models.Field):
         )
 
     def from_db_value(self, value, expression, connection, context):
-        if value is None:
+        if not value:
             return value
         return self.parse_cloudinary_resource(value)
 
@@ -68,7 +68,7 @@ class CloudinaryField(models.Field):
             return value
         elif isinstance(value, UploadedFile):
             return value
-        elif value is None:
+        elif not value:
             return value
         else:
             return self.parse_cloudinary_resource(value)
