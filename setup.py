@@ -50,6 +50,7 @@ setup(name='cloudinary',
       install_requires=[
           "six",
           "mock",
-          "urllib3"
+          "urllib3",
+          "certifi"
       ],
       )

@@ -6,6 +6,7 @@ from os.path import getsize
 
 import cloudinary
 import urllib3
+import certifi
 from cloudinary import utils
 from cloudinary.api import Error
 from cloudinary.compat import string_types
@@ -28,7 +29,10 @@ if is_appengine_sandbox():
     _http = AppEngineManager()
 else:
     # PoolManager uses a socket-level API behind the scenes
-    _http = PoolManager()
+    _http = PoolManager(
+        cert_reqs='CERT_REQUIRED',
+        ca_certs=certifi.where()
+    )
 
 
 def upload(file, **options):
