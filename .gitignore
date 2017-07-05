@@ -98,3 +98,4 @@ cloudinary/static/
 *.sqlite3
 log/
 output.html
+.idea
