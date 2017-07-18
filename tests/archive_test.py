@@ -34,8 +34,13 @@ class ArchiveTest(unittest.TestCase):
         """should successfully generate an archive"""
         result = uploader.create_archive(tags=[TEST_TAG])
         self.assertEqual(2, result.get("file_count"))
-        result = uploader.create_zip(tags=[TEST_TAG], transformations=[{"width": 0.5}, {"width": 2.0}])
-        self.assertEqual(4, result.get("file_count"))
+        result2 = uploader.create_zip(tags=[TEST_TAG], transformations=[{"width": 0.5}, {"width": 2.0}])
+        self.assertEqual(4, result2.get("file_count"))
+        # clean up
+        try:
+            api.delete_resources([result['public_id'], result2['public_id']], resource_type='raw')
+        except:
+            pass
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_expires_at(self):
@@ -43,6 +48,11 @@ class ArchiveTest(unittest.TestCase):
         expires_at = int(time.time()+3600)
         result = uploader.create_zip(tags=[TEST_TAG], expires_at=expires_at)
         self.assertEqual(2, result.get("file_count"))
+        # clean up
+        try:
+            api.delete_resources([result['public_id']], resource_type='raw')
+        except:
+            pass
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_archive_url(self):
@@ -57,6 +67,11 @@ class ArchiveTest(unittest.TestCase):
                 infos = zip_file.infolist()
                 self.assertEqual(4, len(infos))
         http.clear()
+        # clean up
+        try:
+            api.delete_resources([result['public_id']], resource_type='raw')
+        except:
+            pass
 
 
 if __name__ == '__main__':

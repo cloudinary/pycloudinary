@@ -58,9 +58,9 @@ class ApiTest(unittest.TestCase):
                 api.delete_transformation(transformation)
             except Exception:
                 pass
-        for transformation in [API_TEST_PRESET, API_TEST_PRESET2, API_TEST_PRESET3, API_TEST_PRESET4]:
+        for preset in [API_TEST_PRESET, API_TEST_PRESET2, API_TEST_PRESET3, API_TEST_PRESET4]:
             try:
-                api.delete_upload_preset(transformation)
+                api.delete_upload_preset(preset)
             except Exception:
                 pass
 
@@ -68,6 +68,25 @@ class ApiTest(unittest.TestCase):
             uploader.upload("tests/logo.png",
                             public_id=id, tags=[API_TEST_TAG, ],
                             context="key=value", eager=[{"width": 100, "crop": "scale"}])
+
+    @classmethod
+    def tearDownClass(cls):
+        try:
+            api.delete_resources([API_TEST_ID, API_TEST_ID2, API_TEST_ID3, API_TEST_ID4, API_TEST_ID5])
+        except Exception:
+            pass
+        for transformation in [API_TEST_TRANS, API_TEST_TRANS2, API_TEST_TRANS3]:
+            try:
+                api.delete_transformation(transformation)
+            except Exception:
+                pass
+        for preset in [API_TEST_PRESET, API_TEST_PRESET2, API_TEST_PRESET3, API_TEST_PRESET4]:
+            try:
+                api.delete_upload_preset(preset)
+            except Exception:
+                pass
+        cloudinary.api.delete_resources_by_tag(UNIQUE_TAG)
+        cloudinary.api.delete_resources_by_tag(UNIQUE_TAG, resource_type='raw')
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test01_resource_types(self):
@@ -304,7 +323,7 @@ class ApiTest(unittest.TestCase):
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test20_manual_moderation(self):
         """ should support setting manual moderation status """
-        resource = uploader.upload("tests/logo.png", moderation="manual")
+        resource = uploader.upload("tests/logo.png", moderation="manual", tags=[UNIQUE_TAG])
 
         self.assertEqual(resource["moderation"][0]["status"], "pending")
         self.assertEqual(resource["moderation"][0]["kind"], "manual")
@@ -316,7 +335,7 @@ class ApiTest(unittest.TestCase):
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test22_raw_conversion(self):
         """ should support requesting raw_convert """
-        resource = uploader.upload("tests/docx.docx", resource_type="raw")
+        resource = uploader.upload("tests/docx.docx", resource_type="raw", tags=[UNIQUE_TAG])
         with six.assertRaisesRegex(self, api.BadRequest, 'Illegal value'):
             api.update(resource["public_id"], raw_convert="illegal", resource_type="raw")
 
@@ -360,9 +379,9 @@ class ApiTest(unittest.TestCase):
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test28_create_list_upload_presets(self):
         """ should allow creating and listing upload_presets """
-        api.create_upload_preset(name=API_TEST_PRESET, folder="folder")
-        api.create_upload_preset(name=API_TEST_PRESET2, folder="folder2")
-        api.create_upload_preset(name=API_TEST_PRESET3, folder="folder3")
+        api.create_upload_preset(name=API_TEST_PRESET, folder="folder", tags=[UNIQUE_TAG])
+        api.create_upload_preset(name=API_TEST_PRESET2, folder="folder2", tags=[UNIQUE_TAG])
+        api.create_upload_preset(name=API_TEST_PRESET3, folder="folder3", tags=[UNIQUE_TAG])
 
         api_response = api.upload_presets()
         presets = api_response["presets"]
@@ -378,7 +397,7 @@ class ApiTest(unittest.TestCase):
     def test29_get_upload_presets(self):
         """ should allow getting a single upload_preset """
         result = api.create_upload_preset(unsigned=True, folder="folder", width=100, crop="scale",
-                                          tags=["a", "b", "c"], context={"a": "b", "c": "d"})
+                                          tags=["a", "b", "c", UNIQUE_TAG], context={"a": "b", "c": "d"})
         name = result["name"]
         preset = api.upload_preset(name)
         self.assertEqual(preset["name"], name)
@@ -387,13 +406,13 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(settings["folder"], "folder")
         self.assertEqual(settings["transformation"], [{"width": 100, "crop": "scale"}])
         self.assertEqual(settings["context"], {"a": "b", "c": "d"})
-        self.assertEqual(settings["tags"], ["a", "b", "c"])
+        self.assertEqual(settings["tags"], ["a", "b", "c", UNIQUE_TAG])
         api.delete_upload_preset(name)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test30_create_list_upload_presets(self):
         """ should allow deleting upload_presets """
-        api.create_upload_preset(name=API_TEST_PRESET4, folder="folder")
+        api.create_upload_preset(name=API_TEST_PRESET4, folder="folder", tags=[UNIQUE_TAG])
         api.upload_preset(API_TEST_PRESET4)
         api.delete_upload_preset(API_TEST_PRESET4)
         with self.assertRaises(api.NotFound):
@@ -402,7 +421,7 @@ class ApiTest(unittest.TestCase):
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test31_update_upload_presets(self):
         """ should allow getting a single upload_preset """
-        result = api.create_upload_preset(folder="folder")
+        result = api.create_upload_preset(folder="folder", tags=[UNIQUE_TAG])
         name = result["name"]
         preset = api.upload_preset(name)
         settings = preset["settings"]
@@ -410,7 +429,9 @@ class ApiTest(unittest.TestCase):
         api.update_upload_preset(name, **settings)
         preset = api.upload_preset(name)
         self.assertIs(preset["unsigned"], True)
-        self.assertEqual(preset["settings"], {"folder": "folder", "colors": True, "disallow_public_id": True})
+        self.assertEqual(
+            preset["settings"],
+            {"folder": "folder", "colors": True, "disallow_public_id": True, "tags": [UNIQUE_TAG]})
         api.delete_upload_preset(name)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -455,7 +476,7 @@ class ApiTest(unittest.TestCase):
     def test_restore(self):
         """ should support restoring resources """
         TEST_ID = "api_test_restore_{}".format(SUFFIX)
-        uploader.upload("tests/logo.png", public_id=TEST_ID, backup=True)
+        uploader.upload("tests/logo.png", public_id=TEST_ID, backup=True, tags=[UNIQUE_TAG])
         resource = api.resource(TEST_ID)
         self.assertNotEqual(resource, None)
         self.assertEqual(resource["bytes"], 3381)
@@ -476,7 +497,7 @@ class ApiTest(unittest.TestCase):
     def test_upload_mapping(self):
         TEST_ID = "api_test_upload_mapping_{}".format(SUFFIX)
 
-        api.create_upload_mapping(TEST_ID, template="http://cloudinary.com")
+        api.create_upload_mapping(TEST_ID, template="http://cloudinary.com", tags=[UNIQUE_TAG])
         result = api.upload_mapping(TEST_ID)
         self.assertEqual(result["template"], "http://cloudinary.com")
         api.update_upload_mapping(TEST_ID, template="http://res.cloudinary.com")
