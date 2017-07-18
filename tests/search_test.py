@@ -1,9 +1,7 @@
 import unittest
-
 import time
 
-from tests.test_helper import TEST_IMAGE ,TEST_TAG ,UNIQUE_TAG ,SUFFIX
-
+from tests.test_helper import TEST_IMAGE, TEST_TAG, UNIQUE_TAG, SUFFIX
 
 import cloudinary
 from six import iterkeys
