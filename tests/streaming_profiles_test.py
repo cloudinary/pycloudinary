@@ -5,7 +5,7 @@ from cloudinary import uploader, api, utils
 import six
 from urllib3 import disable_warnings
 
-from .test_helper import SUFFIX
+from .test_helper import *
 
 disable_warnings()
 

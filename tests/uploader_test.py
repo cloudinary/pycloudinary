@@ -20,7 +20,7 @@ disable_warnings()
 
 TEST_IMAGE_HEIGHT = 51
 TEST_IMAGE_WIDTH = 241
-UNIQUE_TAG = "up_test_uploader_{}".format(SUFFIX)
+UNIQUE_TAG = "test_uploader_{}".format(SUFFIX)
 TEST_DOCX_ID = "test_docx_{}".format(SUFFIX)
 
 
@@ -33,8 +33,8 @@ class UploaderTest(unittest.TestCase):
     def tearDownClass(cls):
         cloudinary.api.delete_resources_by_tag(UNIQUE_TAG)
         cloudinary.api.delete_resources_by_tag(UNIQUE_TAG, resource_type='raw')
-        cloudinary.api.delete_resources_by_tag(UNIQUE_TAG, type='text')
         cloudinary.api.delete_resources_by_tag(UNIQUE_TAG, type='twitter_name')
+        cloudinary.api.delete_resources_by_tag(UNIQUE_TAG, type='text')
         cloudinary.api.delete_resources([TEST_IMAGE])
         cloudinary.api.delete_resources([TEST_DOCX_ID], resource_type='raw')
 

@@ -9,9 +9,9 @@ from cloudinary.forms import CloudinaryFileField
 
 from .models import Poll
 
-from .test_helper import SUFFIX
+from .test_helper import *
 
-API_TEST_ID = "dj_test_{}".format(SUFFIX)
+API_TEST_ID = "api_test_{}".format(SUFFIX)
 
 
 class TestCloudinaryField(TestCase):
