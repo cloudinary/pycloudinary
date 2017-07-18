@@ -11,9 +11,11 @@ from cloudinary import uploader, utils, api
 import urllib3
 from urllib3 import disable_warnings
 
+from .test_helper import *
+
 disable_warnings()
 
-TEST_TAG = "pycloudinary_test" + str(random.randint(10000, 99999))
+TEST_TAG = "pycloudinary_test_{}".format(SUFFIX)
 
 
 class ArchiveTest(unittest.TestCase):
@@ -26,14 +28,15 @@ class ArchiveTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         api.delete_resources_by_tag(TEST_TAG)
+        api.delete_resources_by_tag(TEST_TAG, resource_type='raw')
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_create_archive(self):
         """should successfully generate an archive"""
         result = uploader.create_archive(tags=[TEST_TAG])
         self.assertEqual(2, result.get("file_count"))
-        result = uploader.create_zip(tags=[TEST_TAG], transformations=[{"width": 0.5}, {"width": 2.0}])
-        self.assertEqual(4, result.get("file_count"))
+        result2 = uploader.create_zip(tags=[TEST_TAG], transformations=[{"width": 0.5}, {"width": 2.0}])
+        self.assertEqual(4, result2.get("file_count"))
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_expires_at(self):
