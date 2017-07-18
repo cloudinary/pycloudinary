@@ -5,6 +5,8 @@ from cloudinary import uploader, api, utils
 import six
 from urllib3 import disable_warnings
 
+from .test_helper import *
+
 disable_warnings()
 
 
@@ -16,7 +18,7 @@ class StreamingProfilesTest(unittest.TestCase):
         StreamingProfilesTest.initialized = True
         cloudinary.reset_config()
         if not cloudinary.config().api_secret: return
-        StreamingProfilesTest.test_id = "api_test_{0}".format(utils.now())
+        StreamingProfilesTest.test_id = "api_test_{}".format(SUFFIX)
 
     __predefined_sp = ["4k", "full_hd", "hd", "sd", "full_hd_wifi", "full_hd_lean", "hd_lean"]
 

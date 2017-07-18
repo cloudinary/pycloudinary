@@ -11,9 +11,11 @@ from cloudinary import uploader, utils, api
 import urllib3
 from urllib3 import disable_warnings
 
+from .test_helper import *
+
 disable_warnings()
 
-TEST_TAG = "pycloudinary_test" + str(random.randint(10000, 99999))
+TEST_TAG = "pycloudinary_test_{}".format(SUFFIX)
 
 
 class ArchiveTest(unittest.TestCase):

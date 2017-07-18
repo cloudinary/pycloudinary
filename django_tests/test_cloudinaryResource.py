@@ -7,10 +7,11 @@ from django.test import TestCase
 
 from urllib3 import disable_warnings
 
+from .test_helper import SUFFIX
+
 disable_warnings()
 
 TEST_IMAGE = "tests/logo.png"
-SUFFIX = random.randint(1, 10)
 TEST_TAG = "pycloudinary_test_{0}".format(SUFFIX)
 
 
