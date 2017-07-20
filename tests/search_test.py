@@ -81,18 +81,27 @@ class SearchTest(unittest.TestCase):
         self.assertEqual(query, {"with_field": ["context", "tags"]})
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    @unittest.skipIf(not os.environ.get('RUN_SEARCH_TESTS', False),
+                     "For this test to work, 'Advanced search' should be enabled for your cloud. " +
+                     "Use env variable RUN_SEARCH_TESTS=1 if you really want to test it.")
     def test_should_return_all_images_tagged(self):
 
         results = Search().expression("tags:{0}".format(UNIQUE_TAG)).execute()
         self.assertEqual(len(results['resources']), 3)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    @unittest.skipIf(not os.environ.get('RUN_SEARCH_TESTS', False),
+                     "For this test to work, 'Advanced search' should be enabled for your cloud. " +
+                     "Use env variable RUN_SEARCH_TESTS=1 if you really want to test it.")
     def test_should_return_resource(self):
 
         results = Search().expression("public_id:{0}".format(public_ids[0])).execute()
         self.assertEqual(len(results['resources']), 1)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    @unittest.skipIf(not os.environ.get('RUN_SEARCH_TESTS', False),
+                     "For this test to work, 'Advanced search' should be enabled for your cloud. " +
+                     "Use env variable RUN_SEARCH_TESTS=1 if you really want to test it.")
     def test_should_paginate_resources_limited_by_tag_and_ordered_by_ascending_public_id(self):
         results = Search().max_results(1).expression("tags:{0}".format(UNIQUE_TAG)).sort_by('public_id', 'asc').execute()
         results = {'next_cursor': ''}
@@ -112,6 +121,9 @@ class SearchTest(unittest.TestCase):
             self.assertEqual(results['total_count'], 3)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    @unittest.skipIf(not os.environ.get('RUN_SEARCH_TESTS', False),
+                     "For this test to work, 'Advanced search' should be enabled for your cloud. " +
+                     "Use env variable RUN_SEARCH_TESTS=1 if you really want to test it.")
     def test_should_include_context(self):
 
         results = Search().expression("tags:{0}".format(UNIQUE_TAG)).with_field('context').execute()
@@ -120,6 +132,9 @@ class SearchTest(unittest.TestCase):
             self.assertEqual([key for key in iterkeys(res['context'])], [u'stage'])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    @unittest.skipIf(not os.environ.get('RUN_SEARCH_TESTS', False),
+                     "For this test to work, 'Advanced search' should be enabled for your cloud. " +
+                     "Use env variable RUN_SEARCH_TESTS=1 if you really want to test it.")
     def test_should_include_context_tags_and_image_metadata(self):
 
         results = Search().expression("tags:{0}".format(UNIQUE_TAG)).with_field('context').with_field('tags').with_field(
