@@ -98,3 +98,4 @@ ENV/
 cloudinary/static/
 log/
 output.html
+.idea

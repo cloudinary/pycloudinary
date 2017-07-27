@@ -1,0 +1,30 @@
+language: python
+matrix:
+  include:
+  - python: 2.7
+    env: TOXENV=py27
+  - python: 3.5
+    env: TOXENV=py35
+  - python: 3.6
+    env: TOXENV=py36
+  - python: 2.7
+    env: TOXENV=py27-django8
+  - python: 3.5
+    env: TOXENV=py35-django8
+  - python: 2.7
+    env: TOXENV=py27-django9
+  - python: 3.5
+    env: TOXENV=py35-django9
+  - python: 2.7
+    env: TOXENV=py27-django10
+  - python: 3.6
+    env: TOXENV=py36-django10
+  - python: 2.7
+    env: TOXENV=py27-django11
+  - python: 3.6
+    env: TOXENV=py36-django11
+install:
+- pip install tox
+script:
+- tox -e $TOXENV
+
