@@ -183,6 +183,40 @@ class ApiTest(unittest.TestCase):
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test08a_delete_derived_by_transformation(self, mocker):
+        """ should allow deleting derived resource by transformations """
+        public_resource_id = 'public_resource_id'
+        public_resource_id2 = 'public_resource_id2'
+        transformation = {"crop": "scale", "width": 100}
+        transformation2 = {"crop": "scale", "width": 200}
+
+        mocker.return_value = MOCK_RESPONSE
+        api.delete_derived_by_transformation(public_resource_id, transformation)
+        method, url, params = mocker.call_args[0][0:3]
+        self.assertEqual('DELETE', method)
+        self.assertTrue(url.endswith('/resources/image/upload'))
+        self.assertIn(('public_ids[]', public_resource_id), params)
+        self.assertIn(('transformations', utils.build_eager([transformation])), params)
+        self.assertIn(('keep_original', True), params)
+
+        mocker.return_value = MOCK_RESPONSE
+        api.delete_derived_by_transformation(
+            [public_resource_id, public_resource_id2],
+            [transformation, transformation2], resource_type='raw', type='fetch', invalidate=True, foo='bar')
+        method, url, params = mocker.call_args[0][0:3]
+        self.assertEqual('DELETE', method)
+        self.assertTrue(url.endswith('/resources/raw/fetch'))
+        self.assertIn(('public_ids[]', public_resource_id), params)
+        self.assertIn(('public_ids[]', public_resource_id2), params)
+        self.assertIn(
+            ('transformations', utils.build_eager([transformation, transformation2])),
+            params)
+        self.assertIn(('keep_original', True), params)
+        self.assertIn(('invalidate', True), params)
+
+
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test09_delete_resources(self, mocker):
         """ should allow deleting resources """
         mocker.return_value = MOCK_RESPONSE

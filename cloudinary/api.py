@@ -159,6 +159,30 @@ def delete_derived_resources(derived_resource_ids, **options):
     return call_api("delete", uri, params, **options)
 
 
+def delete_derived_by_transformation(public_ids, transformations, resource_type='image', type='upload', invalidate=None, **options):
+    """
+    Delete derived resources of public ids, identified by transformations
+    
+    :param public_ids: the base resources
+    :type public_ids: list of string
+    :param transformations: the transformation of derived resources, optionally including the format
+    :type transformations: list of (dict or string)
+    :param invalidate: (optional) True to invalidate the resources after deletion
+    :type invalidate: bool
+    :return: a list of the public ids for which derived resources were deleted
+    :rtype: dict
+    """
+    uri = ["resources", resource_type, type]
+    if not isinstance(public_ids, list):
+        public_ids = [public_ids]
+    params = [("public_ids[]", public_id) for public_id in public_ids]
+    params.append(("transformations", utils.build_eager(transformations)))
+    params.append(("keep_original", True))
+    if invalidate is not None:
+        params.append(('invalidate', invalidate))
+    return call_api("delete", uri, params, **options)
+
+
 def tags(**options):
     resource_type = options.pop("resource_type", "image")
     uri = ["tags", resource_type]
