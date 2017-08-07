@@ -50,6 +50,15 @@ class UploaderTest(unittest.TestCase):
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_upload_async(self, mocker):
+        """should pass async value """
+        mocker.return_value = MOCK_RESPONSE
+        result = uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG], async=True)
+        params = mocker.call_args[0][2]
+        self.assertTrue(params['async'])
+
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_ocr(self, mocker):
         """should pass ocr value """
         mocker.return_value = MOCK_RESPONSE
