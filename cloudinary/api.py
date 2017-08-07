@@ -154,6 +154,19 @@ def delete_derived_resources(derived_resource_ids, **options):
     return call_api("delete", uri, params, **options)
 
 
+def delete_derived_by_transformation(derived_resource_ids, transformation, **options):
+    uri = ["derived_resources"]
+    if not isinstance(derived_resource_ids, list):
+        derived_resource_ids = [derived_resource_ids]
+    params = [("derived_resource_ids[]", derived_resource_id) for derived_resource_id in derived_resource_ids]
+    if not isinstance(transformation, list):
+        transformation = [transformation]
+    for t in transformation:
+        params.append(("transformation[]", t))
+    params.append(("keep_original", 1))
+    return call_api("delete", uri, params, **options)
+
+
 def tags(**options):
     resource_type = options.pop("resource_type", "image")
     uri = ["tags", resource_type]
