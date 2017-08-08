@@ -1,0 +1,64 @@
+language: python
+matrix:
+  include:
+  - python: 2.7
+    env: TOXENV=py27
+  - python: 3.3
+    env: TOXENV=py33
+  - python: 3.4
+    env: TOXENV=py34
+  - python: 3.5
+    env: TOXENV=py35
+  - python: 3.6
+    env: TOXENV=py36
+  - python: 2.7
+    env: TOXENV=py27-django4
+  - python: 2.7
+    env: TOXENV=py27-django5
+  - python: 3.3
+    env: TOXENV=py33-django5
+  - python: 2.7
+    env: TOXENV=py27-django6
+  - python: 3.3
+    env: TOXENV=py33-django6
+  - python: 2.7
+    env: TOXENV=py27-django7
+  - python: 3.3
+    env: TOXENV=py33-django7
+  - python: 3.4
+    env: TOXENV=py34-django7
+  - python: 2.7
+    env: TOXENV=py27-django8
+  - python: 3.3
+    env: TOXENV=py33-django8
+  - python: 3.4
+    env: TOXENV=py34-django8
+  - python: 3.5
+    env: TOXENV=py35-django8
+  - python: 2.7
+    env: TOXENV=py27-django9
+  - python: 3.4
+    env: TOXENV=py34-django9
+  - python: 3.5
+    env: TOXENV=py35-django9
+  - python: 2.7
+    env: TOXENV=py27-django10
+  - python: 3.4
+    env: TOXENV=py34-django10
+  - python: 3.5
+    env: TOXENV=py35-django10
+  - python: 2.7
+    env: TOXENV=py27-django11
+  - python: 3.4
+    env: TOXENV=py34-django11
+  - python: 3.5
+    env: TOXENV=py35-django11
+  - python: 3.6
+    env: TOXENV=py36-django11
+install:
+- pip install tox
+script:
+- tox -e $TOXENV
+env:
+  global:
+    secure: XJLKlrAceHIQtMnpTZ4YyhCIf+DKxBUy4v9SEgFLBTZykN3XpIOAwEr010rAC28QI9RiDsDKNH/Q/pBZ1k761N0sLjjIXu9knTt5m+Y348SN9bd6/yg83N5AFnZvOwc5fKeL22XeC8wK9uF2gDaa0f0drhddq1iouenNCHAi7D6Y3omLtYR72y3zJpvu9GqNSN2/yjLbrr6NoQ98GuL8v+WayWZAE9zVUed2YOvsLATt5DYKKQYnAowxca+F9iickxNgnV8U4YIb6cgAfuNOYhrtUttW713N01M77jbaPTkDs4muqZ1VPRPY9cxxzHo9Evmx9tesBBsGqkG6fPiOMsr9NG5HNLH1jjyOsGZB4FMOB8VYus6mZI6SOlPWbM7soMSTGZ7JLPUUfgE6hUADXN9cdupjZ8RWI2lb5sMEDwVvOcb/AGGJO0+pHa1EsEEtFcCmOu+sz18YrysUTViRW/wmu+PC/zes+QdSHcJeKImamFebAwQMqPyOJ6CGyvXTf+ahoZKu3R2RNa7to50z1BDIbrQpnPlzYXLvkjiihU73BZ00MgeancY4TC0XLYQTTiG60ibgM6Ec0e4T2RtzFtZvrcfiM2ortuq0gtWnxkGgKrh+zp1qv4BfxADH7D8Pz7Oc3NHxk7gHkHrqaEEO7/l0JfrdSVLVENK3orBsh/k=
