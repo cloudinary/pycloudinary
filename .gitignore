@@ -8,7 +8,6 @@ __pycache__/
 
 # Distribution / packaging
 .Python
-env/
 build/
 develop-eggs/
 dist/
@@ -20,6 +19,7 @@ lib64/
 parts/
 sdist/
 var/
+wheels/
 *.egg-info/
 .installed.cfg
 *.egg
@@ -75,27 +75,27 @@ target/
 # celery beat schedule file
 celerybeat-schedule
 
-# dotenv
-.env
-
 # virtualenv
-.venv/
+.env
+.venv
+env/
 venv/
 ENV/
 
 # Spyder project settings
 .spyderproject
+.spyproject
 
 # Rope project settings
 .ropeproject
 
+# Other
 .DS_Store
 *.swp
-
+*.sqlite3
 .project
 .pydevproject
 cloudinary/static/
-*.sqlite3
 log/
 output.html
 .idea
