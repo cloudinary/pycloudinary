@@ -43,16 +43,18 @@ class ApiTest(unittest.TestCase):
     initialized = False
 
     def setUp(self):
+        print("API_TEST_TAG={}".format(API_TEST_TAG))
         if ApiTest.initialized:
+            print("ApiTest already initialized")
             return
         ApiTest.initialized = True
         cloudinary.reset_config()
         if not cloudinary.config().api_secret:
             return
-        try:
-            api.delete_resources([API_TEST_ID, API_TEST_ID2, API_TEST_ID3])
-        except Exception:
-            pass
+        # try:
+        #     api.delete_resources([API_TEST_ID, API_TEST_ID2, API_TEST_ID3])
+        # except Exception:
+        #     pass
         for transformation in [API_TEST_TRANS, API_TEST_TRANS2, API_TEST_TRANS3]:
             try:
                 api.delete_transformation(transformation)
@@ -67,7 +69,8 @@ class ApiTest(unittest.TestCase):
         for id in [API_TEST_ID, API_TEST_ID2]:
             uploader.upload("tests/logo.png",
                             public_id=id, tags=[API_TEST_TAG, ],
-                            context="key=value", eager=[{"width": 100, "crop": "scale"}])
+                            context="key=value", eager=[{"width": 100, "crop": "scale"}],
+                            overwrite=True)
 
     @classmethod
     def tearDownClass(cls):
@@ -177,12 +180,12 @@ class ApiTest(unittest.TestCase):
         self.assertNotEqual(resource, None)
         self.assertEqual(resource["public_id"], API_TEST_ID)
         self.assertEqual(resource["bytes"], 3381)
-        self.assertEqual(len(resource["derived"]), 1)
+        self.assertEqual(len(resource["derived"]), 1, "{} should have one derived resource.".format(API_TEST_ID))
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test08_delete_derived(self):
         """ should allow deleting derived resource """
-        uploader.upload("tests/logo.png", public_id=API_TEST_ID3, eager=[{"width": 101, "crop": "scale"}])
+        uploader.upload("tests/logo.png", public_id=API_TEST_ID3, eager=[{"width": 101, "crop": "scale"}], overwrite=True)
         resource = api.resource(API_TEST_ID3)
         self.assertNotEqual(resource, None)
         self.assertEqual(len(resource["derived"]), 1)
