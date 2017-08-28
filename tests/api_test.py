@@ -468,5 +468,23 @@ class ApiTest(unittest.TestCase):
         result = api.upload_mappings()
         self.assertNotIn("api_test_upload_mapping", [mapping.get("folder") for mapping in result["mappings"]])
 
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_overlay(self, mocker):
+        mocker.return_value = MOCK_RESPONSE
+        uploader.upload("tests/logo.png", public_id="test_overlay",
+                        overlay={"fetch": "http://cloudinary.com/images/old_logo.png"})
+        params = mocker.call_args[0][2]
+        self.assertEqual(params['transformation'], 'l_fetch:L2Nsb3VkaW5hcnkuY29tL2ltYWdlcy9vbGRfbG9nby5wbmc=')
+
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_underlay(self, mocker):
+        mocker.return_value = MOCK_RESPONSE
+        uploader.upload("tests/logo.png", public_id="test_underlay",
+                        underlay={"fetch": "http://cloudinary.com/images/old_logo.png"})
+        params = mocker.call_args[0][2]
+        self.assertEqual(params['transformation'], 'u_fetch:L2Nsb3VkaW5hcnkuY29tL2ltYWdlcy9vbGRfbG9nby5wbmc=')
+
 if __name__ == '__main__':
     unittest.main()

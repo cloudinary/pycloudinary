@@ -666,15 +666,19 @@ def process_layer(layer, layer_parameter):
     type = layer.get("type")
     public_id = layer.get("public_id")
     format = layer.get("format")
+    fetch = layer.get("fetch")
     components = list()
 
     if text is not None and resource_type is None:
         resource_type = "text"
 
+    if fetch and resource_type is None:
+        resource_type = "fetch"
+
     if public_id is not None and format is not None:
         public_id = public_id + "." + format
 
-    if public_id is None and resource_type != "text":
+    if public_id is None and resource_type != "text" and resource_type != "fetch":
         raise ValueError("Must supply public_id for for non-text " + layer_parameter)
 
     if resource_type is not None and resource_type != "image":
@@ -712,6 +716,10 @@ def process_layer(layer, layer_parameter):
             # text = text.replace("%2C", "%252C")
             # text = text.replace("/", "%252F")
             components.append(text)
+    elif resource_type == "fetch":
+        url = fetch[len('fetch:'):]
+        b64 = base64.b64encode(url)
+        components.append(b64)
     else:
         public_id = public_id.replace("/", ':')
         components.append(public_id)
