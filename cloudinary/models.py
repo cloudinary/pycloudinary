@@ -101,6 +101,6 @@ class CloudinaryField(models.Field):
     def formfield(self, **kwargs):
         options = {"type": self.type, "resource_type": self.resource_type}
         options.update(kwargs.pop('options', {}))
-        defaults = {'form_class': self.default_form_class, 'options': options, 'autosave': False}
+        defaults = {'form_class': self.default_form_class, 'options': options, 'autosave': False, 'required': not self.blank}
         defaults.update(kwargs)
         return super(CloudinaryField, self).formfield(**defaults)
