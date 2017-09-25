@@ -184,7 +184,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         different_coordinates = [[122, 32, 111, 152]]
         custom_coordinates = [1, 2, 3, 4]
         uploader.explicit(result["public_id"], face_coordinates=different_coordinates,
-                          custom_coordinates=custom_coordinates, faces=True, type="upload")
+                          custom_coordinates=custom_coordinates, type="upload")
         info = api.resource(result["public_id"], faces=True, coordinates=True)
         self.assertEqual(different_coordinates, info["faces"])
         self.assertEqual({"faces": different_coordinates, "custom": [custom_coordinates]}, info["coordinates"])
