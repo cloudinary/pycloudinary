@@ -11,11 +11,11 @@ from cloudinary import uploader, utils, api
 import urllib3
 from urllib3 import disable_warnings
 
-from .test_helper import *
+from .test_helper import SUFFIX, TEST_TAG
 
 disable_warnings()
 
-TEST_TAG = "pycloudinary_test_{}".format(SUFFIX)
+TEST_TAG = "arch_pycloudinary_test_{}".format(SUFFIX)
 
 
 class ArchiveTest(unittest.TestCase):
