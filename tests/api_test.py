@@ -10,7 +10,7 @@ from cloudinary import uploader, api, utils
 
 from urllib3 import disable_warnings, HTTPResponse
 
-from .test_helper import *
+from .test_helper import SUFFIX, UNIQUE_TAG
 
 
 MOCK_HEADERS = HTTPHeaderDict({"x-featureratelimit-limit": '0', "x-featureratelimit-reset": 'Sat, 01 Apr 2017 22:00:00 GMT',
@@ -23,6 +23,7 @@ else:
 
 disable_warnings()
 
+UNIQUE_TAG = 'api_{}'.format(UNIQUE_TAG)
 API_TEST_TAG = "api_test_{}_tag".format(SUFFIX)
 API_TEST_PREFIX = "api_test_{}".format(SUFFIX)
 API_TEST_ID = "api_test_{}".format(SUFFIX)
@@ -40,32 +41,11 @@ API_TEST_PRESET4 = "api_test_upload_preset_{}4".format(SUFFIX)
 
 
 class ApiTest(unittest.TestCase):
-    initialized = False
-
-    def setUp(self):
-        print("API_TEST_TAG={}".format(API_TEST_TAG))
-        if ApiTest.initialized:
-            print("ApiTest already initialized")
-            return
-        ApiTest.initialized = True
+    @classmethod
+    def setUpClass(cls):
         cloudinary.reset_config()
         if not cloudinary.config().api_secret:
             return
-        # try:
-        #     api.delete_resources([API_TEST_ID, API_TEST_ID2, API_TEST_ID3])
-        # except Exception:
-        #     pass
-        for transformation in [API_TEST_TRANS, API_TEST_TRANS2, API_TEST_TRANS3]:
-            try:
-                api.delete_transformation(transformation)
-            except Exception:
-                pass
-        for preset in [API_TEST_PRESET, API_TEST_PRESET2, API_TEST_PRESET3, API_TEST_PRESET4]:
-            try:
-                api.delete_upload_preset(preset)
-            except Exception:
-                pass
-
         for id in [API_TEST_ID, API_TEST_ID2]:
             uploader.upload("tests/logo.png",
                             public_id=id, tags=[API_TEST_TAG, ],
@@ -201,7 +181,7 @@ class ApiTest(unittest.TestCase):
         uploader.upload("tests/logo.png", public_id=API_TEST_ID3)
         resource = api.resource(API_TEST_ID3)
         self.assertNotEqual(resource, None)
-        api.delete_resources([API_TEST_ID, API_TEST_ID2, API_TEST_ID3])
+        api.delete_resources([API_TEST_ID2, API_TEST_ID3])
         self.assertRaises(api.NotFound, api.resource, API_TEST_ID3)
         # restore resource for further tests
         uploader.upload("tests/logo.png", public_id=API_TEST_ID,
@@ -228,7 +208,7 @@ class ApiTest(unittest.TestCase):
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test10_tags(self):
         """ should allow listing tags """
-        tags = api.tags()["tags"]
+        tags = api.tags(max_results=500)["tags"]
         self.assertIn(API_TEST_TAG, tags)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -301,9 +281,13 @@ class ApiTest(unittest.TestCase):
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test17_transformation_implicit(self):
         """ should allow deleting implicit transformation """
-        api.transformation("c_scale,w_100")
-        api.delete_transformation("c_scale,w_100")
-        self.assertRaises(api.NotFound, api.transformation, "c_scale,w_100")
+        uploader.upload("tests/logo.png",
+                        tags=[API_TEST_TAG, ],
+                        context="key=value", eager=[{"width": 104, "crop": "scale"}],
+                        overwrite=True)
+        api.transformation("c_scale,w_104")
+        api.delete_transformation("c_scale,w_104")
+        self.assertRaises(api.NotFound, api.transformation, "c_scale,w_104")
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test18_usage(self):

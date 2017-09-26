@@ -20,7 +20,7 @@ disable_warnings()
 
 TEST_IMAGE_HEIGHT = 51
 TEST_IMAGE_WIDTH = 241
-UNIQUE_TAG = "test_uploader_{}".format(SUFFIX)
+UNIQUE_TAG = "up_test_uploader_{}".format(SUFFIX)
 TEST_DOCX_ID = "test_docx_{}".format(SUFFIX)
 
 

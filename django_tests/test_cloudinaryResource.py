@@ -12,7 +12,7 @@ from .test_helper import SUFFIX
 disable_warnings()
 
 TEST_IMAGE = "tests/logo.png"
-TEST_TAG = "pycloudinary_test_{0}".format(SUFFIX)
+TEST_TAG = "dj_pycloudinary_test_{0}".format(SUFFIX)
 
 
 class TestCloudinaryResource(TestCase):
