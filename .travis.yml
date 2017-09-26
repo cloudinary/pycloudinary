@@ -27,4 +27,3 @@ install:
 - pip install tox
 script:
 - tox -e $TOXENV
-
