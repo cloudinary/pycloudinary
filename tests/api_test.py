@@ -1,20 +1,21 @@
 import time
 import unittest
 
+import six
 from mock import patch
+from urllib3 import HTTPResponse, disable_warnings
 from urllib3._collections import HTTPHeaderDict
 
 import cloudinary
-import six
-from cloudinary import uploader, api, utils
-
-from urllib3 import disable_warnings, HTTPResponse
-
-from .test_helper import *
+from cloudinary import api, uploader, utils
+from tests.test_helper import *
 
 
-MOCK_HEADERS = HTTPHeaderDict({"x-featureratelimit-limit": '0', "x-featureratelimit-reset": 'Sat, 01 Apr 2017 22:00:00 GMT',
-                          "x-featureratelimit-remaining": '0', })
+MOCK_HEADERS = HTTPHeaderDict({
+    "x-featureratelimit-limit": '0',
+    "x-featureratelimit-reset": 'Sat, 01 Apr 2017 22:00:00 GMT',
+    "x-featureratelimit-remaining": '0',
+})
 
 if six.PY2:
     MOCK_RESPONSE = HTTPResponse(body='{"foo":"bar"}', headers=MOCK_HEADERS)
@@ -58,7 +59,8 @@ class ApiTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         try:
-            api.delete_resources([API_TEST_ID, API_TEST_ID2, API_TEST_ID3, API_TEST_ID4, API_TEST_ID5])
+            api.delete_resources([API_TEST_ID, API_TEST_ID2, API_TEST_ID3,
+                                  API_TEST_ID4, API_TEST_ID5])
         except Exception:
             pass
         for transformation in [API_TEST_TRANS, API_TEST_TRANS2, API_TEST_TRANS3]:
@@ -96,7 +98,6 @@ class ApiTest(unittest.TestCase):
         api.resources()
         args, kargs = mocker.call_args
         self.assertTrue(get_uri(args).endswith('/resources/image'))
-        
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test03_resources_cursor(self):
@@ -109,7 +110,8 @@ class ApiTest(unittest.TestCase):
         result2 = api.resources(max_results=1, next_cursor=result["next_cursor"])
         self.assertNotEqual(result2["resources"], None)
         self.assertEqual(len(result2["resources"]), 1)
-        self.assertNotEqual(result2["resources"][0]["public_id"], result["resources"][0]["public_id"])
+        self.assertNotEqual(result2["resources"][0]["public_id"],
+                            result["resources"][0]["public_id"])
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -179,7 +181,8 @@ class ApiTest(unittest.TestCase):
         self.assertNotEqual(resource, None)
         self.assertEqual(resource["public_id"], API_TEST_ID)
         self.assertEqual(resource["bytes"], 3381)
-        self.assertEqual(len(resource["derived"]), 1, "{} should have one derived resource.".format(API_TEST_ID))
+        self.assertEqual(len(resource["derived"]), 1,
+                         "{} should have one derived resource.".format(API_TEST_ID))
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -211,8 +214,8 @@ class ApiTest(unittest.TestCase):
 
         mocker.return_value = MOCK_RESPONSE
         api.delete_derived_by_transformation(
-            [public_resource_id, public_resource_id2],
-            [transformation, transformation2], resource_type='raw', type='fetch', invalidate=True, foo='bar')
+            [public_resource_id, public_resource_id2], [transformation, transformation2],
+            resource_type='raw', type='fetch', invalidate=True, foo='bar')
         method, url, params = mocker.call_args[0][0:3]
         self.assertEqual('DELETE', method)
         self.assertTrue(url.endswith('/resources/raw/fetch'))
@@ -222,7 +225,6 @@ class ApiTest(unittest.TestCase):
             utils.build_eager([transformation, transformation2]))
         self.assertTrue(get_param(mocker, 'keep_original'))
         self.assertTrue(get_param(mocker, 'invalidate'))
-
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -346,7 +348,8 @@ class ApiTest(unittest.TestCase):
         api.create_transformation(API_TEST_TRANS, {"crop": "scale", "width": 102})
         args, kargs = mocker.call_args
         self.assertEqual(args[0], 'POST')
-        self.assertTrue(get_uri(args).endswith('/transformations/{}'.format(API_TEST_TRANS)), get_uri(args))
+        self.assertTrue(get_uri(args).endswith('/transformations/{}'.format(API_TEST_TRANS)),
+                        get_uri(args))
         self.assertEqual(get_params(args)['transformation'], 'c_scale,w_102')
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -386,7 +389,8 @@ class ApiTest(unittest.TestCase):
     @unittest.skip("Skip delete all derived resources by default")
     def test19_delete_derived(self):
         """ should allow deleting all resource """
-        uploader.upload("tests/logo.png", public_id=API_TEST_ID5, eager=[{"width": 101, "crop": "scale"}])
+        uploader.upload("tests/logo.png", public_id=API_TEST_ID5,
+                        eager=[{"width": 101, "crop": "scale"}])
         resource = api.resource(API_TEST_ID5)
         self.assertNotEqual(resource, None)
         self.assertEqual(len(resource["derived"]), 1)
@@ -485,8 +489,9 @@ class ApiTest(unittest.TestCase):
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test29_get_upload_presets(self):
         """ should allow getting a single upload_preset """
-        result = api.create_upload_preset(unsigned=True, folder="folder", width=100, crop="scale",
-                                          tags=["a", "b", "c", UNIQUE_TAG], context={"a": "b", "c": "d"})
+        result = api.create_upload_preset(
+            unsigned=True, folder="folder", width=100, crop="scale",
+            tags=["a", "b", "c", UNIQUE_TAG], context={"a": "b", "c": "d"})
         name = result["name"]
         preset = api.upload_preset(name)
         self.assertEqual(preset["name"], name)
@@ -512,7 +517,8 @@ class ApiTest(unittest.TestCase):
     def test31_update_upload_presets(self, mocker):
         """ should allow getting a single upload_preset """
         mocker.return_value = MOCK_RESPONSE
-        api.update_upload_preset(API_TEST_PRESET, colors=True, unsigned=True, disallow_public_id=True)
+        api.update_upload_preset(API_TEST_PRESET, colors=True,
+                                 unsigned=True, disallow_public_id=True)
         args, kargs = mocker.call_args
         self.assertEqual(args[0], 'PUT')
         self.assertTrue(get_uri(args).endswith('/upload_presets/{}'.format(API_TEST_PRESET)))
@@ -527,7 +533,8 @@ class ApiTest(unittest.TestCase):
             api.update(API_TEST_ID, background_removal="illegal")
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
-    @unittest.skip("For this test to work, 'Auto-create folders' should be enabled in the Upload Settings, " +
+    @unittest.skip("For this test to work, 'Auto-create folders' " +
+                   "should be enabled in the Upload Settings, " +
                    "and the account should be empty of folders. " +
                    "Comment out this line if you really want to test it.")
     def test_folder_listing(self):
@@ -548,11 +555,11 @@ class ApiTest(unittest.TestCase):
     def test_CloudinaryImage_len(self):
         """Tests the __len__ function on CloudinaryImage"""
         metadata = {
-                "public_id": "test_id",
-                "format": "tst",
-                "version": "1234",
-                "signature": "5678",
-                }
+            "public_id": "test_id",
+            "format": "tst",
+            "version": "1234",
+            "signature": "5678",
+        }
         my_cloudinary_image = cloudinary.CloudinaryImage(metadata=metadata)
         self.assertEqual(len(my_cloudinary_image), len(metadata["public_id"]))
 
@@ -616,6 +623,7 @@ class ApiTest(unittest.TestCase):
         api.publish_by_tag("pub_tag")
         self.assertTrue(get_uri(mocker.call_args[0]).endswith('/resources/image/publish_resources'))
         self.assertEqual(get_param(mocker, 'tag'), "pub_tag")
+
 
 
 if __name__ == '__main__':

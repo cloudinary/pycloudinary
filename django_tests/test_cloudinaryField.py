@@ -1,11 +1,10 @@
 from urllib3.util import parse_url
 
 import cloudinary
-from cloudinary import CloudinaryResource, CloudinaryImage
-from django.test import TestCase
-
-from cloudinary.models import CloudinaryField
+from cloudinary import CloudinaryImage, CloudinaryResource
 from cloudinary.forms import CloudinaryFileField
+from cloudinary.models import CloudinaryField
+from django.test import TestCase
 
 from .models import Poll
 
@@ -18,7 +17,9 @@ class TestCloudinaryField(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        Poll.objects.create(question="with image", image="image/upload/v1234/{}.jpg".format(API_TEST_ID))
+        Poll.objects.create(
+            question="with image",
+            image="image/upload/v1234/{}.jpg".format(API_TEST_ID))
         Poll.objects.create(question="empty")
 
     def test_get_internal_type(self):
@@ -60,5 +61,9 @@ class TestCloudinaryField(TestCase):
         field = Poll.objects.get(question="with image")
         self.assertIsNotNone(field)
         self.assertEqual(field.image.public_id, API_TEST_ID)
-        self.assertEqual(parse_url(field.image.url).path, "/{cloud}/image/upload/v1234/{name}.jpg".format(cloud=cloudinary.config().cloud_name, name=API_TEST_ID))
+        self.assertEqual(
+            parse_url(field.image.url).path,
+            "/{cloud}/image/upload/v1234/{name}.jpg".format(
+                cloud=cloudinary.config().cloud_name, name=API_TEST_ID)
+        )
         self.assertTrue(False or field.image)

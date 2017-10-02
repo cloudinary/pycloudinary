@@ -1,5 +1,6 @@
 import json
 from copy import deepcopy
+
 from . import api
 
 
@@ -46,7 +47,7 @@ class Search:
     def execute(self, **options):
         """Execute the search and return results."""
         options["content_type"] = 'application/json'
-        uri = ['resources','search']
+        uri = ['resources', 'search']
         return api.call_json_api('post', uri, self.as_dict(), **options)
 
     def _add(self, name, value):

@@ -1,20 +1,19 @@
 from __future__ import absolute_import
 
-import logging
-logger = logging.getLogger("Cloudinary")
-ch = logging.StreamHandler()
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-ch.setFormatter(formatter)
-logger.addHandler(ch)
-
 import os
 import re
+import logging
 
 from six import python_2_unicode_compatible
 
 from cloudinary import utils
 from cloudinary.compat import urlparse, parse_qs
-from cloudinary.search import Search
+
+logger = logging.getLogger("Cloudinary")
+ch = logging.StreamHandler()
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+ch.setFormatter(formatter)
+logger.addHandler(ch)
 
 CF_SHARED_CDN = "d3jpl91pxevbkh.cloudfront.net"
 OLD_AKAMAI_SHARED_CDN = "cloudinary-a.akamaihd.net"
@@ -115,7 +114,7 @@ class Config(object):
 
     def _put_nested_key(self, key, value):
         chain = re.split(r'[\[\]]+', key)
-        chain = [key for key in chain if key]
+        chain = [k for k in chain if k]
         outer = self.__dict__
         last_key = chain.pop()
         for inner_key in chain:
@@ -128,7 +127,8 @@ class Config(object):
         if isinstance(value, list):
             value = value[0]
         outer[last_key] = value
-        
+
+
 _config = Config()
 
 
@@ -174,16 +174,20 @@ class CloudinaryResource(object):
             return None
         prep = ''
         prep = prep + self.resource_type + '/' + self.type + '/'
-        if self.version: prep = prep + 'v' + str(self.version) + '/'
+        if self.version:
+            prep = prep + 'v' + str(self.version) + '/'
         prep = prep + self.public_id
-        if self.format: prep = prep + '.' + self.format
+        if self.format:
+            prep = prep + '.' + self.format
         return prep
 
     def get_presigned(self):
         return self.get_prep_value() + '#' + self.get_expected_signature()
 
     def get_expected_signature(self):
-        return utils.api_sign_request({"public_id": self.public_id, "version": self.version}, config().api_secret)
+        return utils.api_sign_request(
+            {"public_id": self.public_id, "version": self.version},
+            config().api_secret)
 
     @property
     def url(self):
@@ -215,12 +219,15 @@ class CloudinaryResource(object):
         if (responsive or hidpi) and not client_hints:
             attrs["data-src"] = src
             classes = "cld-responsive" if responsive else "cld-hidpi"
-            if "class" in attrs: classes += " " + attrs["class"]
+            if "class" in attrs:
+                classes += " " + attrs["class"]
             attrs["class"] = classes
             src = attrs.pop("responsive_placeholder", config().responsive_placeholder)
-            if src == "blank": src = CL_BLANK
+            if src == "blank":
+                src = CL_BLANK
 
-        if src: attrs["src"] = src
+        if src:
+            attrs["src"] = src
 
         return u"<img {0}/>".format(utils.html_attrs(attrs))
 
@@ -231,8 +238,10 @@ class CloudinaryResource(object):
     # Creates an HTML video tag for the provided +source+
     #
     # ==== Options
-    # * <tt>source_types</tt> - Specify which source type the tag should include. defaults to webm, mp4 and ogv.
-    # * <tt>source_transformation</tt> - specific transformations to use for a specific source type.
+    # * <tt>source_types</tt> - Specify which source type the tag should include.
+    #                           defaults to webm, mp4 and ogv.
+    # * <tt>source_transformation</tt> - specific transformations to use
+    #                                    for a specific source type.
     # * <tt>poster</tt> - override default thumbnail:
     #   * url: provide an ad hoc url
     #   * options: with specific poster transformations and/or Cloudinary +:public_id+
@@ -241,7 +250,8 @@ class CloudinaryResource(object):
     #   CloudinaryResource("mymovie.mp4").video()
     #   CloudinaryResource("mymovie.mp4").video(source_types = 'webm')
     #   CloudinaryResource("mymovie.ogv").video(poster = "myspecialplaceholder.jpg")
-    #   CloudinaryResource("mymovie.webm").video(source_types = ['webm', 'mp4'], poster = {'effect': 'sepia'})
+    #   CloudinaryResource("mymovie.webm").video(source_types = ['webm', 'mp4'],
+    #                                            poster = {'effect': 'sepia'})
     def video(self, **options):
         public_id = options.get('public_id', self.public_id)
         source = re.sub("\.({0})$".format("|".join(self.default_source_types())), '', public_id)
@@ -251,20 +261,24 @@ class CloudinaryResource(object):
         fallback = options.pop('fallback_content', '')
         options['resource_type'] = options.pop('resource_type', self.resource_type or 'video')
 
-        if not source_types: source_types = self.default_source_types()
+        if not source_types:
+            source_types = self.default_source_types()
         video_options = options.copy()
 
         if 'poster' in video_options:
             poster_options = video_options['poster']
             if isinstance(poster_options, dict):
                 if 'public_id' in poster_options:
-                    video_options['poster'] = utils.cloudinary_url(poster_options['public_id'], **poster_options)[0]
+                    video_options['poster'] = utils.cloudinary_url(
+                        poster_options['public_id'], **poster_options)[0]
                 else:
-                    video_options['poster'] = self.video_thumbnail(public_id=source, **poster_options)
+                    video_options['poster'] = self.video_thumbnail(
+                        public_id=source, **poster_options)
         else:
             video_options['poster'] = self.video_thumbnail(public_id=source, **options)
 
-        if not video_options['poster']: del video_options['poster']
+        if not video_options['poster']:
+            del video_options['poster']
 
         nested_source_types = isinstance(source_types, list) and len(source_types) > 1
         if not nested_source_types:
@@ -274,8 +288,10 @@ class CloudinaryResource(object):
         video_options = video_url[1]
         if not nested_source_types:
             video_options['src'] = video_url[0]
-        if 'html_width' in video_options: video_options['width'] = video_options.pop('html_width')
-        if 'html_height' in video_options: video_options['height'] = video_options.pop('html_height')
+        if 'html_width' in video_options:
+            video_options['width'] = video_options.pop('html_width')
+        if 'html_height' in video_options:
+            video_options['height'] = video_options.pop('html_height')
 
         sources = ""
         if nested_source_types:
@@ -285,7 +301,8 @@ class CloudinaryResource(object):
                 src = utils.cloudinary_url(source, format=source_type, **transformation)[0]
                 video_type = "ogg" if source_type == 'ogv' else source_type
                 mime_type = "video/" + video_type
-                sources += "<source {attributes}>".format(attributes=utils.html_attrs({'src': src, 'type': mime_type}))
+                sources += "<source {attributes}>".format(
+                    attributes=utils.html_attrs({'src': src, 'type': mime_type}))
 
         html = "<video {attributes}>{sources}{fallback}</video>".format(
             attributes=utils.html_attrs(video_options), sources=sources, fallback=fallback)
@@ -294,9 +311,11 @@ class CloudinaryResource(object):
 
 class CloudinaryImage(CloudinaryResource):
     def __init__(self, public_id=None, **kwargs):
-        super(CloudinaryImage, self).__init__(public_id=public_id, default_resource_type="image", **kwargs)
+        super(CloudinaryImage, self).__init__(
+            public_id=public_id, default_resource_type="image", **kwargs)
 
 
 class CloudinaryVideo(CloudinaryResource):
     def __init__(self, public_id=None, **kwargs):
-        super(CloudinaryVideo, self).__init__(public_id=public_id, default_resource_type="video", **kwargs)
+        super(CloudinaryVideo, self).__init__(
+            public_id=public_id, default_resource_type="video", **kwargs)
