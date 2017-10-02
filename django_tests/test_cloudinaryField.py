@@ -1,11 +1,10 @@
 from urllib3.util import parse_url
 
 import cloudinary
-from cloudinary import CloudinaryResource, CloudinaryImage
-from django.test import TestCase
-
-from cloudinary.models import CloudinaryField
+from cloudinary import CloudinaryImage, CloudinaryResource
 from cloudinary.forms import CloudinaryFileField
+from cloudinary.models import CloudinaryField
+from django.test import TestCase
 
 from .models import Poll
 
@@ -56,5 +55,8 @@ class TestCloudinaryField(TestCase):
         field = Poll.objects.get(question="with image")
         self.assertIsNotNone(field)
         self.assertEqual(field.image.public_id, "sample")
-        self.assertEqual(parse_url(field.image.url).path, "/{cloud}/image/upload/v1234/sample.jpg".format(cloud=cloudinary.config().cloud_name))
+        self.assertEqual(
+            parse_url(field.image.url).path,
+            "/{cloud}/image/upload/v1234/sample.jpg".format(
+                cloud=cloudinary.config().cloud_name))
         self.assertTrue(False or field.image)

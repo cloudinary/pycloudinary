@@ -1,11 +1,10 @@
 import random
 
-import cloudinary
-from cloudinary import CloudinaryResource
-from cloudinary import uploader, api
-from django.test import TestCase
-
 from urllib3 import disable_warnings
+
+import cloudinary
+from cloudinary import CloudinaryResource, api, uploader
+from django.test import TestCase
 
 disable_warnings()
 
@@ -41,17 +40,19 @@ class TestCloudinaryResource(TestCase):
 
     def test_get_prep_value(self):
         res = CloudinaryResource(metadata=self.uploaded)
-        value = "image/upload/v{version}/{id}.{format}".format(version=self.uploaded["version"],
-                                                               id=self.uploaded["public_id"],
-                                                               format=self.uploaded["format"])
+        value = "image/upload/v{version}/{id}.{format}".format(
+            version=self.uploaded["version"],
+            id=self.uploaded["public_id"],
+            format=self.uploaded["format"])
         self.assertEqual(value, res.get_prep_value())
 
     def test_get_presigned(self):
         res = CloudinaryResource(metadata=self.uploaded)
-        value = "image/upload/v{version}/{id}.{format}#{signature}".format(version=self.uploaded["version"],
-                                                                           id=self.uploaded["public_id"],
-                                                                           format=self.uploaded["format"],
-                                                                           signature=self.uploaded["signature"])
+        value = "image/upload/v{version}/{id}.{format}#{signature}".format(
+            version=self.uploaded["version"],
+            id=self.uploaded["public_id"],
+            format=self.uploaded["format"],
+            signature=self.uploaded["signature"])
         self.assertEqual(value, res.get_presigned())
 
     def test_url(self):
@@ -64,6 +65,7 @@ class TestCloudinaryResource(TestCase):
         self.assertRegexpMatches(image, '[^-]src="{url}'.format(url=res.url))
         self.assertNotRegexpMatches(image, 'data-src="{url}'.format(url=res.url))
         image = res.image(responsive=True, width="auto", crop="scale")
-        self.assertNotRegexpMatches(image, '[^-]src="{url}'.format(url=res.build_url(width="auto", crop="scale")))
-        self.assertRegexpMatches(image, 'data-src="{url}'.format(url=res.build_url(width="auto", crop="scale")))
-
+        self.assertNotRegexpMatches(image, '[^-]src="{url}'.format(
+            url=res.build_url(width="auto", crop="scale")))
+        self.assertRegexpMatches(image, 'data-src="{url}'.format(
+            url=res.build_url(width="auto", crop="scale")))

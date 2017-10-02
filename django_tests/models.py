@@ -1,6 +1,8 @@
-from django.db import models
-from cloudinary.models import CloudinaryField
 from six import python_2_unicode_compatible
+
+from cloudinary.models import CloudinaryField
+from django.db import models
+
 
 @python_2_unicode_compatible
 class Poll(models.Model):
@@ -10,6 +12,7 @@ class Poll(models.Model):
     def __str__(self):
         return self.question
 
+
 @python_2_unicode_compatible
 class Choice(models.Model):
     poll = models.ForeignKey(Poll)
@@ -18,4 +21,3 @@ class Choice(models.Model):
 
     def __str__(self):
         return self.choice.encode()
-
