@@ -276,6 +276,20 @@ class ApiTest(unittest.TestCase):
         self.assertIs(transformation["used"], True)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test12a_transformations_cursor(self):
+        """ should allow listing transformations with cursor """
+        result = api.transformations(max_results=1)
+        self.assertNotEqual(result["transformations"], None)
+        self.assertEqual(len(result["transformations"]), 1)
+        self.assertNotEqual(result["next_cursor"], None)
+
+        result2 = api.transformations(max_results=1, next_cursor=result["next_cursor"])
+        self.assertNotEqual(result2["transformations"], None)
+        self.assertEqual(len(result2["transformations"]), 1)
+        self.assertNotEqual(result2["transformations"][0]["name"],
+                            result["transformations"][0]["name"])
+
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test13_transformation_metadata(self):
         """ should allow getting transformation metadata """
         transformation = api.transformation("c_scale,w_100")
