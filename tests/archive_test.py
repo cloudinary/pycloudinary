@@ -8,12 +8,26 @@ import cloudinary
 import cloudinary.poster.streaminghttp
 from cloudinary import uploader, utils, api
 
+from mock import patch
+import six
 import urllib3
-from urllib3 import disable_warnings
+from urllib3 import disable_warnings, HTTPResponse
+from urllib3._collections import HTTPHeaderDict
 
 from .test_helper import SUFFIX, TEST_TAG
 
 disable_warnings()
+
+MOCK_HEADERS = HTTPHeaderDict({
+    "x-featureratelimit-limit": '0',
+    "x-featureratelimit-reset": 'Sat, 01 Apr 2017 22:00:00 GMT',
+    "x-featureratelimit-remaining": '0',
+})
+
+if six.PY2:
+    MOCK_RESPONSE = HTTPResponse(body='{"foo":"bar"}', headers=MOCK_HEADERS)
+else:
+    MOCK_RESPONSE = HTTPResponse(body='{"foo":"bar"}'.encode("UTF-8"), headers=MOCK_HEADERS)
 
 TEST_TAG = "arch_pycloudinary_test_{}".format(SUFFIX)
 
@@ -38,12 +52,22 @@ class ArchiveTest(unittest.TestCase):
         result2 = uploader.create_zip(tags=[TEST_TAG], transformations=[{"width": 0.5}, {"width": 2.0}])
         self.assertEqual(4, result2.get("file_count"))
 
+    @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
-    def test_expires_at(self):
-        """should successfully generate an archive"""
+    def test_optional_parameters(self, mocker):
+        """should allow optional parameters"""
+        mocker.return_value = MOCK_RESPONSE
         expires_at = int(time.time()+3600)
-        result = uploader.create_zip(tags=[TEST_TAG], expires_at=expires_at)
-        self.assertEqual(2, result.get("file_count"))
+        uploader.create_zip(
+            tags=[TEST_TAG],
+            expires_at=expires_at,
+            allow_missing=True,
+            skip_transformation_name=True,
+        )
+        params = mocker.call_args[0][2]
+        self.assertEqual(params['expires_at'], expires_at)
+        self.assertTrue(params['allow_missing'])
+        self.assertTrue(params['skip_transformation_name'])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_archive_url(self):
