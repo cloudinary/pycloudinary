@@ -66,6 +66,21 @@ class UploaderTest(unittest.TestCase):
         args, kargs = mocker.call_args
         self.assertEqual(get_params(args)['ocr'], 'adv_ocr')
 
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_quality_override(self, mocker):
+        """should pass quality_override """
+        mocker.return_value = MOCK_RESPONSE
+        test_values = ['auto:advanced', 'auto:best', '80:420', 'none']
+        for quality in test_values:
+            uploader.upload(TEST_IMAGE, tags=TEST_TAG, quality_override=quality)
+            params = mocker.call_args[0][2]
+            self.assertEqual(params['quality_override'], quality)
+        # verify explicit works too
+        uploader.explicit(TEST_IMAGE, quality_override='auto:best')
+        params = mocker.call_args[0][2]
+        self.assertEqual(params['quality_override'], 'auto:best')
+
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_url(self):
         """should successfully upload file by url """

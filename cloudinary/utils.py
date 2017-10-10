@@ -612,6 +612,7 @@ def build_upload_params(**options):
               "context": encode_dict(options.get("context")),
               "moderation": options.get("moderation"),
               "raw_convert": options.get("raw_convert"),
+              "quality_override": options.get("quality_override"),
               "ocr": options.get("ocr"),
               "categorization": options.get("categorization"),
               "detection": options.get("detection"),

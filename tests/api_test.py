@@ -406,6 +406,17 @@ class ApiTest(unittest.TestCase):
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test26_2_quality_override(self, mocker):
+        """ should support quality_override """
+        mocker.return_value = MOCK_RESPONSE
+        test_values = ['auto:advanced', 'auto:best', '80:420', 'none']
+        for quality in test_values:
+            api.update("api_test", quality_override=quality)
+            params = mocker.call_args[0][2]
+            self.assertEqual(params['quality_override'], quality)
+
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test27_start_at(self, mocker):
         """ should allow listing resources by start date """
         mocker.return_value = MOCK_RESPONSE

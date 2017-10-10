@@ -105,7 +105,8 @@ def update(public_id, **options):
     resource_type = options.pop("resource_type", "image")
     upload_type = options.pop("type", "upload")
     uri = ["resources", resource_type, upload_type, public_id]
-    params = only(options, "moderation_status", "raw_convert", "ocr", "categorization", "detection",
+    params = only(options, "moderation_status", "raw_convert",
+                  "quality_override", "ocr", "categorization", "detection",
                   "similarity_search", "background_removal")
     if "tags" in options:
         params["tags"] = ",".join(utils.build_array(options["tags"]))
