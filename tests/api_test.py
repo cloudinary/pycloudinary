@@ -182,6 +182,28 @@ class ApiTest(unittest.TestCase):
         api.delete_resources_by_tag("api_test_tag_for_delete")
         self.assertRaises(api.NotFound, api.resource, "api_test4")
 
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test09c_delete_resources_by_transformations(self, mocker):
+        """ should allow deleting resources by transformations """
+        mocker.return_value = MOCK_RESPONSE
+
+        api.delete_resources(['api_test', 'api_test2'], transformations=['c_crop,w_100'])
+        self.assertEqual(mocker.call_args[0][0], 'DELETE')
+        self.assertIn(('transformations', 'c_crop,w_100'), mocker.call_args[0][2])
+
+        api.delete_all_resources(transformations=['c_crop,w_100', {"crop": "scale", "width": 107}])
+        self.assertEqual(mocker.call_args[0][0], 'DELETE')
+        self.assertEqual(mocker.call_args[0][2]['transformations'], 'c_crop,w_100|c_scale,w_107')
+
+        api.delete_resources_by_prefix("api_test_by", transformations='c_crop,w_100')
+        self.assertEqual(mocker.call_args[0][0], 'DELETE')
+        self.assertEqual(mocker.call_args[0][2]['transformations'], 'c_crop,w_100')
+
+        api.delete_resources_by_tag("api_test_tag", transformations=['c_crop,w_100'])
+        self.assertEqual(mocker.call_args[0][0], 'DELETE')
+        self.assertEqual(mocker.call_args[0][2]['transformations'], 'c_crop,w_100')
+
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test10_tags(self):
         """ should allow listing tags """

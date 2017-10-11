@@ -563,6 +563,9 @@ def archive_params(**options):
 def build_eager(transformations):
     eager = []
     for tr in build_array(transformations):
+        if isinstance(tr, str):
+            eager.append(tr)
+            continue
         format = tr.get("format")
         single_eager = "/".join([x for x in [generate_transformation_string(**tr)[0], format] if x])
         eager.append(single_eager)

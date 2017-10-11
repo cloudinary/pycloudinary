@@ -120,7 +120,12 @@ def delete_resources(public_ids, **options):
     upload_type = options.pop("type", "upload")
     uri = ["resources", resource_type, upload_type]
     params = [("public_ids[]", public_id) for public_id in public_ids]
-    optional = list(only(options, "keep_original", "next_cursor", "invalidate").items())
+    prep_options = options
+    if prep_options.get("transformations"):
+        prep_options["transformations"] = utils.build_eager(
+            prep_options["transformations"])
+    optional = list(only(prep_options, "keep_original", "next_cursor",
+                         "invalidate", "transformations").items())
     return call_api("delete", uri, params + optional, **options)
 
 
@@ -128,7 +133,12 @@ def delete_resources_by_prefix(prefix, **options):
     resource_type = options.pop("resource_type", "image")
     upload_type = options.pop("type", "upload")
     uri = ["resources", resource_type, upload_type]
-    params = dict(only(options, "keep_original", "next_cursor", "invalidate"), prefix=prefix)
+    prep_options = options
+    if prep_options.get("transformations"):
+        prep_options["transformations"] = utils.build_eager(
+            prep_options["transformations"])
+    params = dict(only(prep_options, "keep_original", "next_cursor",
+                       "invalidate", "transformations"), prefix=prefix)
     return call_api("delete", uri, params, **options)
 
 
@@ -136,14 +146,24 @@ def delete_all_resources(**options):
     resource_type = options.pop("resource_type", "image")
     upload_type = options.pop("type", "upload")
     uri = ["resources", resource_type, upload_type]
-    params = dict(only(options, "keep_original", "next_cursor", "invalidate"), all=True)
+    prep_options = options
+    if prep_options.get("transformations"):
+        prep_options["transformations"] = utils.build_eager(
+            prep_options["transformations"])
+    params = dict(only(prep_options, "keep_original", "next_cursor",
+                       "invalidate", "transformations"), all=True)
     return call_api("delete", uri, params, **options)
 
 
 def delete_resources_by_tag(tag, **options):
     resource_type = options.pop("resource_type", "image")
     uri = ["resources", resource_type, "tags", tag]
-    params = only(options, "keep_original", "next_cursor", "invalidate")
+    prep_options = options
+    if prep_options.get("transformations"):
+        prep_options["transformations"] = utils.build_eager(
+            prep_options["transformations"])
+    params = only(prep_options, "keep_original", "next_cursor",
+                  "invalidate", "transformations")
     return call_api("delete", uri, params, **options)
 
 
