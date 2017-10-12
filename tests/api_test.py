@@ -592,5 +592,31 @@ class ApiTest(unittest.TestCase):
         result = api.upload_mappings()
         self.assertNotIn(MAPPING_TEST_ID, [mapping.get("folder") for mapping in result["mappings"]])
 
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_publish_by_ids(self, mocker):
+        mocker.return_value = MOCK_RESPONSE
+        api.publish_by_ids(["pub1", "pub2"])
+        self.assertTrue(get_uri(mocker.call_args[0]).endswith('/resources/image/publish_resources'))
+        self.assertIn('pub1', get_list_param(mocker, 'public_ids'))
+        self.assertIn('pub2', get_list_param(mocker, 'public_ids'))
+
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_publish_by_prefix(self, mocker):
+        mocker.return_value = MOCK_RESPONSE
+        api.publish_by_prefix("pub_prefix")
+        self.assertTrue(get_uri(mocker.call_args[0]).endswith('/resources/image/publish_resources'))
+        self.assertEqual(get_param(mocker, 'prefix'), 'pub_prefix')
+
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_publish_by_tag(self, mocker):
+        mocker.return_value = MOCK_RESPONSE
+        api.publish_by_tag("pub_tag")
+        self.assertTrue(get_uri(mocker.call_args[0]).endswith('/resources/image/publish_resources'))
+        self.assertEqual(get_param(mocker, 'tag'), "pub_tag")
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -228,6 +228,27 @@ def create_transformation(name, definition, **options):
     return call_api("post", uri, {"transformation": transformation_string(definition)}, **options)
 
 
+def publish_by_ids(public_ids, **options):
+    resource_type = options.pop("resource_type", "image")
+    uri = ["resources", resource_type, "publish_resources"]
+    params = dict(only(options, "type", "overwrite", "invalidate"), public_ids=public_ids)
+    return call_api("post", uri, params, **options)
+
+
+def publish_by_prefix(prefix, **options):
+    resource_type = options.pop("resource_type", "image")
+    uri = ["resources", resource_type, "publish_resources"]
+    params = dict(only(options, "type", "overwrite", "invalidate"), prefix=prefix)
+    return call_api("post", uri, params, **options)
+
+
+def publish_by_tag(tag, **options):
+    resource_type = options.pop("resource_type", "image")
+    uri = ["resources", resource_type, "publish_resources"]
+    params = dict(only(options, "type", "overwrite", "invalidate"), tag=tag)
+    return call_api("post", uri, params, **options)
+
+
 def upload_presets(**options):
     uri = ["upload_presets"]
     return call_api("get", uri, only(options, "next_cursor", "max_results"), **options)
