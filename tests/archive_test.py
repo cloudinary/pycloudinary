@@ -4,12 +4,12 @@ import time
 import unittest
 import zipfile
 
-import cloudinary
-import cloudinary.poster.streaminghttp
-from cloudinary import uploader, utils, api
-
 import urllib3
 from urllib3 import disable_warnings
+
+import cloudinary
+import cloudinary.poster.streaminghttp
+from cloudinary import api, uploader, utils
 
 disable_warnings()
 
@@ -32,7 +32,8 @@ class ArchiveTest(unittest.TestCase):
         """should successfully generate an archive"""
         result = uploader.create_archive(tags=[TEST_TAG])
         self.assertEqual(2, result.get("file_count"))
-        result = uploader.create_zip(tags=[TEST_TAG], transformations=[{"width": 0.5}, {"width": 2.0}])
+        result = uploader.create_zip(tags=[TEST_TAG],
+                                     transformations=[{"width": 0.5}, {"width": 2.0}])
         self.assertEqual(4, result.get("file_count"))
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -44,7 +45,8 @@ class ArchiveTest(unittest.TestCase):
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_archive_url(self):
-        result = utils.download_zip_url(tags=[TEST_TAG], transformations=[{"width": 0.5}, {"width": 2.0}])
+        result = utils.download_zip_url(
+            tags=[TEST_TAG], transformations=[{"width": 0.5}, {"width": 2.0}])
         http = urllib3.PoolManager()
         response = http.request('get', result)
         with tempfile.NamedTemporaryFile() as temp_file:
