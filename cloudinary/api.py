@@ -7,6 +7,8 @@ import cloudinary
 from six import string_types
 
 import urllib3
+import certifi
+
 from cloudinary import utils
 from urllib3.exceptions import HTTPError
 
@@ -40,7 +42,10 @@ class Response(dict):
         self.rate_limit_reset_at = email.utils.parsedate(response.headers["x-featureratelimit-reset"])
         self.rate_limit_remaining = int(response.headers["x-featureratelimit-remaining"])
 
-_http = urllib3.PoolManager()
+_http = urllib3.PoolManager(
+        cert_reqs='CERT_REQUIRED',
+        ca_certs=certifi.where()
+        )
 
 
 def ping(**options):
