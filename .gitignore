@@ -90,6 +90,7 @@ ENV/
 .ropeproject
 
 # Other
+cloudinary.egg-info
 .DS_Store
 *.swp
 *.sqlite3

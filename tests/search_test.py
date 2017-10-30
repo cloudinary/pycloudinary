@@ -1,9 +1,7 @@
 import unittest
-
 import time
 
-from tests.test_helper import TEST_IMAGE ,TEST_TAG ,UNIQUE_TAG ,SUFFIX
-
+from tests.test_helper import TEST_IMAGE, TEST_TAG, UNIQUE_TAG, SUFFIX
 
 import cloudinary
 from six import iterkeys
@@ -15,6 +13,8 @@ disable_warnings()
 public_ids = ["api_test{0}_{1}".format(i, SUFFIX) for i in range(0, 3)]
 upload_results = ["++"]
 
+TEST_TAG = 'search_{}'.format(TEST_TAG)
+UNIQUE_TAG = 'search_{}'.format(UNIQUE_TAG)
 
 class SearchTest(unittest.TestCase):
     @classmethod
