@@ -84,7 +84,9 @@ class ApiTest(unittest.TestCase):
         """ should allow listing resources """
         mocker.return_value = MOCK_RESPONSE
         api.resources()
-        self.assertIn('/resources/image', mocker.call_args[0][1])
+        args, kargs = mocker.call_args
+        self.assertTrue(get_uri(args).endswith('/resources/image'))
+        
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test03_resources_cursor(self):
@@ -105,9 +107,10 @@ class ApiTest(unittest.TestCase):
         """ should allow listing resources by type """
         mocker.return_value = MOCK_RESPONSE
         api.resources(type="upload", context=True, tags=True)
-        self.assertIn('/resources/image/upload', mocker.call_args[0][1])
-        self.assertTrue(mocker.call_args[0][2]['context'])
-        self.assertTrue(mocker.call_args[0][2]['tags'])
+        args, kargs = mocker.call_args
+        self.assertTrue(get_uri(args).endswith('/resources/image/upload'))
+        self.assertTrue(get_params(args)['context'])
+        self.assertTrue(get_params(args)['tags'])
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -115,10 +118,11 @@ class ApiTest(unittest.TestCase):
         """ should allow listing resources by prefix """
         mocker.return_value = MOCK_RESPONSE
         api.resources(prefix=API_TEST_PREFIX, context=True, tags=True, type="upload")
-        self.assertIn('/resources/image/upload', mocker.call_args[0][1])
-        self.assertEqual(mocker.call_args[0][2]['prefix'], API_TEST_PREFIX)
-        self.assertTrue(mocker.call_args[0][2]['context'])
-        self.assertTrue(mocker.call_args[0][2]['tags'])
+        args, kargs = mocker.call_args
+        self.assertTrue(get_uri(args).endswith('/resources/image/upload'))
+        self.assertEqual(get_params(args)['prefix'], API_TEST_PREFIX)
+        self.assertTrue(get_params(args)['context'])
+        self.assertTrue(get_params(args)['tags'])
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -126,9 +130,10 @@ class ApiTest(unittest.TestCase):
         """ should allow listing resources by tag """
         mocker.return_value = MOCK_RESPONSE
         api.resources_by_tag(API_TEST_TAG, context=True, tags=True)
-        self.assertIn('/resources/image/tags/%s' % API_TEST_TAG, mocker.call_args[0][1])
-        self.assertTrue(mocker.call_args[0][2]['context'])
-        self.assertTrue(mocker.call_args[0][2]['tags'])
+        args, kargs = mocker.call_args
+        self.assertTrue(get_uri(args).endswith('/resources/image/tags/%s' % API_TEST_TAG))
+        self.assertTrue(get_params(args)['context'])
+        self.assertTrue(get_params(args)['tags'])
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -136,11 +141,12 @@ class ApiTest(unittest.TestCase):
         """ should allow listing resources by public ids """
         mocker.return_value = MOCK_RESPONSE
         api.resources_by_ids([API_TEST_ID, API_TEST_ID2], context=True, tags=True)
-        self.assertIn('/resources/image', mocker.call_args[0][1])
-        self.assertIn(('public_ids[]', API_TEST_ID), mocker.call_args[0][2])
-        self.assertIn(('public_ids[]', API_TEST_ID2), mocker.call_args[0][2])
-        self.assertIn(('context', True), mocker.call_args[0][2])
-        self.assertIn(('tags', True), mocker.call_args[0][2])
+        args, kargs = mocker.call_args
+        self.assertTrue(get_uri(args).endswith('/resources/image/upload'), get_uri(args))
+        self.assertIn(('public_ids[]', API_TEST_ID), get_params(args))
+        self.assertIn(('public_ids[]', API_TEST_ID2), get_params(args))
+        self.assertIn(('context', True), get_params(args))
+        self.assertIn(('tags', True), get_params(args))
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -148,11 +154,13 @@ class ApiTest(unittest.TestCase):
         """ should allow listing resources in both directions """
         mocker.return_value = MOCK_RESPONSE
         api.resources_by_tag(API_TEST_TAG, direction="asc", type="upload")
-        self.assertIn('/resources/image/tags/%s' % API_TEST_TAG, mocker.call_args[0][1])
-        self.assertEqual(mocker.call_args[0][2]['direction'], 'asc')
+        args, kargs = mocker.call_args
+        self.assertTrue(get_uri(args).endswith('/resources/image/tags/%s' % API_TEST_TAG))
+        self.assertEqual(get_params(args)['direction'], 'asc')
         api.resources_by_tag(API_TEST_TAG, direction="desc", type="upload")
-        self.assertIn('/resources/image/tags/%s' % API_TEST_TAG, mocker.call_args[0][1])
-        self.assertEqual(mocker.call_args[0][2]['direction'], 'desc')
+        args, kargs = mocker.call_args
+        self.assertTrue(get_uri(args).endswith('/resources/image/tags/%s' % API_TEST_TAG))
+        self.assertEqual(get_params(args)['direction'], 'desc')
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test07_resource_metadata(self):
@@ -169,8 +177,9 @@ class ApiTest(unittest.TestCase):
         """ should allow deleting derived resource """
         mocker.return_value = MOCK_RESPONSE
         api.delete_derived_resources([API_TEST_ID])
-        self.assertIn('/derived_resources', mocker.call_args[0][1])
-        self.assertIn(('derived_resource_ids[]', API_TEST_ID), mocker.call_args[0][2])
+        args, kargs = mocker.call_args
+        self.assertTrue(get_uri(args).endswith('/derived_resources'))
+        self.assertIn(('derived_resource_ids[]', API_TEST_ID), get_params(args))
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -178,10 +187,11 @@ class ApiTest(unittest.TestCase):
         """ should allow deleting resources """
         mocker.return_value = MOCK_RESPONSE
         api.delete_resources([API_TEST_ID, API_TEST_ID2])
-        self.assertEqual(mocker.call_args[0][0], 'DELETE')
-        self.assertIn('/resources/image/upload', mocker.call_args[0][1])
-        self.assertIn(('public_ids[]', API_TEST_ID), mocker.call_args[0][2])
-        self.assertIn(('public_ids[]', API_TEST_ID2), mocker.call_args[0][2])
+        args, kargs = mocker.call_args
+        self.assertEqual(args[0], 'DELETE')
+        self.assertTrue(get_uri(args).endswith('/resources/image/upload'))
+        self.assertIn(('public_ids[]', API_TEST_ID), get_params(args))
+        self.assertIn(('public_ids[]', API_TEST_ID2), get_params(args))
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -189,9 +199,10 @@ class ApiTest(unittest.TestCase):
         """ should allow deleting resources by prefix """
         mocker.return_value = MOCK_RESPONSE
         api.delete_resources_by_prefix("api_test")
-        self.assertEqual(mocker.call_args[0][0], 'DELETE')
-        self.assertIn('/resources/image/upload', mocker.call_args[0][1])
-        self.assertEqual(mocker.call_args[0][2]['prefix'], "api_test")
+        args, kargs = mocker.call_args
+        self.assertEqual(args[0], 'DELETE')
+        self.assertTrue(get_uri(args).endswith('/resources/image/upload'))
+        self.assertEqual(get_params(args)['prefix'], "api_test")
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -199,8 +210,9 @@ class ApiTest(unittest.TestCase):
         """ should allow deleting resources by tags """
         mocker.return_value = MOCK_RESPONSE
         api.delete_resources_by_tag("api_test_tag_for_delete")
-        self.assertEqual(mocker.call_args[0][0], 'DELETE')
-        self.assertIn('/resources/image/tags/api_test_tag_for_delete', mocker.call_args[0][1])
+        args, kargs = mocker.call_args
+        self.assertEqual(args[0], 'DELETE')
+        self.assertTrue(get_uri(args).endswith('/resources/image/tags/api_test_tag_for_delete'))
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -208,7 +220,8 @@ class ApiTest(unittest.TestCase):
         """ should allow listing tags """
         mocker.return_value = MOCK_RESPONSE
         api.tags()
-        self.assertIn('/tags/image', mocker.call_args[0][1])
+        args, kargs = mocker.call_args
+        self.assertTrue(get_uri(args).endswith('/tags/image'))
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -216,8 +229,9 @@ class ApiTest(unittest.TestCase):
         """ should allow listing tag by prefix """
         mocker.return_value = MOCK_RESPONSE
         api.tags(prefix=API_TEST_PREFIX)
-        self.assertIn('/tags/image', mocker.call_args[0][1])
-        self.assertEqual(mocker.call_args[0][2]['prefix'], API_TEST_PREFIX)
+        args, kargs = mocker.call_args
+        self.assertTrue(get_uri(args).endswith('/tags/image'))
+        self.assertEqual(get_params(args)['prefix'], API_TEST_PREFIX)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test12_transformations(self):
@@ -243,9 +257,10 @@ class ApiTest(unittest.TestCase):
         """ should allow updating transformation allowed_for_strict """
         mocker.return_value = MOCK_RESPONSE
         api.update_transformation("c_scale,w_100", allowed_for_strict=True)
-        self.assertEqual(mocker.call_args[0][0], 'PUT')
-        self.assertIn('/transformations/c_scale,w_100', mocker.call_args[0][1])
-        self.assertTrue(mocker.call_args[0][2]['allowed_for_strict'])
+        args, kargs = mocker.call_args
+        self.assertEqual(args[0], 'PUT')
+        self.assertTrue(get_uri(args).endswith('/transformations/c_scale,w_100'))
+        self.assertTrue(get_params(args)['allowed_for_strict'])
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -253,9 +268,10 @@ class ApiTest(unittest.TestCase):
         """ should allow creating named transformation """
         mocker.return_value = MOCK_RESPONSE
         api.create_transformation(API_TEST_TRANS, {"crop": "scale", "width": 102})
-        self.assertEqual(mocker.call_args[0][0], 'POST')
-        self.assertIn('/transformations', mocker.call_args[0][1])
-        self.assertEqual(mocker.call_args[0][2]['transformation'], 'c_scale,w_102')
+        args, kargs = mocker.call_args
+        self.assertEqual(args[0], 'POST')
+        self.assertTrue(get_uri(args).endswith('/transformations/{}' % API_TEST_TRANS), get_uri(args))
+        self.assertEqual(get_params(args)['transformation'], 'c_scale,w_102')
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test15a_transformation_unsafe_update(self):
@@ -281,8 +297,9 @@ class ApiTest(unittest.TestCase):
         """ should allow deleting implicit transformation """
         mocker.return_value = MOCK_RESPONSE
         api.delete_transformation("c_scale,w_100")
-        self.assertEqual(mocker.call_args[0][0], 'DELETE')
-        self.assertIn('/transformations/c_scale,w_100', mocker.call_args[0][1])
+        args, kargs = mocker.call_args
+        self.assertEqual(args[0], 'DELETE')
+        self.assertTrue(get_uri(args).endswith('/transformations/c_scale,w_100'))
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test18_usage(self):
@@ -345,7 +362,8 @@ class ApiTest(unittest.TestCase):
         """ should support requesting ocr """
         mocker.return_value = MOCK_RESPONSE
         api.update(API_TEST_ID, ocr='adv_ocr')
-        params = mocker.call_args[0][2]
+        args, kargs = mocker.call_args
+        params = get_params(args)
         self.assertEqual(params['ocr'], 'adv_ocr')
 
     @patch('urllib3.request.RequestMethods.request')
@@ -355,7 +373,8 @@ class ApiTest(unittest.TestCase):
         mocker.return_value = MOCK_RESPONSE
         start_at = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime())
         api.resources(type="upload", start_at=start_at, direction="asc")
-        params = mocker.call_args[0][2]
+        args, kargs = mocker.call_args
+        params = get_params(args)
         self.assertEqual(params['start_at'], start_at)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -397,8 +416,9 @@ class ApiTest(unittest.TestCase):
         """ should allow deleting upload_presets """
         mocker.return_value = MOCK_RESPONSE
         api.delete_upload_preset(API_TEST_PRESET)
-        self.assertEqual(mocker.call_args[0][0], 'DELETE')
-        self.assertIn('/upload_presets/%s' % API_TEST_PRESET, mocker.call_args[0][1])
+        args, kargs = mocker.call_args
+        self.assertEqual(args[0], 'DELETE')
+        self.assertTrue(get_uri(args).endswith('/upload_presets/%s' % API_TEST_PRESET))
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -406,11 +426,12 @@ class ApiTest(unittest.TestCase):
         """ should allow getting a single upload_preset """
         mocker.return_value = MOCK_RESPONSE
         api.update_upload_preset(API_TEST_PRESET, colors=True, unsigned=True, disallow_public_id=True)
-        self.assertEqual(mocker.call_args[0][0], 'PUT')
-        self.assertIn('/upload_presets/%s' % API_TEST_PRESET, mocker.call_args[0][1])
-        self.assertTrue(mocker.call_args[0][2]['colors'])
-        self.assertTrue(mocker.call_args[0][2]['unsigned'])
-        self.assertTrue(mocker.call_args[0][2]['disallow_public_id'])
+        args, kargs = mocker.call_args
+        self.assertEqual(args[0], 'PUT')
+        self.assertTrue(get_uri(args).endswith('/upload_presets/%s' % API_TEST_PRESET))
+        self.assertTrue(get_params(args)['colors'])
+        self.assertTrue(get_params(args)['unsigned'])
+        self.assertTrue(get_params(args)['disallow_public_id'])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test32_background_removal(self):

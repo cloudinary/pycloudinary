@@ -9,7 +9,7 @@ from cloudinary import uploader, utils, api
 
 from urllib3 import disable_warnings, HTTPResponse
 from urllib3.util import parse_url
-from tests.test_helper import TEST_IMAGE, SUFFIX
+from tests.test_helper import *
 
 if six.PY2:
     MOCK_RESPONSE = HTTPResponse(body='{"foo":"bar"}')
@@ -54,8 +54,8 @@ class UploaderTest(unittest.TestCase):
         """should pass ocr value """
         mocker.return_value = MOCK_RESPONSE
         result = uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG], ocr='adv_ocr')
-        params = mocker.call_args[0][2]
-        self.assertEqual(params['ocr'], 'adv_ocr')
+        args, kargs = mocker.call_args
+        self.assertEqual(get_params(args)['ocr'], 'adv_ocr')
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_url(self):
