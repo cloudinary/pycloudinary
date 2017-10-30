@@ -131,7 +131,7 @@ class ApiTest(unittest.TestCase):
         mocker.return_value = MOCK_RESPONSE
         api.resources_by_tag(API_TEST_TAG, context=True, tags=True)
         args, kargs = mocker.call_args
-        self.assertTrue(get_uri(args).endswith('/resources/image/tags/%s' % API_TEST_TAG))
+        self.assertTrue(get_uri(args).endswith('/resources/image/tags/{}'.format(API_TEST_TAG)))
         self.assertTrue(get_params(args)['context'])
         self.assertTrue(get_params(args)['tags'])
 
@@ -155,11 +155,11 @@ class ApiTest(unittest.TestCase):
         mocker.return_value = MOCK_RESPONSE
         api.resources_by_tag(API_TEST_TAG, direction="asc", type="upload")
         args, kargs = mocker.call_args
-        self.assertTrue(get_uri(args).endswith('/resources/image/tags/%s' % API_TEST_TAG))
+        self.assertTrue(get_uri(args).endswith('/resources/image/tags/{}'.format(API_TEST_TAG)))
         self.assertEqual(get_params(args)['direction'], 'asc')
         api.resources_by_tag(API_TEST_TAG, direction="desc", type="upload")
         args, kargs = mocker.call_args
-        self.assertTrue(get_uri(args).endswith('/resources/image/tags/%s' % API_TEST_TAG))
+        self.assertTrue(get_uri(args).endswith('/resources/image/tags/{}'.format(API_TEST_TAG)))
         self.assertEqual(get_params(args)['direction'], 'desc')
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -270,7 +270,7 @@ class ApiTest(unittest.TestCase):
         api.create_transformation(API_TEST_TRANS, {"crop": "scale", "width": 102})
         args, kargs = mocker.call_args
         self.assertEqual(args[0], 'POST')
-        self.assertTrue(get_uri(args).endswith('/transformations/{}' % API_TEST_TRANS), get_uri(args))
+        self.assertTrue(get_uri(args).endswith('/transformations/{}'.format(API_TEST_TRANS)), get_uri(args))
         self.assertEqual(get_params(args)['transformation'], 'c_scale,w_102')
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -418,7 +418,7 @@ class ApiTest(unittest.TestCase):
         api.delete_upload_preset(API_TEST_PRESET)
         args, kargs = mocker.call_args
         self.assertEqual(args[0], 'DELETE')
-        self.assertTrue(get_uri(args).endswith('/upload_presets/%s' % API_TEST_PRESET))
+        self.assertTrue(get_uri(args).endswith('/upload_presets/{}'.format(API_TEST_PRESET)))
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -428,7 +428,7 @@ class ApiTest(unittest.TestCase):
         api.update_upload_preset(API_TEST_PRESET, colors=True, unsigned=True, disallow_public_id=True)
         args, kargs = mocker.call_args
         self.assertEqual(args[0], 'PUT')
-        self.assertTrue(get_uri(args).endswith('/upload_presets/%s' % API_TEST_PRESET))
+        self.assertTrue(get_uri(args).endswith('/upload_presets/{}'.format(API_TEST_PRESET)))
         self.assertTrue(get_params(args)['colors'])
         self.assertTrue(get_params(args)['unsigned'])
         self.assertTrue(get_params(args)['disallow_public_id'])
