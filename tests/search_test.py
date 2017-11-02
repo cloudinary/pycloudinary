@@ -1,12 +1,13 @@
-import unittest
 import time
+import unittest
+import os
 
-from tests.test_helper import TEST_IMAGE, TEST_TAG, UNIQUE_TAG, SUFFIX
+from six import iterkeys
+from urllib3 import disable_warnings
 
 import cloudinary
-from six import iterkeys
 from cloudinary import uploader, api, logger, Search
-from urllib3 import disable_warnings
+from tests.test_helper import TEST_IMAGE, TEST_TAG, UNIQUE_TAG, SUFFIX
 
 disable_warnings()
 
