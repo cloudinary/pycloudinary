@@ -621,7 +621,8 @@ def build_upload_params(**options):
               "phash": options.get("phash"),
               "return_delete_token": options.get("return_delete_token"),
               "auto_tagging": options.get("auto_tagging") and str(options.get("auto_tagging")),
-              "responsive_breakpoints": generate_responsive_breakpoints_string(options.get("responsive_breakpoints"))}
+              "responsive_breakpoints": generate_responsive_breakpoints_string(options.get("responsive_breakpoints")),
+              "async": options.get("async")}
     return params
 
 
