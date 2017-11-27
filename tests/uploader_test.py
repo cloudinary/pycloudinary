@@ -225,12 +225,6 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
             uploader.upload(TEST_IMAGE, detection="illegal", tags=[UNIQUE_TAG])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
-    def test_auto_tagging(self):
-        """ should support requesting auto_tagging """
-        with six.assertRaisesRegex(self, api.Error, 'Must use'): 
-            uploader.upload(TEST_IMAGE, auto_tagging=0.5, tags=[UNIQUE_TAG])
-
-    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_large(self):
         """ should support uploading large files """
         temp_file = tempfile.NamedTemporaryFile()

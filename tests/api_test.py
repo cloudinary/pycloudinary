@@ -350,12 +350,6 @@ class ApiTest(unittest.TestCase):
         with six.assertRaisesRegex(self, api.BadRequest, 'Illegal value'):
             api.update(API_TEST_ID, detection="illegal")
 
-    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
-    def test26_auto_tagging(self):
-        """ should support requesting auto_tagging """
-        with six.assertRaisesRegex(self, api.BadRequest, 'Must use'):
-            api.update(API_TEST_ID, auto_tagging=0.5)
-
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test26_1_ocr(self, mocker):
