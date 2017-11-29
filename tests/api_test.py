@@ -158,29 +158,30 @@ class ApiTest(unittest.TestCase):
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test08a_delete_derived_by_transformation(self, mocker):
-        """ should allow deleting derived resource by transformation """
-        derived_resource_id = 'derived_resource_id'
-        derived_resource_id2 = 'derived_resource_id2'
-        transformation = 'c_limit,h_100,w_150'
-        transformation2 = 't_media_lib_thumb'
+        """ should allow deleting derived resource by transformations """
+        public_resource_id = 'public_resource_id'
+        public_resource_id2 = 'public_resource_id2'
+        transformation = {"crop": "scale", "width": 100}
+        transformation2 = {"crop": "scale", "width": 200}
 
         mocker.return_value = MOCK_RESPONSE
-        result = api.delete_derived_by_transformation(derived_resource_id, transformation)
+        api.delete_derived_by_transformation(public_resource_id, transformation)
         params = mocker.call_args[0][2]
-        self.assertIn(('derived_resource_ids[]', derived_resource_id), params)
-        self.assertIn(('transformation[]', transformation), params)
-        self.assertIn(('keep_original', 1), params)
+        self.assertIn(('public_ids[]', public_resource_id), params)
+        self.assertIn(('transformations', utils.build_eager([transformation])), params)
+        self.assertIn(('keep_original', True), params)
 
         mocker.return_value = MOCK_RESPONSE
-        result = api.delete_derived_by_transformation(
-            [derived_resource_id, derived_resource_id2],
+        api.delete_derived_by_transformation(
+            [public_resource_id, public_resource_id2],
             [transformation, transformation2])
         params = mocker.call_args[0][2]
-        self.assertIn(('derived_resource_ids[]', derived_resource_id), params)
-        self.assertIn(('derived_resource_ids[]', derived_resource_id2), params)
-        self.assertIn(('transformation[]', transformation), params)
-        self.assertIn(('transformation[]', transformation2), params)
-        self.assertIn(('keep_original', 1), params)
+        self.assertIn(('public_ids[]', public_resource_id), params)
+        self.assertIn(('public_ids[]', public_resource_id2), params)
+        self.assertIn(
+            ('transformations', utils.build_eager([transformation, transformation2])),
+            params)
+        self.assertIn(('keep_original', True), params)
 
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")

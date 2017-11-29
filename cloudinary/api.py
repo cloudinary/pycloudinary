@@ -154,17 +154,16 @@ def delete_derived_resources(derived_resource_ids, **options):
     return call_api("delete", uri, params, **options)
 
 
-def delete_derived_by_transformation(derived_resource_ids, transformation, **options):
-    uri = ["derived_resources"]
-    if not isinstance(derived_resource_ids, list):
-        derived_resource_ids = [derived_resource_ids]
-    params = [("derived_resource_ids[]", derived_resource_id) for derived_resource_id in derived_resource_ids]
-    if not isinstance(transformation, list):
-        transformation = [transformation]
-    for t in transformation:
-        params.append(("transformation[]", t))
-    params.append(("keep_original", 1))
-    return call_api("delete", uri, params, **options)
+def delete_derived_by_transformation(public_ids, transformations, **options):
+    resource_type = options.pop("resource_type", "image")
+    uri = ["resources", resource_type]
+    if not isinstance(public_ids, list):
+        public_ids = [public_ids]
+    params = [("public_ids[]", public_id) for public_id in public_ids]
+    params.append(("transformations", utils.build_eager(transformations)))
+    params.append(("keep_original", True))
+    optional = list(only(options, "invalidate").items())
+    return call_api("delete", uri, params + optional, **options)
 
 
 def tags(**options):
