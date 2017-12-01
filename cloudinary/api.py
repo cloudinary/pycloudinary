@@ -156,7 +156,8 @@ def delete_derived_resources(derived_resource_ids, **options):
 
 def delete_derived_by_transformation(public_ids, transformations, **options):
     resource_type = options.pop("resource_type", "image")
-    uri = ["resources", resource_type]
+    type = options.pop("type", "upload")
+    uri = ["resources", resource_type, type]
     if not isinstance(public_ids, list):
         public_ids = [public_ids]
     params = [("public_ids[]", public_id) for public_id in public_ids]
