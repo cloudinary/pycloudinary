@@ -1,4 +1,33 @@
 
+1.9.0 / 2017-12-03
+==================
+
+New functionality and features
+------------------------------
+
+  * Add `api.delete_derived_by_transformation`
+  * Support SSL certificate (#101)
+  * Add async param to uploader (#115)
+  * Add TravisCI configuration
+
+Other Changes
+-------------
+
+  * Add `update_version.sh`
+  * Add CONTRIBUTING.md (#113)
+  * Remove `auto_tagging` failure test
+  * Skip search tests by default
+  * Fix parallel tests
+  * Replace `%` with `format()`
+  * Make test more readable
+  * Mock up tests
+  * Fix parallel tests
+  * Remove faces param
+  * Clean up resources after tests
+  * Update PKG-INFO
+  * Update .gitignore
+  * Update setup.py
+
 1.8.0 / 2017-05-03
 ==================
 
