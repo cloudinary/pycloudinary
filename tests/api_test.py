@@ -275,6 +275,15 @@ class ApiTest(unittest.TestCase):
         self.assertIsNotNone(transformation)
         self.assertIs(transformation["used"], True)
 
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test12a_transformations_cursor(self, mocker):
+        """ should allow listing transformations with cursor """
+        mocker.return_value = MOCK_RESPONSE
+        api.transformation('c_scale,w_100', next_cursor='2412515')
+        params = mocker.call_args[0][2]
+        self.assertEqual(params['next_cursor'], '2412515')
+
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test13_transformation_metadata(self):
         """ should allow getting transformation metadata """
