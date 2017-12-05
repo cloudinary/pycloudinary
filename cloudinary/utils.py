@@ -539,6 +539,16 @@ def zip_download_url(tag, **options):
     return cloudinary_api_url("download_tag.zip", **options) + "?" + urlencode(cloudinary_params)
 
 
+def fetch_image_url(url, action="fetch", overlay=None, underlay=None, **options):
+    cloudinary_prefix = options.get("url_prefix", "https://res.cloudinary.com")
+    cloud_name = options.get("cloud_name", cloudinary.config().cloud_name)
+    if not cloud_name:
+        raise ValueError("Must supply cloud_name")
+    resource_type = options.get("resource_type", "image")
+    fetch, _ = generate_transformation_string(overlay=overlay, underlay=underlay, **options)
+    return "/".join([cloudinary_prefix, cloud_name, resource_type, action, fetch, url])
+
+
 def bracketize_seq(params):
     url_params = dict()
     for param_name in params:
@@ -758,8 +768,7 @@ def process_layer(layer, layer_parameter):
             # text = text.replace("/", "%252F")
             components.append(text)
     elif resource_type == "fetch":
-        url = fetch[len('fetch:'):]
-        b64 = base64.b64encode(url)
+        b64 = base64.b64encode(fetch)
         components.append(b64)
     else:
         public_id = public_id.replace("/", ':')
