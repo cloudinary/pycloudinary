@@ -375,6 +375,15 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(api_result["moderation"][0]["status"], "approved")
         self.assertEqual(api_result["moderation"][0]["kind"], "manual")
 
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test21_notification_url(self, mocker):
+        """ should support notification_url param """
+        mocker.return_value = MOCK_RESPONSE
+        api.update("api_test", notification_url="http://example.com")
+        params = mocker.call_args[0][2]
+        self.assertEqual(params['notification_url'], "http://example.com")
+
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test22_raw_conversion(self):
         """ should support requesting raw_convert """
