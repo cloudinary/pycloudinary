@@ -83,6 +83,11 @@ class ArchiveTest(unittest.TestCase):
                 self.assertEqual(4, len(infos))
         http.clear()
 
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_download_zip_url_options(self):
+        result = utils.download_zip_url(tags=[TEST_TAG], transformations=[{"width": 0.5}, {"width": 2.0}], cloud_name="demo")
+        self.assertRegexpMatches(result, '^https://api.cloudinary.com/v1_1/demo/.*$')
+
 
 if __name__ == '__main__':
     unittest.main()

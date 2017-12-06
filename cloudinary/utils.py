@@ -518,7 +518,7 @@ def download_archive_url(**options):
     params = options.copy()
     params.update(mode="download")
     cloudinary_params = sign_request(archive_params(**params), options)
-    return cloudinary_api_url("generate_archive") + "?" + urlencode(bracketize_seq(cloudinary_params), True)
+    return cloudinary_api_url("generate_archive", **options) + "?" + urlencode(bracketize_seq(cloudinary_params), True)
 
 
 def download_zip_url(**options):
