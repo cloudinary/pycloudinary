@@ -660,6 +660,8 @@ def __process_text_options(layer, layer_parameter):
 
 
 def process_layer(layer, layer_parameter):
+    if isinstance(layer, string_types) and layer.startswith("fetch:"):
+        layer = {"url": layer[len('fetch:'):]}
     if not isinstance(layer, dict):
         return layer
 
@@ -668,15 +670,19 @@ def process_layer(layer, layer_parameter):
     type = layer.get("type")
     public_id = layer.get("public_id")
     format = layer.get("format")
+    fetch = layer.get("url")
     components = list()
 
     if text is not None and resource_type is None:
         resource_type = "text"
 
+    if fetch and resource_type is None:
+        resource_type = "fetch"
+
     if public_id is not None and format is not None:
         public_id = public_id + "." + format
 
-    if public_id is None and resource_type != "text":
+    if public_id is None and resource_type != "text" and resource_type != "fetch":
         raise ValueError("Must supply public_id for for non-text " + layer_parameter)
 
     if resource_type is not None and resource_type != "image":
@@ -714,6 +720,9 @@ def process_layer(layer, layer_parameter):
             # text = text.replace("%2C", "%252C")
             # text = text.replace("/", "%252F")
             components.append(text)
+    elif resource_type == "fetch":
+        b64 = base64_encode_url(fetch)
+        components.append(b64)
     else:
         public_id = public_id.replace("/", ':')
         components.append(public_id)
@@ -803,3 +812,22 @@ def __crc(source):
 def __compact(array):
     return filter(lambda x: x, array)
 
+
+def base64_encode_url(url):
+    """
+    Returns the Base64-decoded version of url.
+    The method tries to unquote the url because quoting it
+
+    :param str url:
+        the url to encode. the value is URIdecoded and then 
+        re-encoded before converting to base64 representation
+
+    """
+
+    try:
+        url = unquote(url)
+    except:
+        pass
+    url = smart_escape(url)
+    b64 = base64.b64encode(url.encode('utf-8'))
+    return b64.decode('ascii')

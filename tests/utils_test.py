@@ -14,7 +14,6 @@ VIDEO_UPLOAD_PATH = 'http://res.cloudinary.com/test123/video/upload/'
 
 class TestUtils(unittest.TestCase):
     def setUp(self):
-        
         cloudinary.config(cloud_name="test123",
                           api_key="a", api_secret="b",
                           secure_distribution=None,
@@ -263,6 +262,27 @@ class TestUtils(unittest.TestCase):
         self.__test_cloudinary_url(
             options={"overlay": {"font_family": "arial", "font_size": 20, "text": "hello"}, "height": 100,
                      "width": 100}, expected_url=DEFAULT_UPLOAD_PATH + "h_100,l_text:arial_20:hello,w_100/test")
+
+    def test_fetch_overlay(self):
+        """should support overlay"""
+        self.__test_cloudinary_url(
+            options={"overlay": "fetch:http://cloudinary.com/images/old_logo.png"},
+            expected_url=(
+                    DEFAULT_UPLOAD_PATH 
+                    + "l_fetch:aHR0cDovL2Nsb3VkaW5hcnkuY29tL2ltYWdlcy9vbGRfbG9nby5wbmc=/"
+                    + "test"))
+
+        self.__test_cloudinary_url(
+            options={
+                "overlay": {
+                    "url":
+                    "https://upload.wikimedia.org/wikipedia/commons/2/2b/고창갯벌.jpg"}},
+            expected_url=(
+                DEFAULT_UPLOAD_PATH +
+                "l_fetch:"
+                "aHR0cHM6Ly91cGxvYWQud2lraW1lZGlhLm9yZy93aWtpcGVkaWEvY29"
+                "tbW9ucy8yLzJiLyVFQSVCMyVBMCVFQyVCMCVCRCVFQSVCMCVBRiVFQiVCMiU4Qy5qcGc=/"
+                "test"))
 
     def test_underlay(self):
         """should support underlay"""
@@ -605,24 +625,28 @@ class TestUtils(unittest.TestCase):
 
     def test_overlay_options(self):
         tests = [
-            dict(public_id="logo"), "logo",
-            dict(public_id="folder/logo"), "folder:logo",
-            dict(public_id="logo", type="private"), "private:logo",
-            dict(public_id="logo", format="png"), "logo.png",
-            dict(resource_type="video", public_id="cat"), "video:cat",
-            dict(text="Hello World, Nice to meet you?", font_family="Arial", font_size="18"),
-            "text:Arial_18:Hello%20World%252C%20Nice%20to%20meet%20you%3F",
-            dict(text="Hello World, Nice to meet you?", font_family="Arial", font_size="18", font_weight="bold",
-                 font_style="italic", letter_spacing=4, line_spacing=3),
-            "text:Arial_18_bold_italic_letter_spacing_4_line_spacing_3:Hello%20World%252C%20Nice%20to%20meet%20you%3F",
-            dict(resource_type="subtitles", public_id="sample_sub_en.srt"), "subtitles:sample_sub_en.srt",
-            dict(resource_type="subtitles", public_id="sample_sub_he.srt", font_family="Arial", font_size=40),
-            "subtitles:Arial_40:sample_sub_he.srt"
+            ({'public_id': "logo"}, "logo"),
+            ({'public_id': "folder/logo"}, "folder:logo"),
+            ({'public_id': "logo", 'type': "private"}, "private:logo"),
+            ({'public_id': "logo", 'format': "png"}, "logo.png"),
+            ({'resource_type': "video", 'public_id': "cat"}, "video:cat"),
+            ({'text': "Hello World, Nice to meet you?", 'font_family': "Arial", 'font_size': "18"},
+             "text:Arial_18:Hello%20World%252C%20Nice%20to%20meet%20you%3F"),
+            ({'text': "Hello World, Nice to meet you?", 'font_family': "Arial", 'font_size': "18",
+              'font_weight': "bold", 'font_style': "italic", 'letter_spacing': 4,
+              'line_spacing': 3},
+             "text:Arial_18_bold_italic_letter_spacing_4_line_spacing_3:Hello%20World%252C%20Nice%20to%20meet%20you%3F"),
+            ({'resource_type': "subtitles", 'public_id': "sample_sub_en.srt"},
+             "subtitles:sample_sub_en.srt"),
+            ({'resource_type': "subtitles", 'public_id': "sample_sub_he.srt", 
+              'font_family': "Arial", 'font_size': 40},
+             "subtitles:Arial_40:sample_sub_he.srt"),
+            ({'url': "https://upload.wikimedia.org/wikipedia/commons/2/2b/고창갯벌.jpg"},
+             "fetch:aHR0cHM6Ly91cGxvYWQud2lraW1lZGlhLm9yZy93aWtpcGVkaWEvY29"
+             "tbW9ucy8yLzJiLyVFQSVCMyVBMCVFQyVCMCVCRCVFQSVCMCVBRiVFQiVCMiU4Qy5qcGc=")
         ]
 
-        for i in cldrange(0, len(tests), 2):
-            options = tests[i]
-            expected = tests[i + 1]
+        for options, expected in tests:
             result = cloudinary.utils.process_layer(options, "overlay")
             self.assertEqual(expected, result)
 
