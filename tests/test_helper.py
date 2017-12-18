@@ -22,6 +22,12 @@ def get_params(args):
 
 
 def get_param(mocker, name):
+    """
+    Return the value of the parameter
+    :param mocker: the mocked object
+    :param name: the name of the paramer
+    :return: the value of the parameter if present or None
+    """
     args, kargs = mocker.call_args
     params = get_params(args)
     return params.get(name)
@@ -30,9 +36,9 @@ def get_param(mocker, name):
 def get_list_param(mocker, name):
     """
     Return a list of values for the given param name
-    :param mocker: 
-    :param name: 
-    :return: 
+    :param mocker: the mocked object
+    :param name: the name of the parameter
+    :return: a list of values
     """
     args, kargs = mocker.call_args
     params = get_params(args)
