@@ -563,5 +563,31 @@ class ApiTest(unittest.TestCase):
         except Exception:
             pass
 
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_publish_by_ids(self, mocker):
+        mocker.return_value = MOCK_RESPONSE
+        api.publish_by_ids(["pub1", "pub2"])
+        self.assertIn('/resources/image/publish_resources', mocker.call_args[0][1])
+        self.assertIn(('public_ids[]', "pub1"), mocker.call_args[0][2])
+        self.assertIn(('public_ids[]', "pub2"), mocker.call_args[0][2])
+
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_publish_by_prefix(self, mocker):
+        mocker.return_value = MOCK_RESPONSE
+        api.publish_by_prefix("pub_prefix")
+        self.assertIn('/resources/image/publish_resources', mocker.call_args[0][1])
+        self.assertEqual(mocker.call_args[0][2]['prefix'], "pub_prefix")
+
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_publish_by_tag(self, mocker):
+        mocker.return_value = MOCK_RESPONSE
+        api.publish_by_tag("pub_tag")
+        self.assertIn('/resources/image/publish_resources', mocker.call_args[0][1])
+        self.assertEqual(mocker.call_args[0][2]['tag'], "pub_tag")
+
+
 if __name__ == '__main__':
     unittest.main()
