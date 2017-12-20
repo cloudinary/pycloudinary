@@ -1,4 +1,5 @@
 # Copyright Cloudinary
+
 import email.utils
 import json
 import socket
@@ -14,6 +15,7 @@ from urllib3.exceptions import HTTPError
 
 logger = cloudinary.logger
 
+# intentionally one-liners
 class Error(Exception): pass
 class NotFound(Error): pass
 class NotAllowed(Error): pass
@@ -22,6 +24,7 @@ class RateLimited(Error): pass
 class BadRequest(Error): pass
 class GeneralError(Error): pass
 class AuthorizationRequired(Error): pass
+
 
 EXCEPTION_CODES = {
     400: BadRequest,
@@ -88,9 +91,8 @@ def resources_by_ids(public_ids, **options):
     resource_type = options.pop("resource_type", "image")
     upload_type = options.pop("type", "upload")
     uri = ["resources", resource_type, upload_type]
-    params = [("public_ids[]", public_id) for public_id in public_ids]
-    optional = list(only(options, "tags", "moderations", "context").items())
-    return call_api("get", uri, params + optional, **options)
+    params = dict(only(options, "tags", "moderations", "context"), public_ids=public_ids)
+    return call_api("get", uri, params, **options)
 
 
 def resource(public_id, **options):
@@ -125,9 +127,8 @@ def delete_resources(public_ids, **options):
     resource_type = options.pop("resource_type", "image")
     upload_type = options.pop("type", "upload")
     uri = ["resources", resource_type, upload_type]
-    params = [("public_ids[]", public_id) for public_id in public_ids]
-    optional = list(only(options, "keep_original", "next_cursor", "invalidate").items())
-    return call_api("delete", uri, params + optional, **options)
+    params = dict(only(options, "keep_original", "next_cursor", "invalidate"), public_ids=public_ids)
+    return call_api("delete", uri, params, **options)
 
 
 def delete_resources_by_prefix(prefix, **options):
@@ -155,19 +156,24 @@ def delete_resources_by_tag(tag, **options):
 
 def delete_derived_resources(derived_resource_ids, **options):
     uri = ["derived_resources"]
-    params = [("derived_resource_ids[]", derived_resource_id) for derived_resource_id in derived_resource_ids]
-
+    params = {"derived_resource_ids": derived_resource_ids}
     return call_api("delete", uri, params, **options)
 
 
-def delete_derived_by_transformation(public_ids, transformations, resource_type='image', type='upload', invalidate=None, **options):
+def delete_derived_by_transformation(public_ids, transformations,
+                                     resource_type='image', type='upload', invalidate=None,
+                                     **options):
     """
     Delete derived resources of public ids, identified by transformations
-    
+
     :param public_ids: the base resources
-    :type public_ids: list of string
+    :type public_ids: list of str
     :param transformations: the transformation of derived resources, optionally including the format
-    :type transformations: list of (dict or string)
+    :type transformations: list of (dict or str)
+    :param type: The upload type
+    :type type: str
+    :param resource_type: The type of the resource: defaults to "image"
+    :type resource_type: str
     :param invalidate: (optional) True to invalidate the resources after deletion
     :type invalidate: bool
     :return: a list of the public ids for which derived resources were deleted
@@ -176,11 +182,11 @@ def delete_derived_by_transformation(public_ids, transformations, resource_type=
     uri = ["resources", resource_type, type]
     if not isinstance(public_ids, list):
         public_ids = [public_ids]
-    params = [("public_ids[]", public_id) for public_id in public_ids]
-    params.append(("transformations", utils.build_eager(transformations)))
-    params.append(("keep_original", True))
+    params = {"public_ids": public_ids,
+              "transformations": utils.build_eager(transformations),
+              "keep_original": True}
     if invalidate is not None:
-        params.append(('invalidate', invalidate))
+        params['invalidate'] = invalidate
     return call_api("delete", uri, params, **options)
 
 
@@ -264,7 +270,7 @@ def restore(public_ids, **options):
     resource_type = options.pop("resource_type", "image")
     upload_type = options.pop("type", "upload")
     uri = ["resources", resource_type, upload_type, "restore"]
-    params = [("public_ids[]", public_id) for public_id in public_ids]
+    params = dict(public_ids=public_ids)
     return call_api("post", uri, params, **options)
 
 
@@ -338,7 +344,8 @@ def call_api(method, uri, params, **options):
 
 
 def _call_api(method, uri, params=None, body=None, headers=None, **options):
-    prefix = options.pop("upload_prefix", cloudinary.config().upload_prefix) or "https://api.cloudinary.com"
+    prefix = options.pop("upload_prefix",
+                         cloudinary.config().upload_prefix) or "https://api.cloudinary.com"
     cloud_name = options.pop("cloud_name", cloudinary.config().cloud_name)
     if not cloud_name: raise Exception("Must supply cloud_name")
     api_key = options.pop("api_key", cloudinary.config().api_key)
@@ -346,6 +353,17 @@ def _call_api(method, uri, params=None, body=None, headers=None, **options):
     api_secret = options.pop("api_secret", cloudinary.config().api_secret)
     if not cloud_name: raise Exception("Must supply api_secret")
     api_url = "/".join([prefix, "v1_1", cloud_name] + uri)
+
+    processed_params = None
+    if isinstance(params, dict):
+        processed_params = {}
+        for key, value in params.items():
+            if isinstance(value, list):
+                value_list = {"{}[{}]".format(key, i): i_value for i, i_value in enumerate(value)}
+                processed_params.update(value_list)
+            elif value:
+                processed_params[key] = value
+
     # Add authentication
     req_headers = urllib3.make_headers(
         basic_auth="{0}:{1}".format(api_key, api_secret),
@@ -359,7 +377,7 @@ def _call_api(method, uri, params=None, body=None, headers=None, **options):
     if body is not None:
         kw['body'] = body
     try:
-        response = _http.request(method.upper(), api_url, params, req_headers, **kw)
+        response = _http.request(method.upper(), api_url, processed_params, req_headers, **kw)
         body = response.data
     except HTTPError as e:
         raise GeneralError("Unexpected error {0}", e.message)

@@ -38,7 +38,9 @@ API_TEST_PRESET = "api_test_upload_preset_{}".format(SUFFIX)
 API_TEST_PRESET2 = "api_test_upload_preset_{}2".format(SUFFIX)
 API_TEST_PRESET3 = "api_test_upload_preset_{}3".format(SUFFIX)
 API_TEST_PRESET4 = "api_test_upload_preset_{}4".format(SUFFIX)
-
+PREFIX = "test_folder_{}".format(SUFFIX)
+MAPPING_TEST_ID = "api_test_upload_mapping_{}".format(SUFFIX)
+RESTORE_TEST_ID = "api_test_restore_{}".format(SUFFIX)
 
 class ApiTest(unittest.TestCase):
     @classmethod
@@ -63,13 +65,20 @@ class ApiTest(unittest.TestCase):
                 api.delete_transformation(transformation)
             except Exception:
                 pass
-        for preset in [API_TEST_PRESET, API_TEST_PRESET2, API_TEST_PRESET3, API_TEST_PRESET4]:
+        presets_response = api.upload_presets(max_results=200)
+        preset_names = [ preset["name"] for preset in presets_response.get('presets',[]) if UNIQUE_TAG in preset.get('settings',{}).get('tags','')]
+        for name in preset_names:
             try:
-                api.delete_upload_preset(preset)
+                api.delete_upload_preset(name)
             except Exception:
                 pass
         cloudinary.api.delete_resources_by_tag(UNIQUE_TAG)
         cloudinary.api.delete_resources_by_tag(UNIQUE_TAG, resource_type='raw')
+
+        try:
+            api.delete_upload_mapping(MAPPING_TEST_ID)
+        except Exception:
+            pass
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test01_resource_types(self):
@@ -143,10 +152,10 @@ class ApiTest(unittest.TestCase):
         api.resources_by_ids([API_TEST_ID, API_TEST_ID2], context=True, tags=True)
         args, kargs = mocker.call_args
         self.assertTrue(get_uri(args).endswith('/resources/image/upload'), get_uri(args))
-        self.assertIn(('public_ids[]', API_TEST_ID), get_params(args))
-        self.assertIn(('public_ids[]', API_TEST_ID2), get_params(args))
-        self.assertIn(('context', True), get_params(args))
-        self.assertIn(('tags', True), get_params(args))
+        self.assertIn(API_TEST_ID, get_list_param(mocker, 'public_ids'))
+        self.assertIn(API_TEST_ID2, get_list_param(mocker, 'public_ids'))
+        self.assertEqual(get_param(mocker, 'context'), True)
+        self.assertEqual(get_param(mocker, 'tags'), True)
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -179,7 +188,7 @@ class ApiTest(unittest.TestCase):
         api.delete_derived_resources([API_TEST_ID])
         args, kargs = mocker.call_args
         self.assertTrue(get_uri(args).endswith('/derived_resources'))
-        self.assertIn(('derived_resource_ids[]', API_TEST_ID), get_params(args))
+        self.assertIn(API_TEST_ID, get_list_param(mocker, 'derived_resource_ids'))
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -195,9 +204,9 @@ class ApiTest(unittest.TestCase):
         method, url, params = mocker.call_args[0][0:3]
         self.assertEqual('DELETE', method)
         self.assertTrue(url.endswith('/resources/image/upload'))
-        self.assertIn(('public_ids[]', public_resource_id), params)
-        self.assertIn(('transformations', utils.build_eager([transformation])), params)
-        self.assertIn(('keep_original', True), params)
+        self.assertIn(public_resource_id, get_list_param(mocker, 'public_ids'))
+        self.assertEqual(get_param(mocker, 'transformations'), utils.build_eager([transformation]))
+        self.assertTrue(get_param(mocker, 'keep_original'))
 
         mocker.return_value = MOCK_RESPONSE
         api.delete_derived_by_transformation(
@@ -206,13 +215,12 @@ class ApiTest(unittest.TestCase):
         method, url, params = mocker.call_args[0][0:3]
         self.assertEqual('DELETE', method)
         self.assertTrue(url.endswith('/resources/raw/fetch'))
-        self.assertIn(('public_ids[]', public_resource_id), params)
-        self.assertIn(('public_ids[]', public_resource_id2), params)
-        self.assertIn(
-            ('transformations', utils.build_eager([transformation, transformation2])),
-            params)
-        self.assertIn(('keep_original', True), params)
-        self.assertIn(('invalidate', True), params)
+        self.assertIn(public_resource_id, get_list_param(mocker, 'public_ids'))
+        self.assertIn(public_resource_id2, get_list_param(mocker, 'public_ids'))
+        self.assertEqual(get_param(mocker, 'transformations'),
+            utils.build_eager([transformation, transformation2]))
+        self.assertTrue(get_param(mocker, 'keep_original'))
+        self.assertTrue(get_param(mocker, 'invalidate'))
 
 
     @patch('urllib3.request.RequestMethods.request')
@@ -224,8 +232,9 @@ class ApiTest(unittest.TestCase):
         args, kargs = mocker.call_args
         self.assertEqual(args[0], 'DELETE')
         self.assertTrue(get_uri(args).endswith('/resources/image/upload'))
-        self.assertIn(('public_ids[]', API_TEST_ID), get_params(args))
-        self.assertIn(('public_ids[]', API_TEST_ID2), get_params(args))
+        param = get_list_param(mocker, 'public_ids')
+        self.assertIn(API_TEST_ID, param)
+        self.assertIn(API_TEST_ID2, param)
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -436,12 +445,10 @@ class ApiTest(unittest.TestCase):
         api_response = api.upload_presets()
         presets = api_response["presets"]
         self.assertGreaterEqual(len(presets), 3)
-        self.assertEqual(presets[0]["name"], API_TEST_PRESET3)
-        self.assertEqual(presets[1]["name"], API_TEST_PRESET2)
-        self.assertEqual(presets[2]["name"], API_TEST_PRESET)
-        api.delete_upload_preset(API_TEST_PRESET)
-        api.delete_upload_preset(API_TEST_PRESET2)
-        api.delete_upload_preset(API_TEST_PRESET3)
+        names = [preset["name"] for preset in presets]
+        self.assertIn(API_TEST_PRESET3, names)
+        self.assertIn(API_TEST_PRESET2, names)
+        self.assertIn(API_TEST_PRESET, names)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test29_get_upload_presets(self):
@@ -457,7 +464,6 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(settings["transformation"], [{"width": 100, "crop": "scale"}])
         self.assertEqual(settings["context"], {"a": "b", "c": "d"})
         self.assertEqual(settings["tags"], ["a", "b", "c", UNIQUE_TAG])
-        api.delete_upload_preset(name)
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -494,11 +500,10 @@ class ApiTest(unittest.TestCase):
                    "Comment out this line if you really want to test it.")
     def test_folder_listing(self):
         """ should support listing folders """
-        PREFIX = "test_folder_{}".format(SUFFIX)
-        uploader.upload("tests/logo.png", public_id="{}1/item".format(PREFIX))
-        uploader.upload("tests/logo.png", public_id="{}2/item".format(PREFIX))
-        uploader.upload("tests/logo.png", public_id="{}1/test_subfolder1/item".format(PREFIX))
-        uploader.upload("tests/logo.png", public_id="{}1/test_subfolder2/item".format(PREFIX))
+        uploader.upload("tests/logo.png", public_id="{}1/item".format(PREFIX), tags=[UNIQUE_TAG])
+        uploader.upload("tests/logo.png", public_id="{}2/item".format(PREFIX), tags=[UNIQUE_TAG])
+        uploader.upload("tests/logo.png", public_id="{}1/test_subfolder1/item".format(PREFIX), tags=[UNIQUE_TAG])
+        uploader.upload("tests/logo.png", public_id="{}1/test_subfolder2/item".format(PREFIX), tags=[UNIQUE_TAG])
         result = api.root_folders()
         self.assertEqual(result["folders"][0]["name"], "{}1".format(PREFIX))
         self.assertEqual(result["folders"][1]["name"], "{}2".format(PREFIX))
@@ -507,7 +512,6 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(result["folders"][1]["path"], "{}1/test_subfolder2".format(PREFIX))
         with six.assertRaisesRegex(self, api.NotFound):
             api.subfolders(PREFIX)
-        api.delete_resources_by_prefix(PREFIX)
 
     def test_CloudinaryImage_len(self):
         """Tests the __len__ function on CloudinaryImage"""
@@ -523,45 +527,38 @@ class ApiTest(unittest.TestCase):
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_restore(self):
         """ should support restoring resources """
-        TEST_ID = "api_test_restore_{}".format(SUFFIX)
-        uploader.upload("tests/logo.png", public_id=TEST_ID, backup=True, tags=[UNIQUE_TAG])
-        resource = api.resource(TEST_ID)
+        uploader.upload("tests/logo.png", public_id=RESTORE_TEST_ID, backup=True, tags=[UNIQUE_TAG])
+        resource = api.resource(RESTORE_TEST_ID)
         self.assertNotEqual(resource, None)
         self.assertEqual(resource["bytes"], 3381)
-        api.delete_resources([TEST_ID])
-        resource = api.resource(TEST_ID)
+        api.delete_resources([RESTORE_TEST_ID])
+        resource = api.resource(RESTORE_TEST_ID)
         self.assertNotEqual(resource, None)
         self.assertEqual(resource["bytes"], 0)
         self.assertIs(resource["placeholder"], True)
-        response = api.restore([TEST_ID])
-        info = response[TEST_ID]
+        response = api.restore([RESTORE_TEST_ID])
+        info = response[RESTORE_TEST_ID]
         self.assertNotEqual(info, None)
         self.assertEqual(info["bytes"], 3381)
-        resource = api.resource(TEST_ID)
+        resource = api.resource(RESTORE_TEST_ID)
         self.assertNotEqual(resource, None)
         self.assertEqual(resource["bytes"], 3381)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_mapping(self):
-        TEST_ID = "api_test_upload_mapping_{}".format(SUFFIX)
 
-        api.create_upload_mapping(TEST_ID, template="http://cloudinary.com", tags=[UNIQUE_TAG])
-        result = api.upload_mapping(TEST_ID)
+        api.create_upload_mapping(MAPPING_TEST_ID, template="http://cloudinary.com", tags=[UNIQUE_TAG])
+        result = api.upload_mapping(MAPPING_TEST_ID)
         self.assertEqual(result["template"], "http://cloudinary.com")
-        api.update_upload_mapping(TEST_ID, template="http://res.cloudinary.com")
-        result = api.upload_mapping(TEST_ID)
+        api.update_upload_mapping(MAPPING_TEST_ID, template="http://res.cloudinary.com")
+        result = api.upload_mapping(MAPPING_TEST_ID)
         self.assertEqual(result["template"], "http://res.cloudinary.com")
         result = api.upload_mappings()
-        self.assertIn({"folder": TEST_ID, "template": "http://res.cloudinary.com"},
+        self.assertIn({"folder": MAPPING_TEST_ID, "template": "http://res.cloudinary.com"},
                       result["mappings"])
-        api.delete_upload_mapping(TEST_ID)
+        api.delete_upload_mapping(MAPPING_TEST_ID)
         result = api.upload_mappings()
-        self.assertNotIn(TEST_ID, [mapping.get("folder") for mapping in result["mappings"]])
-
-        try:
-            api.delete_upload_mapping(TEST_ID)
-        except Exception:
-            pass
+        self.assertNotIn(MAPPING_TEST_ID, [mapping.get("folder") for mapping in result["mappings"]])
 
 if __name__ == '__main__':
     unittest.main()
