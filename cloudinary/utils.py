@@ -561,10 +561,15 @@ def archive_params(**options):
 
 
 def build_eager(transformations):
+    if transformations is None:
+        return None
     eager = []
     for tr in build_array(transformations):
-        format = tr.get("format")
-        single_eager = "/".join([x for x in [generate_transformation_string(**tr)[0], format] if x])
+        if isinstance(tr, string_types):
+            single_eager = tr
+        else:
+            ext = tr.get("format")
+            single_eager = "/".join([x for x in [generate_transformation_string(**tr)[0], ext] if x])
         eager.append(single_eager)
     return "|".join(eager)
 

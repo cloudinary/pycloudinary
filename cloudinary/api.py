@@ -127,7 +127,7 @@ def delete_resources(public_ids, **options):
     resource_type = options.pop("resource_type", "image")
     upload_type = options.pop("type", "upload")
     uri = ["resources", resource_type, upload_type]
-    params = dict(only(options, "keep_original", "next_cursor", "invalidate"), public_ids=public_ids)
+    params = __delete_resource_params(options, public_ids=public_ids)
     return call_api("delete", uri, params, **options)
 
 
@@ -135,7 +135,7 @@ def delete_resources_by_prefix(prefix, **options):
     resource_type = options.pop("resource_type", "image")
     upload_type = options.pop("type", "upload")
     uri = ["resources", resource_type, upload_type]
-    params = dict(only(options, "keep_original", "next_cursor", "invalidate"), prefix=prefix)
+    params = __delete_resource_params(options, prefix=prefix)
     return call_api("delete", uri, params, **options)
 
 
@@ -143,14 +143,14 @@ def delete_all_resources(**options):
     resource_type = options.pop("resource_type", "image")
     upload_type = options.pop("type", "upload")
     uri = ["resources", resource_type, upload_type]
-    params = dict(only(options, "keep_original", "next_cursor", "invalidate"), all=True)
+    params = __delete_resource_params(options, all=True)
     return call_api("delete", uri, params, **options)
 
 
 def delete_resources_by_tag(tag, **options):
     resource_type = options.pop("resource_type", "image")
     uri = ["resources", resource_type, "tags", tag]
-    params = only(options, "keep_original", "next_cursor", "invalidate")
+    params = __delete_resource_params(options)
     return call_api("delete", uri, params, **options)
 
 
@@ -415,3 +415,9 @@ def __prepare_streaming_profile_params(**options):
         representations = [{"transformation": transformation_string(trans)} for trans in options["representations"]]
         params["representations"] = json.dumps(representations)
     return params
+
+def __delete_resource_params(options, **params):
+    p = dict(transformations=utils.build_eager(options.get('transformations')),
+             **only(options, "keep_original", "next_cursor", "invalidate"))
+    p.update(params)
+    return p
