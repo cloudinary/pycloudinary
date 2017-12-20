@@ -48,6 +48,7 @@ class ApiTest(unittest.TestCase):
         cloudinary.reset_config()
         if not cloudinary.config().api_secret:
             return
+        print("Running tests for cloud: {}".format(cloudinary.config().cloud_name))
         for id in [API_TEST_ID, API_TEST_ID2]:
             uploader.upload("tests/logo.png",
                             public_id=id, tags=[API_TEST_TAG, ],
