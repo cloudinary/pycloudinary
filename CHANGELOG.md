@@ -1,4 +1,30 @@
 
+1.10.0 / 2017-12-20
+===================
+
+New functionality and features
+------------------------------
+
+  * Add Publish API
+  * Add `notification_url` param for update API
+  * Add `transformations` parameter to delete_resources APIs
+  * Add support for fetch overlay/underlay
+  * Add `allow_missing` and `skip_transformation_name` parameters to Archive API
+  * Add support of `quality_override` param for update and explicit API
+
+Other Changes
+-------------
+
+  * Update .gitignore
+  * Print cloud name when testing
+  * Pass all environment vars to tox tests
+  * Add documentation to test helpers
+  * Use dict for Api params
+  * Add test helper methods
+  * Pass options to cloudinary_api_url when creating an archive URL. Fixes #130
+  * Add `max_results` to transformations test
+  * Add test for cursor of transformations (#123)
+
 1.9.0 / 2017-12-03
 ==================
 
