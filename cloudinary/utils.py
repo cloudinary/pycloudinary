@@ -345,7 +345,7 @@ def unsigned_download_url_prefix(source, cloud_name, private_cdn, cdn_subdomain,
     """cdn_subdomain and secure_cdn_subdomain
     1) Customers in shared distribution (e.g. res.cloudinary.com)
       if cdn_domain is true uses res-[1-5].cloudinary.com for both http and https. Setting secure_cdn_subdomain to false disables this for https.
-    2) Customers with private cdn 
+    2) Customers with private cdn
       if cdn_domain is true uses cloudname-res-[1-5].cloudinary.com for http
       if secure_cdn_domain is true uses cloudname-res-[1-5].cloudinary.com for https (please contact support if you require this)
     3) Customers with cname
@@ -417,9 +417,6 @@ def cloudinary_url(source, **options):
     auth_token = options.pop("auth_token", None)
     if auth_token is not False:
         auth_token = merge(cloudinary.config().auth_token, auth_token)
-
-    if url_suffix and not private_cdn:
-        raise ValueError("URL Suffix only supported in private CDN")
 
     if (not source) or type == "upload" and re.match(r'^https?:', source):
         return original_source, options
@@ -699,7 +696,7 @@ def process_layer(layer, layer_parameter):
     if resource_type == "text" or resource_type == "subtitles":
         if public_id is None and text is None:
             raise ValueError("Must supply either text or public_id in " + layer_parameter)
-        
+
         text_options = __process_text_options(layer, layer_parameter)
 
         if text_options is not None:
@@ -824,7 +821,7 @@ def base64_encode_url(url):
     The method tries to unquote the url because quoting it
 
     :param str url:
-        the url to encode. the value is URIdecoded and then 
+        the url to encode. the value is URIdecoded and then
         re-encoded before converting to base64 representation
 
     """

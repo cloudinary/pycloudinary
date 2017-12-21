@@ -389,14 +389,6 @@ class TestUtils(unittest.TestCase):
             options={"version": 1234, "type": "fetch", "sign_url": True},
             expected_url=DEFAULT_ROOT_PATH + "image/fetch/s--hH_YcbiS--/v1234/http://google.com/path/to/image.png")
 
-    def test_disallow_url_suffix_in_shared_distribution(self):
-        with self.assertRaises(ValueError):
-            cloudinary.utils.cloudinary_url("test", url_suffix="hello")
-
-    def test_should_allow_explicit_private_cdn_false(self):
-        with self.assertRaises(ValueError):
-            cloudinary.utils.cloudinary_url("test", url_suffix="hello", private_cdn=False)
-
     def test_disallow_url_suffix_in_non_upload_types(self):
         with self.assertRaises(ValueError):
             cloudinary.utils.cloudinary_url("test", url_suffix="hello", private_cdn=True, type="facebook")
