@@ -1,3 +1,5 @@
+import re
+
 import cloudinary
 from cloudinary import CloudinaryImage
 import unittest
@@ -60,16 +62,18 @@ class ImageTest(unittest.TestCase):
         """should not use data-src or set responsive class"""
         tag = CloudinaryImage('sample.jpg').image(**options)
         six.assertRegex(self, tag, '<img.*>', "should not use data-src or set responsive class")
-        self.assertNotRegexpMatches(tag, '<.* class.*>', "should not use data-src or set responsive class")
-        self.assertNotRegexpMatches(tag, '\bdata-src\b', "should not use data-src or set responsive class")
+        self.assertIsNone(re.match('<.* class.*>', tag), 
+                          "should not use data-src or set responsive class")
+        self.assertIsNone(re.match('\bdata-src\b', tag), 
+                          "should not use data-src or set responsive class")
         six.assertRegex(self, tag,
                         'src=["\']http://res.cloudinary.com/test/image/upload/c_scale,dpr_auto,w_auto/sample.jpg["\']',
                         "should not use data-src or set responsive class")
         cloudinary.config(responsive=True)
         tag = CloudinaryImage('sample.jpg').image(**options)
         six.assertRegex(self, tag, '<img.*>')
-        self.assertNotRegexpMatches(tag, '<.* class.*>', "should override responsive")
-        self.assertNotRegexpMatches(tag, '\bdata-src\b', "should override responsive")
+        self.assertIsNone(re.match('<.* class.*>', tag), "should override responsive")
+        self.assertIsNone(re.match('\bdata-src\b', tag), "should override responsive")
         six.assertRegex(self, tag,
                         'src=["\']http://res.cloudinary.com/test/image/upload/c_scale,dpr_auto,w_auto/sample.jpg["\']',
                         "should override responsive")

@@ -6,4 +6,6 @@ class TestConfig(TestCase):
     def test_parse_cloudinary_url(self):
         config = cloudinary.Config()
         config._parse_cloudinary_url('cloudinary://key:secret@test123?foo[bar]=value')
-        self.assertDictContainsSubset({'foo': {'bar': 'value'}}, config.__dict__)
+        foo = config.__dict__.get('foo')
+        self.assertIsNotNone(foo)
+        self.assertEqual(foo.get('bar'), 'value')
