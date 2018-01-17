@@ -58,6 +58,11 @@ class ImageTest(unittest.TestCase):
         self.assertEqual(self.image.image(dpr="auto"),
                          '<img class="cld-hidpi" data-src="http://res.cloudinary.com/test/image/upload/dpr_auto/hello.png"/>')
 
+    def test_effect_art_incognito(self):
+        """should support effect art:incognito """
+        self.assertEqual(self.image.image(effect="art:incognito"),
+                         '<img src="http://res.cloudinary.com/test/image/upload/e_art:incognito/hello.png"/>')
+
     def shared_client_hints(self, **options):
         """should not use data-src or set responsive class"""
         tag = CloudinaryImage('sample.jpg').image(**options)
