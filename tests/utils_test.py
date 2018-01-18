@@ -713,11 +713,12 @@ class TestUtils(unittest.TestCase):
         self.assertEqual("", cloudinary.utils.encode_context({}))
         self.assertEqual("a=b", cloudinary.utils.encode_context({"a": "b"}))
         # using OrderedDict for tests consistency
-        self.assertEqual("a=b|c=d", cloudinary.utils.encode_context(OrderedDict({"a": "b", "c": "d"})))
+        self.assertEqual("a=b|c=d", cloudinary.utils.encode_context(OrderedDict((("a", "b"), ("c", "d")))))
         # test that special characters are unchanged
-        self.assertEqual("a=!@#$%^&*()_+<>?,./", cloudinary.utils.encode_context(OrderedDict({"a": "!@#$%^&*()_+<>?,./"})))
+        self.assertEqual("a=!@#$%^&*()_+<>?,./", cloudinary.utils.encode_context({"a": "!@#$%^&*()_+<>?,./"}))
         # check value escaping
-        self.assertEqual("a=b\|\|\=|c=d\=a\=\|", cloudinary.utils.encode_context(OrderedDict({"a": "b||=", "c": "d=a=|"})))
+        self.assertEqual("a=b\|\|\=|c=d\=a\=\|", cloudinary.utils.encode_context(OrderedDict((("a", "b||="),
+                                                                                              ("c", "d=a=|")))))
         # check fallback
         self.assertEqual("not a dict", cloudinary.utils.encode_context("not a dict"))
 
