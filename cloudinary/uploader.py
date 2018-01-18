@@ -174,6 +174,10 @@ def replace_tag(tag, public_ids=None, **options):
     return call_tags_api(tag, "replace", public_ids, **options)
 
 
+def remove_all_tags(public_ids=None, **options):
+    return call_tags_api(None, "remove_all", public_ids, **options)
+
+
 def call_tags_api(tag, command, public_ids=None, **options):
     params = {
         "timestamp": utils.now(),
