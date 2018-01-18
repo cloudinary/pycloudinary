@@ -181,6 +181,19 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         uploader.replace_tag(UNIQUE_TAG, result["public_id"])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_remove_all_tags(self):
+        """should successfully remove all tags"""
+        result = uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG])
+        result2 = uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG])
+        uploader.add_tag("tag1", [result["public_id"], result2["public_id"]])
+        uploader.add_tag("tag2", result["public_id"])
+        self.assertEqual(api.resource(result["public_id"])["tags"], ["tag1", "tag2", UNIQUE_TAG])
+        self.assertEqual(api.resource(result2["public_id"])["tags"], ["tag1", UNIQUE_TAG])
+        uploader.remove_all_tags([result["public_id"], result2["public_id"]])
+        self.assertFalse("tags" in api.resource(result["public_id"]))
+        self.assertFalse("tags" in api.resource(result2["public_id"]))
+
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_allowed_formats(self):
         """ should allow whitelisted formats if allowed_formats """
         result = uploader.upload(TEST_IMAGE, allowed_formats=['png'], tags=[UNIQUE_TAG])
