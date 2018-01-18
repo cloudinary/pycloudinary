@@ -216,7 +216,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_context(self):
         """should allow sending context"""
-        context = {"caption": "some caption", "alt": "alternative"}
+        context = {"caption": "some caption", "alt": "alternative|alt=a"}
         result = uploader.upload(TEST_IMAGE, context=context, tags=[UNIQUE_TAG])
         info = api.resource(result["public_id"], context=True)
         self.assertEqual({"custom": context}, info["context"])

@@ -118,7 +118,7 @@ def update(public_id, **options):
     if "custom_coordinates" in options:
         params["custom_coordinates"] = utils.encode_double_array(options.get("custom_coordinates"))
     if "context" in options:
-        params["context"] = utils.encode_dict(options.get("context"))
+        params["context"] = utils.encode_context(options.get("context"))
     if "auto_tagging" in options:
         params["auto_tagging"] = str(options.get("auto_tagging"))
     return call_api("post", uri, params, **options)
