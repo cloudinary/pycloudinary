@@ -13,6 +13,7 @@ from fractions import Fraction
 
 import cloudinary
 import six.moves.urllib.parse
+from six import iteritems
 from cloudinary.compat import PY3, to_bytes, to_bytearray, to_string, string_types, urlparse
 from cloudinary import auth_token
 
@@ -62,6 +63,18 @@ def encode_dict(arg):
         return "|".join((k + "=" + v) for k, v in items)
     else:
         return arg
+
+
+def encode_context(context):
+    """
+       :param context: dict of context to be encoded
+       :return: a joined string of all keys and values properly escaped and separated by a pipe character
+    """
+
+    if not isinstance(context, dict):
+        return context
+
+    return "|".join(("{}={}".format(k, v.replace("=", "\\=").replace("|", "\\|"))) for k, v in iteritems(context))
 
 
 def generate_transformation_string(**options):
@@ -611,7 +624,7 @@ def build_upload_params(**options):
               "allowed_formats": options.get("allowed_formats") and ",".join(build_array(options["allowed_formats"])),
               "face_coordinates": encode_double_array(options.get("face_coordinates")),
               "custom_coordinates": encode_double_array(options.get("custom_coordinates")),
-              "context": encode_dict(options.get("context")),
+              "context": encode_context(options.get("context")),
               "moderation": options.get("moderation"),
               "raw_convert": options.get("raw_convert"),
               "quality_override": options.get("quality_override"),

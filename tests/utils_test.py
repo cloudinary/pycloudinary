@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from collections import OrderedDict
 
 import cloudinary.utils
 import unittest
@@ -707,6 +708,20 @@ class TestUtils(unittest.TestCase):
         options = { "crop":"scale", "overlay":{"text":"$(start)Hello $(name)$(ext), $(no ) $( no)$(end)", "font_family":"Arial", "font_size":"18"}}
         url, options = cloudinary.utils.cloudinary_url(public_id, **options)
         self.assertEqual(DEFAULT_UPLOAD_PATH+"c_scale,l_text:Arial_18:$(start)Hello%20$(name)$(ext)%252C%20%24%28no%20%29%20%24%28%20no%29$(end)/sample",url)
+
+    def test_encode_context(self):
+        self.assertEqual("", cloudinary.utils.encode_context({}))
+        self.assertEqual("a=b", cloudinary.utils.encode_context({"a": "b"}))
+        # using OrderedDict for tests consistency
+        self.assertEqual("a=b|c=d", cloudinary.utils.encode_context(OrderedDict((("a", "b"), ("c", "d")))))
+        # test that special characters are unchanged
+        self.assertEqual("a=!@#$%^&*()_+<>?,./", cloudinary.utils.encode_context({"a": "!@#$%^&*()_+<>?,./"}))
+        # check value escaping
+        self.assertEqual("a=b\|\|\=|c=d\=a\=\|", cloudinary.utils.encode_context(OrderedDict((("a", "b||="),
+                                                                                              ("c", "d=a=|")))))
+        # check fallback
+        self.assertEqual("not a dict", cloudinary.utils.encode_context("not a dict"))
+
 
 if __name__ == '__main__':
     unittest.main()
