@@ -74,8 +74,7 @@ def encode_context(context):
     if not isinstance(context, dict):
         return context
 
-    return "|".join(("{}={}".format(k, re.sub(r'(\=|\|)', lambda m: {'=': '\=', '|': '\|'}[m.group()], v))
-                    for k, v in iteritems(context)))
+    return "|".join(("{}={}".format(k, v.replace("=", "\\=").replace("|", "\\|"))) for k, v in iteritems(context))
 
 
 def generate_transformation_string(**options):
