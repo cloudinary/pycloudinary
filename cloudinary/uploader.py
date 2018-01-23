@@ -178,6 +178,14 @@ def remove_all_tags(public_ids=None, **options):
     return call_tags_api(None, "remove_all", public_ids, **options)
 
 
+def add_context(context, public_ids=None, **options):
+    return call_context_api(context, "add", public_ids, **options)
+
+
+def remove_all_context(public_ids=None, **options):
+    return call_context_api(None, "remove_all", public_ids, **options)
+
+
 def call_tags_api(tag, command, public_ids=None, **options):
     params = {
         "timestamp": utils.now(),
@@ -187,6 +195,17 @@ def call_tags_api(tag, command, public_ids=None, **options):
         "type": options.get("type")
     }
     return call_api("tags", params, **options)
+
+
+def call_context_api(context, command, public_ids=None, **options):
+    params = {
+        "timestamp": utils.now(),
+        "context": utils.encode_context(context),
+        "public_ids": utils.build_array(public_ids),
+        "command": command,
+        "type": options.get("type")
+    }
+    return call_api("context", params, **options)
 
 
 TEXT_PARAMS = ["public_id",
