@@ -235,6 +235,28 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         self.assertEqual({"custom": context}, info["context"])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_add_context(self):
+        """should allow adding context"""
+        context = {"caption": "some caption", "alt": "alternative|alt=a"}
+        result = uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG])
+        info = api.resource(result["public_id"], context=True)
+        self.assertFalse("context" in info)
+        uploader.add_context(context, result["public_id"])
+        info = api.resource(result["public_id"], context=True)
+        self.assertEqual({"custom": context}, info["context"])
+
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_remove_all_context(self):
+        """should allow removing all context"""
+        context = {"caption": "some caption", "alt": "alternative|alt=a"}
+        result = uploader.upload(TEST_IMAGE, context=context, tags=[UNIQUE_TAG])
+        info = api.resource(result["public_id"], context=True)
+        self.assertEqual({"custom": context}, info["context"])
+        uploader.remove_all_context(result["public_id"])
+        info = api.resource(result["public_id"], context=True)
+        self.assertFalse("context" in info)
+
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_manual_moderation(self):
         """ should support setting manual moderation status """
         resource = uploader.upload(TEST_IMAGE, moderation="manual", tags=[UNIQUE_TAG])
