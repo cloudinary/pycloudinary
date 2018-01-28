@@ -45,10 +45,17 @@ class TestCloudinaryField(TestCase):
         res = CloudinaryImage(public_id=API_TEST_ID, format='jpg')
         self.assertEqual(c.get_prep_value(res), "image/upload/{}.jpg".format(API_TEST_ID))
 
+    def test_value_to_string(self):
+        c = CloudinaryField('image')
+        c.set_attributes_from_name('image')
+        image_field = Poll.objects.get(question="with image")
+        value_string = c.value_to_string(image_field)
+        self.assertEqual("image/upload/v1234/{name}.jpg".format(name=API_TEST_ID), value_string)
+
     def test_formfield(self):
         c = CloudinaryField('image')
-        for_field = c.formfield()
-        self.assertTrue(isinstance(for_field, CloudinaryFileField))
+        form_field = c.formfield()
+        self.assertTrue(isinstance(form_field, CloudinaryFileField))
 
     def test_empty_field(self):
         emptyField = Poll.objects.get(question="empty")
