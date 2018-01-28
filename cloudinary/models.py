@@ -43,7 +43,16 @@ class CloudinaryField(models.Field):
         return 'CharField'
 
     def value_to_string(self, obj):
-        value = self._get_val_from_obj(obj)
+        # We need to support both legacy `_get_val_from_obj` and new `value_from_object` models.Field methods.
+        # It would be better to wrap it with try -> except AttributeError -> fallback to legacy.
+        # Unfortunately, we can catch AttributeError exception from `value_from_object` function itself.
+        # Parsing exception string is an overkill here, that's why we check for attribute existence
+
+        if hasattr(self, 'value_from_object'):
+            value = self.value_from_object(obj)
+        else:  # fallback for legacy django versions
+            value = self._get_val_from_obj(obj)
+
         return self.get_prep_value(value)
 
     def parse_cloudinary_resource(self, value):
