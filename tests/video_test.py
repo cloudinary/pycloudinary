@@ -1,6 +1,9 @@
+import unittest
+
+from django.utils.safestring import SafeText
+
 import cloudinary
 from cloudinary import CloudinaryVideo
-import unittest
 
 VIDEO_UPLOAD_PATH = 'http://res.cloudinary.com/test123/video/upload/'
 DEFAULT_UPLOAD_PATH = 'http://res.cloudinary.com/test123/image/upload/'
@@ -31,6 +34,9 @@ class VideoTest(unittest.TestCase):
                          "<source src=\"" + expected_url + ".mp4\" type=\"video/mp4\">" +
                          "<source src=\"" + expected_url + ".ogv\" type=\"video/ogg\">" +
                          "</video>")
+
+    def test_video_tag_marked_safe(self):
+        self.assertIsInstance(self.video.video(), SafeText)
 
     def test_video_tag_with_attributes(self):
         """ test video attributes """

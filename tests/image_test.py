@@ -1,9 +1,11 @@
 import re
+import unittest
+
+import six
+from django.utils.safestring import SafeText
 
 import cloudinary
 from cloudinary import CloudinaryImage
-import unittest
-import six
 
 
 class ImageTest(unittest.TestCase):
@@ -23,6 +25,9 @@ class ImageTest(unittest.TestCase):
     def test_image(self):
         """should generate image """
         self.assertEqual(self.image.image(), '<img src="http://res.cloudinary.com/test/image/upload/hello.png"/>')
+
+    def test_image_marked_safe(self):
+        self.assertIsInstance(self.image.image(), SafeText)
 
     def test_image_unicode(self):
         """should generate image with unicode arguments """
