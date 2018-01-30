@@ -174,15 +174,34 @@ def replace_tag(tag, public_ids=None, **options):
     return call_tags_api(tag, "replace", public_ids, **options)
 
 
-def remove_all_tags(public_ids=None, **options):
+def remove_all_tags(public_ids, **options):
+    """
+    Remove all tags from the specified public IDs.
+    :param public_ids: the public IDs of the resources to update
+    :param options: additional options passed to the request
+    :return: dictionary with a list of public IDs that were updated
+    """
     return call_tags_api(None, "remove_all", public_ids, **options)
 
 
-def add_context(context, public_ids=None, **options):
+def add_context(context, public_ids, **options):
+    """
+    Add a context keys and values. If a particular key already exists, the value associated with the key is updated.
+    :param context: dictionary of context
+    :param public_ids: the public IDs of the resources to update
+    :param options: additional options passed to the request
+    :return: dictionary with a list of public IDs that were updated
+    """
     return call_context_api(context, "add", public_ids, **options)
 
 
-def remove_all_context(public_ids=None, **options):
+def remove_all_context(public_ids, **options):
+    """
+    Remove all custom context from the specified public IDs.
+    :param public_ids: the public IDs of the resources to update
+    :param options: additional options passed to the request
+    :return: dictionary with a list of public IDs that were updated
+    """
     return call_context_api(None, "remove_all", public_ids, **options)
 
 
