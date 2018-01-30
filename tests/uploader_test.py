@@ -319,13 +319,26 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
             responsive_breakpoints=[dict(create_derived=False,
                                          transformation=dict(angle=90)),
                                     dict(create_derived=False,
-                                         transformation=dict(angle=45))])
+                                         transformation=dict(angle=45),
+                                         format="jpg")])
 
         self.assertIsNotNone(result["responsive_breakpoints"])
         self.assertEqual(result["responsive_breakpoints"][0]["transformation"],
                          "a_90")
         self.assertEqual(result["responsive_breakpoints"][1]["transformation"],
-                         "a_45")
+                         "a_45/jpg")
+
+        result = uploader.explicit(
+            result["public_id"],
+            type="upload",
+            responsive_breakpoints=[dict(create_derived=False,
+                                         transformation=dict(angle=90),
+                                         format="")])
+
+        self.assertIsNotNone(result["responsive_breakpoints"])
+        self.assertEqual(result["responsive_breakpoints"][0]["transformation"],
+                         "a_90")
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -296,7 +296,8 @@ def breakpoint_settings_mapper(breakpoint_settings):
     breakpoint_settings = copy.deepcopy(breakpoint_settings)
     transformation = breakpoint_settings.get("transformation")
     if transformation is not None:
-        breakpoint_settings["transformation"], _ = generate_transformation_string(**transformation)
+        breakpoint_settings["transformation"]["format"] = breakpoint_settings.get("format")
+        breakpoint_settings["transformation"] = build_eager(breakpoint_settings["transformation"])
     return breakpoint_settings
 
 
