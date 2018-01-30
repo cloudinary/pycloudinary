@@ -4,7 +4,6 @@ import json
 
 from django import template
 from django.forms import Form
-from django.utils.safestring import mark_safe
 
 import cloudinary
 from cloudinary import CloudinaryResource, utils, uploader
@@ -43,7 +42,7 @@ def cloudinary_tag(context, image, options_dict=None, **options):
         pass
     if not isinstance(image, CloudinaryResource):
         image = CloudinaryResource(image)
-    return mark_safe(image.image(**options))
+    return image.image(**options)
 
 
 @register.simple_tag
