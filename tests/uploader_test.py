@@ -1,4 +1,4 @@
-import os
+import io
 import tempfile
 import unittest
 
@@ -47,6 +47,18 @@ class UploaderTest(unittest.TestCase):
         expected_signature = utils.api_sign_request(dict(public_id=result["public_id"], version=result["version"]),
                                                     cloudinary.config().api_secret)
         self.assertEqual(result["signature"], expected_signature)
+
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_upload_file_io_without_filename(self):
+        """should successfully upload FileIO file """
+        with io.BytesIO() as temp_file, \
+                open(TEST_IMAGE, 'rb') as input_file:
+            temp_file.write(input_file.read())
+            temp_file.seek(0)
+            result = uploader.upload(temp_file, tags=[UNIQUE_TAG])
+        self.assertEqual(result["width"], TEST_IMAGE_WIDTH)
+        self.assertEqual(result["height"], TEST_IMAGE_HEIGHT)
+        self.assertEqual('stream', result["original_filename"])
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
