@@ -18,6 +18,7 @@ VIDEO_UPLOAD_PATH = 'http://res.cloudinary.com/test123/video/upload/'
 class TestUtils(unittest.TestCase):
     def setUp(self):
         cloudinary.config(cloud_name="test123",
+                          cname=None,  # for these tests without actual upload, we ignore cname
                           api_key="a", api_secret="b",
                           secure_distribution=None,
                           private_cdn=False)

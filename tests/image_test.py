@@ -9,7 +9,7 @@ import six
 class ImageTest(unittest.TestCase):
     def setUp(self):
         cloudinary.reset_config()
-        cloudinary.config(cloud_name="test", api_secret="1234")
+        cloudinary.config(cloud_name="test", api_secret="1234", cname=None)
         self.image = CloudinaryImage("hello", format="png")
 
     def test_build_url(self):
