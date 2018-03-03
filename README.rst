@@ -40,7 +40,7 @@ Try it right away
 -----------------
 
 Sign up for a `free
-account <https://cloudinary.com/users/register/free>`__ so you can try
+account <https://cloudinary.com/users/register/free>`_ so you can try
 out image transformations and seamless image delivery through CDN.
 
 *Note: Replace ``demo`` in all the following examples with your
@@ -103,13 +103,13 @@ Each request for building a URL of a remote cloud resource must have the
 ``cloud_name`` parameter set. Each request to our secure APIs (e.g.,
 image uploads, eager sprite generation) must have the ``api_key`` and
 ``api_secret`` parameters set. See `API, URLs and access
-identifiers <http://cloudinary.com/documentation/api_and_access_identifiers>`__
+identifiers <http://cloudinary.com/documentation/api_and_access_identifiers>`_
 for more details.
 
 Setting the ``cloud_name``, ``api_key`` and ``api_secret`` parameters
 can be done either directly in each call to a Cloudinary method, by
 calling the cloudinary.config(), by using environment variables, or
-using the CLOUDINARY django settings.
+using the CLOUDINARY django settings. Be sure to add ``cloudinary`` to `INSTALLED_APPS` in your `settings.py` file.
 
 You can `download your customized cloudinary python
 configuration <https://cloudinary.com/console/cloudinary_python.txt>`__
