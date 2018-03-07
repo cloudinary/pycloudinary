@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
+import re
+import unittest
 from collections import OrderedDict
+from datetime import datetime, date
+from fractions import Fraction
+
+import six
 
 import cloudinary.utils
-import unittest
-import re
-from fractions import Fraction
-from cloudinary.compat import cldrange
-import six
+from cloudinary.utils import build_list_of_dicts, json_encode
 
 DEFAULT_ROOT_PATH = 'http://res.cloudinary.com/test123/'
 DEFAULT_UPLOAD_PATH = 'http://res.cloudinary.com/test123/image/upload/'
@@ -721,6 +723,51 @@ class TestUtils(unittest.TestCase):
                                                                                               ("c", "d=a=|")))))
         # check fallback
         self.assertEqual("not a dict", cloudinary.utils.encode_context("not a dict"))
+
+    def test_build_list_of_dicts(self):
+        dict_data = {"one": 1, "two": 2, "three": 3}
+        list_of_dict_data = [dict_data]
+
+        # should convert a dict to a list of dict
+        self.assertListEqual(list_of_dict_data, build_list_of_dicts(dict_data))
+
+        # should leave as is a list of dict
+        self.assertListEqual(list_of_dict_data, build_list_of_dicts(list_of_dict_data))
+
+        # should convert a JSON string representing dict to a list of dict
+        string_data = '{"one": 1, "two": 2, "three": 3}'
+        self.assertListEqual(list_of_dict_data, build_list_of_dicts(string_data))
+
+        # should convert a JSON string representing a list of dict to a list of dict
+        string_array_data = '[{"one": 1, "two": 2, "three": 3}]'
+        self.assertListEqual(list_of_dict_data, build_list_of_dicts(string_array_data))
+
+        # should return an empty list on None
+        self.assertListEqual([], build_list_of_dicts(None))
+
+        # should return an empty list on []
+        self.assertListEqual([], build_list_of_dicts([]))
+
+        # should raise a ValueError on invalid values
+        invalid_values = ["", [[]], ["not_a_dict"], [7357], {"not", "a dict"}]
+        for invalid_value in invalid_values:
+            with self.assertRaises(ValueError):
+                build_list_of_dicts(invalid_value)
+
+    def test_json_encode(self):
+        # should encode simple values
+        self.assertEqual('[]', json_encode(list()))
+        self.assertEqual('{}', json_encode(dict()))
+        self.assertEqual('[{"k":"v"}]', json_encode([{"k": "v"}, ]))
+
+        # should encode date and datetime to ISO format
+        self.assertEqual('{"t":"2019-02-22T16:20:57"}', json_encode({"t": datetime(2019, 2, 22, 16, 20, 57)}))
+        self.assertEqual('{"t":"2019-02-22"}', json_encode({"t": date(2019, 2, 22)}))
+
+        # should raise Exception on unsupported values
+        with self.assertRaises(TypeError) as te:
+            json_encode({"t": self})
+        self.assertIn("is not JSON serializable", str(te.exception))
 
 
 if __name__ == '__main__':

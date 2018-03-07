@@ -2,11 +2,28 @@ import os
 import random
 
 import re
+from datetime import timedelta, tzinfo
 
 SUFFIX = os.environ.get('TRAVIS_JOB_ID') or random.randint(10000, 99999)
 TEST_IMAGE = "tests/logo.png"
 TEST_TAG = "pycloudinary_test"
 UNIQUE_TAG = "{0}_{1}".format(TEST_TAG, SUFFIX)
+
+ZERO = timedelta(0)
+
+# A UTC class.
+
+class UTC(tzinfo):
+    """UTC"""
+
+    def utcoffset(self, dt):
+        return ZERO
+
+    def tzname(self, dt):
+        return "UTC"
+
+    def dst(self, dt):
+        return ZERO
 
 
 def get_method(mocker):
