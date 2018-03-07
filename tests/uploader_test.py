@@ -286,7 +286,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_categorization(self):
         """ should support requesting categorization """
-        with six.assertRaisesRegex(self, api.Error, 'invalid'):
+        with six.assertRaisesRegex(self, api.Error, 'is not valid'):
             uploader.upload(TEST_IMAGE, categorization="illegal", tags=[UNIQUE_TAG])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
