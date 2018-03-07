@@ -9,13 +9,16 @@ import string
 import struct
 import time
 import zlib
+from collections import OrderedDict
+from datetime import datetime, date
 from fractions import Fraction
 
-import cloudinary
 import six.moves.urllib.parse
 from six import iteritems
-from cloudinary.compat import PY3, to_bytes, to_bytearray, to_string, string_types, urlparse
+
+import cloudinary
 from cloudinary import auth_token
+from cloudinary.compat import PY3, to_bytes, to_bytearray, to_string, string_types, urlparse
 
 VAR_NAME_RE = r'(\$\([a-zA-Z]\w+\))'
 
@@ -44,6 +47,48 @@ def build_array(arg):
         return []
     else:
         return [arg]
+
+
+def build_list_of_dicts(val):
+    """
+    Converts a value that can be presented as a list of dict.
+
+    In case top level item is not a list, it is wrapped with a list
+
+    Valid values examples:
+        - Valid dict: {"k": "v", "k2","v2"}
+        - List of dict: [{"k": "v"}, {"k2","v2"}]
+        - JSON decodable string: '{"k": "v"}', or '[{"k": "v"}]'
+        - List of JSON decodable strings: ['{"k": "v"}', '{"k2","v2"}']
+
+    Invalid values examples:
+        - ["not", "a", "dict"]
+        - [123, None],
+        - [["another", "list"]]
+
+    :param val: Input value
+    :type val: Union[list, dict, str]
+
+    :return: Converted(or original) list of dict
+    :raises: ValueError in case value cannot be converted to a list of dict
+    """
+    if val is None:
+        return []
+
+    if isinstance(val, str):
+        # use OrderedDict to preserve order
+        val = json.loads(val, object_pairs_hook=OrderedDict)
+
+    if isinstance(val, dict):
+        val = [val]
+
+    for index, item in enumerate(val):
+        if isinstance(item, str):
+            # use OrderedDict to preserve order
+            val[index] = json.loads(item, object_pairs_hook=OrderedDict)
+        if not isinstance(val[index], dict):
+            raise ValueError("Expected a list of dicts")
+    return val
 
 
 def encode_double_array(array):
@@ -75,6 +120,17 @@ def encode_context(context):
         return context
 
     return "|".join(("{}={}".format(k, v.replace("=", "\\=").replace("|", "\\|"))) for k, v in iteritems(context))
+
+
+def json_encode(value):
+    """
+    Converts value to a json encoded string
+
+    :param value: value to be encoded
+
+    :return: JSON encoded string
+    """
+    return json.dumps(value, default=__json_serializer, separators=(',', ':'))
 
 
 def generate_transformation_string(**options):
@@ -638,7 +694,8 @@ def build_upload_params(**options):
               "return_delete_token": options.get("return_delete_token"),
               "auto_tagging": options.get("auto_tagging") and str(options.get("auto_tagging")),
               "responsive_breakpoints": generate_responsive_breakpoints_string(options.get("responsive_breakpoints")),
-              "async": options.get("async")}
+              "async": options.get("async"),
+              "access_control": options.get("access_control") and json_encode(build_list_of_dicts(options.get("access_control")))}
     return params
 
 
@@ -846,3 +903,10 @@ def base64_encode_url(url):
     url = smart_escape(url)
     b64 = base64.b64encode(url.encode('utf-8'))
     return b64.decode('ascii')
+
+
+def __json_serializer(obj):
+    """JSON serializer for objects not serializable by default json code"""
+    if isinstance(obj, (datetime, date)):
+        return obj.isoformat()
+    raise TypeError("Object of type %s is not JSON serializable" % type(obj))

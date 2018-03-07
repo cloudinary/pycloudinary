@@ -121,6 +121,9 @@ def update(public_id, **options):
         params["context"] = utils.encode_context(options.get("context"))
     if "auto_tagging" in options:
         params["auto_tagging"] = str(options.get("auto_tagging"))
+    if "access_control" in options:
+        params["access_control"] = utils.json_encode(utils.build_list_of_dicts(options.get("access_control")))
+
     return call_api("post", uri, params, **options)
 
 

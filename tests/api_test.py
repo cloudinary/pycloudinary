@@ -1,5 +1,6 @@
 import time
 import unittest
+from collections import OrderedDict
 
 from mock import patch
 from urllib3._collections import HTTPHeaderDict
@@ -616,6 +617,24 @@ class ApiTest(unittest.TestCase):
         api.publish_by_tag("pub_tag")
         self.assertTrue(get_uri(mocker.call_args[0]).endswith('/resources/image/publish_resources'))
         self.assertEqual(get_param(mocker, 'tag'), "pub_tag")
+
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_update_access_control(self, mocker):
+        """ should allow the user to define ACL in the update parameters """
+        mocker.return_value = MOCK_RESPONSE
+
+        acl = OrderedDict((("access_type", "anonymous"),
+                           ("start", "2018-02-22 16:20:57 +0200"),
+                           ("end", "2018-03-22 00:00 +0200")))
+        exp_acl = '[{"access_type":"anonymous","start":"2018-02-22 16:20:57 +0200","end":"2018-03-22 00:00 +0200"}]'
+
+        api.update(API_TEST_ID, access_control=acl)
+
+        params = get_params(mocker.call_args[0])
+
+        self.assertIn("access_control", params)
+        self.assertEqual(exp_acl, params["access_control"])
 
 
 if __name__ == '__main__':

@@ -1,14 +1,16 @@
 import io
 import tempfile
 import unittest
+from collections import OrderedDict
+from datetime import datetime
 
-from mock import patch
-import cloudinary
 import six
-from cloudinary import uploader, utils, api
-
+from mock import patch
 from urllib3 import disable_warnings, HTTPResponse
 from urllib3.util import parse_url
+
+import cloudinary
+from cloudinary import uploader, utils, api
 from tests.test_helper import *
 
 if six.PY2:
@@ -373,6 +375,61 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
                          "a_90")
         self.assertEqual(result["responsive_breakpoints"][1]["transformation"],
                          "a_45")
+
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    @patch('urllib3.request.RequestMethods.request')
+    def test_access_control(self, request_mock):
+        request_mock.return_value = MOCK_RESPONSE
+
+        # Should accept a dictionary of strings
+        acl = OrderedDict((("access_type", "anonymous"),
+                          ("start", "2018-02-22 16:20:57 +0200"),
+                          ("end", "2018-03-22 00:00 +0200")))
+        exp_acl = '[{"access_type":"anonymous","start":"2018-02-22 16:20:57 +0200","end":"2018-03-22 00:00 +0200"}]'
+
+        uploader.upload(TEST_IMAGE, access_control=acl)
+        params = get_params(request_mock.call_args[0])
+
+        self.assertIn("access_control", params)
+        self.assertEqual(exp_acl, params["access_control"])
+
+        # Should accept a dictionary of datetime objects
+        acl_2 = OrderedDict((("access_type", "anonymous"),
+                          ("start", datetime.strptime("2019-02-22 16:20:57Z", "%Y-%m-%d %H:%M:%SZ")),
+                          ("end", datetime(2019, 3, 22, 0, 0, tzinfo=UTC()))))
+
+        exp_acl_2 = '[{"access_type":"anonymous","start":"2019-02-22T16:20:57","end":"2019-03-22T00:00:00+00:00"}]'
+
+        uploader.upload(TEST_IMAGE, access_control=acl_2)
+        params = get_params(request_mock.call_args[0])
+
+        self.assertEqual(exp_acl_2, params["access_control"])
+
+        # Should accept a JSON string
+        acl_str = '{"access_type":"anonymous","start":"2019-02-22 16:20:57 +0200","end":"2019-03-22 00:00 +0200"}'
+        exp_acl_str = '[{"access_type":"anonymous","start":"2019-02-22 16:20:57 +0200","end":"2019-03-22 00:00 +0200"}]'
+
+        uploader.upload(TEST_IMAGE, access_control=acl_str)
+        params = get_params(request_mock.call_args[0])
+
+        self.assertEqual(exp_acl_str, params["access_control"])
+
+        # Should accept a list of all the above values
+        list_of_acl = [acl, acl_2, acl_str]
+        # Remove starting "[" and ending "]" in all expected strings and combine them into one string
+        expected_list_of_acl = "[" + ",".join([v[1:-1] for v in(exp_acl, exp_acl_2, exp_acl_str)]) + "]"
+
+        uploader.upload(TEST_IMAGE, access_control=list_of_acl)
+        params = get_params(request_mock.call_args[0])
+
+        self.assertEqual(expected_list_of_acl, params["access_control"])
+
+        # Should raise ValueError on invalid values
+        invalid_values = [[[]], ["not_a_dict"], [7357]]
+        for invalid_value in invalid_values:
+            with self.assertRaises(ValueError):
+                uploader.upload(TEST_IMAGE, access_control=invalid_value)
+
 
 if __name__ == '__main__':
     unittest.main()
