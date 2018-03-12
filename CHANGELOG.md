@@ -1,4 +1,32 @@
 
+1.11.0 / 2018-03-12
+===================
+
+New functionality and features
+------------------------------
+
+  * Support url suffix for shared CDN
+  * Add `remove_all_tags` to `uploader`
+  * Add `add_context` and `remove_all_context` to `uploader`
+  * Add `access_control` parameter to uploader `upload` and api `update`
+  * Update `_get_val_from_object` method. Fixes #131
+
+Other Changes
+-------------
+
+  * Add `TestCloudinaryFileField` unit test
+  * Add verbosity to Django unit tests in tox.ini
+  * Fix categorization test
+  * Merge branch 'add-width-height-fields'. Merges #62
+  * Add  `test_pre_save` for `CloudinaryField`
+  * CloudinaryField width_field and height_field attributes like in ImageField
+  * Add `test_upload_file_io_without_filename` unit test
+  * Support FileIO upload w/preexisting OS descriptors
+  * Remove default value for `public_ids` argument
+  * Add `test_effect_art_incognito` unit test
+  * Fix `test_download_zip_url_options` unit test with custom upload prefix
+  * Escape `|` and `=` characters in API context parameter values
+
 1.10.0 / 2017-12-20
 ===================
 
