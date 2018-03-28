@@ -17,6 +17,8 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 ch.setFormatter(formatter)
 logger.addHandler(ch)
 
+from platform import python_version
+
 
 from cloudinary import utils
 from cloudinary.compat import urlparse, parse_qs
@@ -29,7 +31,8 @@ SHARED_CDN = AKAMAI_SHARED_CDN
 CL_BLANK = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
 
 VERSION = "1.11.0"
-USER_AGENT = "CloudinaryPython/" + VERSION
+
+USER_AGENT = "CloudinaryPython/{} (Python {})".format(VERSION, python_version())
 """ :const: USER_AGENT """
 
 USER_PLATFORM = ""
@@ -60,15 +63,27 @@ def get_user_agent():
 
 def import_django_settings():
     try:
-        import django.conf
         from django.core.exceptions import ImproperlyConfigured
+
         try:
-            if 'CLOUDINARY' in dir(django.conf.settings):
-                return django.conf.settings.CLOUDINARY
+            from django.conf import settings as _django_settings
+
+            # We can get a situation when Django module is installed in the system, but not initialized,
+            # which means we are running not in a Django process.
+            # In this case the following line throws ImproperlyConfigured exception
+            if 'cloudinary' in _django_settings.INSTALLED_APPS:
+                from django import get_version as _get_django_version
+                global USER_PLATFORM
+                USER_PLATFORM = "Django/{django_version}".format(django_version=_get_django_version())
+
+            if 'CLOUDINARY' in dir(_django_settings):
+                return _django_settings.CLOUDINARY
             else:
                 return None
+
         except ImproperlyConfigured:
             return None
+
     except ImportError:
         return None
 

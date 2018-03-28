@@ -6,6 +6,7 @@ from datetime import datetime, date
 from fractions import Fraction
 
 import six
+from mock import patch
 
 import cloudinary.utils
 from cloudinary.utils import build_list_of_dicts, json_encode
@@ -615,13 +616,13 @@ class TestUtils(unittest.TestCase):
                                        expected_url=VIDEO_UPLOAD_PATH + transformation + "/video_id")
 
     def test_user_agent(self):
-        agent = cloudinary.get_user_agent()
+        with patch('cloudinary.USER_PLATFORM', ''):
+            agent = cloudinary.get_user_agent()
+        six.assertRegex(self, agent, '^CloudinaryPython\/\d\.\d+\.\d+ \(Python \d\.\d+\.\d+\)$')
+
         platform = 'MyPlatform/1.2.3 (Test code)'
-        six.assertRegex(self, agent, 'CloudinaryPython/\d\.\d+\.\d+')
-        temp = cloudinary.USER_PLATFORM
-        cloudinary.USER_PLATFORM = platform
-        result = cloudinary.get_user_agent()
-        cloudinary.USER_PLATFORM = temp  # restore value before assertion
+        with patch('cloudinary.USER_PLATFORM', platform):
+            result = cloudinary.get_user_agent()
         self.assertEqual(result, platform + ' ' + agent)
 
     def test_aspect_ratio(self):
