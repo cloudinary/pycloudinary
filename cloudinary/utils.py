@@ -261,7 +261,6 @@ def generate_transformation_string(**options):
         for var in variables:
             var_params.append(u"{0}_{1}".format(var[0], normalize_expression(str(var[1]))))
 
-
     variables = ','.join(var_params)
 
     sorted_params = sorted([param + "_" + str(value) for param, value in params.items() if (value or value == 0)])
@@ -270,10 +269,14 @@ def generate_transformation_string(**options):
 
     if if_value is not None:
         sorted_params.insert(0, "if_" + str(if_value))
+
+    if "raw_transformation" in options and (options["raw_transformation"] or options["raw_transformation"] == 0):
+        sorted_params.append(options.pop("raw_transformation"))
+
     transformation = ",".join(sorted_params)
-    if "raw_transformation" in options:
-        transformation = transformation + "," + options.pop("raw_transformation")
+
     transformations = base_transformations + [transformation]
+
     if responsive_width:
         responsive_width_transformation = cloudinary.config().responsive_width_transformation \
                                           or DEFAULT_RESPONSIVE_WIDTH_TRANSFORMATION

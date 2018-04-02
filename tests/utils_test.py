@@ -190,6 +190,15 @@ class TestUtils(unittest.TestCase):
         self.__test_cloudinary_url(options={"transformation": [{}, {"x": 100, "y": 100, "crop": "fill"}, {}]},
                                    expected_url=DEFAULT_UPLOAD_PATH + "c_fill,x_100,y_100/test")
 
+    def test_raw_transformation(self):
+        """should include raw_transformation"""
+        self.__test_cloudinary_url(options={"transformation": {"width": 100, "raw_transformation": "g_north_west"}},
+                                   expected_url=DEFAULT_UPLOAD_PATH + "w_100,g_north_west/test")
+        self.__test_cloudinary_url(options={"transformation": {"raw_transformation": "g_north_west"}},
+                                   expected_url=DEFAULT_UPLOAD_PATH + "g_north_west/test")
+        self.__test_cloudinary_url(options={"transformation": {"width": 100, "raw_transformation": ""}},
+                                   expected_url=DEFAULT_UPLOAD_PATH + "w_100/test")
+
     def test_size(self):
         """should support size"""
         options = {"size": "10x10", "crop": "crop"}
