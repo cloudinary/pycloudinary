@@ -281,7 +281,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_raw_conversion(self):
         """ should support requesting raw_convert """
-        with six.assertRaisesRegex(self, api.Error, 'illegal is not a valid'):
+        with six.assertRaisesRegex(self, api.Error, 'Raw convert is invalid'):
             uploader.upload("tests/docx.docx", public_id=TEST_DOCX_ID, raw_convert="illegal",
                             resource_type="raw", tags=[UNIQUE_TAG])
 
