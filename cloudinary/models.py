@@ -98,9 +98,9 @@ class CloudinaryField(models.Field):
             instance_value = uploader.upload_resource(value, **options)
             setattr(model_instance, self.attname, instance_value)
             if self.width_field:
-                setattr(model_instance, self.width_field, instance_value.metadata['width'])
+                setattr(model_instance, self.width_field, instance_value.metadata.get('width'))
             if self.height_field:
-                setattr(model_instance, self.height_field, instance_value.metadata['height'])
+                setattr(model_instance, self.height_field, instance_value.metadata.get('height'))
             return self.get_prep_value(instance_value)
         else:
             return value
