@@ -14,7 +14,16 @@ except ImportError:
     pass
 
 CLOUDINARY_FIELD_DB_RE = r'(?:(?P<resource_type>image|raw|video)/(?P<type>upload|private|authenticated)/)?(?:v(?P<version>\d+)/)?(?P<public_id>.*?)(\.(?P<format>[^.]+))?$'
-
+VALID_OPTIONS = [
+    'public_id',
+    'folder',
+    'use_filename',
+    'unique_filename',
+    'access_control',
+    'access_mode',
+    'discard_original_filename',
+    'overwrite',
+]
 
 # Taken from six - https://pythonhosted.org/six/
 def with_metaclass(meta, *bases):
@@ -34,11 +43,11 @@ class CloudinaryField(models.Field):
     def __init__(self, *args, **kwargs):
         options = {'max_length': 255}
         self.default_form_class = kwargs.pop("default_form_class", forms.CloudinaryFileField)
-        options.update(kwargs)
-        self.type = options.pop("type", "upload")
-        self.resource_type = options.pop("resource_type", "image")
-        self.width_field = options.pop("width_field", None)
-        self.height_field = options.pop("height_field", None)
+        self.type = kwargs.pop("type", "upload")
+        self.resource_type = kwargs.pop("resource_type", "image")
+        self.width_field = kwargs.pop("width_field", None)
+        self.height_field = kwargs.pop("height_field", None)
+        self.options = {key: value for key, value in kwargs.items()}
         super(CloudinaryField, self).__init__(*args, **options)
 
     def get_internal_type(self):
@@ -84,17 +93,12 @@ class CloudinaryField(models.Field):
         else:
             return self.parse_cloudinary_resource(value)
 
-    def upload_options_with_filename(self, model_instance, filename):
-        return self.upload_options(model_instance)
-
-    def upload_options(self, model_instance):
-        return {}
-
     def pre_save(self, model_instance, add):
         value = super(CloudinaryField, self).pre_save(model_instance, add)
         if isinstance(value, UploadedFile):
             options = {"type": self.type, "resource_type": self.resource_type}
-            options.update(self.upload_options_with_filename(model_instance, value.name))
+            options.update(self.options)
+
             instance_value = uploader.upload_resource(value, **options)
             setattr(model_instance, self.attname, instance_value)
             if self.width_field:
