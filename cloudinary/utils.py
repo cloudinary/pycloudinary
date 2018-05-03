@@ -595,9 +595,11 @@ def download_zip_url(**options):
     new_options.update(target_format="zip")
     return download_archive_url(**new_options)
 
+
 def generate_auth_token(**options):
     token_options = merge(cloudinary.config().auth_token, options)
     return auth_token.generate(**token_options)
+
 
 def archive_params(**options):
     if options.get("timestamp") is None:
@@ -843,11 +845,13 @@ def translate_if(match):
                             PREDEFINED_VARS.get(name,
                                               name))
 
+
 def process_conditional(conditional):
     if conditional is None:
         return conditional
     result = normalize_expression(conditional)
     return result
+
 
 def normalize_expression(expression):
     if re.match(r'^!.+!$',str(expression)): # quoted string
@@ -859,6 +863,7 @@ def normalize_expression(expression):
         return result
     else:
         return expression
+
 
 def __join_pair(key, value):
     if value is None or value == "":
