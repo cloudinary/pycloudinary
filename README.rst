@@ -110,7 +110,7 @@ for more details.
 Setting the ``cloud_name``, ``api_key`` and ``api_secret`` parameters
 can be done either directly in each call to a Cloudinary method, by
 calling the cloudinary.config(), by using environment variables, or
-using the CLOUDINARY django settings.
+using the CLOUDINARY django settings. Be sure to add ``cloudinary`` to `INSTALLED_APPS` in your `settings.py` file.
 
 You can `download your customized cloudinary python
 configuration <https://cloudinary.com/console/cloudinary_python.txt>`__
