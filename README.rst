@@ -23,8 +23,8 @@ even further.
 Getting started guide
 ---------------------
 
-|image0| **Take a look at our `Getting started guide for Python &
-Django <http://cloudinary.com/documentation/django_integration#getting_started_guide>`__**.
+|image0| Take a look at our `Getting started guide for Python &
+Django <http://cloudinary.com/documentation/django_integration#getting_started_guide>`__.
 
 Setup
 -----
@@ -95,6 +95,7 @@ profile pictures.
 
 Usage
 -----
+.. _configuration:
 
 Configuration
 ~~~~~~~~~~~~~
@@ -109,7 +110,7 @@ for more details.
 Setting the ``cloud_name``, ``api_key`` and ``api_secret`` parameters
 can be done either directly in each call to a Cloudinary method, by
 calling the cloudinary.config(), by using environment variables, or
-using the CLOUDINARY django settings. Be sure to add ``cloudinary`` to `INSTALLED_APPS` in your `settings.py` file.
+using the CLOUDINARY django settings.
 
 You can `download your customized cloudinary python
 configuration <https://cloudinary.com/console/cloudinary_python.txt>`__
@@ -164,10 +165,10 @@ Same goes for Twitter:
     cloudinary.utils.cloudinary_url("billclinton.jpg",
                                     type = "twitter_name")
 
-|image1| **See `our
+|image1| See `our
 documentation <http://cloudinary.com/documentation/django_image_manipulation>`__
 for more information about displaying and transforming images in Python
-& Django**.
+& Django.
 
 Upload
 ~~~~~~
@@ -201,13 +202,18 @@ You can also specify your own public ID:
 
     # http://res.cloudinary.com/demo/image/upload/sample_remote.jpg
 
-|image2| **See `our
+|image2| See `our
 documentation <http://cloudinary.com/documentation/django_image_upload>`__
 for plenty more options of uploading to the cloud from your Python &
-Django code or directly from the browser**.
+Django code or directly from the browser.
 
 Django
 ------
+
+Configuration
+~~~~~~~~~~~~~
+1. Follow python configuration_ instructions.
+2. Add ``cloudinary`` to `INSTALLED_APPS` in your `settings.py` file.
 
 cloudinary.CloudinaryImage
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -292,7 +298,7 @@ validate and convert to CloudinaryImage a signed Cloudinary image
 reference resulting from a successful image upload (see
 `here <http://github.com/cloudinary/cloudinary_js>`__)
 
-cloudinary template tags
+Cloudinary template tags
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 Initialization:
