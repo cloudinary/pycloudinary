@@ -186,11 +186,11 @@ def generate_transformation_string(**options):
     flags = ".".join(build_array(options.pop("flags", None)))
     dpr = options.pop("dpr", cloudinary.config().dpr)
     duration = norm_range_value(options.pop("duration", None))
-    start_offset = norm_range_value(options.pop("start_offset", None))
+    start_offset = norm_auto_range_value(options.pop("start_offset", None))
     end_offset = norm_range_value(options.pop("end_offset", None))
     offset = split_range(options.pop("offset", None))
     if offset:
-        start_offset = norm_range_value(offset[0])
+        start_offset = norm_auto_range_value(offset[0])
         end_offset = norm_range_value(offset[1])
 
     video_codec = process_video_codec_param(options.pop("video_codec", None))
@@ -315,6 +315,12 @@ def norm_range_value(value):
     if match.group('modifier') is not None:
       modifier = 'p'
     return match.group('value') + modifier
+
+
+def norm_auto_range_value(value):
+    if value == "auto":
+        return value
+    return norm_range_value(value)
 
 
 def process_video_codec_param(param):
