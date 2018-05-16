@@ -514,6 +514,13 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(cloudinary.utils.norm_range_value("20%"), "20p")
         self.assertEqual(cloudinary.utils.norm_range_value("p"), None)
 
+    def test_norm_auto_range_value(self):
+        """Should parse both auto and values supported by norm_range_value"""
+        self.assertEqual("auto", cloudinary.utils.norm_auto_range_value("auto"))
+        self.assertEqual(None, cloudinary.utils.norm_auto_range_value("non_auto"))
+        # Should handle regular norm_range_value values
+        self.assertEqual(cloudinary.utils.norm_auto_range_value("20P"), "20p")
+
     def test_video_codec(self):
         # should support a string value
         self.__test_cloudinary_url(public_id="video_id", options={'resource_type': 'video', 'video_codec': 'auto'},
@@ -565,6 +572,9 @@ class TestUtils(unittest.TestCase):
         # should support percents of the video length as "<number>%"
         self.__test_cloudinary_url(public_id="video_id", options={'resource_type': 'video', 'start_offset': '35%'},
                                    expected_url=VIDEO_UPLOAD_PATH + "so_35p/video_id")
+        # should support auto
+        self.__test_cloudinary_url(public_id="video_id", options={'resource_type': 'video', 'start_offset': 'auto'},
+                                   expected_url=VIDEO_UPLOAD_PATH + "so_auto/video_id")
 
     def test_end_offset(self):
         # should support decimal seconds 
