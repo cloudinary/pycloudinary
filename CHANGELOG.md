@@ -1,4 +1,25 @@
 
+1.12.0 / 2018-05-16
+===================
+
+New functionality and features
+------------------------------
+
+  * Add `srcset` to `CloudinaryResource.image`
+  * Add support of "auto" value for `start_offset` transformation parameter
+  * Add language and platform version to user_agent / platform_agent
+
+ 
+Other Changes
+-------------
+
+  * Fix `test12_transformations` unit test
+  * Fix case when resource has no width and height
+  * Update `README`, add `Configuration` subtitle under `Django`
+  * django setup: need to add cloudinary to installed_apps in settings.py (#152)
+  * Fix raw transformation parameter extra comma
+  * Fix `test_raw_conversion` unit test
+
 1.11.0 / 2018-03-12
 ===================
 
