@@ -155,7 +155,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
     def test_explicit(self):
         """should support explicit """
         result = uploader.explicit("cloudinary", type="twitter_name",
-                                   eager=[dict(crop="scale", width="2.0")], tags=[UNIQUE_TAG])
+                                   eager=[dict(crop="scale", width="2.0", format="png")], tags=[UNIQUE_TAG])
         url = utils.cloudinary_url("cloudinary", type="twitter_name", crop="scale", width="2.0", format="png",
                                    version=result["version"])[0]
         actual = result["eager"][0]["url"]
