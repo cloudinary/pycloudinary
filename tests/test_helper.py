@@ -12,7 +12,6 @@ UNIQUE_TAG = "{0}_{1}".format(TEST_TAG, SUFFIX)
 
 ZERO = timedelta(0)
 
-# A UTC class.
 
 class UTC(tzinfo):
     """UTC"""

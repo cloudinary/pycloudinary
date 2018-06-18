@@ -6,13 +6,15 @@ from six import iterkeys
 from urllib3 import disable_warnings
 
 import cloudinary
-from cloudinary import uploader, api, logger, Search
-from tests.test_helper import TEST_IMAGE, TEST_TAG, UNIQUE_TAG, SUFFIX
+from cloudinary import api, logger, uploader
+from cloudinary.search import Search
+from tests.test_helper import SUFFIX, TEST_IMAGE, TEST_TAG, UNIQUE_TAG
 
 disable_warnings()
 
 TEST_TAG = 'search_{}'.format(TEST_TAG)
 UNIQUE_TAG = 'search_{}'.format(UNIQUE_TAG)
+
 
 TEST_IMAGES_COUNT = 3
 MAX_INDEX_RETRIES = 10
@@ -26,7 +28,8 @@ class SearchTest(unittest.TestCase):
     def setUpClass(cls):
         cls.ready = False
         cloudinary.reset_config()
-        if not cloudinary.config().api_secret: return
+        if not cloudinary.config().api_secret:
+            return
         for public_id in public_ids:
             res = uploader.upload(TEST_IMAGE,
                                   public_id=public_id,
@@ -34,7 +37,6 @@ class SearchTest(unittest.TestCase):
                                   context="stage=value",
                                   eager=[{"width": 100, "crop": "scale"}])
             upload_results.append(res)
-
         attempt = 0
         while attempt < MAX_INDEX_RETRIES:
             time.sleep(1)
@@ -135,11 +137,11 @@ class SearchTest(unittest.TestCase):
                 .next_cursor(results['next_cursor']) \
                 .execute()
             self.assertEqual(len(results['resources']), 1)
-            self.assertEqual(results['resources'][0]['public_id'],
-                             public_ids[i],
-                             "{0} found public_id {1} instead of {2} ".format(i,
-                                                                              results['resources'][0]['public_id'],
-                                                                              public_ids[i]))
+            self.assertEqual(
+                results['resources'][0]['public_id'],
+                public_ids[i],
+                "{0} found public_id {1} instead of {2} ".format(
+                    i, results['resources'][0]['public_id'], public_ids[i]))
             self.assertEqual(results['total_count'], TEST_IMAGES_COUNT)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -159,11 +161,11 @@ class SearchTest(unittest.TestCase):
                      "Use env variable RUN_SEARCH_TESTS=1 if you really want to test it.")
     def test_should_include_context_tags_and_image_metadata(self):
 
-        results = Search().expression("tags={0}".format(UNIQUE_TAG)).with_field('context').with_field('tags').\
+        results = Search().expression("tags={0}".format(UNIQUE_TAG)).\
+            with_field('context').with_field('tags').\
             with_field('image_metadata').execute()
 
         self.assertEqual(len(results['resources']), TEST_IMAGES_COUNT)
-
         for res in results['resources']:
             self.assertEqual([key for key in iterkeys(res['context'])], [u'stage'])
             self.assertTrue('image_metadata' in res)

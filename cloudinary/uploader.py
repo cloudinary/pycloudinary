@@ -4,14 +4,14 @@ import re
 import socket
 from os.path import getsize
 
-import cloudinary
-import urllib3
+from six import string_types
+from urllib3 import PoolManager
+from urllib3.exceptions import HTTPError
+
 import certifi
+import cloudinary
 from cloudinary import utils
 from cloudinary.api import Error
-from cloudinary.compat import string_types
-from urllib3.exceptions import HTTPError
-from urllib3 import PoolManager
 
 try:
     from urllib3.contrib.appengine import AppEngineManager, is_appengine_sandbox
@@ -55,7 +55,8 @@ def upload_resource(file, **options):
     result = upload(file, **options)
     return cloudinary.CloudinaryResource(
         result["public_id"], version=str(result["version"]),
-        format=result.get("format"), type=result["type"], resource_type=result["resource_type"], metadata=result)
+        format=result.get("format"), type=result["type"],
+        resource_type=result["resource_type"], metadata=result)
 
 
 def upload_large(file, **options):
@@ -74,9 +75,11 @@ def upload_large(file, **options):
             range = "bytes {0}-{1}/{2}".format(current_loc, current_loc + len(chunk) - 1, file_size)
             current_loc += len(chunk)
 
-            results = upload_large_part((file, chunk),
-                                       http_headers={"Content-Range": range, "X-Unique-Upload-Id": upload_id},
-                                       **options)
+            results = upload_large_part(
+                (file, chunk),
+                http_headers={"Content-Range": range,
+                              "X-Unique-Upload-Id": upload_id},
+                **options)
             options["public_id"] = results.get("public_id")
             chunk = file_io.read(chunk_size)
         return results
@@ -85,7 +88,8 @@ def upload_large(file, **options):
 def upload_large_part(file, **options):
     """ Upload large files. """
     params = utils.build_upload_params(**options)
-    if 'resource_type' not in options: options['resource_type'] = "raw"
+    if 'resource_type' not in options:
+        options['resource_type'] = "raw"
     return call_api("upload", params, file=file, **options)
 
 
@@ -94,7 +98,7 @@ def destroy(public_id, **options):
         "timestamp": utils.now(),
         "type": options.get("type"),
         "invalidate": options.get("invalidate"),
-        "public_id":    public_id
+        "public_id": public_id
     }
     return call_api("destroy", params, **options)
 
@@ -134,7 +138,8 @@ def generate_sprite(tag, **options):
         "tag": tag,
         "async": options.get("async"),
         "notification_url": options.get("notification_url"),
-        "transformation": utils.generate_transformation_string(fetch_format=options.get("format"), **options)[0]
+        "transformation": utils.generate_transformation_string(
+            fetch_format=options.get("format"), **options)[0]
     }
     return call_api("sprite", params, **options)
 
@@ -230,17 +235,18 @@ def call_context_api(context, command, public_ids=None, **options):
     return call_api("context", params, **options)
 
 
-TEXT_PARAMS = ["public_id",
-               "font_family",
-               "font_size",
-               "font_color",
-               "text_align",
-               "font_weight",
-               "font_style",
-               "background",
-               "opacity",
-               "text_decoration"
-               ]
+TEXT_PARAMS = [
+    "public_id",
+    "font_family",
+    "font_size",
+    "font_color",
+    "text_align",
+    "font_weight",
+    "font_style",
+    "background",
+    "opacity",
+    "text_decoration"
+]
 
 
 def text(text, **options):
@@ -325,4 +331,5 @@ def call_api(action, params, http_headers=None, return_error=False, unsigned=Fal
 
         return result
     finally:
-        if file_io: file_io.close()
+        if file_io:
+            file_io.close()

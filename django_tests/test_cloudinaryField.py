@@ -1,15 +1,16 @@
 import os
 import unittest
 
-from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase
 from mock import mock
 from urllib3.util import parse_url
 
 import cloudinary
-from cloudinary import CloudinaryResource, CloudinaryImage, uploader
+from cloudinary import CloudinaryImage, CloudinaryResource, uploader
 from cloudinary.forms import CloudinaryFileField
 from cloudinary.models import CloudinaryField
+from django.test import TestCase
+from django.core.files.uploadedfile import SimpleUploadedFile
+
 from .models import Poll
 from .test_helper import SUFFIX
 
@@ -21,6 +22,7 @@ TEST_IMAGE_H = 51
 
 
 class TestCloudinaryField(TestCase):
+
     @classmethod
     def setUpTestData(cls):
         Poll.objects.create(question="with image", image="image/upload/v1234/{}.jpg".format(API_TEST_ID))
@@ -98,5 +100,8 @@ class TestCloudinaryField(TestCase):
         field = Poll.objects.get(question="with image")
         self.assertIsNotNone(field)
         self.assertEqual(field.image.public_id, API_TEST_ID)
-        self.assertEqual(parse_url(field.image.url).path, "/{cloud}/image/upload/v1234/{name}.jpg".format(cloud=cloudinary.config().cloud_name, name=API_TEST_ID))
+        self.assertEqual(
+            parse_url(field.image.url).path,
+            "/{cloud}/image/upload/v1234/{name}.jpg".format(cloud=cloudinary.config().cloud_name, name=API_TEST_ID)
+        )
         self.assertTrue(False or field.image)

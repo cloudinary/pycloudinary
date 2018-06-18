@@ -2,20 +2,21 @@ import time
 import unittest
 from collections import OrderedDict
 
+import six
 from mock import patch
+from urllib3 import HTTPResponse, disable_warnings
 from urllib3._collections import HTTPHeaderDict
 
 import cloudinary
-import six
-from cloudinary import uploader, api, utils
-
-from urllib3 import disable_warnings, HTTPResponse
-
-from .test_helper import *
+from cloudinary import api, uploader, utils
+from tests.test_helper import *
 
 
-MOCK_HEADERS = HTTPHeaderDict({"x-featureratelimit-limit": '0', "x-featureratelimit-reset": 'Sat, 01 Apr 2017 22:00:00 GMT',
-                          "x-featureratelimit-remaining": '0', })
+MOCK_HEADERS = HTTPHeaderDict({
+    "x-featureratelimit-limit": '0',
+    "x-featureratelimit-reset": 'Sat, 01 Apr 2017 22:00:00 GMT',
+    "x-featureratelimit-remaining": '0',
+})
 
 if six.PY2:
     MOCK_RESPONSE = HTTPResponse(body='{"foo":"bar"}', headers=MOCK_HEADERS)
@@ -43,6 +44,7 @@ PREFIX = "test_folder_{}".format(SUFFIX)
 MAPPING_TEST_ID = "api_test_upload_mapping_{}".format(SUFFIX)
 RESTORE_TEST_ID = "api_test_restore_{}".format(SUFFIX)
 
+
 class ApiTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -68,7 +70,9 @@ class ApiTest(unittest.TestCase):
             except Exception:
                 pass
         presets_response = api.upload_presets(max_results=200)
-        preset_names = [ preset["name"] for preset in presets_response.get('presets',[]) if UNIQUE_TAG in preset.get('settings',{}).get('tags','')]
+        preset_names = [
+            preset["name"] for preset in presets_response.get('presets', [])
+            if UNIQUE_TAG in preset.get('settings', {}).get('tags', '')]
         for name in preset_names:
             try:
                 api.delete_upload_preset(name)
@@ -97,7 +101,6 @@ class ApiTest(unittest.TestCase):
         api.resources()
         args, kargs = mocker.call_args
         self.assertTrue(get_uri(args).endswith('/resources/image'))
-        
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test03_resources_cursor(self):
@@ -212,18 +215,16 @@ class ApiTest(unittest.TestCase):
 
         mocker.return_value = MOCK_RESPONSE
         api.delete_derived_by_transformation(
-            [public_resource_id, public_resource_id2],
-            [transformation, transformation2], resource_type='raw', type='fetch', invalidate=True, foo='bar')
+            [public_resource_id, public_resource_id2], [transformation, transformation2],
+            resource_type='raw', type='fetch', invalidate=True, foo='bar')
         method, url, params = mocker.call_args[0][0:3]
         self.assertEqual('DELETE', method)
         self.assertTrue(url.endswith('/resources/raw/fetch'))
         self.assertIn(public_resource_id, get_list_param(mocker, 'public_ids'))
         self.assertIn(public_resource_id2, get_list_param(mocker, 'public_ids'))
-        self.assertEqual(get_param(mocker, 'transformations'),
-            utils.build_eager([transformation, transformation2]))
+        self.assertEqual(get_param(mocker, 'transformations'), utils.build_eager([transformation, transformation2]))
         self.assertTrue(get_param(mocker, 'keep_original'))
         self.assertTrue(get_param(mocker, 'invalidate'))
-
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -550,11 +551,11 @@ class ApiTest(unittest.TestCase):
     def test_CloudinaryImage_len(self):
         """Tests the __len__ function on CloudinaryImage"""
         metadata = {
-                "public_id": "test_id",
-                "format": "tst",
-                "version": "1234",
-                "signature": "5678",
-                }
+            "public_id": "test_id",
+            "format": "tst",
+            "version": "1234",
+            "signature": "5678",
+        }
         my_cloudinary_image = cloudinary.CloudinaryImage(metadata=metadata)
         self.assertEqual(len(my_cloudinary_image), len(metadata["public_id"]))
 

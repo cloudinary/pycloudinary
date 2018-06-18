@@ -1,4 +1,3 @@
-import random
 import tempfile
 import time
 import unittest
@@ -8,7 +7,7 @@ import certifi
 
 import cloudinary
 import cloudinary.poster.streaminghttp
-from cloudinary import uploader, utils, api
+from cloudinary import api, uploader, utils
 
 from mock import patch
 import six
@@ -16,7 +15,7 @@ import urllib3
 from urllib3 import disable_warnings, HTTPResponse
 from urllib3._collections import HTTPHeaderDict
 
-from .test_helper import SUFFIX, TEST_TAG
+from .test_helper import SUFFIX
 
 disable_warnings()
 
@@ -51,7 +50,8 @@ class ArchiveTest(unittest.TestCase):
         """should successfully generate an archive"""
         result = uploader.create_archive(tags=[TEST_TAG])
         self.assertEqual(2, result.get("file_count"))
-        result2 = uploader.create_zip(tags=[TEST_TAG], transformations=[{"width": 0.5}, {"width": 2.0}])
+        result2 = uploader.create_zip(
+            tags=[TEST_TAG], transformations=[{"width": 0.5}, {"width": 2.0}])
         self.assertEqual(4, result2.get("file_count"))
 
     @patch('urllib3.request.RequestMethods.request')
@@ -90,7 +90,8 @@ class ArchiveTest(unittest.TestCase):
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_download_zip_url_options(self):
-        result = utils.download_zip_url(tags=[TEST_TAG], transformations=[{"width": 0.5}, {"width": 2.0}], cloud_name="demo")
+        result = utils.download_zip_url(tags=[TEST_TAG], transformations=[{"width": 0.5}, {"width": 2.0}],
+                                        cloud_name="demo")
         upload_prefix = cloudinary.config().upload_prefix or "https://api.cloudinary.com"
         six.assertRegex(self, result, r'^{0}/v1_1/demo/.*$'.format(upload_prefix))
 

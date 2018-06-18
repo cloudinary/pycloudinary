@@ -1,8 +1,6 @@
 import re
 
-
 from cloudinary import CloudinaryResource, forms, uploader
-
 from django.core.files.uploadedfile import UploadedFile
 from django.db import models
 
@@ -13,7 +11,9 @@ try:
 except ImportError:
     pass
 
-CLOUDINARY_FIELD_DB_RE = r'(?:(?P<resource_type>image|raw|video)/(?P<type>upload|private|authenticated)/)?(?:v(?P<version>\d+)/)?(?P<public_id>.*?)(\.(?P<format>[^.]+))?$'
+CLOUDINARY_FIELD_DB_RE = r'(?:(?P<resource_type>image|raw|video)/' \
+                         r'(?P<type>upload|private|authenticated)/)?' \
+                         r'(?:v(?P<version>\d+)/)?(?P<public_id>.*?)(\.(?P<format>[^.]+))?$'
 
 
 # Taken from six - https://pythonhosted.org/six/

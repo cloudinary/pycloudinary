@@ -166,6 +166,7 @@ def generate_transformation_string(**options):
                 return generate_transformation_string(**bs)[0]
             else:
                 return generate_transformation_string(transformation=bs)[0]
+
         base_transformations = list(map(recurse, base_transformations))
         named_transformation = None
     else:
@@ -218,17 +219,17 @@ def generate_transformation_string(**options):
         "fl": flags,
         "h": normalize_expression(height),
         "l": overlay,
-        "o": normalize_expression(options.pop('opacity',None)),
-        "q": normalize_expression(options.pop('quality',None)),
-        "r": normalize_expression(options.pop('radius',None)),
+        "o": normalize_expression(options.pop('opacity', None)),
+        "q": normalize_expression(options.pop('quality', None)),
+        "r": normalize_expression(options.pop('radius', None)),
         "so": normalize_expression(start_offset),
         "t": named_transformation,
         "u": underlay,
         "w": normalize_expression(width),
-        "x": normalize_expression(options.pop('x',None)),
-        "y": normalize_expression(options.pop('y',None)),
+        "x": normalize_expression(options.pop('x', None)),
+        "y": normalize_expression(options.pop('y', None)),
         "vc": video_codec,
-        "z": normalize_expression(options.pop('zoom',None))
+        "z": normalize_expression(options.pop('zoom', None))
     }
     simple_params = {
         "ac": "audio_codec",
@@ -250,9 +251,9 @@ def generate_transformation_string(**options):
     for param, option in simple_params.items():
         params[param] = options.pop(option, None)
 
-    variables = options.pop('variables',{})
+    variables = options.pop('variables', {})
     var_params = []
-    for key,value in options.items():
+    for key, value in options.items():
         if re.match(r'^\$', key):
             var_params.append(u"{0}_{1}".format(key, normalize_expression(str(value))))
 
@@ -306,15 +307,17 @@ def split_range(range):
 
 
 def norm_range_value(value):
-    if value is None: return None
+    if value is None:
+        return None
 
     match = re.match(RANGE_VALUE_RE, str(value))
 
-    if match is None: return None
+    if match is None:
+        return None
 
     modifier = ''
     if match.group('modifier') is not None:
-      modifier = 'p'
+        modifier = 'p'
     return match.group('value') + modifier
 
 
@@ -341,9 +344,11 @@ def cleanup_params(params):
 
 def sign_request(params, options):
     api_key = options.get("api_key", cloudinary.config().api_key)
-    if not api_key: raise ValueError("Must supply api_key")
+    if not api_key:
+        raise ValueError("Must supply api_key")
     api_secret = options.get("api_secret", cloudinary.config().api_secret)
-    if not api_secret: raise ValueError("Must supply api_secret")
+    if not api_secret:
+        raise ValueError("Must supply api_secret")
 
     params = cleanup_params(params)
     params["signature"] = api_sign_request(params, api_secret)
@@ -380,11 +385,13 @@ def finalize_source(source, format, url_suffix):
         source_to_sign = source
     else:
         source = unquote(source)
-        if not PY3: source = source.encode('utf8')
+        if not PY3:
+            source = source.encode('utf8')
         source = smart_escape(source)
         source_to_sign = source
         if url_suffix is not None:
-            if re.search(r'[\./]', url_suffix): raise ValueError("url_suffix should not include . or /")
+            if re.search(r'[\./]', url_suffix):
+                raise ValueError("url_suffix should not include . or /")
             source = source + "/" + url_suffix
         if format is not None:
             source = source + "." + format
@@ -406,7 +413,8 @@ def finalize_resource_type(resource_type, type, url_suffix, use_root_path, short
             raise ValueError("URL Suffix only supported for image/upload and raw/upload")
 
     if use_root_path:
-        if (resource_type == "image" and upload_type == "upload") or (resource_type == "images" and upload_type is None):
+        if (resource_type == "image" and upload_type == "upload") or (
+                resource_type == "images" and upload_type is None):
             resource_type = None
             upload_type = None
         else:
@@ -419,28 +427,33 @@ def finalize_resource_type(resource_type, type, url_suffix, use_root_path, short
     return resource_type, upload_type
 
 
-def unsigned_download_url_prefix(source, cloud_name, private_cdn, cdn_subdomain, secure_cdn_subdomain, cname, secure,
-                                 secure_distribution):
+def unsigned_download_url_prefix(source, cloud_name, private_cdn, cdn_subdomain,
+                                 secure_cdn_subdomain, cname, secure, secure_distribution):
     """cdn_subdomain and secure_cdn_subdomain
     1) Customers in shared distribution (e.g. res.cloudinary.com)
-      if cdn_domain is true uses res-[1-5].cloudinary.com for both http and https. Setting secure_cdn_subdomain to false disables this for https.
+      if cdn_domain is true uses res-[1-5].cloudinary.com for both http and https.
+      Setting secure_cdn_subdomain to false disables this for https.
     2) Customers with private cdn
       if cdn_domain is true uses cloudname-res-[1-5].cloudinary.com for http
-      if secure_cdn_domain is true uses cloudname-res-[1-5].cloudinary.com for https (please contact support if you require this)
+      if secure_cdn_domain is true uses cloudname-res-[1-5].cloudinary.com for https
+      (please contact support if you require this)
     3) Customers with cname
-      if cdn_domain is true uses a[1-5].cname for http. For https, uses the same naming scheme as 1 for shared distribution and as 2 for private distribution."""
+      if cdn_domain is true uses a[1-5].cname for http. For https, uses the same naming scheme
+      as 1 for shared distribution and as 2 for private distribution."""
     shared_domain = not private_cdn
     shard = __crc(source)
     if secure:
         if secure_distribution is None or secure_distribution == cloudinary.OLD_AKAMAI_SHARED_CDN:
-            secure_distribution = cloud_name + "-res.cloudinary.com" if private_cdn else cloudinary.SHARED_CDN
+            secure_distribution = cloud_name + "-res.cloudinary.com" \
+                if private_cdn else cloudinary.SHARED_CDN
 
         shared_domain = shared_domain or secure_distribution == cloudinary.SHARED_CDN
         if secure_cdn_subdomain is None and shared_domain:
             secure_cdn_subdomain = cdn_subdomain
 
         if secure_cdn_subdomain:
-            secure_distribution = re.sub('res.cloudinary.com', "res-" + shard + ".cloudinary.com", secure_distribution)
+            secure_distribution = re.sub('res.cloudinary.com', "res-" + shard + ".cloudinary.com",
+                                         secure_distribution)
 
         prefix = "https://" + secure_distribution
     elif cname:
@@ -448,10 +461,12 @@ def unsigned_download_url_prefix(source, cloud_name, private_cdn, cdn_subdomain,
         prefix = "http://" + subdomain + cname
     else:
         subdomain = cloud_name + "-res" if private_cdn else "res"
-        if cdn_subdomain: subdomain = subdomain + "-" + shard
+        if cdn_subdomain:
+            subdomain = subdomain + "-" + shard
         prefix = "http://" + subdomain + ".cloudinary.com"
 
-    if shared_domain: prefix += "/" + cloud_name
+    if shared_domain:
+        prefix += "/" + cloud_name
 
     return prefix
 
@@ -479,7 +494,8 @@ def cloudinary_url(source, **options):
     version = options.pop("version", None)
     format = options.pop("format", None)
     cdn_subdomain = options.pop("cdn_subdomain", cloudinary.config().cdn_subdomain)
-    secure_cdn_subdomain = options.pop("secure_cdn_subdomain", cloudinary.config().secure_cdn_subdomain)
+    secure_cdn_subdomain = options.pop("secure_cdn_subdomain",
+                                       cloudinary.config().secure_cdn_subdomain)
     cname = options.pop("cname", cloudinary.config().cname)
     shorten = options.pop("shorten", cloudinary.config().shorten)
 
@@ -488,7 +504,8 @@ def cloudinary_url(source, **options):
         raise ValueError("Must supply cloud_name in tag or in configuration")
     secure = options.pop("secure", cloudinary.config().secure)
     private_cdn = options.pop("private_cdn", cloudinary.config().private_cdn)
-    secure_distribution = options.pop("secure_distribution", cloudinary.config().secure_distribution)
+    secure_distribution = options.pop("secure_distribution",
+                                      cloudinary.config().secure_distribution)
     sign_url = options.pop("sign_url", cloudinary.config().sign_url)
     api_secret = options.pop("api_secret", cloudinary.config().api_secret)
     url_suffix = options.pop("url_suffix", None)
@@ -500,7 +517,8 @@ def cloudinary_url(source, **options):
     if (not source) or type == "upload" and re.match(r'^https?:', source):
         return original_source, options
 
-    resource_type, type = finalize_resource_type(resource_type, type, url_suffix, use_root_path, shorten)
+    resource_type, type = finalize_resource_type(
+        resource_type, type, url_suffix, use_root_path, shorten)
     source, source_to_sign = finalize_source(source, format, url_suffix)
 
     if source_to_sign.find("/") >= 0 \
@@ -508,7 +526,8 @@ def cloudinary_url(source, **options):
             and not re.match(r'^v[0-9]+', source_to_sign) \
             and not version:
         version = "1"
-    if version: version = "v" + str(version)
+    if version:
+        version = "v" + str(version)
 
     transformation = re.sub(r'([^:])/+', r'\1/', transformation)
 
@@ -516,35 +535,44 @@ def cloudinary_url(source, **options):
     if sign_url and not auth_token:
         to_sign = "/".join(__compact([transformation, source_to_sign]))
         signature = "s--" + to_string(
-            base64.urlsafe_b64encode(hashlib.sha1(to_bytes(to_sign + api_secret)).digest())[0:8]) + "--"
+            base64.urlsafe_b64encode(
+                hashlib.sha1(to_bytes(to_sign + api_secret)).digest())[0:8]) + "--"
 
-    prefix = unsigned_download_url_prefix(source, cloud_name, private_cdn, cdn_subdomain, secure_cdn_subdomain, cname,
-                                          secure, secure_distribution)
-    source = "/".join(__compact([prefix, resource_type, type, signature, transformation, version, source]))
+    prefix = unsigned_download_url_prefix(
+        source, cloud_name, private_cdn, cdn_subdomain, secure_cdn_subdomain,
+        cname, secure, secure_distribution)
+    source = "/".join(__compact(
+        [prefix, resource_type, type, signature, transformation, version, source]))
     if sign_url and auth_token:
         path = urlparse(source).path
-        token = cloudinary.auth_token.generate( **merge(auth_token, {"url": path}))
+        token = cloudinary.auth_token.generate(**merge(auth_token, {"url": path}))
         source = "%s?%s" % (source, token)
     return source, options
 
 
 def cloudinary_api_url(action='upload', **options):
-    cloudinary_prefix = options.get("upload_prefix", cloudinary.config().upload_prefix) or "https://api.cloudinary.com"
+    cloudinary_prefix = options.get("upload_prefix", cloudinary.config().upload_prefix)\
+                        or "https://api.cloudinary.com"
     cloud_name = options.get("cloud_name", cloudinary.config().cloud_name)
-    if not cloud_name: raise ValueError("Must supply cloud_name")
+    if not cloud_name:
+        raise ValueError("Must supply cloud_name")
     resource_type = options.get("resource_type", "image")
     return "/".join([cloudinary_prefix, "v1_1", cloud_name, resource_type, action])
 
 
 # Based on ruby's CGI::unescape. In addition does not escape / :
-def smart_escape(source,unsafe = r"([^a-zA-Z0-9_.\-\/:]+)"):
+def smart_escape(source, unsafe=r"([^a-zA-Z0-9_.\-\/:]+)"):
     def pack(m):
-        return to_bytes('%' + "%".join(["%02X" % x for x in struct.unpack('B' * len(m.group(1)), m.group(1))]).upper())
+        return to_bytes('%' + "%".join(
+            ["%02X" % x for x in struct.unpack('B' * len(m.group(1)), m.group(1))]
+        ).upper())
+
     return to_string(re.sub(to_bytes(unsafe), pack, to_bytes(source)))
 
 
 def random_public_id():
-    return ''.join(random.SystemRandom().choice(string.ascii_lowercase + string.digits) for _ in range(16))
+    return ''.join(random.SystemRandom().choice(string.ascii_lowercase + string.digits)
+                   for _ in range(16))
 
 
 def signed_preloaded_image(result):
@@ -594,7 +622,8 @@ def download_archive_url(**options):
     params = options.copy()
     params.update(mode="download")
     cloudinary_params = sign_request(archive_params(**params), options)
-    return cloudinary_api_url("generate_archive", **options) + "?" + urlencode(bracketize_seq(cloudinary_params), True)
+    return cloudinary_api_url("generate_archive", **options) + "?" + \
+        urlencode(bracketize_seq(cloudinary_params), True)
 
 
 def download_zip_url(**options):
@@ -665,49 +694,54 @@ def build_custom_headers(headers):
 
 
 def build_upload_params(**options):
-    params = {"timestamp": now(),
-              "transformation": generate_transformation_string(**options)[0],
-              "public_id": options.get("public_id"),
-              "callback": options.get("callback"),
-              "format": options.get("format"),
-              "type": options.get("type"),
-              "backup": options.get("backup"),
-              "faces": options.get("faces"),
-              "image_metadata": options.get("image_metadata"),
-              "exif": options.get("exif"),
-              "colors": options.get("colors"),
-              "headers": build_custom_headers(options.get("headers")),
-              "eager": build_eager(options.get("eager")),
-              "use_filename": options.get("use_filename"),
-              "unique_filename": options.get("unique_filename"),
-              "discard_original_filename": options.get("discard_original_filename"),
-              "invalidate": options.get("invalidate"),
-              "notification_url": options.get("notification_url"),
-              "eager_notification_url": options.get("eager_notification_url"),
-              "eager_async": options.get("eager_async"),
-              "proxy": options.get("proxy"),
-              "folder": options.get("folder"),
-              "overwrite": options.get("overwrite"),
-              "tags": options.get("tags") and ",".join(build_array(options["tags"])),
-              "allowed_formats": options.get("allowed_formats") and ",".join(build_array(options["allowed_formats"])),
-              "face_coordinates": encode_double_array(options.get("face_coordinates")),
-              "custom_coordinates": encode_double_array(options.get("custom_coordinates")),
-              "context": encode_context(options.get("context")),
-              "moderation": options.get("moderation"),
-              "raw_convert": options.get("raw_convert"),
-              "quality_override": options.get("quality_override"),
-              "ocr": options.get("ocr"),
-              "categorization": options.get("categorization"),
-              "detection": options.get("detection"),
-              "similarity_search": options.get("similarity_search"),
-              "background_removal": options.get("background_removal"),
-              "upload_preset": options.get("upload_preset"),
-              "phash": options.get("phash"),
-              "return_delete_token": options.get("return_delete_token"),
-              "auto_tagging": options.get("auto_tagging") and str(options.get("auto_tagging")),
-              "responsive_breakpoints": generate_responsive_breakpoints_string(options.get("responsive_breakpoints")),
-              "async": options.get("async"),
-              "access_control": options.get("access_control") and json_encode(build_list_of_dicts(options.get("access_control")))}
+    params = {
+        "timestamp": now(),
+        "transformation": generate_transformation_string(**options)[0],
+        "public_id": options.get("public_id"),
+        "callback": options.get("callback"),
+        "format": options.get("format"),
+        "type": options.get("type"),
+        "backup": options.get("backup"),
+        "faces": options.get("faces"),
+        "image_metadata": options.get("image_metadata"),
+        "exif": options.get("exif"),
+        "colors": options.get("colors"),
+        "headers": build_custom_headers(options.get("headers")),
+        "eager": build_eager(options.get("eager")),
+        "use_filename": options.get("use_filename"),
+        "unique_filename": options.get("unique_filename"),
+        "discard_original_filename": options.get("discard_original_filename"),
+        "invalidate": options.get("invalidate"),
+        "notification_url": options.get("notification_url"),
+        "eager_notification_url": options.get("eager_notification_url"),
+        "eager_async": options.get("eager_async"),
+        "proxy": options.get("proxy"),
+        "folder": options.get("folder"),
+        "overwrite": options.get("overwrite"),
+        "tags": options.get("tags") and ",".join(build_array(options["tags"])),
+        "allowed_formats": options.get("allowed_formats") and ",".join(
+            build_array(options["allowed_formats"])),
+        "face_coordinates": encode_double_array(options.get("face_coordinates")),
+        "custom_coordinates": encode_double_array(options.get("custom_coordinates")),
+        "context": encode_context(options.get("context")),
+        "moderation": options.get("moderation"),
+        "raw_convert": options.get("raw_convert"),
+        "quality_override": options.get("quality_override"),
+        "ocr": options.get("ocr"),
+        "categorization": options.get("categorization"),
+        "detection": options.get("detection"),
+        "similarity_search": options.get("similarity_search"),
+        "background_removal": options.get("background_removal"),
+        "upload_preset": options.get("upload_preset"),
+        "phash": options.get("phash"),
+        "return_delete_token": options.get("return_delete_token"),
+        "auto_tagging": options.get("auto_tagging") and str(options.get("auto_tagging")),
+        "responsive_breakpoints": generate_responsive_breakpoints_string(
+            options.get("responsive_breakpoints")),
+        "async": options.get("async"),
+        "access_control": options.get("access_control") and json_encode(
+            build_list_of_dicts(options.get("access_control")))
+    }
     return params
 
 
@@ -790,12 +824,12 @@ def process_layer(layer, layer_parameter):
 
         if text is not None:
             var_pattern = VAR_NAME_RE
-            match = re.findall(var_pattern,text)
+            match = re.findall(var_pattern, text)
 
-            parts= filter(lambda p: p is not None, re.split(var_pattern,text))
+            parts = filter(lambda p: p is not None, re.split(var_pattern, text))
             encoded_text = []
             for part in parts:
-                if re.match(var_pattern,part):
+                if re.match(var_pattern, part):
                     encoded_text.append(part)
                 else:
                     encoded_text.append(smart_escape(smart_escape(part, r"([,/])")))
@@ -812,6 +846,7 @@ def process_layer(layer, layer_parameter):
         components.append(public_id)
 
     return ':'.join(components)
+
 
 IF_OPERATORS = {
     "=": 'eq',
@@ -843,14 +878,14 @@ PREDEFINED_VARS = {
     "width": "w"
 }
 
-replaceRE = "((\\|\\||>=|<=|&&|!=|>|=|<|/|-|\\+|\\*)(?=[ _])|" + '|'.join(PREDEFINED_VARS.keys())+ ")"
+replaceRE = "((\\|\\||>=|<=|&&|!=|>|=|<|/|-|\\+|\\*)(?=[ _])|" + '|'.join(PREDEFINED_VARS.keys()) + ")"
 
 
 def translate_if(match):
     name = match.group(0)
     return IF_OPERATORS.get(name,
                             PREDEFINED_VARS.get(name,
-                                              name))
+                                                name))
 
 
 def process_conditional(conditional):
@@ -861,7 +896,7 @@ def process_conditional(conditional):
 
 
 def normalize_expression(expression):
-    if re.match(r'^!.+!$',str(expression)): # quoted string
+    if re.match(r'^!.+!$', str(expression)):  # quoted string
         return expression
     elif expression:
         result = str(expression)
@@ -913,7 +948,7 @@ def base64_encode_url(url):
 
     try:
         url = unquote(url)
-    except:
+    except Exception:
         pass
     url = smart_escape(url)
     b64 = base64.b64encode(url.encode('utf-8'))
