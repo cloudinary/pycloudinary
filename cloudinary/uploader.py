@@ -62,24 +62,24 @@ def upload_large(file, **options):
     """ Upload large files. """
     if utils.is_remote_url(file):
         return upload(file, **options)
-    else:
-        upload_id = utils.random_public_id()
-        with open(file, 'rb') as file_io:
-            results = None
-            current_loc = 0
-            chunk_size = options.get("chunk_size", 20000000)
-            file_size = getsize(file)
-            chunk = file_io.read(chunk_size)
-            while chunk:
-                range = "bytes {0}-{1}/{2}".format(current_loc, current_loc + len(chunk) - 1, file_size)
-                current_loc += len(chunk)
 
-                results = upload_large_part((file, chunk),
-                                           http_headers={"Content-Range": range, "X-Unique-Upload-Id": upload_id},
-                                           **options)
-                options["public_id"] = results.get("public_id")
-                chunk = file_io.read(chunk_size)
-            return results
+    upload_id = utils.random_public_id()
+    with open(file, 'rb') as file_io:
+        results = None
+        current_loc = 0
+        chunk_size = options.get("chunk_size", 20000000)
+        file_size = getsize(file)
+        chunk = file_io.read(chunk_size)
+        while chunk:
+            range = "bytes {0}-{1}/{2}".format(current_loc, current_loc + len(chunk) - 1, file_size)
+            current_loc += len(chunk)
+
+            results = upload_large_part((file, chunk),
+                                       http_headers={"Content-Range": range, "X-Unique-Upload-Id": upload_id},
+                                       **options)
+            options["public_id"] = results.get("public_id")
+            chunk = file_io.read(chunk_size)
+        return results
 
 
 def upload_large_part(file, **options):
@@ -271,7 +271,7 @@ def call_api(action, params, http_headers=None, return_error=False, unsigned=Fal
         api_url = utils.cloudinary_api_url(action, **options)
         if file:
             if isinstance(file, string_types):
-                if re.match(utils.REMOTE_URL_RE, file):
+                if utils.is_remote_url(file):
                     # URL
                     name = None
                     data = file
