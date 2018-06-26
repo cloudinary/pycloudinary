@@ -60,6 +60,9 @@ def upload_resource(file, **options):
 
 def upload_large(file, **options):
     """ Upload large files. """
+    if utils.is_remote_url(file):
+        return upload(file, **options)
+
     upload_id = utils.random_public_id()
     with open(file, 'rb') as file_io:
         results = None
@@ -268,7 +271,7 @@ def call_api(action, params, http_headers=None, return_error=False, unsigned=Fal
         api_url = utils.cloudinary_api_url(action, **options)
         if file:
             if isinstance(file, string_types):
-                if re.match(r'ftp:|https?:|s3:|data:[^;]*;base64,([a-zA-Z0-9\/+\n=]+)$', file):
+                if utils.is_remote_url(file):
                     # URL
                     name = None
                     data = file

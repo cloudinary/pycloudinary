@@ -33,6 +33,7 @@ DEFAULT_RESPONSIVE_WIDTH_TRANSFORMATION = {"width": "auto", "crop": "limit"}
 RANGE_VALUE_RE = r'^(?P<value>(\d+\.)?\d+)(?P<modifier>[%pP])?$'
 RANGE_RE = r'^(\d+\.)?\d+[%pP]?\.\.(\d+\.)?\d+[%pP]?$'
 FLOAT_RE = r'^(\d+)\.(\d+)?$'
+REMOTE_URL_RE = r'ftp:|https?:|s3:|data:[^;]*;base64,([a-zA-Z0-9\/+\n=]+)$'
 __LAYER_KEYWORD_PARAMS = [("font_weight", "normal"),
                           ("font_style", "normal"),
                           ("text_decoration", "none"),
@@ -924,3 +925,8 @@ def __json_serializer(obj):
     if isinstance(obj, (datetime, date)):
         return obj.isoformat()
     raise TypeError("Object of type %s is not JSON serializable" % type(obj))
+
+
+def is_remote_url(file):
+    """Basic URL scheme check to define if it's remote URL"""
+    return isinstance(file, string_types) and re.match(REMOTE_URL_RE, file)

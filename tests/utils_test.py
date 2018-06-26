@@ -10,6 +10,7 @@ from mock import patch
 
 import cloudinary.utils
 from cloudinary.utils import build_list_of_dicts, json_encode
+from tests.test_helper import TEST_IMAGE, REMOTE_TEST_IMAGE
 
 DEFAULT_ROOT_PATH = 'http://res.cloudinary.com/test123/'
 DEFAULT_UPLOAD_PATH = 'http://res.cloudinary.com/test123/image/upload/'
@@ -790,6 +791,9 @@ class TestUtils(unittest.TestCase):
             json_encode({"t": self})
         self.assertIn("is not JSON serializable", str(te.exception))
 
+    def test_is_remote_url(self):
+        self.assertFalse(cloudinary.utils.is_remote_url(TEST_IMAGE))
+        self.assertTrue(cloudinary.utils.is_remote_url(REMOTE_TEST_IMAGE))
 
 if __name__ == '__main__':
     unittest.main()
