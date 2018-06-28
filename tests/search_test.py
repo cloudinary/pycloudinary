@@ -17,9 +17,13 @@ upload_results = ["++"]
 TEST_TAG = 'search_{}'.format(TEST_TAG)
 UNIQUE_TAG = 'search_{}'.format(UNIQUE_TAG)
 
+MAX_INDEX_RETRIES = 10
+
+
 class SearchTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        cls.ready = False
         cloudinary.reset_config()
         if not cloudinary.config().api_secret: return
         for id in public_ids:
@@ -28,7 +32,22 @@ class SearchTest(unittest.TestCase):
                             tags=[TEST_TAG, UNIQUE_TAG],
                             context="stage=value", eager=[{"width": 100, "crop": "scale"}])
             upload_results.append(res)
-        time.sleep(3) # wait for the server to update
+
+        attempt = 0
+        while attempt < MAX_INDEX_RETRIES:
+            time.sleep(1)
+
+            results = Search().expression("tags:{0}".format(UNIQUE_TAG)).execute()
+
+            if len(results['resources']) == len(public_ids):
+                cls.ready = True
+                break
+
+            attempt += 1
+
+    def setUp(self):
+        if not self.ready:
+            self.fail("Failed indexing test resources")
 
     @classmethod
     def tearDownClass(cls):
