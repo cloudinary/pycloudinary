@@ -4,11 +4,16 @@ import random
 import re
 from datetime import timedelta, tzinfo
 
+import six
+from urllib3 import HTTPResponse
+from urllib3._collections import HTTPHeaderDict
+
 SUFFIX = os.environ.get('TRAVIS_JOB_ID') or random.randint(10000, 99999)
 REMOTE_TEST_IMAGE = "http://cloudinary.com/images/old_logo.png"
 TEST_IMAGE = "tests/logo.png"
 TEST_TAG = "pycloudinary_test"
 UNIQUE_TAG = "{0}_{1}".format(TEST_TAG, SUFFIX)
+UNIQUE_TEST_ID = UNIQUE_TAG
 
 ZERO = timedelta(0)
 
@@ -29,6 +34,10 @@ class UTC(tzinfo):
 
 def get_method(mocker):
     return mocker.call_args[0][0]
+
+
+def get_request_url(mocker):
+    return mocker.call_args[0][1]
 
 
 def get_uri(args):
@@ -62,3 +71,19 @@ def get_list_param(mocker, name):
     params = get_params(args)
     reg = re.compile(r'{}\[\d*\]'.format(name))
     return [params[key] for key in params.keys() if reg.match(key)]
+
+
+def http_response_mock(body="", headers=None, status=200):
+    if headers is None:
+        headers = {}
+
+    if not six.PY2:
+        body = body.encode("UTF-8")
+
+    return HTTPResponse(body, HTTPHeaderDict(headers), status=status)
+
+
+def api_response_mock():
+    return http_response_mock('{"foo":"bar"}', {"x-featureratelimit-limit": '0',
+                                                "x-featureratelimit-reset": 'Sat, 01 Apr 2017 22:00:00 GMT',
+                                                "x-featureratelimit-remaining": '0'})

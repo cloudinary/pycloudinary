@@ -50,6 +50,8 @@ class SearchTest(unittest.TestCase):
     def setUp(self):
         if not self.ready:
             self.fail("Failed indexing test resources")
+        # seems like some race condition happens between tests, try to avoid it using sleep
+        time.sleep(0.1)
 
     @classmethod
     def tearDownClass(cls):
