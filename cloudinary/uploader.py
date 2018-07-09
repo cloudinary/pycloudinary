@@ -1,14 +1,12 @@
 # Copyright Cloudinary
 import json
-import re
 import socket
-from os.path import getsize
 
+import certifi
 from six import string_types
 from urllib3 import PoolManager
 from urllib3.exceptions import HTTPError
 
-import certifi
 import cloudinary
 from cloudinary import utils
 from cloudinary.api import Error
@@ -33,6 +31,8 @@ else:
         cert_reqs='CERT_REQUIRED',
         ca_certs=certifi.where()
     )
+
+UPLOAD_LARGE_CHUNK_SIZE = 20000000
 
 
 def upload(file, **options):
@@ -64,32 +64,44 @@ def upload_large(file, **options):
     if utils.is_remote_url(file):
         return upload(file, **options)
 
-    upload_id = utils.random_public_id()
-    with open(file, 'rb') as file_io:
-        results = None
-        current_loc = 0
-        chunk_size = options.get("chunk_size", 20000000)
-        file_size = getsize(file)
-        chunk = file_io.read(chunk_size)
-        while chunk:
-            range = "bytes {0}-{1}/{2}".format(current_loc, current_loc + len(chunk) - 1, file_size)
-            current_loc += len(chunk)
+    if hasattr(file, 'read') and callable(file.read):
+        file_io = file
+    else:
+        file_io = open(file, 'rb')
 
-            results = upload_large_part(
-                (file, chunk),
-                http_headers={"Content-Range": range,
-                              "X-Unique-Upload-Id": upload_id},
-                **options)
-            options["public_id"] = results.get("public_id")
+    upload_result = None
+
+    with file_io:
+        upload_id = utils.random_public_id()
+        current_loc = 0
+        chunk_size = options.get("chunk_size", UPLOAD_LARGE_CHUNK_SIZE)
+        file_size = utils.file_io_size(file_io)
+
+        file_name = file.name if hasattr(file, 'name') and isinstance(file.name, str) else "stream"
+
+        chunk = file_io.read(chunk_size)
+
+        while chunk:
+            content_range = "bytes {0}-{1}/{2}".format(current_loc, current_loc + len(chunk) - 1, file_size)
+            current_loc += len(chunk)
+            http_headers = {"Content-Range": content_range, "X-Unique-Upload-Id": upload_id}
+
+            upload_result = upload_large_part((file_name, chunk), http_headers=http_headers, **options)
+
+            options["public_id"] = upload_result.get("public_id")
+
             chunk = file_io.read(chunk_size)
-        return results
+
+    return upload_result
 
 
 def upload_large_part(file, **options):
     """ Upload large files. """
     params = utils.build_upload_params(**options)
+
     if 'resource_type' not in options:
         options['resource_type'] = "raw"
+
     return call_api("upload", params, file=file, **options)
 
 
