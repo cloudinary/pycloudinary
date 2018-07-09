@@ -3,6 +3,7 @@ import base64
 import copy
 import hashlib
 import json
+import os
 import random
 import re
 import string
@@ -988,3 +989,19 @@ def __json_serializer(obj):
 def is_remote_url(file):
     """Basic URL scheme check to define if it's remote URL"""
     return isinstance(file, string_types) and re.match(REMOTE_URL_RE, file)
+
+
+def file_io_size(file_io):
+    """
+    Helper function for getting file-like object size(suitable for both files and streams)
+
+    :param file_io: io.IOBase
+
+    :return: size
+    """
+    initial_position = file_io.tell()
+    file_io.seek(0, os.SEEK_END)
+    size = file_io.tell()
+    file_io.seek(initial_position, os.SEEK_SET)
+
+    return size

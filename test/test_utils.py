@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
-
+import io
 import re
+import tempfile
 import unittest
 from collections import OrderedDict
 from datetime import datetime, date
 from fractions import Fraction
+from os.path import getsize
 
 import six
 from mock import patch
@@ -12,7 +14,6 @@ from mock import patch
 import cloudinary.utils
 from cloudinary.utils import build_list_of_dicts, json_encode, encode_unicode_url
 from test.helper_test import TEST_IMAGE, REMOTE_TEST_IMAGE
-
 
 DEFAULT_ROOT_PATH = 'http://res.cloudinary.com/test123/'
 DEFAULT_UPLOAD_PATH = 'http://res.cloudinary.com/test123/image/upload/'
@@ -823,6 +824,32 @@ class TestUtils(unittest.TestCase):
     def test_is_remote_url(self):
         self.assertFalse(cloudinary.utils.is_remote_url(TEST_IMAGE))
         self.assertTrue(cloudinary.utils.is_remote_url(REMOTE_TEST_IMAGE))
+
+    def test_file_io_size(self):
+        """Should return correct file size"""
+        test_data = b"Test data"
+        test_data_len = len(test_data)
+
+        with tempfile.NamedTemporaryFile() as temp_file:
+            temp_file.write(test_data)
+
+            actual_size = cloudinary.utils.file_io_size(temp_file)
+
+            filesystem_size = getsize(temp_file.name)
+
+            self.assertEqual(test_data_len, filesystem_size)
+            self.assertEqual(test_data_len, actual_size)
+
+        with io.BytesIO() as temp_stream:
+            temp_stream.write(test_data)
+
+            actual_size = cloudinary.utils.file_io_size(temp_stream)
+
+            self.assertEqual(test_data_len, actual_size)
+
+        with tempfile.NamedTemporaryFile() as empty_file:
+            actual_size = cloudinary.utils.file_io_size(empty_file)
+            self.assertEqual(0, actual_size)
 
 
 if __name__ == '__main__':

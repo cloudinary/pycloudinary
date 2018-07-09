@@ -1,12 +1,13 @@
 import os
 import random
-
 import re
 from datetime import timedelta, tzinfo
 
 import six
 from urllib3 import HTTPResponse
 from urllib3._collections import HTTPHeaderDict
+
+from cloudinary import utils
 
 SUFFIX = os.environ.get('TRAVIS_JOB_ID') or random.randint(10000, 99999)
 
@@ -92,3 +93,21 @@ def api_response_mock():
 
 def uploader_response_mock():
     return http_response_mock('{"foo":"bar"}')
+
+
+def populate_large_file(file_io, size, chunk_size=4096):
+    file_io.write(b"BMJ\xB9Y\x00\x00\x00\x00\x00\x8A\x00\x00\x00|\x00\x00\x00x\x05\x00\x00x\x05\x00\x00\x01\
+\x00\x18\x00\x00\x00\x00\x00\xC0\xB8Y\x00a\x0F\x00\x00a\x0F\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xFF\x00\
+\x00\xFF\x00\x00\xFF\x00\x00\x00\x00\x00\x00\xFFBGRs\x00\x00\x00\x00\x00\x00\x00\x00T\xB8\x1E\xFC\x00\x00\x00\x00\
+\x00\x00\x00\x00fff\xFC\x00\x00\x00\x00\x00\x00\x00\x00\xC4\xF5(\xFF\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\
+\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00")
+
+    remaining_size = size - utils.file_io_size(file_io)
+
+    while remaining_size > 0:
+        curr_chunk_size = min(remaining_size, chunk_size)
+        file_io.write(b"\xFF" * curr_chunk_size)
+        remaining_size -= chunk_size
+
+    file_io.flush()
+    file_io.seek(0)

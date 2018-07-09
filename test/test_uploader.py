@@ -7,13 +7,13 @@ from datetime import datetime
 
 import six
 from mock import patch
-import cloudinary
-from cloudinary import api, uploader, utils
-
 from urllib3 import disable_warnings
 from urllib3.util import parse_url
+
+import cloudinary
+from cloudinary import api, uploader, utils
 from test.helper_test import uploader_response_mock, SUFFIX, TEST_IMAGE, get_params, TEST_ICON, TEST_DOC, \
-    REMOTE_TEST_IMAGE, UTC
+    REMOTE_TEST_IMAGE, UTC, populate_large_file
 
 MOCK_RESPONSE = uploader_response_mock()
 
@@ -36,6 +36,11 @@ TEST_ID1 = "uploader_test_{}".format(SUFFIX)
 TEST_ID2 = "uploader_test_{}2".format(SUFFIX)
 
 disable_warnings()
+
+LARGE_FILE_SIZE = 5880138
+LARGE_CHUNK_SIZE = 5243000
+LARGE_FILE_WIDTH = 1400
+LARGE_FILE_HEIGHT = 1400
 
 
 class UploaderTest(unittest.TestCase):
@@ -72,11 +77,12 @@ class UploaderTest(unittest.TestCase):
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_file_io_without_filename(self):
         """should successfully upload FileIO file """
-        with io.BytesIO() as temp_file, \
-                open(TEST_IMAGE, 'rb') as input_file:
+        with io.BytesIO() as temp_file, open(TEST_IMAGE, 'rb') as input_file:
             temp_file.write(input_file.read())
             temp_file.seek(0)
+
             result = uploader.upload(temp_file, tags=[UNIQUE_TAG])
+
         self.assertEqual(result["width"], TEST_IMAGE_WIDTH)
         self.assertEqual(result["height"], TEST_IMAGE_HEIGHT)
         self.assertEqual('stream', result["original_filename"])
@@ -325,44 +331,57 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_large(self):
         """ should support uploading large files """
-        temp_file = tempfile.NamedTemporaryFile()
-        temp_file_name = temp_file.name
-        temp_file.write(b"BMJ\xB9Y\x00\x00\x00\x00\x00\x8A\x00\x00\x00|\x00\x00\x00x\x05\x00\x00x\x05\x00\x00\x01\
-\x00\x18\x00\x00\x00\x00\x00\xC0\xB8Y\x00a\x0F\x00\x00a\x0F\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xFF\x00\
-\x00\xFF\x00\x00\xFF\x00\x00\x00\x00\x00\x00\xFFBGRs\x00\x00\x00\x00\x00\x00\x00\x00T\xB8\x1E\xFC\x00\x00\x00\x00\
-\x00\x00\x00\x00fff\xFC\x00\x00\x00\x00\x00\x00\x00\x00\xC4\xF5(\xFF\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\
-\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00")
-        for i in range(0, 588000):
-            temp_file.write(b"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF")
+        with tempfile.NamedTemporaryFile() as temp_file:
+            populate_large_file(temp_file, LARGE_FILE_SIZE)
+            temp_file_name = temp_file.name
 
-        temp_file.flush()
-        self.assertEqual(5880138, os.path.getsize(temp_file_name))
+            self.assertEqual(LARGE_FILE_SIZE, os.path.getsize(temp_file_name))
 
-        resource = uploader.upload_large(temp_file_name, chunk_size=5243000, tags=["upload_large_tag", UNIQUE_TAG])
-        self.assertEqual(resource["tags"], ["upload_large_tag", UNIQUE_TAG])
-        self.assertEqual(resource["resource_type"], "raw")
+            resource = uploader.upload_large(temp_file_name, chunk_size=LARGE_CHUNK_SIZE,
+                                             tags=["upload_large_tag", UNIQUE_TAG])
 
-        resource2 = uploader.upload_large(temp_file_name, chunk_size=5243000, tags=["upload_large_tag", UNIQUE_TAG],
-                                          resource_type="image")
-        self.assertEqual(resource2["tags"], ["upload_large_tag", UNIQUE_TAG])
-        self.assertEqual(resource2["resource_type"], "image")
-        self.assertEqual(resource2["width"], 1400)
-        self.assertEqual(resource2["height"], 1400)
+            self.assertEqual(resource["tags"], ["upload_large_tag", UNIQUE_TAG])
+            self.assertEqual(resource["resource_type"], "raw")
 
-        resource3 = uploader.upload_large(temp_file_name, chunk_size=5880138, tags=["upload_large_tag", UNIQUE_TAG])
-        self.assertEqual(resource3["tags"], ["upload_large_tag", UNIQUE_TAG])
-        self.assertEqual(resource3["resource_type"], "raw")
+            resource2 = uploader.upload_large(temp_file_name, chunk_size=LARGE_CHUNK_SIZE,
+                                              tags=["upload_large_tag", UNIQUE_TAG], resource_type="image")
 
-        # should allow fallback of upload large with remote url to regular upload
+            self.assertEqual(resource2["tags"], ["upload_large_tag", UNIQUE_TAG])
+            self.assertEqual(resource2["resource_type"], "image")
+            self.assertEqual(resource2["width"], LARGE_FILE_WIDTH)
+            self.assertEqual(resource2["height"], LARGE_FILE_HEIGHT)
+
+            resource3 = uploader.upload_large(temp_file_name, chunk_size=LARGE_FILE_SIZE,
+                                              tags=["upload_large_tag", UNIQUE_TAG])
+
+            self.assertEqual(resource3["tags"], ["upload_large_tag", UNIQUE_TAG])
+            self.assertEqual(resource3["resource_type"], "raw")
+
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_upload_large_url(self):
+        """Should allow fallback of upload large with remote url to regular upload"""
         resource4 = uploader.upload_large(REMOTE_TEST_IMAGE, tags=[UNIQUE_TAG])
+
         self.assertEqual(resource4["width"], TEST_IMAGE_WIDTH)
         self.assertEqual(resource4["height"], TEST_IMAGE_HEIGHT)
-        expected_signature = utils.api_sign_request(dict(public_id=resource4["public_id"],
-                                                         version=resource4["version"]),
-                                                    cloudinary.config().api_secret)
+
+        expected_signature = utils.api_sign_request(
+            dict(public_id=resource4["public_id"], version=resource4["version"]), cloudinary.config().api_secret)
+
         self.assertEqual(resource4["signature"], expected_signature)
 
-        temp_file.close()
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_upload_large_file_io(self):
+        """Should support uploading large streams"""
+        with io.BytesIO() as temp_file:
+            populate_large_file(temp_file, LARGE_FILE_SIZE)
+            resource = uploader.upload_large(temp_file, chunk_size=LARGE_CHUNK_SIZE,
+                                             tags=["upload_large_tag", UNIQUE_TAG], resource_type="image")
+
+            self.assertEqual(resource["tags"], ["upload_large_tag", UNIQUE_TAG])
+            self.assertEqual(resource["resource_type"], "image")
+            self.assertEqual(resource["width"], LARGE_FILE_WIDTH)
+            self.assertEqual(resource["height"], LARGE_FILE_HEIGHT)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_preset(self):
