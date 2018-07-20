@@ -34,8 +34,7 @@ class SearchTest(unittest.TestCase):
             res = uploader.upload(TEST_IMAGE,
                                   public_id=public_id,
                                   tags=[TEST_TAG, UNIQUE_TAG],
-                                  context="stage=value",
-                                  eager=[{"width": 100, "crop": "scale"}])
+                                  context="stage=value")
             upload_results.append(res)
         attempt = 0
         while attempt < MAX_INDEX_RETRIES:

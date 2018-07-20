@@ -19,6 +19,7 @@ from test.helper_test import SUFFIX, TEST_IMAGE, api_response_mock
 MOCK_RESPONSE = api_response_mock()
 
 TEST_TAG = "arch_pycloudinary_test_{}".format(SUFFIX)
+TEST_TAG_RAW = "arch_pycloudinary_test_raw_{}".format(SUFFIX)
 
 disable_warnings()
 
@@ -33,15 +34,15 @@ class ArchiveTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         api.delete_resources_by_tag(TEST_TAG)
-        api.delete_resources_by_tag(TEST_TAG, resource_type='raw')
+        api.delete_resources_by_tag(TEST_TAG_RAW, resource_type='raw')
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_create_archive(self):
         """should successfully generate an archive"""
-        result = uploader.create_archive(tags=[TEST_TAG])
+        result = uploader.create_archive(tags=[TEST_TAG], target_tags=[TEST_TAG_RAW])
         self.assertEqual(2, result.get("file_count"))
         result2 = uploader.create_zip(
-            tags=[TEST_TAG], transformations=[{"width": 0.5}, {"width": 2.0}])
+            tags=[TEST_TAG], transformations=[{"width": 0.5}, {"width": 2.0}], target_tags=[TEST_TAG_RAW])
         self.assertEqual(4, result2.get("file_count"))
 
     @patch('urllib3.request.RequestMethods.request')

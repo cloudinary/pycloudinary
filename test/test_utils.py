@@ -283,7 +283,7 @@ class TestUtils(unittest.TestCase):
     def test_fetch_overlay(self):
         """should support overlay"""
         self.__test_cloudinary_url(
-            options={"overlay": "fetch:http://cloudinary.com/images/old_logo.png"},
+            options={"overlay": "fetch:" + REMOTE_TEST_IMAGE},
             expected_url=(
                     DEFAULT_UPLOAD_PATH
                     + "l_fetch:aHR0cDovL2Nsb3VkaW5hcnkuY29tL2ltYWdlcy9vbGRfbG9nby5wbmc=/"
