@@ -8,6 +8,7 @@ import re
 import string
 import struct
 import time
+import urllib
 import zlib
 from collections import OrderedDict
 from datetime import datetime, date
@@ -557,7 +558,8 @@ def cloudinary_api_url(action='upload', **options):
     if not cloud_name:
         raise ValueError("Must supply cloud_name")
     resource_type = options.get("resource_type", "image")
-    return "/".join([cloudinary_prefix, "v1_1", cloud_name, resource_type, action])
+
+    return encode_unicode_url("/".join([cloudinary_prefix, "v1_1", cloud_name, resource_type, action]))
 
 
 def smart_escape(source, unsafe=r"([^a-zA-Z0-9_.\-\/:]+)"):
@@ -960,6 +962,20 @@ def base64_encode_url(url):
     url = smart_escape(url)
     b64 = base64.b64encode(url.encode('utf-8'))
     return b64.decode('ascii')
+
+
+def encode_unicode_url(url_str):
+    """
+    Quote and encode possible unicode url string (applicable for python2)
+
+    :param url_str: Url string to encode
+
+    :return: Encoded string
+    """
+    if six.PY2:
+        url_str = urllib.quote(url_str.encode('utf-8'), ":/?#[]@!$&'()*+,;=")
+
+    return url_str
 
 
 def __json_serializer(obj):

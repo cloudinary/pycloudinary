@@ -10,7 +10,7 @@ import six
 from mock import patch
 
 import cloudinary.utils
-from cloudinary.utils import build_list_of_dicts, json_encode
+from cloudinary.utils import build_list_of_dicts, json_encode, encode_unicode_url
 from test.helper_test import TEST_IMAGE, REMOTE_TEST_IMAGE
 
 
@@ -815,6 +815,10 @@ class TestUtils(unittest.TestCase):
         with self.assertRaises(TypeError) as te:
             json_encode({"t": self})
         self.assertIn("is not JSON serializable", str(te.exception))
+
+    def test_encode_unicode_url(self):
+        self.assertEqual("string", encode_unicode_url("string"))
+        self.assertEqual("encoded", encode_unicode_url(u"encoded"))
 
     def test_is_remote_url(self):
         self.assertFalse(cloudinary.utils.is_remote_url(TEST_IMAGE))
