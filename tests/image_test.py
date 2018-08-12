@@ -1,14 +1,25 @@
 import copy
+import logging
+import os
 import re
 import unittest
+from collections import OrderedDict
 
 import six
+from mock import mock
 
 import cloudinary
 from cloudinary import CloudinaryImage
 
 
 class ImageTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.logger = cloudinary.logger
+
+        if os.getenv("DEBUG"):
+            cls.logger.setLevel(logging.DEBUG)
+
     def setUp(self):
         self.cloud_name = 'test123'
         self.public_id = "sample"
@@ -18,11 +29,19 @@ class ImageTest(unittest.TestCase):
         self.common_format = {"url": self.upload_url, "id": self.full_public_id}
         self.image = CloudinaryImage(self.public_id, format=self.image_format)
 
-        self.common_image_options = {"effect": "sepia", "cloud_name": self.cloud_name}
+        self.common_transformation = {"effect": "sepia"}
         self.common_transformation_str = 'e_sepia'
-        self.breakpoint_list = [100, 200, 300, 399]
-        self.common_srcset = {"breakpoints": self.breakpoint_list}
+        self.common_image_options = {"cloud_name": self.cloud_name}
+        self.common_image_options.update(self.common_transformation)
         self.custom_attributes = {'custom_attr1': 'custom_value1', 'custom_attr2': 'custom_value2'}
+
+        self.min_width = 100
+        self.max_width = 399
+        self.breakpoint_list = [self.min_width, 200, 300, self.max_width]
+        self.common_srcset = {"breakpoints": self.breakpoint_list}
+
+        self.fill_transformation = {"width": self.max_width, "height": self.max_width, "crop": "fill"}
+        self.fill_transformation_str = "c_fill,h_{h},w_{w}".format(h=self.max_width, w=self.max_width)
 
         cloudinary.reset_config()
         cloudinary.config(cloud_name=self.cloud_name, api_secret="1234", cname=None)
@@ -120,6 +139,49 @@ class ImageTest(unittest.TestCase):
         expected_re = 'src=["\']{url}/c_scale,dpr_auto,w_auto:breakpoints/{id}["\']'.format(**self.common_format)
         six.assertRegex(self, tag, expected_re)
 
+    def _common_image_tag_helper(self, tag_name, public_id, common_trans_str, custom_trans_str=None,
+                                srcset_breakpoints=None, attributes=None, is_void=False):
+        """
+        Helper method for generating expected img and source tags
+
+        :param tag_name:            Expected tag name(img or source)
+        :param public_id:           Public ID of the image
+        :param common_trans_str:    Default transformation string to be used in all resources
+        :param custom_trans_str:    Optional custom transformation string to be be used inside srcset resources.
+                                    If not provided, common_trans_str is used
+        :param srcset_breakpoints:  Optional list of breakpoints for srcset. If not provided srcset is omitted
+        :param attributes:          Optional dict of custom attributes to be added to the tag
+        :param is_void:             Indicates whether tag is an HTML5 void tag (does not need to be self-closed)
+
+        :return: Resulting tag
+        """
+        if not custom_trans_str:
+            custom_trans_str = common_trans_str
+
+        if attributes is None:
+            attributes = dict()
+
+        if srcset_breakpoints:
+            bp_template = "{upload_url}{custom_trans_str}/c_scale,w_{{w}}/{public_id} {{w}}w".format(
+                upload_url=self.upload_url,
+                custom_trans_str="/" + custom_trans_str if custom_trans_str else "",
+                public_id=public_id)
+            attributes['srcset'] = ', '.join(bp_template.format(w=bp) for bp in srcset_breakpoints)
+
+        attributes_str = " ".join(
+            '{k}="{v}"'.format(k=k, v=attributes[k]) for k in sorted(attributes)) if attributes else ""
+
+        tag = "<{}".format(tag_name)
+
+        if attributes_str:
+            tag += " " + attributes_str
+
+        tag += "/>" if not is_void else ">"  # HTML5 void elements do not need to be self closed
+
+        self.logger.debug(re.sub(r'([,"]) ', r'\1\n    ', tag))
+
+        return tag
+
     def _get_expected_cl_image_tag(self, public_id, common_trans_str, custom_trans_str=None, srcset_breakpoints=None,
                                    attributes=None):
         """
@@ -134,30 +196,56 @@ class ImageTest(unittest.TestCase):
 
         :return: Resulting image tag
         """
-        if not custom_trans_str:
-            custom_trans_str = common_trans_str
 
         if attributes is None:
-            attributes = dict()
+            attributes = OrderedDict()
 
-        if srcset_breakpoints:
-            bp_template = "{upload_url}/{custom_trans_str}/c_scale,w_{{w}}/{public_id} {{w}}w".format(
-                upload_url=self.upload_url, custom_trans_str=custom_trans_str, public_id=public_id)
-            attributes['srcset'] = ', '.join(bp_template.format(w=bp) for bp in srcset_breakpoints)
+        attributes["src"] = "{upload_url}{common_trans_str}/{public_id}".format(
+            upload_url=self.upload_url,
+            common_trans_str="/" + common_trans_str if common_trans_str else "",
+            public_id=public_id)
 
-        attributes["src"] = "{upload_url}/{common_trans_str}/{public_id}".format(
-            upload_url=self.upload_url, common_trans_str=common_trans_str, public_id=public_id)
+        return self._common_image_tag_helper("img", public_id, common_trans_str, custom_trans_str, srcset_breakpoints,
+                                             attributes)
 
-        attributes_str = " ".join(
-            '{k}="{v}"'.format(k=k, v=attributes[k]) for k in sorted(attributes)) if attributes else ""
+    @staticmethod
+    def _get_expected_media_attr(**media_options):
+        media_query_conditions = []
+        if "min_width" in media_options:
+            media_query_conditions.append("(min-width: {}px)".format(media_options["min_width"]))
+        if "max_width" in media_options:
+            media_query_conditions.append("(max-width: {}px)".format(media_options["max_width"]))
 
-        tag = "<img"
+        return " and ".join(media_query_conditions)
 
-        if attributes_str:
-            tag += " " + attributes_str
+    def _get_expected_cl_source_tag(self, public_id, common_trans_str, custom_trans_str=None, srcset_breakpoints=None,
+                                    media=None, attributes=None):
+        """
+        Helper method for generating expected image tag
 
-        tag += "/>"
-        return tag
+        :param public_id:           Public ID of the image
+        :param common_trans_str:    Default transformation string to be used in all resources
+        :param custom_trans_str:    Optional custom transformation string to be be used inside srcset resources.
+                                    If not provided, common_trans_str is used
+        :param srcset_breakpoints:  Optional list of breakpoints for srcset. If not provided srcset is omitted
+        :param attributes:          Optional dict of custom attributes to be added to the tag
+
+        :return: Resulting image tag
+        """
+
+        if attributes is None:
+            attributes = OrderedDict()
+
+        if media:
+            attributes["media"] = self._get_expected_media_attr(**media)
+
+        attributes["srcset"] = "{upload_url}{common_trans_str}/{public_id}".format(
+            upload_url=self.upload_url,
+            common_trans_str="/" + common_trans_str if common_trans_str else "",
+            public_id=public_id)
+
+        return self._common_image_tag_helper("source", public_id, common_trans_str, custom_trans_str,
+                                             srcset_breakpoints, attributes, True)
 
     def test_srcset_from_breakpoints(self):
         """Should create srcset attribute with provided breakpoints"""
@@ -177,7 +265,7 @@ class ImageTest(unittest.TestCase):
 
     def test_srcset_from_min_width_max_width_max_images(self):
         """Should support srcset attribute defined by min_width, max_width, and max_images"""
-        srcset_params = {"min_width": self.breakpoint_list[0], "max_width": self.breakpoint_list[-1],
+        srcset_params = {"min_width": self.min_width, "max_width": self.max_width,
                          "max_images": len(self.breakpoint_list)}
 
         tag = CloudinaryImage(self.full_public_id).image(srcset=srcset_params, **self.common_image_options)
@@ -188,16 +276,16 @@ class ImageTest(unittest.TestCase):
 
     def test_srcset_with_one_image(self):
         """Should support 1 image in srcset"""
-        srcset_params = {"min_width": self.breakpoint_list[0], "max_width": self.breakpoint_list[-1],
+        srcset_params = {"min_width": self.min_width, "max_width": self.max_width,
                          "max_images": 1}
 
         tag_by_params = CloudinaryImage(self.full_public_id).image(srcset=srcset_params, **self.common_image_options)
 
         expected_tag = self._get_expected_cl_image_tag(self.full_public_id, self.common_transformation_str,
-                                                       srcset_breakpoints=[self.breakpoint_list[-1]])
+                                                       srcset_breakpoints=[self.max_width])
         self.assertEqual(expected_tag, tag_by_params)
 
-        srcset_breakpoint = {"breakpoints": [self.breakpoint_list[-1]]}
+        srcset_breakpoint = {"breakpoints": [self.max_width]}
         tag_by_breakpoint = CloudinaryImage(self.full_public_id).image(srcset=srcset_breakpoint,
                                                                        **self.common_image_options)
         self.assertEqual(expected_tag, tag_by_breakpoint)
@@ -230,9 +318,10 @@ class ImageTest(unittest.TestCase):
     def test_srcset_from_string(self):
         """Should support srcset string value"""
         raw_srcset_value = "some srcset data as is"
-        tag = CloudinaryImage(self.full_public_id).image(srcset=raw_srcset_value, **self.common_image_options)
-
         attributes = {"srcset": raw_srcset_value}
+
+        tag = CloudinaryImage(self.full_public_id).image(attributes=attributes, **self.common_image_options)
+
         expected_tag = self._get_expected_cl_image_tag(self.full_public_id, self.common_transformation_str,
                                                        attributes=attributes)
         self.assertEqual(expected_tag, tag)
@@ -261,10 +350,14 @@ class ImageTest(unittest.TestCase):
             {'min_width': 100, 'max_width': 300, 'max_images': -17},  # invalid max_images
             {'min_width': 100, 'max_width': 300, 'max_images': '3'},  # invalid max_images
         ]
+        with mock.patch('cloudinary.logger') as log_mock:
+            for invalid_srcset in invalid_srcset_params:
+                image_tag = CloudinaryImage(self.full_public_id).image(srcset=invalid_srcset,
+                                                                       **self.common_image_options)
+                self.assertNotIn("srcset", image_tag)
 
-        for invalid_srcset in invalid_srcset_params:
-            with self.assertRaises(ValueError):
-                CloudinaryImage(self.full_public_id).image(srcset=invalid_srcset, **self.common_image_options)
+            expected_log_call_count = len(invalid_srcset_params) + 1  # When `sizes` is True we call log twice
+            self.assertEqual(expected_log_call_count, log_mock.warning.call_count)
 
     def test_custom_attributes(self):
         """ Should consume custom attributes from 'attributes' key"""
@@ -293,6 +386,71 @@ class ImageTest(unittest.TestCase):
         expected_tag = self._get_expected_cl_image_tag(self.full_public_id, self.common_transformation_str,
                                                        attributes=updated_attributes)
         self.assertEqual(expected_tag, tag)
+
+    def test_source_tag(self):
+        """should generate source tag"""
+        tag = CloudinaryImage(self.full_public_id).source(**self.common_image_options)
+        expected_tag = self._get_expected_cl_source_tag(self.full_public_id, self.common_transformation_str)
+
+        self.assertEqual(expected_tag, tag)
+
+    def test_source_tag_media_query(self):
+        """should generate source tag with media query"""
+        media = {"min_width": self.min_width, "max_width": self.max_width}
+        tag = CloudinaryImage(self.full_public_id).source(media=media)
+        expected_media = "(min-width: {min}px) and (max-width: {max}px)".format(min=self.min_width,
+                                                                                     max=self.max_width)
+        expected_tag = self._get_expected_cl_source_tag(self.full_public_id, "", attributes={"media": expected_media})
+
+        self.assertEqual(expected_tag, tag)
+
+    def test_source_tag_responsive_srcset(self):
+        """should generate source tag with responsive srcset"""
+        tag = CloudinaryImage(self.full_public_id).source(srcset=self.common_srcset)
+        expected_tag = self._get_expected_cl_source_tag(self.full_public_id, "",
+                                                        srcset_breakpoints=self.breakpoint_list)
+
+        self.assertEqual(expected_tag, tag)
+
+    def test_picture_tag(self):
+        """should generate picture tag"""
+        tag = CloudinaryImage(self.full_public_id).picture(sources=[
+            {"max_width": self.min_width,
+             "transformation": {"effect": "sepia", "angle": 17, "width": self.min_width}},
+            {"min_width": self.min_width,
+             "max_width": self.max_width,
+             "transformation": {"effect": "colorize", "angle": 18, "width": self.max_width}},
+            {"min_width": self.max_width,
+             "transformation": {"effect": "blur", "angle": 19, "width": self.max_width}}
+        ], **self.fill_transformation)
+
+        expected_source_1 = self._get_expected_cl_source_tag(
+            self.full_public_id,
+            "{tr}/a_17,e_sepia,w_{w}".format(tr=self.fill_transformation_str, w=self.min_width),
+            media={"max_width": self.min_width}
+        )
+
+        expected_source_2 = self._get_expected_cl_source_tag(
+            self.full_public_id,
+            "{tr}/a_18,e_colorize,w_{w}".format(tr=self.fill_transformation_str, w=self.max_width),
+            media={"min_width": self.min_width, "max_width": self.max_width}
+        )
+
+        expected_source_3 = self._get_expected_cl_source_tag(
+            self.full_public_id,
+            "{tr}/a_19,e_blur,w_{w}".format(tr=self.fill_transformation_str, w=self.max_width),
+            media={"min_width": self.max_width}
+        )
+
+        expected_img = self._get_expected_cl_image_tag(
+            self.full_public_id,
+            self.fill_transformation_str,
+            attributes={"height": self.max_width, "width": self.max_width}
+        )
+
+        exp_tag = '<picture>' + expected_source_1 + expected_source_2 + expected_source_3 + expected_img + '</picture>'
+
+        self.assertEqual(exp_tag, tag)
 
 
 if __name__ == "__main__":

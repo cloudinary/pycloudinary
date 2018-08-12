@@ -3,24 +3,15 @@ import unittest
 from collections import OrderedDict
 
 from mock import patch
-from urllib3._collections import HTTPHeaderDict
 
 import cloudinary
-import six
 from cloudinary import uploader, api, utils
 
-from urllib3 import disable_warnings, HTTPResponse
+from urllib3 import disable_warnings
 
 from .test_helper import *
 
-
-MOCK_HEADERS = HTTPHeaderDict({"x-featureratelimit-limit": '0', "x-featureratelimit-reset": 'Sat, 01 Apr 2017 22:00:00 GMT',
-                          "x-featureratelimit-remaining": '0', })
-
-if six.PY2:
-    MOCK_RESPONSE = HTTPResponse(body='{"foo":"bar"}', headers=MOCK_HEADERS)
-else:
-    MOCK_RESPONSE = HTTPResponse(body='{"foo":"bar"}'.encode("UTF-8"), headers=MOCK_HEADERS)
+MOCK_RESPONSE = api_response_mock()
 
 disable_warnings()
 
