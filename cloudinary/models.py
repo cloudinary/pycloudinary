@@ -13,15 +13,21 @@ except ImportError:
 
 CLOUDINARY_FIELD_DB_RE = r'(?:(?P<resource_type>image|raw|video)/' \
                          r'(?P<type>upload|private|authenticated)/)?' \
-                         r'(?:v(?P<version>\d+)/)?(?P<public_id>.*?)(\.(?P<format>[^.]+))?$'
+                         r'(?:v(?P<version>\d+)/)?' \
+                         r'(?P<public_id>.*?)' \
+                         r'(\.(?P<format>[^.]+))?$'
 
 
-# Taken from six - https://pythonhosted.org/six/
 def with_metaclass(meta, *bases):
-    """Create a base class with a metaclass."""
-    # This requires a bit of explanation: the basic idea is to make a dummy
-    # metaclass for one level of class instantiation that replaces itself with
-    # the actual metaclass.
+    """
+    Create a base class with a metaclass.
+
+    This requires a bit of explanation: the basic idea is to make a dummy
+    metaclass for one level of class instantiation that replaces itself with
+    the actual metaclass.
+
+    Taken from six - https://pythonhosted.org/six/
+    """
     class metaclass(meta):
         def __new__(cls, name, this_bases, d):
             return meta(name, bases, d)
@@ -45,10 +51,16 @@ class CloudinaryField(models.Field):
         return 'CharField'
 
     def value_to_string(self, obj):
-        # We need to support both legacy `_get_val_from_obj` and new `value_from_object` models.Field methods.
-        # It would be better to wrap it with try -> except AttributeError -> fallback to legacy.
-        # Unfortunately, we can catch AttributeError exception from `value_from_object` function itself.
-        # Parsing exception string is an overkill here, that's why we check for attribute existence
+        """
+        We need to support both legacy `_get_val_from_obj` and new `value_from_object` models.Field methods.
+        It would be better to wrap it with try -> except AttributeError -> fallback to legacy.
+        Unfortunately, we can catch AttributeError exception from `value_from_object` function itself.
+        Parsing exception string is an overkill here, that's why we check for attribute existence
+
+        :param obj: Value to serialize
+
+        :return: Serialized value
+        """
 
         if hasattr(self, 'value_from_object'):
             value = self.value_from_object(obj)

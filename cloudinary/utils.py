@@ -560,8 +560,15 @@ def cloudinary_api_url(action='upload', **options):
     return "/".join([cloudinary_prefix, "v1_1", cloud_name, resource_type, action])
 
 
-# Based on ruby's CGI::unescape. In addition does not escape / :
 def smart_escape(source, unsafe=r"([^a-zA-Z0-9_.\-\/:]+)"):
+    """
+    Based on ruby's CGI::unescape. In addition does not escape / :
+
+    :param source: Source string to escape
+    :param unsafe: Unsafe characters
+
+    :return: Escaped string
+    """
     def pack(m):
         return to_bytes('%' + "%".join(
             ["%02X" % x for x in struct.unpack('B' * len(m.group(1)), m.group(1))]

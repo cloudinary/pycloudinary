@@ -46,7 +46,8 @@ The format of the value should be <ProductName>/Version[ (comment)].
 
 
 def get_user_agent():
-    """Provides the `USER_AGENT` string that is passed to the Cloudinary servers.
+    """
+    Provides the `USER_AGENT` string that is passed to the Cloudinary servers.
     Prepends  `USER_PLATFORM` if it is defined.
 
     :returns: the user agent
@@ -407,23 +408,27 @@ class CloudinaryResource(object):
         self.default_poster_options(options)
         return self.build_url(**options)
 
-    # Creates an HTML video tag for the provided +source+
-    #
-    # ==== Options
-    # * <tt>source_types</tt> - Specify which source type the tag should include.
-    #                           defaults to webm, mp4 and ogv.
-    # * <tt>source_transformation</tt> - specific transformations to use
-    #                                    for a specific source type.
-    # * <tt>poster</tt> - override default thumbnail:
-    #   * url: provide an ad hoc url
-    #   * options: with specific poster transformations and/or Cloudinary +:public_id+
-    #
-    # ==== Examples
-    #   CloudinaryResource("mymovie.mp4").video()
-    #   CloudinaryResource("mymovie.mp4").video(source_types = 'webm')
-    #   CloudinaryResource("mymovie.ogv").video(poster = "myspecialplaceholder.jpg")
-    #   CloudinaryResource("mymovie.webm").video(source_types = ['webm', 'mp4'], poster = {'effect': 'sepia'})
     def video(self, **options):
+        """
+        Creates an HTML video tag for the provided +source+
+
+        Examples:
+           CloudinaryResource("mymovie.mp4").video()
+           CloudinaryResource("mymovie.mp4").video(source_types = 'webm')
+           CloudinaryResource("mymovie.ogv").video(poster = "myspecialplaceholder.jpg")
+           CloudinaryResource("mymovie.webm").video(source_types = ['webm', 'mp4'], poster = {'effect': 'sepia'})
+
+        :param options:
+         * <tt>source_types</tt>            - Specify which source type the tag should include.
+                                              defaults to webm, mp4 and ogv.
+         * <tt>source_transformation</tt>   - specific transformations to use
+                                              for a specific source type.
+         * <tt>poster</tt>                  - override default thumbnail:
+           * url: provide an ad hoc url
+           * options: with specific poster transformations and/or Cloudinary +:public_id+
+
+        :return: Video tag
+        """
         public_id = options.get('public_id', self.public_id)
         source = re.sub(r"\.({0})$".format("|".join(self.default_source_types())), '', public_id)
 

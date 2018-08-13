@@ -15,7 +15,6 @@ from cloudinary import utils
 logger = cloudinary.logger
 
 
-# intentionally one-liners
 class Error(Exception):
     pass
 
