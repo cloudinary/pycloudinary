@@ -1,4 +1,5 @@
 import io
+import os
 import tempfile
 import unittest
 from collections import OrderedDict
@@ -6,28 +7,25 @@ from datetime import datetime
 
 import six
 from mock import patch
-from urllib3 import disable_warnings, HTTPResponse
-from urllib3.util import parse_url
-
 import cloudinary
-from cloudinary import uploader, utils, api
-from tests.test_helper import *
+from cloudinary import api, uploader, utils
 
-if six.PY2:
-    MOCK_RESPONSE = HTTPResponse(body='{"foo":"bar"}')
-else:
-    MOCK_RESPONSE = HTTPResponse(body='{"foo":"bar"}'.encode("UTF-8"))
+from urllib3 import disable_warnings
+from urllib3.util import parse_url
+from test.helper_test import uploader_response_mock, SUFFIX, TEST_IMAGE, get_params, TEST_TAG, TEST_ICON, TEST_DOC, \
+    REMOTE_TEST_IMAGE, UTC
 
-disable_warnings()
+MOCK_RESPONSE = uploader_response_mock()
 
 TEST_IMAGE_HEIGHT = 51
 TEST_IMAGE_WIDTH = 241
 UNIQUE_TAG = "up_test_uploader_{}".format(SUFFIX)
 TEST_DOCX_ID = "test_docx_{}".format(SUFFIX)
 
+disable_warnings()
+
 
 class UploaderTest(unittest.TestCase):
-
     def setUp(self):
         cloudinary.reset_config()
 
@@ -46,8 +44,9 @@ class UploaderTest(unittest.TestCase):
         result = uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG])
         self.assertEqual(result["width"], TEST_IMAGE_WIDTH)
         self.assertEqual(result["height"], TEST_IMAGE_HEIGHT)
-        expected_signature = utils.api_sign_request(dict(public_id=result["public_id"], version=result["version"]),
-                                                    cloudinary.config().api_secret)
+        expected_signature = utils.api_sign_request(
+            dict(public_id=result["public_id"], version=result["version"]),
+            cloudinary.config().api_secret)
         self.assertEqual(result["signature"], expected_signature)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -67,7 +66,7 @@ class UploaderTest(unittest.TestCase):
     def test_upload_async(self, mocker):
         """should pass async value """
         mocker.return_value = MOCK_RESPONSE
-        result = uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG], async=True)
+        uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG], async=True)
         params = mocker.call_args[0][2]
         self.assertTrue(params['async'])
 
@@ -76,7 +75,7 @@ class UploaderTest(unittest.TestCase):
     def test_ocr(self, mocker):
         """should pass ocr value """
         mocker.return_value = MOCK_RESPONSE
-        result = uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG], ocr='adv_ocr')
+        uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG], ocr='adv_ocr')
         args, kargs = mocker.call_args
         self.assertEqual(get_params(args)['ocr'], 'adv_ocr')
 
@@ -101,8 +100,9 @@ class UploaderTest(unittest.TestCase):
         result = uploader.upload("http://cloudinary.com/images/old_logo.png", tags=[UNIQUE_TAG])
         self.assertEqual(result["width"], TEST_IMAGE_WIDTH)
         self.assertEqual(result["height"], TEST_IMAGE_HEIGHT)
-        expected_signature = utils.api_sign_request(dict(public_id=result["public_id"], version=result["version"]),
-                                                    cloudinary.config().api_secret)
+        expected_signature = utils.api_sign_request(
+            dict(public_id=result["public_id"], version=result["version"]),
+            cloudinary.config().api_secret)
         self.assertEqual(result["signature"], expected_signature)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -111,8 +111,9 @@ class UploaderTest(unittest.TestCase):
         result = uploader.upload(u"http://cloudinary.com/images/old_logo.png", tags=[UNIQUE_TAG])
         self.assertEqual(result["width"], TEST_IMAGE_WIDTH)
         self.assertEqual(result["height"], TEST_IMAGE_HEIGHT)
-        expected_signature = utils.api_sign_request(dict(public_id=result["public_id"], version=result["version"]),
-                                                    cloudinary.config().api_secret)
+        expected_signature = utils.api_sign_request(
+            dict(public_id=result["public_id"], version=result["version"]),
+            cloudinary.config().api_secret)
         self.assertEqual(result["signature"], expected_signature)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -128,8 +129,9 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
             tags=[UNIQUE_TAG])
         self.assertEqual(result["width"], 16)
         self.assertEqual(result["height"], 16)
-        expected_signature = utils.api_sign_request(dict(public_id=result["public_id"], version=result["version"]),
-                                                    cloudinary.config().api_secret)
+        expected_signature = utils.api_sign_request(
+            dict(public_id=result["public_id"], version=result["version"]),
+            cloudinary.config().api_secret)
         self.assertEqual(result["signature"], expected_signature)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -138,8 +140,9 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         result = uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG])
         uploader.rename(result["public_id"], result["public_id"]+"2")
         self.assertIsNotNone(api.resource(result["public_id"]+"2"))
-        result2 = uploader.upload("tests/favicon.ico", tags=[UNIQUE_TAG])
-        self.assertRaises(api.Error, uploader.rename, result2["public_id"], result["public_id"]+"2")
+        result2 = uploader.upload(TEST_ICON, tags=[UNIQUE_TAG])
+        self.assertRaises(api.Error, uploader.rename,
+                          result2["public_id"], result["public_id"]+"2")
         uploader.rename(result2["public_id"], result["public_id"]+"2", overwrite=True)
         self.assertEqual(api.resource(result["public_id"]+"2")["format"], "ico")
 
@@ -148,7 +151,8 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         """should successfully take use file name of uploaded file in public id if specified use_filename """
         result = uploader.upload(TEST_IMAGE, use_filename=True, tags=[UNIQUE_TAG])
         six.assertRegex(self, result["public_id"], 'logo_[a-z0-9]{6}')
-        result = uploader.upload(TEST_IMAGE, use_filename=True, unique_filename=False, tags=[UNIQUE_TAG])
+        result = uploader.upload(
+            TEST_IMAGE, use_filename=True, unique_filename=False, tags=[UNIQUE_TAG])
         self.assertEqual(result["public_id"], 'logo')
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -156,8 +160,8 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         """should support explicit """
         result = uploader.explicit("cloudinary", type="twitter_name",
                                    eager=[dict(crop="scale", width="2.0", format="png")], tags=[UNIQUE_TAG])
-        url = utils.cloudinary_url("cloudinary", type="twitter_name", crop="scale", width="2.0", format="png",
-                                   version=result["version"])[0]
+        url = utils.cloudinary_url("cloudinary", type="twitter_name", crop="scale", width="2.0",
+                                   format="png", version=result["version"])[0]
         actual = result["eager"][0]["url"]
         self.assertEqual(parse_url(actual).path, parse_url(url).path)
 
@@ -229,7 +233,8 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         """should allow sending face coordinates"""
         coordinates = [[120, 30, 109, 150], [121, 31, 110, 151]]
         result_coordinates = [[120, 30, 109, 51], [121, 31, 110, 51]]
-        result = uploader.upload(TEST_IMAGE, face_coordinates=coordinates, faces=True, tags=[UNIQUE_TAG])
+        result = uploader.upload(TEST_IMAGE, face_coordinates=coordinates,
+                                 faces=True, tags=[UNIQUE_TAG])
         self.assertEqual(result_coordinates, result["faces"])
 
         different_coordinates = [[122, 32, 111, 152]]
@@ -282,7 +287,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
     def test_raw_conversion(self):
         """ should support requesting raw_convert """
         with six.assertRaisesRegex(self, api.Error, 'Raw convert is invalid'):
-            uploader.upload("tests/docx.docx", public_id=TEST_DOCX_ID, raw_convert="illegal",
+            uploader.upload(TEST_DOC, public_id=TEST_DOCX_ID, raw_convert="illegal",
                             resource_type="raw", tags=[UNIQUE_TAG])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -294,7 +299,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_detection(self):
         """ should support requesting detection """
-        with six.assertRaisesRegex(self, api.Error, 'illegal is not a valid'): 
+        with six.assertRaisesRegex(self, api.Error, 'illegal is not a valid'):
             uploader.upload(TEST_IMAGE, detection="illegal", tags=[UNIQUE_TAG])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -318,7 +323,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         self.assertEqual(resource["resource_type"], "raw")
 
         resource2 = uploader.upload_large(temp_file_name, chunk_size=5243000, tags=["upload_large_tag", UNIQUE_TAG],
-                                         resource_type="image")
+                                          resource_type="image")
         self.assertEqual(resource2["tags"], ["upload_large_tag", UNIQUE_TAG])
         self.assertEqual(resource2["resource_type"], "image")
         self.assertEqual(resource2["width"], 1400)
@@ -332,7 +337,8 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         resource4 = uploader.upload_large(REMOTE_TEST_IMAGE, tags=[UNIQUE_TAG])
         self.assertEqual(resource4["width"], TEST_IMAGE_WIDTH)
         self.assertEqual(resource4["height"], TEST_IMAGE_HEIGHT)
-        expected_signature = utils.api_sign_request(dict(public_id=resource4["public_id"], version=resource4["version"]),
+        expected_signature = utils.api_sign_request(dict(public_id=resource4["public_id"],
+                                                         version=resource4["version"]),
                                                     cloudinary.config().api_secret)
         self.assertEqual(resource4["signature"], expected_signature)
 
@@ -343,7 +349,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         """ should support unsigned uploading using presets """
         preset = api.create_upload_preset(folder="upload_folder", unsigned=True, tags=[UNIQUE_TAG])
         result = uploader.unsigned_upload(TEST_IMAGE, preset["name"], tags=[UNIQUE_TAG])
-        six.assertRegex(self, result["public_id"], '^upload_folder\/[a-z0-9]+$')
+        six.assertRegex(self, result["public_id"], r'^upload_folder\/[a-z0-9]+$')
         api.delete_upload_preset(preset["name"])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -403,8 +409,8 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
 
         # Should accept a dictionary of datetime objects
         acl_2 = OrderedDict((("access_type", "anonymous"),
-                          ("start", datetime.strptime("2019-02-22 16:20:57Z", "%Y-%m-%d %H:%M:%SZ")),
-                          ("end", datetime(2019, 3, 22, 0, 0, tzinfo=UTC()))))
+                            ("start", datetime.strptime("2019-02-22 16:20:57Z", "%Y-%m-%d %H:%M:%SZ")),
+                            ("end", datetime(2019, 3, 22, 0, 0, tzinfo=UTC()))))
 
         exp_acl_2 = '[{"access_type":"anonymous","start":"2019-02-22T16:20:57","end":"2019-03-22T00:00:00+00:00"}]'
 

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 import re
 import unittest
 from collections import OrderedDict
@@ -10,7 +11,8 @@ from mock import patch
 
 import cloudinary.utils
 from cloudinary.utils import build_list_of_dicts, json_encode
-from tests.test_helper import TEST_IMAGE, REMOTE_TEST_IMAGE
+from test.helper_test import TEST_IMAGE, REMOTE_TEST_IMAGE
+
 
 DEFAULT_ROOT_PATH = 'http://res.cloudinary.com/test123/'
 DEFAULT_UPLOAD_PATH = 'http://res.cloudinary.com/test123/image/upload/'
@@ -151,15 +153,15 @@ class TestUtils(unittest.TestCase):
             options={"x": 1, "y": 2, "radius": 3, "gravity": "center", "quality": "auto:good", "prefix": "a"},
             expected_url=DEFAULT_UPLOAD_PATH + "g_center,p_a,q_auto:good,r_3,x_1,y_2/test")
         self.__test_cloudinary_url(
-            options={"width":100, "height":100, "crop":'crop', "gravity":"auto:ocr_text"},
+            options={"width": 100, "height": 100, "crop": 'crop', "gravity": "auto:ocr_text"},
             expected_url=DEFAULT_UPLOAD_PATH + "c_crop,g_auto:ocr_text,h_100,w_100/test",
             expected_options={"width": 100, "height": 100})
         self.__test_cloudinary_url(
-            options={"width":100, "height":100, "crop":'crop', "gravity":"ocr_text"},
+            options={"width": 100, "height": 100, "crop": 'crop', "gravity": "ocr_text"},
             expected_url=DEFAULT_UPLOAD_PATH + "c_crop,g_ocr_text,h_100,w_100/test",
             expected_options={"width": 100, "height": 100})
         self.__test_cloudinary_url(
-            options={"width":100, "height":100, "crop":'crop', "gravity":"ocr_text:adv_ocr"},
+            options={"width": 100, "height": 100, "crop": 'crop', "gravity": "ocr_text:adv_ocr"},
             expected_url=DEFAULT_UPLOAD_PATH + "c_crop,g_ocr_text:adv_ocr,h_100,w_100/test",
             expected_options={"width": 100, "height": 100})
 
@@ -283,7 +285,7 @@ class TestUtils(unittest.TestCase):
         self.__test_cloudinary_url(
             options={"overlay": "fetch:http://cloudinary.com/images/old_logo.png"},
             expected_url=(
-                    DEFAULT_UPLOAD_PATH 
+                    DEFAULT_UPLOAD_PATH
                     + "l_fetch:aHR0cDovL2Nsb3VkaW5hcnkuY29tL2ltYWdlcy9vbGRfbG9nby5wbmc=/"
                     + "test"))
 
@@ -309,10 +311,11 @@ class TestUtils(unittest.TestCase):
 
     def test_fetch_format(self):
         """should support format for fetch urls"""
-        self.__test_cloudinary_url(public_id="http://cloudinary.com/images/logo.png",
-                                   options={"format": "jpg", "type": "fetch"},
-                                   expected_url=DEFAULT_ROOT_PATH + 
-                                                "image/fetch/f_jpg/http://cloudinary.com/images/logo.png")
+        self.__test_cloudinary_url(
+            public_id="http://cloudinary.com/images/logo.png",
+            options={"format": "jpg", "type": "fetch"},
+            expected_url=DEFAULT_ROOT_PATH + "image/fetch/f_jpg/http://cloudinary.com/images/logo.png"
+        )
 
     def test_effect(self):
         """should support effect"""
@@ -579,7 +582,7 @@ class TestUtils(unittest.TestCase):
                                    expected_url=VIDEO_UPLOAD_PATH + "so_auto/video_id")
 
     def test_end_offset(self):
-        # should support decimal seconds 
+        # should support decimal seconds
         self.__test_cloudinary_url(public_id="video_id", options={'resource_type': 'video', 'end_offset': 2.63},
                                    expected_url=VIDEO_UPLOAD_PATH + "eo_2.63/video_id")
         self.__test_cloudinary_url(public_id="video_id", options={'resource_type': 'video', 'end_offset': '2.63'},
@@ -613,13 +616,15 @@ class TestUtils(unittest.TestCase):
             'eo_70.5p,so_35.5p': ['35.5p', '70.5p']
         }
         for transformation, offset in test_cases.items():
-            self.__test_cloudinary_url(public_id="video_id", options={'resource_type': 'video', 'offset': offset},
-                                       expected_url=VIDEO_UPLOAD_PATH + transformation + "/video_id")
+            self.__test_cloudinary_url(
+                public_id="video_id",
+                options={'resource_type': 'video', 'offset': offset},
+                expected_url=VIDEO_UPLOAD_PATH + transformation + "/video_id")
 
     def test_user_agent(self):
         with patch('cloudinary.USER_PLATFORM', ''):
             agent = cloudinary.get_user_agent()
-        six.assertRegex(self, agent, '^CloudinaryPython\/\d\.\d+\.\d+ \(Python \d\.\d+\.\d+\)$')
+        six.assertRegex(self, agent, r'^CloudinaryPython\/\d\.\d+\.\d+ \(Python \d\.\d+\.\d+\)$')
 
         platform = 'MyPlatform/1.2.3 (Test code)'
         with patch('cloudinary.USER_PLATFORM', platform):
@@ -652,10 +657,11 @@ class TestUtils(unittest.TestCase):
             ({'text': "Hello World, Nice to meet you?", 'font_family': "Arial", 'font_size': "18",
               'font_weight': "bold", 'font_style': "italic", 'letter_spacing': 4,
               'line_spacing': 3},
-             "text:Arial_18_bold_italic_letter_spacing_4_line_spacing_3:Hello%20World%252C%20Nice%20to%20meet%20you%3F"),
+             "text:Arial_18_bold_italic_letter_spacing_4_line_spacing_3:Hello%20World"
+             "%252C%20Nice%20to%20meet%20you%3F"),
             ({'resource_type': "subtitles", 'public_id': "sample_sub_en.srt"},
              "subtitles:sample_sub_en.srt"),
-            ({'resource_type': "subtitles", 'public_id': "sample_sub_he.srt", 
+            ({'resource_type': "subtitles", 'public_id': "sample_sub_he.srt",
               'font_family': "Arial", 'font_size': 40},
              "subtitles:Arial_40:sample_sub_he.srt"),
             ({'url': "https://upload.wikimedia.org/wikipedia/commons/2/2b/고창갯벌.jpg"},
@@ -670,7 +676,8 @@ class TestUtils(unittest.TestCase):
     def test_overlay_error_1(self):
         """ Must supply font_family for text in overlay """
         with self.assertRaises(ValueError):
-            cloudinary.utils.cloudinary_url("test", overlay=dict(text="text", font_style="italic"))
+            cloudinary.utils.cloudinary_url(
+                "test", overlay=dict(text="text", font_style="italic"))
 
     def test_overlay_error_2(self):
         """ Must supply public_id for for non-text underlay """
@@ -686,7 +693,8 @@ class TestUtils(unittest.TestCase):
         all_operators += "_fc_lte_0_and"
         all_operators += "_w_gte_0"
         all_operators += ",e_grayscale"
-        condition = "width = 0 && height != 0 || aspect_ratio < 0 && page_count > 0 and face_count <= 0 and width >= 0"
+        condition = "width = 0 && height != 0 || aspect_ratio < 0 && page_count > 0 " \
+                    "and face_count <= 0 and width >= 0"
         options = {"if": condition, "effect": "grayscale"}
         transformation, options = cloudinary.utils.generate_transformation_string(**options)
         self.assertEqual({}, options)
@@ -695,43 +703,60 @@ class TestUtils(unittest.TestCase):
     def test_merge(self):
         a = {"foo": "foo", "bar": "foo"}
         b = {"foo": "bar"}
-        self.assertIsNone(cloudinary.utils.merge( None,None))
+        self.assertIsNone(cloudinary.utils.merge(None, None))
         self.assertDictEqual(a, cloudinary.utils.merge(a, None))
         self.assertDictEqual(a, cloudinary.utils.merge(None, a))
         self.assertDictEqual({"foo": "bar", "bar": "foo"}, cloudinary.utils.merge(a, b))
         self.assertDictEqual(a, cloudinary.utils.merge(b, a))
 
     def test_array_should_define_a_set_of_variables(self):
-        options = { "if":  "face_count > 2", "variables" : [ ["$z", 5], ["$foo", "$z * 2"] ], "crop" : "scale", "width" : "$foo * 200" }
+        options = {
+            "if":  "face_count > 2",
+            "variables": [["$z", 5], ["$foo", "$z * 2"]],
+            "crop": "scale",
+            "width": "$foo * 200"
+        }
         transformation, options = cloudinary.utils.generate_transformation_string(**options)
         self.assertEqual('if_fc_gt_2,$z_5,$foo_$z_mul_2,c_scale,w_$foo_mul_200', transformation)
 
     def test_dollar_key_should_define_a_variable(self):
-        options = { "transformation":[ {"$foo":10 }, {"if":"face_count > 2"}, {"crop":"scale", "width":"$foo * 200 / face_count"}, {"if":"end"} ] }
+        options = {"transformation": [{"$foo": 10}, {"if": "face_count > 2"},
+                                      {"crop": "scale", "width": "$foo * 200 / face_count"}, {"if": "end"}]}
         transformation, options = cloudinary.utils.generate_transformation_string(**options)
         self.assertEqual('$foo_10/if_fc_gt_2/c_scale,w_$foo_mul_200_div_fc/if_end', transformation)
 
     def test_should_sort_defined_variable(self):
-        options = { "$second": 1, "$first": 2}
+        options = {"$second": 1, "$first": 2}
         transformation, options = cloudinary.utils.generate_transformation_string(**options)
         self.assertEqual('$first_2,$second_1', transformation)
 
     def test_should_place_defined_variables_before_ordered(self):
-        options = {"variables" : [ ["$z", 5], ["$foo", "$z * 2"] ], "$second": 1, "$first": 2}
+        options = {"variables": [["$z", 5], ["$foo", "$z * 2"]], "$second": 1, "$first": 2}
         transformation, options = cloudinary.utils.generate_transformation_string(**options)
         self.assertEqual('$first_2,$second_1,$z_5,$foo_$z_mul_2', transformation)
 
     def test_should_support_text_values(self):
         public_id = "sample"
-        options =  {"effect":"$efname:100", "$efname":"!blur!"}
+        options = {"effect": "$efname:100", "$efname": "!blur!"}
         url, options = cloudinary.utils.cloudinary_url(public_id, **options)
-        self.assertEqual(DEFAULT_UPLOAD_PATH+"$efname_!blur!,e_$efname:100/sample",url)
+        self.assertEqual(DEFAULT_UPLOAD_PATH + "$efname_!blur!,e_$efname:100/sample", url)
 
     def test_should_support_string_interpolation(self):
         public_id = "sample"
-        options = { "crop":"scale", "overlay":{"text":"$(start)Hello $(name)$(ext), $(no ) $( no)$(end)", "font_family":"Arial", "font_size":"18"}}
+        options = {
+            "crop": "scale",
+            "overlay": {
+                "text": "$(start)Hello $(name)$(ext), $(no ) $( no)$(end)",
+                "font_family": "Arial",
+                "font_size": "18"
+            }
+        }
         url, options = cloudinary.utils.cloudinary_url(public_id, **options)
-        self.assertEqual(DEFAULT_UPLOAD_PATH+"c_scale,l_text:Arial_18:$(start)Hello%20$(name)$(ext)%252C%20%24%28no%20%29%20%24%28%20no%29$(end)/sample",url)
+        self.assertEqual(
+            DEFAULT_UPLOAD_PATH + "c_scale,l_text:Arial_18:$(start)"
+                                  "Hello%20$(name)$(ext)%252C%20%24%28no%20%29"
+                                  "%20%24%28%20no%29$(end)/sample",
+            url)
 
     def test_encode_context(self):
         self.assertEqual("", cloudinary.utils.encode_context({}))
@@ -741,7 +766,7 @@ class TestUtils(unittest.TestCase):
         # test that special characters are unchanged
         self.assertEqual("a=!@#$%^&*()_+<>?,./", cloudinary.utils.encode_context({"a": "!@#$%^&*()_+<>?,./"}))
         # check value escaping
-        self.assertEqual("a=b\|\|\=|c=d\=a\=\|", cloudinary.utils.encode_context(OrderedDict((("a", "b||="),
+        self.assertEqual(r"a=b\|\|\=|c=d\=a\=\|", cloudinary.utils.encode_context(OrderedDict((("a", "b||="),
                                                                                               ("c", "d=a=|")))))
         # check fallback
         self.assertEqual("not a dict", cloudinary.utils.encode_context("not a dict"))
@@ -794,6 +819,7 @@ class TestUtils(unittest.TestCase):
     def test_is_remote_url(self):
         self.assertFalse(cloudinary.utils.is_remote_url(TEST_IMAGE))
         self.assertTrue(cloudinary.utils.is_remote_url(REMOTE_TEST_IMAGE))
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,7 +1,6 @@
-import os
-from flask import Flask, request, render_template
 from cloudinary.uploader import upload
 from cloudinary.utils import cloudinary_url
+from flask import Flask, render_template, request
 
 app = Flask(__name__)
 

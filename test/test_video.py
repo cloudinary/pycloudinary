@@ -1,6 +1,7 @@
+import unittest
+
 import cloudinary
 from cloudinary import CloudinaryVideo
-import unittest
 
 VIDEO_UPLOAD_PATH = 'http://res.cloudinary.com/test123/video/upload/'
 DEFAULT_UPLOAD_PATH = 'http://res.cloudinary.com/test123/image/upload/'

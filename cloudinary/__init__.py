@@ -1,12 +1,11 @@
 from __future__ import absolute_import
 
+import os
+import re
 import logging
 import numbers
 
 from math import ceil
-
-import os
-import re
 
 from six import python_2_unicode_compatible, string_types
 
@@ -17,12 +16,11 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 ch.setFormatter(formatter)
 logger.addHandler(ch)
 
-from platform import python_version
-
-
 from cloudinary import utils
 from cloudinary.compat import urlparse, parse_qs
 from cloudinary.search import Search
+
+from platform import python_version
 
 CF_SHARED_CDN = "d3jpl91pxevbkh.cloudfront.net"
 OLD_AKAMAI_SHARED_CDN = "cloudinary-a.akamaihd.net"
@@ -48,7 +46,8 @@ The format of the value should be <ProductName>/Version[ (comment)].
 
 
 def get_user_agent():
-    """Provides the `USER_AGENT` string that is passed to the Cloudinary servers.
+    """
+    Provides the `USER_AGENT` string that is passed to the Cloudinary servers.
     Prepends  `USER_PLATFORM` if it is defined.
 
     :returns: the user agent
@@ -136,7 +135,7 @@ class Config(object):
 
     def _put_nested_key(self, key, value):
         chain = re.split(r'[\[\]]+', key)
-        chain = [key for key in chain if key]
+        chain = [k for k in chain if k]
         outer = self.__dict__
         last_key = chain.pop()
         for inner_key in chain:
@@ -196,9 +195,11 @@ class CloudinaryResource(object):
             return None
         prep = ''
         prep = prep + self.resource_type + '/' + self.type + '/'
-        if self.version: prep = prep + 'v' + str(self.version) + '/'
+        if self.version:
+            prep = prep + 'v' + str(self.version) + '/'
         prep = prep + self.public_id
-        if self.format: prep = prep + '.' + self.format
+        if self.format:
+            prep = prep + '.' + self.format
         return prep
 
     def get_presigned(self):
@@ -407,30 +408,37 @@ class CloudinaryResource(object):
         self.default_poster_options(options)
         return self.build_url(**options)
 
-    # Creates an HTML video tag for the provided +source+
-    #
-    # ==== Options
-    # * <tt>source_types</tt> - Specify which source type the tag should include. defaults to webm, mp4 and ogv.
-    # * <tt>source_transformation</tt> - specific transformations to use for a specific source type.
-    # * <tt>poster</tt> - override default thumbnail:
-    #   * url: provide an ad hoc url
-    #   * options: with specific poster transformations and/or Cloudinary +:public_id+
-    #
-    # ==== Examples
-    #   CloudinaryResource("mymovie.mp4").video()
-    #   CloudinaryResource("mymovie.mp4").video(source_types = 'webm')
-    #   CloudinaryResource("mymovie.ogv").video(poster = "myspecialplaceholder.jpg")
-    #   CloudinaryResource("mymovie.webm").video(source_types = ['webm', 'mp4'], poster = {'effect': 'sepia'})
     def video(self, **options):
+        """
+        Creates an HTML video tag for the provided +source+
+
+        Examples:
+           CloudinaryResource("mymovie.mp4").video()
+           CloudinaryResource("mymovie.mp4").video(source_types = 'webm')
+           CloudinaryResource("mymovie.ogv").video(poster = "myspecialplaceholder.jpg")
+           CloudinaryResource("mymovie.webm").video(source_types = ['webm', 'mp4'], poster = {'effect': 'sepia'})
+
+        :param options:
+         * <tt>source_types</tt>            - Specify which source type the tag should include.
+                                              defaults to webm, mp4 and ogv.
+         * <tt>source_transformation</tt>   - specific transformations to use
+                                              for a specific source type.
+         * <tt>poster</tt>                  - override default thumbnail:
+           * url: provide an ad hoc url
+           * options: with specific poster transformations and/or Cloudinary +:public_id+
+
+        :return: Video tag
+        """
         public_id = options.get('public_id', self.public_id)
-        source = re.sub("\.({0})$".format("|".join(self.default_source_types())), '', public_id)
+        source = re.sub(r"\.({0})$".format("|".join(self.default_source_types())), '', public_id)
 
         source_types = options.pop('source_types', [])
         source_transformation = options.pop('source_transformation', {})
         fallback = options.pop('fallback_content', '')
         options['resource_type'] = options.pop('resource_type', self.resource_type or 'video')
 
-        if not source_types: source_types = self.default_source_types()
+        if not source_types:
+            source_types = self.default_source_types()
         video_options = options.copy()
 
         if 'poster' in video_options:
@@ -439,11 +447,13 @@ class CloudinaryResource(object):
                 if 'public_id' in poster_options:
                     video_options['poster'] = utils.cloudinary_url(poster_options['public_id'], **poster_options)[0]
                 else:
-                    video_options['poster'] = self.video_thumbnail(public_id=source, **poster_options)
+                    video_options['poster'] = self.video_thumbnail(
+                        public_id=source, **poster_options)
         else:
             video_options['poster'] = self.video_thumbnail(public_id=source, **options)
 
-        if not video_options['poster']: del video_options['poster']
+        if not video_options['poster']:
+            del video_options['poster']
 
         nested_source_types = isinstance(source_types, list) and len(source_types) > 1
         if not nested_source_types:
@@ -453,8 +463,10 @@ class CloudinaryResource(object):
         video_options = video_url[1]
         if not nested_source_types:
             video_options['src'] = video_url[0]
-        if 'html_width' in video_options: video_options['width'] = video_options.pop('html_width')
-        if 'html_height' in video_options: video_options['height'] = video_options.pop('html_height')
+        if 'html_width' in video_options:
+            video_options['width'] = video_options.pop('html_width')
+        if 'html_height' in video_options:
+            video_options['height'] = video_options.pop('html_height')
 
         sources = ""
         if nested_source_types:

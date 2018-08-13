@@ -1,6 +1,7 @@
-from django.db import models
-from cloudinary.models import CloudinaryField
 from six import python_2_unicode_compatible
+
+from cloudinary.models import CloudinaryField
+from django.db import models
 
 
 @python_2_unicode_compatible
@@ -22,4 +23,3 @@ class Choice(models.Model):
 
     def __str__(self):
         return self.choice.encode()
-

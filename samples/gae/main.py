@@ -14,12 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import webapp2
 import os
-from cloudinary.compat import  StringIO
-from google.appengine.ext.webapp import template
+
+import webapp2
+from cloudinary.compat import StringIO
 from cloudinary.uploader import upload
 from cloudinary.utils import cloudinary_url
+from google.appengine.ext.webapp import template
 
 
 class MainHandler(webapp2.RequestHandler):
@@ -53,6 +54,7 @@ class MainHandler(webapp2.RequestHandler):
         }
         path = os.path.join(os.path.dirname(__file__), 'index.html')
         self.response.write(template.render(path, template_values))
+
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler)

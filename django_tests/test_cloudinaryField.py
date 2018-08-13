@@ -1,26 +1,24 @@
 import os
 import unittest
 
-from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase
 from mock import mock
 from urllib3.util import parse_url
 
 import cloudinary
-from cloudinary import CloudinaryResource, CloudinaryImage, uploader
+from cloudinary import CloudinaryImage, CloudinaryResource, uploader
 from cloudinary.forms import CloudinaryFileField
 from cloudinary.models import CloudinaryField
+from django.test import TestCase
+from django.core.files.uploadedfile import SimpleUploadedFile
+
 from .models import Poll
-from .test_helper import SUFFIX
+from django_tests.helper_test import SUFFIX, TEST_IMAGE, TEST_IMAGE_W, TEST_IMAGE_H
 
 API_TEST_ID = "dj_test_{}".format(SUFFIX)
 
-TEST_IMAGE = "tests/logo.png"
-TEST_IMAGE_W = 241
-TEST_IMAGE_H = 51
-
 
 class TestCloudinaryField(TestCase):
+
     @classmethod
     def setUpTestData(cls):
         Poll.objects.create(question="with image", image="image/upload/v1234/{}.jpg".format(API_TEST_ID))
@@ -98,5 +96,8 @@ class TestCloudinaryField(TestCase):
         field = Poll.objects.get(question="with image")
         self.assertIsNotNone(field)
         self.assertEqual(field.image.public_id, API_TEST_ID)
-        self.assertEqual(parse_url(field.image.url).path, "/{cloud}/image/upload/v1234/{name}.jpg".format(cloud=cloudinary.config().cloud_name, name=API_TEST_ID))
+        self.assertEqual(
+            parse_url(field.image.url).path,
+            "/{cloud}/image/upload/v1234/{name}.jpg".format(cloud=cloudinary.config().cloud_name, name=API_TEST_ID)
+        )
         self.assertTrue(False or field.image)

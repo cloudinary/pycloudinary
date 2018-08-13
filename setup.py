@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 version = '1.12.0'
 
@@ -14,7 +14,7 @@ setup(name='cloudinary',
       author_email='info@cloudinary.com',
       url='http://cloudinary.com',
       license='MIT',
-      packages=find_packages(exclude=['ez_setup', 'examples', 'tests', 'django_tests', 'django_tests.*']),
+      packages=find_packages(exclude=['ez_setup', 'examples', 'test', 'django_tests', 'django_tests.*']),
       classifiers=[
           "Development Status :: 5 - Production/Stable",
           "Environment :: Web Environment",
@@ -49,7 +49,7 @@ setup(name='cloudinary',
       ],
       include_package_data=True,
       zip_safe=False,
-      test_suite="tests",
+      test_suite="test",
       install_requires=[
           "six",
           "mock",
