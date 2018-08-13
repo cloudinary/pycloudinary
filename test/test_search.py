@@ -8,9 +8,7 @@ from urllib3 import disable_warnings
 import cloudinary
 from cloudinary import api, logger, uploader
 from cloudinary.search import Search
-from tests.test_helper import SUFFIX, TEST_IMAGE, TEST_TAG, UNIQUE_TAG
-
-disable_warnings()
+from test.helper_test import SUFFIX, TEST_IMAGE, TEST_TAG, UNIQUE_TAG
 
 TEST_TAG = 'search_{}'.format(TEST_TAG)
 UNIQUE_TAG = 'search_{}'.format(UNIQUE_TAG)
@@ -21,6 +19,8 @@ MAX_INDEX_RETRIES = 10
 
 public_ids = ["api_test{0}_{1}".format(i, SUFFIX) for i in range(0, TEST_IMAGES_COUNT)]
 upload_results = ["++"]
+
+disable_warnings()
 
 
 class SearchTest(unittest.TestCase):

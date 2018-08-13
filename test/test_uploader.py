@@ -1,4 +1,5 @@
 import io
+import os
 import tempfile
 import unittest
 from collections import OrderedDict
@@ -9,25 +10,22 @@ from mock import patch
 import cloudinary
 from cloudinary import api, uploader, utils
 
-from urllib3 import disable_warnings, HTTPResponse
+from urllib3 import disable_warnings
 from urllib3.util import parse_url
-from tests.test_helper import *
+from test.helper_test import uploader_response_mock, SUFFIX, TEST_IMAGE, get_params, TEST_TAG, TEST_ICON, TEST_DOC, \
+    REMOTE_TEST_IMAGE, UTC
 
-if six.PY2:
-    MOCK_RESPONSE = HTTPResponse(body='{"foo":"bar"}')
-else:
-    MOCK_RESPONSE = HTTPResponse(body='{"foo":"bar"}'.encode("UTF-8"))
-
-disable_warnings()
+MOCK_RESPONSE = uploader_response_mock()
 
 TEST_IMAGE_HEIGHT = 51
 TEST_IMAGE_WIDTH = 241
 UNIQUE_TAG = "up_test_uploader_{}".format(SUFFIX)
 TEST_DOCX_ID = "test_docx_{}".format(SUFFIX)
 
+disable_warnings()
+
 
 class UploaderTest(unittest.TestCase):
-
     def setUp(self):
         cloudinary.reset_config()
 
@@ -142,7 +140,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         result = uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG])
         uploader.rename(result["public_id"], result["public_id"]+"2")
         self.assertIsNotNone(api.resource(result["public_id"]+"2"))
-        result2 = uploader.upload("tests/favicon.ico", tags=[UNIQUE_TAG])
+        result2 = uploader.upload(TEST_ICON, tags=[UNIQUE_TAG])
         self.assertRaises(api.Error, uploader.rename,
                           result2["public_id"], result["public_id"]+"2")
         uploader.rename(result2["public_id"], result["public_id"]+"2", overwrite=True)
@@ -289,7 +287,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
     def test_raw_conversion(self):
         """ should support requesting raw_convert """
         with six.assertRaisesRegex(self, api.Error, 'Raw convert is invalid'):
-            uploader.upload("tests/docx.docx", public_id=TEST_DOCX_ID, raw_convert="illegal",
+            uploader.upload(TEST_DOC, public_id=TEST_DOCX_ID, raw_convert="illegal",
                             resource_type="raw", tags=[UNIQUE_TAG])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")

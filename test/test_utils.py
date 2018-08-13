@@ -11,7 +11,7 @@ from mock import patch
 
 import cloudinary.utils
 from cloudinary.utils import build_list_of_dicts, json_encode
-from tests.test_helper import TEST_IMAGE, REMOTE_TEST_IMAGE
+from test.helper_test import TEST_IMAGE, REMOTE_TEST_IMAGE
 
 
 DEFAULT_ROOT_PATH = 'http://res.cloudinary.com/test123/'

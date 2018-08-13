@@ -3,29 +3,29 @@ import cloudinary
 from cloudinary import api
 from urllib3 import disable_warnings
 
-from .test_helper import SUFFIX
+from test.helper_test import SUFFIX
 
 disable_warnings()
 
 
 class StreamingProfilesTest(unittest.TestCase):
     initialized = False
+    test_id = "streaming_profiles_test_{}".format(SUFFIX)
 
     def setUp(self):
-        if StreamingProfilesTest.initialized:
+        if self.initialized:
             return
-        StreamingProfilesTest.initialized = True
+        self.initialized = True
         cloudinary.reset_config()
         if not cloudinary.config().api_secret:
             return
-        StreamingProfilesTest.test_id = "api_test_{}".format(SUFFIX)
 
     __predefined_sp = ["4k", "full_hd", "hd", "sd", "full_hd_wifi", "full_hd_lean", "hd_lean"]
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_create_streaming_profile(self):
         """should create a streaming profile with representations"""
-        name = StreamingProfilesTest.test_id + "_streaming_profile"
+        name = self.test_id + "_streaming_profile"
         result = api.create_streaming_profile(
             name,
             representations=[{"transformation": {
@@ -68,7 +68,7 @@ class StreamingProfilesTest(unittest.TestCase):
         self.assertIn("crop", tr)
 
     def test_update_delete_streaming_profile(self):
-        name = StreamingProfilesTest.test_id + "_streaming_profile_delete"
+        name = self.test_id + "_streaming_profile_delete"
         api.create_streaming_profile(
             name,
             representations=[{"transformation": {

@@ -8,14 +8,9 @@ from django.test import TestCase
 
 from cloudinary import api, CloudinaryResource
 from cloudinary.forms import CloudinaryFileField
-from django_tests.test_helper import SUFFIX
+from django_tests.helper_test import SUFFIX, TEST_IMAGE, TEST_IMAGE_W, TEST_IMAGE_H
 
 API_TEST_ID = "dj_test_{}".format(SUFFIX)
-
-TEST_IMAGES_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "tests")
-TEST_IMAGE = os.path.join(TEST_IMAGES_PATH, "logo.png")
-TEST_IMAGE_W = 241
-TEST_IMAGE_H = 51
 
 
 class TestCloudinaryFileField(TestCase):

@@ -4,9 +4,20 @@ import random
 import re
 from datetime import timedelta, tzinfo
 
+import six
+from urllib3 import HTTPResponse
+from urllib3._collections import HTTPHeaderDict
+
 SUFFIX = os.environ.get('TRAVIS_JOB_ID') or random.randint(10000, 99999)
+
 REMOTE_TEST_IMAGE = "http://cloudinary.com/images/old_logo.png"
-TEST_IMAGE = "tests/logo.png"
+
+RESOURCES_PATH = "test/resources/"
+
+TEST_IMAGE = RESOURCES_PATH + "logo.png"
+TEST_DOC = RESOURCES_PATH + "docx.docx"
+TEST_ICON = RESOURCES_PATH + "favicon.ico"
+
 TEST_TAG = "pycloudinary_test"
 UNIQUE_TAG = "{0}_{1}".format(TEST_TAG, SUFFIX)
 
@@ -61,3 +72,23 @@ def get_list_param(mocker, name):
     params = get_params(args)
     reg = re.compile(r'{}\[\d*\]'.format(name))
     return [params[key] for key in params.keys() if reg.match(key)]
+
+
+def http_response_mock(body="", headers=None, status=200):
+    if headers is None:
+        headers = {}
+
+    if not six.PY2:
+        body = body.encode("UTF-8")
+
+    return HTTPResponse(body, HTTPHeaderDict(headers), status=status)
+
+
+def api_response_mock():
+    return http_response_mock('{"foo":"bar"}', {"x-featureratelimit-limit": '0',
+                                                "x-featureratelimit-reset": 'Sat, 01 Apr 2017 22:00:00 GMT',
+                                                "x-featureratelimit-remaining": '0'})
+
+
+def uploader_response_mock():
+    return http_response_mock('{"foo":"bar"}')

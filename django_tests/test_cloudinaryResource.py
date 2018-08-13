@@ -4,11 +4,10 @@ import cloudinary
 from cloudinary import CloudinaryResource, api, uploader
 from django.test import TestCase
 
-from .test_helper import SUFFIX
+from django_tests.helper_test import SUFFIX, TEST_IMAGE
 
 disable_warnings()
 
-TEST_IMAGE = "tests/logo.png"
 TEST_TAG = "dj_pycloudinary_test_{0}".format(SUFFIX)
 
 

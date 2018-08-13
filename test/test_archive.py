@@ -12,33 +12,23 @@ from cloudinary import api, uploader, utils
 from mock import patch
 import six
 import urllib3
-from urllib3 import disable_warnings, HTTPResponse
-from urllib3._collections import HTTPHeaderDict
+from urllib3 import disable_warnings
 
-from .test_helper import SUFFIX
+from test.helper_test import SUFFIX, TEST_IMAGE, api_response_mock
 
-disable_warnings()
-
-MOCK_HEADERS = HTTPHeaderDict({
-    "x-featureratelimit-limit": '0',
-    "x-featureratelimit-reset": 'Sat, 01 Apr 2017 22:00:00 GMT',
-    "x-featureratelimit-remaining": '0',
-})
-
-if six.PY2:
-    MOCK_RESPONSE = HTTPResponse(body='{"foo":"bar"}', headers=MOCK_HEADERS)
-else:
-    MOCK_RESPONSE = HTTPResponse(body='{"foo":"bar"}'.encode("UTF-8"), headers=MOCK_HEADERS)
+MOCK_RESPONSE = api_response_mock()
 
 TEST_TAG = "arch_pycloudinary_test_{}".format(SUFFIX)
+
+disable_warnings()
 
 
 class ArchiveTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cloudinary.reset_config()
-        uploader.upload("tests/logo.png", tags=[TEST_TAG])
-        uploader.upload("tests/logo.png", tags=[TEST_TAG], transformation=dict(width=10))
+        uploader.upload(TEST_IMAGE, tags=[TEST_TAG])
+        uploader.upload(TEST_IMAGE, tags=[TEST_TAG], transformation=dict(width=10))
 
     @classmethod
     def tearDownClass(cls):

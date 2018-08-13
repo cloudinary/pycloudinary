@@ -12,13 +12,9 @@ from django.test import TestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 from .models import Poll
-from .test_helper import SUFFIX
+from django_tests.helper_test import SUFFIX, TEST_IMAGE, TEST_IMAGE_W, TEST_IMAGE_H
 
 API_TEST_ID = "dj_test_{}".format(SUFFIX)
-
-TEST_IMAGE = "tests/logo.png"
-TEST_IMAGE_W = 241
-TEST_IMAGE_H = 51
 
 
 class TestCloudinaryField(TestCase):
