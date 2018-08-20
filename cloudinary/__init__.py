@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+from copy import deepcopy
 import os
 import re
 import logging
@@ -582,6 +583,55 @@ class CloudinaryResource(object):
         html = "<video {attributes}>{sources}{fallback}</video>".format(
             attributes=utils.html_attrs(video_options), sources=sources, fallback=fallback)
         return html
+
+    @staticmethod
+    def __generate_media_attr(**media_options):
+        media_query_conditions = []
+        if "min_width" in media_options:
+            media_query_conditions.append("(min-width: {}px)".format(media_options["min_width"]))
+        if "max_width" in media_options:
+            media_query_conditions.append("(max-width: {}px)".format(media_options["max_width"]))
+
+        return " and ".join(media_query_conditions)
+
+    def source(self, **options):
+        attrs = options.get("attributes") or {}
+
+        srcset_data = config().srcset or dict()
+        srcset_data = srcset_data.copy()
+        srcset_data.update(options.pop("srcset", dict()))
+
+        responsive_attrs  = self._generate_image_responsive_attributes(attrs, srcset_data, **options)
+
+        attrs.update(responsive_attrs)
+
+        # `source` tag under `picture` tag uses `srcset` attribute for both `srcset` and `src` urls
+        if "srcset" not in attrs:
+            attrs["srcset"], _ = self.__build_url(**options)
+
+        if "media" not in attrs:
+            media_attr = self.__generate_media_attr(**(options.get("media", {})))
+            if media_attr:
+                attrs["media"] = media_attr
+
+        return u"<source {0}>".format(utils.html_attrs(attrs))
+
+    def picture(self, **options):
+        sub_tags = []
+        sources = options.pop("sources") or list()
+        for source in sources:
+            curr_options = deepcopy(options)
+
+            if "transformation" in source:
+                curr_options = utils.chain_transformations(curr_options, source["transformation"])
+
+            curr_options["media"] = dict((k, source[k]) for k in ['min_width', 'max_width'] if k in source)
+
+            sub_tags.append(self.source(**curr_options))
+
+        sub_tags.append(self.image(**options))
+
+        return u"<picture>{}</picture>".format("".join(sub_tags))
 
 
 class CloudinaryImage(CloudinaryResource):
