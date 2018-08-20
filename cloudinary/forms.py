@@ -17,7 +17,7 @@ def cl_init_js_callbacks(form, request):
 class CloudinaryInput(forms.TextInput):
     input_type = 'file'
 
-    def render(self, name, value, attrs=None):
+    def render(self, name, value, attrs=None, renderer=None):
         attrs = self.build_attrs(attrs)
         options = attrs.get('options', {})
         attrs["options"] = ''
