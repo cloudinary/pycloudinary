@@ -502,7 +502,7 @@ class TestUtils(unittest.TestCase):
         self.__test_cloudinary_url(options={"secure": True, "cdn_subdomain": True},
                                    expected_url="https://res-2.cloudinary.com/test123/image/upload/test")
 
-    def support_secure_cdn_subdomain_false_override_with_secure(self):
+    def test_support_secure_cdn_subdomain_false_override_with_secure(self):
         self.__test_cloudinary_url(options={"secure": True, "cdn_subdomain": True, "secure_cdn_subdomain": False},
                                    expected_url="https://res.cloudinary.com/test123/image/upload/test")
 
