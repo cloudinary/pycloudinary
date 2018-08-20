@@ -40,6 +40,28 @@ __LAYER_KEYWORD_PARAMS = [("font_weight", "normal"),
                           ("text_align", None),
                           ("stroke", "none")]
 
+# a list of keys used by the cloudinary_url function
+__URL_KEYS = [
+    'api_secret',
+    'auth_token',
+    'cdn_subdomain',
+    'cloud_name',
+    'cname',
+    'format',
+    'private_cdn',
+    'resource_type',
+    'secure',
+    'secure_cdn_subdomain',
+    'secure_distribution',
+    'shorten',
+    'sign_url',
+    'ssl_detected',
+    'type',
+    'url_suffix',
+    'use_root_path',
+    'version'
+]
+
 
 def build_array(arg):
     if isinstance(arg, list):
@@ -132,6 +154,22 @@ def json_encode(value):
     :return: JSON encoded string
     """
     return json.dumps(value, default=__json_serializer, separators=(',', ':'))
+
+
+def patch_fetch_format(options):
+    """
+    When upload type is fetch, remove the format options.
+    In addition, set the fetch_format options to the format value unless it was already set.
+    Mutates the options parameter!
+
+    :param options: URL and transformation options
+    """
+    if options.get("type", "upload") != "fetch":
+        return
+
+    resource_format = options.pop("format", None)
+    if "fetch_format" not in options:
+        options["fetch_format"] = resource_format
 
 
 def generate_transformation_string(**options):
@@ -289,6 +327,33 @@ def generate_transformation_string(**options):
     if dpr == "auto":
         options["hidpi"] = True
     return url, options
+
+
+def chain_transformations(transformations, **options):
+    """
+    Helper function, allows chaining transformations to the end of transformations list
+
+    The result of this function is an updated options parameter
+
+    :param transformations: Transformations to chain at the end
+    :param options:         Original options
+
+    :return: Resulting options
+    """
+    if not transformations:
+        return options
+
+    transformations = copy.deepcopy(transformations)
+
+    transformations = build_array(transformations)
+    # preserve url options
+    url_options = dict((o, options[o]) for o in __URL_KEYS if o in options)
+
+    transformations.insert(0, options)
+
+    url_options["transformation"] = transformations
+
+    return url_options
 
 
 def is_fraction(width):
@@ -470,9 +535,9 @@ def merge(*dict_args):
 def cloudinary_url(source, **options):
     original_source = source
 
+    patch_fetch_format(options)
     type = options.pop("type", "upload")
-    if type == 'fetch':
-        options["fetch_format"] = options.get("fetch_format", options.pop("format", None))
+
     transformation, options = generate_transformation_string(**options)
 
     resource_type = options.pop("resource_type", "image")
@@ -534,6 +599,38 @@ def cloudinary_api_url(action='upload', **options):
     if not cloud_name: raise ValueError("Must supply cloud_name")
     resource_type = options.get("resource_type", "image")
     return "/".join([cloudinary_prefix, "v1_1", cloud_name, resource_type, action])
+
+
+def cloudinary_scaled_url(source, width, transformation, options):
+    """
+    Generates a cloudinary url scaled to specified width.
+
+    :param source:          The resource
+    :param width:           Width in pixels of the srcset item
+    :param transformation:  Custom transformation that overrides transformations provided in options
+    :param options:         A dict with additional options
+
+    :return: Resulting URL of the item
+    """
+
+    # preserve options from being destructed
+    options = copy.deepcopy(options)
+
+    if transformation:
+        if isinstance(transformation, string_types):
+            transformation = {"raw_transformation": transformation}
+
+        # Remove all transformation related options
+        options = dict((o, options[o]) for o in __URL_KEYS if o in options)
+        options.update(transformation)
+
+    scale_transformation = {"crop": "scale", "width": width}
+
+    url_options = options
+    patch_fetch_format(url_options)
+    url_options = chain_transformations(scale_transformation, **url_options)
+
+    return cloudinary_url(source, **url_options)[0]
 
 
 # Based on ruby's CGI::unescape. In addition does not escape / :
@@ -813,6 +910,7 @@ def process_layer(layer, layer_parameter):
 
     return ':'.join(components)
 
+
 IF_OPERATORS = {
     "=": 'eq',
     "!=": 'ne',
@@ -930,3 +1028,18 @@ def __json_serializer(obj):
 def is_remote_url(file):
     """Basic URL scheme check to define if it's remote URL"""
     return isinstance(file, string_types) and re.match(REMOTE_URL_RE, file)
+
+
+def check_property_enabled(f):
+    """
+    Used as a class method decorator to check whether class is enabled(self.enabled is True)
+
+    :param f: function to call
+
+    :return: None if not enabled, otherwise calls function f
+    """
+    def wrapper(*args, **kwargs):
+        if not args[0].enabled:
+            return None
+        return f(*args, **kwargs)
+    return wrapper
