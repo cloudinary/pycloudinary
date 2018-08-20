@@ -1,5 +1,6 @@
 # Copyright Cloudinary
 import json
+import os
 import socket
 
 import certifi
@@ -10,6 +11,7 @@ from urllib3.exceptions import HTTPError
 import cloudinary
 from cloudinary import utils
 from cloudinary.api import Error
+from cloudinary.cache.responsive_breakpoints_cache import instance as responsive_breakpoints_cache_instance
 
 try:
     from urllib3.contrib.appengine import AppEngineManager, is_appengine_sandbox
@@ -37,7 +39,7 @@ UPLOAD_LARGE_CHUNK_SIZE = 20000000
 
 def upload(file, **options):
     params = utils.build_upload_params(**options)
-    return call_api("upload", params, file=file, **options)
+    return call_cacheable_api("upload", params, file=file, **options)
 
 
 def unsigned_upload(file, upload_preset, **options):
@@ -101,8 +103,8 @@ def upload_large_part(file, **options):
 
     if 'resource_type' not in options:
         options['resource_type'] = "raw"
-
-    return call_api("upload", params, file=file, **options)
+    
+    return call_cacheable_api("upload", params, file=file, **options)
 
 
 def destroy(public_id, **options):
@@ -130,7 +132,7 @@ def rename(from_public_id, to_public_id, **options):
 def explicit(public_id, **options):
     params = utils.build_upload_params(**options)
     params["public_id"] = public_id
-    return call_api("explicit", params, **options)
+    return call_cacheable_api("explicit", params, **options)
 
 
 def create_archive(**options):
@@ -272,6 +274,42 @@ def text(text, **options):
     for key in TEXT_PARAMS:
         params[key] = options.get(key)
     return call_api("text", params, **options)
+
+
+def _save_responsive_breakpoints_to_cache(result):
+    """
+    Saves responsive breakpoints parsed from upload result to cache
+
+    :param result: Upload result
+    """
+    if "responsive_breakpoints" not in result:
+        return
+
+    if "public_id" not in result:
+        # We have some faulty result, nothing to cache
+        return
+
+    options = dict((k, result[k]) for k in ["type", "resource_type"] if k in result)
+
+    for transformation in result.get("responsive_breakpoints", []):
+        options["raw_transformation"] = transformation.get("transformation", "")
+        options["format"] = os.path.splitext(transformation["breakpoints"][0]["url"])[1][1:]
+        breakpoints = [bp["width"] for bp in transformation["breakpoints"]]
+        responsive_breakpoints_cache_instance.set(result["public_id"], breakpoints, **options)
+
+
+def call_cacheable_api(action, params, http_headers=None, return_error=False, unsigned=False, file=None, timeout=None,
+                       **options):
+    """
+    Calls Upload API and saves results to cache (if enabled)
+    """
+
+    result = call_api(action, params, http_headers, return_error, unsigned, file, timeout, **options)
+
+    if "use_cache" in options or cloudinary.config().use_cache:
+        _save_responsive_breakpoints_to_cache(result)
+
+    return result
 
 
 def call_api(action, params, http_headers=None, return_error=False, unsigned=False, file=None, timeout=None, **options):

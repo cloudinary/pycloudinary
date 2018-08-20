@@ -23,6 +23,7 @@ TEST_ICON = RESOURCES_PATH + "favicon.ico"
 
 TEST_TAG = "pycloudinary_test"
 UNIQUE_TAG = "{0}_{1}".format(TEST_TAG, SUFFIX)
+UNIQUE_TEST_ID = UNIQUE_TAG
 
 ZERO = timedelta(0)
 
@@ -42,6 +43,10 @@ class UTC(tzinfo):
 
 def get_method(mocker):
     return mocker.call_args[0][0]
+
+
+def get_request_url(mocker):
+    return mocker.call_args[0][1]
 
 
 def get_uri(args):

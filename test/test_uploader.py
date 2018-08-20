@@ -12,8 +12,11 @@ from urllib3.util import parse_url
 
 import cloudinary
 from cloudinary import api, uploader, utils
+from cloudinary.cache import responsive_breakpoints_cache
+from cloudinary.cache.adapter.key_value_cache_adapter import KeyValueCacheAdapter
 from test.helper_test import uploader_response_mock, SUFFIX, TEST_IMAGE, get_params, TEST_ICON, TEST_DOC, \
     REMOTE_TEST_IMAGE, UTC, populate_large_file
+from test.cache.storage.dummy_cache_storage import DummyCacheStorage
 
 MOCK_RESPONSE = uploader_response_mock()
 
@@ -35,15 +38,41 @@ TEXT_ID = "text_{}".format(SUFFIX)
 TEST_ID1 = "uploader_test_{}".format(SUFFIX)
 TEST_ID2 = "uploader_test_{}2".format(SUFFIX)
 
-disable_warnings()
-
 LARGE_FILE_SIZE = 5880138
 LARGE_CHUNK_SIZE = 5243000
 LARGE_FILE_WIDTH = 1400
 LARGE_FILE_HEIGHT = 1400
 
+disable_warnings()
+
 
 class UploaderTest(unittest.TestCase):
+    rbp_trans = {"angle": 45, "crop": "scale"}
+    rbp_format = "png"
+    rbp_values = [206, 50]
+    rbp_params = {
+        "use_cache": True,
+        "responsive_breakpoints":
+        [
+            {
+                "create_derived": False,
+                "transformation":
+                {
+                    "angle": 90
+                },
+                "format": "gif"
+            },
+            {
+                "create_derived": False,
+                "transformation": rbp_trans,
+                "format": rbp_format
+            },
+            {
+                "create_derived": False
+            }
+        ],
+        "type": "upload"
+    }
 
     def setUp(self):
         cloudinary.reset_config()
@@ -162,6 +191,18 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         self.assertEqual(result["signature"], expected_signature)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_upload_responsive_breakpoints_cache(self):
+        """Should save responsive breakpoints to cache after upload"""
+        cache = responsive_breakpoints_cache.instance
+        cache.set_cache_adapter(KeyValueCacheAdapter(DummyCacheStorage()))
+
+        upload_result = uploader.upload(TEST_IMAGE, **self.rbp_params)
+
+        cache_value = cache.get(upload_result["public_id"], transformation=self.rbp_trans, format=self.rbp_format)
+
+        self.assertEqual(self.rbp_values, cache_value)
+
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_rename(self):
         """should successfully rename a file"""
         result = uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG])
@@ -190,6 +231,19 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         url = utils.cloudinary_url("cloudinary", **params)[0]
         actual = result["eager"][0]["url"]
         self.assertEqual(parse_url(actual).path, parse_url(url).path)
+
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_explicit_responsive_breakpoints_cache(self):
+        """Should save responsive breakpoints to cache after explicit"""
+        cache = responsive_breakpoints_cache.instance
+        cache.set_cache_adapter(KeyValueCacheAdapter(DummyCacheStorage()))
+
+        upload_result = uploader.upload(TEST_IMAGE)
+        explicit_result = uploader.explicit(upload_result["public_id"], **self.rbp_params)
+
+        cache_value = cache.get(explicit_result["public_id"], transformation=self.rbp_trans, format=self.rbp_format)
+
+        self.assertEqual(self.rbp_values, cache_value)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_eager(self):

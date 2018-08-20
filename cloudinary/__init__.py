@@ -4,11 +4,8 @@ import os
 import re
 import logging
 import numbers
-
 from math import ceil
-
 from six import python_2_unicode_compatible, string_types
-
 
 logger = logging.getLogger("Cloudinary")
 ch = logging.StreamHandler()
@@ -17,6 +14,9 @@ ch.setFormatter(formatter)
 logger.addHandler(ch)
 
 from cloudinary import utils
+from cloudinary.api import GeneralError
+from cloudinary.cache import responsive_breakpoints_cache
+from cloudinary.http_client import HttpClient
 from cloudinary.compat import urlparse, parse_qs
 from cloudinary.search import Search
 
@@ -164,6 +164,9 @@ def reset_config():
     _config = Config()
 
 
+_http_client = HttpClient()
+
+
 @python_2_unicode_compatible
 class CloudinaryResource(object):
     def __init__(self, public_id=None, format=None, version=None,
@@ -230,9 +233,38 @@ class CloudinaryResource(object):
     def default_source_types():
         return ['webm', 'mp4', 'ogv']
 
-    def __get_srcset_breakpoints(self, srcset_data):
+    @staticmethod
+    def _validate_srcset_data(srcset_data):
         """
-        Helper function. Gets or populates srcset breakpoints using provided parameters.
+        Helper function. Validates srcset_data parameters
+
+        :param srcset_data: A dictionary containing the following keys:
+                breakpoints A list of breakpoints.
+                min_width   Minimal width of the srcset images
+                max_width   Maximal width of the srcset images.
+                max_images  Number of srcset images to generate.
+
+        :return: bool True on success or False on failure
+        """
+        if not all(k in srcset_data and isinstance(srcset_data[k], numbers.Number) for k in ("min_width", "max_width",
+                                                                                             "max_images")):
+            logger.warning("Either valid (min_width, max_width, max_images)" +
+                           "or breakpoints must be provided to the image srcset attribute")
+            return False
+
+        if srcset_data["min_width"] > srcset_data["max_width"]:
+            logger.warning("min_width must be less than max_width")
+            return False
+
+        if srcset_data["max_images"] <= 0:
+            logger.warning("max_images must be a positive integer")
+            return False
+
+        return True
+
+    def _generate_breakpoints(self, srcset_data):
+        """
+        Helper function. Calculates static responsive breakpoints using provided parameters.
 
         Either the breakpoints or min_width, max_width, max_images must be provided.
 
@@ -251,19 +283,12 @@ class CloudinaryResource(object):
         if breakpoints:
             return breakpoints
 
-        if not all(k in srcset_data and isinstance(srcset_data[k], numbers.Number) for k in ("min_width", "max_width",
-                                                                                             "max_images")):
-            raise ValueError("Either valid (min_width, max_width, max_images)" +
-                             "or breakpoints must be provided to the image srcset attribute")
+        if not self._validate_srcset_data(srcset_data):
+            return None
 
         min_width, max_width, max_images = srcset_data["min_width"], srcset_data["max_width"], srcset_data["max_images"]
 
-        if min_width > max_width:
-            raise ValueError("min_width must be less than max_width")
-
-        if max_images <= 0:
-            raise ValueError("max_images must be a positive integer")
-        elif max_images == 1:
+        if max_images == 1:
             # if user requested only 1 image in srcset, we return max_width one
             min_width = max_width
 
@@ -279,92 +304,172 @@ class CloudinaryResource(object):
 
         return breakpoints
 
-    def __generate_single_srcset_url(self, breakpoint, **options):
+    def _fetch_breakpoints(self, srcset_data=None, **options):
         """
-        Helper function. Generates a single srcset item url.
+        Helper function. Retrieves responsive breakpoints list from cloudinary server
 
-        :param width:   Width in pixels of the srcset item
-        :param options: A dict with additional options
+        When passing special string to transformation `width` parameter of form `auto:breakpoints{parameters}:json`,
+        the response contains JSON with data of the responsive breakpoints
 
-        :return: Resulting URL of the item
+        :param srcset_data: A dictionary containing the following keys:
+                                min_width   Minimal width of the srcset images
+                                max_width   Maximal width of the srcset images
+                                bytes_step  Minimal bytes step between images
+                                max_images  Number of srcset images to generate
+        :param options: Additional options
+
+        :return: Resulting breakpoints
         """
+        if srcset_data is None:
+            srcset_data = dict()
 
-        # The following line is used for the next purposes:
-        #   1. Generate raw transformation string
-        #   2. Cleanup transformation parameters from options.
-        # We call it intentionally even when the user provided custom transformation in srcset
-        raw_transformation, options = utils.generate_transformation_string(**options)
+        min_width = srcset_data.get("min_width", 50)
+        max_width = srcset_data.get("max_width", 1000)
+        bytes_step = srcset_data.get("bytes_step", 20000)
+        max_images = srcset_data.get("max_images", 20)
+        transformation = srcset_data.get("transformation")
 
-        # Handle custom transformation provided for srcset items
-        if "srcset" in options and "transformation" in options["srcset"] and options["srcset"]["transformation"]:
-            options["transformation"] = options["srcset"]["transformation"]
-            raw_transformation, options = utils.generate_transformation_string(**options)
+        kbytes_step = int(ceil(float(bytes_step)/1024))
 
-        options["raw_transformation"] = raw_transformation + "/c_scale,w_{}".format(breakpoint)
+        breakpoints_width_param = "auto:breakpoints_{min_width}_{max_width}_{kbytes_step}_{max_images}:json".format(
+            min_width=min_width, max_width=max_width, kbytes_step=kbytes_step, max_images=max_images)
+        breakpoints_url = utils.cloudinary_scaled_url(self.public_id, breakpoints_width_param, transformation, options)
 
-        # We might still have width and height params left if they were provided.
-        # We don't want to use them for the second time
-        for key in {"width", "height"}:
-            options.pop(key, None)
+        return _http_client.get_json(breakpoints_url).get("breakpoints", None)
 
-        return utils.cloudinary_url(self.public_id, **options)[0]
-
-    def __generate_image_srcset_attribute(self, srcset_data, **options):
+    def _get_or_generate_breakpoints(self, srcset_data, **options):
         """
-        Helper function. Generates srcset attribute value of the HTML img tag.
+        Helper function. Gets from cache or calculates srcset breakpoints using provided parameters
 
         :param srcset_data: A dictionary containing the following keys:
                                 breakpoints A list of breakpoints.
                                 min_width   Minimal width of the srcset images
-                                max_width   Maximal width of the srcset images.
-                                max_images  Number of srcset images to generate.
+                                max_width   Maximal width of the srcset images
+                                max_images  Number of srcset images to generate
+        :param options: Additional options
+
+        :return: Resulting breakpoints
+        """
+
+        breakpoints = srcset_data.get("breakpoints")
+
+        if breakpoints:
+            return breakpoints
+
+        if srcset_data.get("use_cache"):
+            breakpoints = responsive_breakpoints_cache.instance.get(self.public_id, **options)
+            if not breakpoints:
+                try:
+                    breakpoints = self._fetch_breakpoints(srcset_data, **options)
+                except GeneralError as e:
+                    logger.warning("Failed getting responsive breakpoints: {error}".format(error=e.message))
+
+                if breakpoints:
+                    responsive_breakpoints_cache.instance.set(self.public_id, breakpoints, **options)
+
+        if not breakpoints:
+            # Static calculation if cache is not enabled or we failed to fetch breakpoints
+            breakpoints = self._generate_breakpoints(srcset_data)
+
+        return breakpoints
+
+    def _generate_srcset_attribute(self, breakpoints, transformation=None, **options):
+        """
+        Helper function. Generates srcset attribute value of the HTML img tag.
+
+        :param breakpoints: A list of breakpoints.
+        :param transformation: Custom transformation
         :param options:     Additional options
 
         :return:  Resulting srcset attribute value
 
         :raises ValueError: In case of invalid or missing parameters
         """
-        if not srcset_data:
+        if not breakpoints:
             return None
 
-        if isinstance(srcset_data, string_types):
-            return srcset_data
+        if transformation is None:
+            transformation = dict()
 
-        breakpoints = self.__get_srcset_breakpoints(srcset_data)
+        return ", ".join(["{0} {1}w".format(utils.cloudinary_scaled_url(
+            self.public_id, w, transformation, options), w) for w in breakpoints])
 
-        # The code below is a part of cloudinary_url code that affects options.
-        # We call it here, to make sure we get exactly the same behavior.
-        # TODO: Refactor this code, unify it with `utils.cloudinary_url()` or fix `utils.cloudinary_url()` and remove it
-        storage_type = options.pop("type", "upload")
-        if storage_type == 'fetch':
-            options["fetch_format"] = options.get("fetch_format", options.pop("format", None))
-        # END OF TODO
-
-        return ", ".join([self.__generate_single_srcset_url(bp, **options) + " {0}w".format(bp) for bp in breakpoints])
-
-    def __generate_image_sizes_attribute(self, srcset_data):
+    @staticmethod
+    def _generate_sizes_attribute(breakpoints):
         """
         Helper function. Generates sizes attribute value of the HTML img tag.
 
+        :param breakpoints: A list of breakpoints.
+
+        :return: Resulting 'sizes' attribute value
+        """
+        if not breakpoints:
+            return None
+
+        return ", ".join("(max-width: {bp}px) {bp}px".format(bp=bp) for bp in breakpoints)
+
+    def _generate_image_responsive_attributes(self, attributes, srcset_data, **options):
+        """
+        Helper function. Generates srcset and sizes attributes of the image tag
+
+        Create both srcset and sizes here to avoid fetching breakpoints twice
+
+        :param attributes: Existing attributes
         :param srcset_data: A dictionary containing the following keys:
                                 breakpoints     A list of breakpoints.
                                 min_width       Minimal width of the srcset images
                                 max_width       Maximal width of the srcset images.
                                 max_images      Number of srcset images to generate.
-        :return: Resulting 'sizes' attribute value
+        :param options:     Additional options
 
-        :raises ValueError: In case of invalid or missing parameters
+        :return: The responsive attributes
         """
-        if not srcset_data or isinstance(srcset_data, string_types):
-            return None
+        responsive_attributes = dict()
 
-        breakpoints = self.__get_srcset_breakpoints(srcset_data)
+        if not srcset_data:
+            return responsive_attributes
 
-        return ", ".join("(max-width: {bp}px) {bp}px".format(bp=bp) for bp in breakpoints)
+        breakpoints = None
+
+        if "srcset" not in attributes:
+            breakpoints = self._get_or_generate_breakpoints(srcset_data, **options)
+            transformation = srcset_data.get("transformation")
+            srcset_attr = self._generate_srcset_attribute(breakpoints, transformation, **options)
+            if srcset_attr:
+                responsive_attributes["srcset"] = srcset_attr
+
+        if "sizes" not in attributes and srcset_data.get("sizes") is True:
+            if not breakpoints:
+                breakpoints = self._get_or_generate_breakpoints(srcset_data, **options)
+            sizes_attr = self._generate_sizes_attribute(breakpoints)
+            if sizes_attr:
+                responsive_attributes["sizes"] = sizes_attr
+
+        return responsive_attributes
 
     def image(self, **options):
+        """
+        Generates HTML img tag
+
+        :param options: Additional options
+
+        :return: Resulting img tag
+        """
         if options.get("resource_type", self.resource_type) == "video":
             self.default_poster_options(options)
+
+        custom_attributes = options.pop("attributes", dict())
+
+        srcset_option = options.pop("srcset", dict())
+        srcset_data = dict()
+
+        if isinstance(srcset_option, dict):
+            srcset_data = config().srcset or dict()
+            srcset_data = srcset_data.copy()
+            srcset_data.update(srcset_option)
+        else:
+            if "srcset" not in custom_attributes:
+                custom_attributes["srcset"] = srcset_option
 
         src, attrs = self.__build_url(**options)
 
@@ -384,20 +489,16 @@ class CloudinaryResource(object):
             if src == "blank":
                 src = CL_BLANK
 
-        if "srcset" in options:
-            srcset_data = options["srcset"]
-            attrs["srcset"] = self.__generate_image_srcset_attribute(srcset_data, **options)
+        responsive_attrs = self._generate_image_responsive_attributes(custom_attributes, srcset_data, **options)
 
-            if "sizes" in srcset_data and srcset_data["sizes"] is True:
-                attrs["sizes"] = self.__generate_image_sizes_attribute(srcset_data)
-
+        if responsive_attrs:
             # width and height attributes override srcset behavior, they should be removed from html attributes.
             for key in {"width", "height"}:
                 attrs.pop(key, None)
 
-        if "attributes" in attrs and attrs["attributes"]:
-            # Explicitly provided attributes override options
-            attrs.update(attrs.pop("attributes"))
+        attrs.update(responsive_attrs)
+        # Explicitly provided attributes override options
+        attrs.update(custom_attributes)
 
         if src:
             attrs["src"] = src

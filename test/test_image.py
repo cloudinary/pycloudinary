@@ -1,14 +1,24 @@
 import copy
+import logging
+import os
 import re
 import unittest
 
 import six
+from mock import mock
 
 import cloudinary
 from cloudinary import CloudinaryImage
 
 
 class ImageTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.logger = cloudinary.logger
+
+        if os.getenv("DEBUG"):
+            cls.logger.setLevel(logging.DEBUG)
+
     def setUp(self):
         self.cloud_name = 'test123'
         self.public_id = "sample"
@@ -230,12 +240,16 @@ class ImageTest(unittest.TestCase):
     def test_srcset_from_string(self):
         """Should support srcset string value"""
         raw_srcset_value = "some srcset data as is"
-        tag = CloudinaryImage(self.full_public_id).image(srcset=raw_srcset_value, **self.common_image_options)
-
         attributes = {"srcset": raw_srcset_value}
+
+        tag = CloudinaryImage(self.full_public_id).image(attributes=attributes, **self.common_image_options)
+
         expected_tag = self._get_expected_cl_image_tag(self.full_public_id, self.common_transformation_str,
                                                        attributes=attributes)
         self.assertEqual(expected_tag, tag)
+
+        legacy_tag = CloudinaryImage(self.full_public_id).image(srcset=raw_srcset_value, **self.common_image_options)
+        self.assertEqual(expected_tag, legacy_tag)
 
     def test_srcset_width_height_removed(self):
         """Should remove width and height attributes in case srcset is specified, but passed to transformation"""
@@ -261,10 +275,14 @@ class ImageTest(unittest.TestCase):
             {'min_width': 100, 'max_width': 300, 'max_images': -17},  # invalid max_images
             {'min_width': 100, 'max_width': 300, 'max_images': '3'},  # invalid max_images
         ]
+        with mock.patch('cloudinary.logger') as log_mock:
+            for invalid_srcset in invalid_srcset_params:
+                image_tag = CloudinaryImage(self.full_public_id).image(srcset=invalid_srcset,
+                                                                       **self.common_image_options)
+                self.assertNotIn("srcset", image_tag)
 
-        for invalid_srcset in invalid_srcset_params:
-            with self.assertRaises(ValueError):
-                CloudinaryImage(self.full_public_id).image(srcset=invalid_srcset, **self.common_image_options)
+            expected_log_call_count = len(invalid_srcset_params) + 1  # When `sizes` is True we call log twice
+            self.assertEqual(expected_log_call_count, log_mock.warning.call_count)
 
     def test_custom_attributes(self):
         """ Should consume custom attributes from 'attributes' key"""

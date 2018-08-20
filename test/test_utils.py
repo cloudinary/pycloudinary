@@ -12,15 +12,24 @@ import six
 from mock import patch
 
 import cloudinary.utils
-from cloudinary.utils import build_list_of_dicts, json_encode, encode_unicode_url, base64url_encode
+from cloudinary.utils import build_list_of_dicts, json_encode, encode_unicode_url, base64url_encode, \
+    patch_fetch_format, cloudinary_scaled_url, chain_transformations, generate_transformation_string
 from test.helper_test import TEST_IMAGE, REMOTE_TEST_IMAGE
 
 DEFAULT_ROOT_PATH = 'http://res.cloudinary.com/test123/'
-DEFAULT_UPLOAD_PATH = 'http://res.cloudinary.com/test123/image/upload/'
-VIDEO_UPLOAD_PATH = 'http://res.cloudinary.com/test123/video/upload/'
+
+DEFAULT_UPLOAD_PATH = DEFAULT_ROOT_PATH + 'image/upload/'
+DEFAULT_FETCH_PATH = DEFAULT_ROOT_PATH + 'image/fetch/'
+VIDEO_UPLOAD_PATH = DEFAULT_ROOT_PATH + 'video/upload/'
+
+FETCH_URL = "http://cloudinary.com/images/logo.png"
 
 
 class TestUtils(unittest.TestCase):
+    crop_transformation = {'crop': 'crop', 'width': 100}
+    crop_transformation_str = 'c_crop,w_100'
+    raw_transformation = "c_fill,e_grayscale,q_auto"
+
     def setUp(self):
         cloudinary.config(cloud_name="test123",
                           cname=None,  # for these tests without actual upload, we ignore cname
@@ -203,6 +212,76 @@ class TestUtils(unittest.TestCase):
                                    expected_url=DEFAULT_UPLOAD_PATH + "g_north_west/test")
         self.__test_cloudinary_url(options={"transformation": {"width": 100, "raw_transformation": ""}},
                                    expected_url=DEFAULT_UPLOAD_PATH + "w_100/test")
+
+    def test_chain_transformations(self):
+        """Should support chaining transformations at the end"""
+        options = {"effect": "art:incognito", "format": "png"}
+        chained_transformations = [
+            {"x": 100, "y": 100, "width": 200, "crop": "fill"},
+            {"radius": 10},
+            {"raw_transformation": self.raw_transformation}
+        ]
+
+        actual_options = chain_transformations(options, chained_transformations)
+        actual_transformation_str = generate_transformation_string(**actual_options)[0]
+
+        self.assertEqual("e_art:incognito/c_fill,w_200,x_100,y_100/r_10/" + self.raw_transformation,
+                         actual_transformation_str)
+
+        # Should support chaining transformations, when default options have no transformations
+        actual_options = chain_transformations({}, chained_transformations)
+        actual_transformation_str = generate_transformation_string(**actual_options)[0]
+
+        self.assertEqual("c_fill,w_200,x_100,y_100/r_10/" + self.raw_transformation,
+                         actual_transformation_str)
+
+        # Should handle  empty list of chained transformations
+
+        actual_options = chain_transformations(options, [])
+        actual_transformation_str = generate_transformation_string(**actual_options)[0]
+        self.assertEqual("e_art:incognito", actual_transformation_str)
+
+        # Should handle empty options and empty list of chained transformations
+
+        actual_options = chain_transformations({}, [])
+        actual_transformation_str = generate_transformation_string(**actual_options)[0]
+
+        self.assertEqual("", actual_transformation_str)
+
+        # Should remove transformation options from resulting options
+        actual_options = chain_transformations(dict(width=200, height=100), chained_transformations)
+
+        self.assertNotIn("width", actual_options)
+        self.assertNotIn("height", actual_options)
+
+        actual_transformation_str = generate_transformation_string(**actual_options)[0]
+
+        self.assertEqual("h_100,w_200/c_fill,w_200,x_100,y_100/r_10/c_fill,e_grayscale,q_auto",
+                         actual_transformation_str)
+
+        # Should chain transformations with a fetch option
+        options["type"] = "fetch"
+
+        patch_fetch_format(options)
+        actual_options = chain_transformations(options, chained_transformations)
+
+        # format should be removed when we use fetch
+        self.assertNotIn("format", actual_options)
+
+        actual_transformation_str = generate_transformation_string(**actual_options)[0]
+
+        # Should use url format as a fetch_format
+        self.assertEqual("e_art:incognito,f_png/c_fill,w_200,x_100,y_100/r_10/" + self.raw_transformation,
+                         actual_transformation_str)
+
+        options["fetch_format"] = "gif"
+
+        actual_options = chain_transformations(options, chained_transformations)
+        actual_transformation_str = generate_transformation_string(**actual_options)[0]
+
+        # Should use fetch_format
+        self.assertEqual("e_art:incognito,f_gif/c_fill,w_200,x_100,y_100/r_10/" + self.raw_transformation,
+                         actual_transformation_str)
 
     def test_size(self):
         """should support size"""
@@ -883,6 +962,52 @@ class TestUtils(unittest.TestCase):
         with tempfile.NamedTemporaryFile() as empty_file:
             actual_size = cloudinary.utils.file_io_size(empty_file)
             self.assertEqual(0, actual_size)
+
+    def test_cloudinary_scaled_url(self):
+        """Should correctly handle format and fetch_format with and without custom transformation"""
+        image_format = "jpg"
+        fetch_format = "gif"
+        resp_w = 99
+        resp_trans = "c_scale,w_{}".format(resp_w)
+        effect = "sepia"
+
+        options = {"format": image_format, "type": "fetch", "fetch_format": fetch_format}
+
+        # Without custom transformation
+        actual_url = cloudinary_scaled_url(FETCH_URL, resp_w, {}, options)
+
+        self.assertEqual("{p}f_{ff}/{t}/{fu}".format(p=DEFAULT_FETCH_PATH, ff=fetch_format, t=resp_trans, fu=FETCH_URL),
+                         actual_url)
+
+        # With custom transformation
+        actual_url = cloudinary_scaled_url(FETCH_URL, resp_w, self.crop_transformation, options)
+
+        self.assertEqual("{p}c_crop,f_{f},w_100/{t}/{fu}".format(p=DEFAULT_FETCH_PATH, f=image_format, t=resp_trans,
+                                                                 fu=FETCH_URL),
+                         actual_url)
+
+        # Add base transformation
+        options["effect"] = effect
+        actual_url = cloudinary_scaled_url(FETCH_URL, resp_w, {}, options)
+
+        self.assertEqual("{p}e_{e},f_{ff}/{t}/{fu}".format(p=DEFAULT_FETCH_PATH, e=effect, ff=fetch_format,
+                                                           t=resp_trans, fu=FETCH_URL),
+                         actual_url)
+
+        # Should ignore base transformation
+        actual_url = cloudinary_scaled_url(FETCH_URL, resp_w, self.crop_transformation, options)
+
+        self.assertEqual("{p}c_crop,f_{f},w_100/{t}/{fu}".format(p=DEFAULT_FETCH_PATH, f=image_format,
+                                                                 t=resp_trans, fu=FETCH_URL),
+                         actual_url)
+
+        # Should include raw transformation from base options
+        options["raw_transformation"] = self.raw_transformation
+        actual_url = cloudinary_scaled_url(FETCH_URL, resp_w, {}, options)
+
+        self.assertEqual("{p}e_{e},f_{ff},{rt}/{t}/{fu}".format(p=DEFAULT_FETCH_PATH, e=effect, ff=fetch_format,
+                                                                rt=self.raw_transformation, t=resp_trans, fu=FETCH_URL),
+                         actual_url)
 
 
 if __name__ == '__main__':
