@@ -376,11 +376,8 @@ class CloudinaryResource(object):
         """
         Helper function. Generates srcset attribute value of the HTML img tag.
 
-        :param srcset_data: A dictionary containing the following keys:
-                                breakpoints A list of breakpoints.
-                                min_width   Minimal width of the srcset images
-                                max_width   Maximal width of the srcset images.
-                                max_images  Number of srcset images to generate.
+        :param breakpoints: A list of breakpoints.
+        :param transformation: Custom transformation
         :param options:     Additional options
 
         :return:  Resulting srcset attribute value
@@ -401,15 +398,9 @@ class CloudinaryResource(object):
         """
         Helper function. Generates sizes attribute value of the HTML img tag.
 
-        :param srcset_data: A dictionary containing the following keys:
-                                breakpoints     A list of breakpoints.
-                                min_width       Minimal width of the srcset images
-                                max_width       Maximal width of the srcset images.
-                                max_images      Number of srcset images to generate.
+        :param breakpoints: A list of breakpoints.
 
         :return: Resulting 'sizes' attribute value
-
-        :raises ValueError: In case of invalid or missing parameters
         """
         if not breakpoints:
             return None
