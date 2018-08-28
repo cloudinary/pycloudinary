@@ -326,6 +326,9 @@ class ImageTest(unittest.TestCase):
                                                        attributes=attributes)
         self.assertEqual(expected_tag, tag)
 
+        legacy_tag = CloudinaryImage(self.full_public_id).image(srcset=raw_srcset_value, **self.common_image_options)
+        self.assertEqual(expected_tag, legacy_tag)
+
     def test_srcset_width_height_removed(self):
         """Should remove width and height attributes in case srcset is specified, but passed to transformation"""
         tag = CloudinaryImage(self.full_public_id).image(width=500, height=500, srcset=self.common_srcset,

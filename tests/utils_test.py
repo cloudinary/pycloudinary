@@ -219,28 +219,34 @@ class TestUtils(unittest.TestCase):
             {"raw_transformation": self.raw_transformation}
         ]
 
-        actual_options = chain_transformations(chained_transformations, **options)
+        actual_options = chain_transformations(options, chained_transformations)
         actual_transformation_str = generate_transformation_string(**actual_options)[0]
 
         self.assertEqual("e_art:incognito/c_fill,w_200,x_100,y_100/r_10/" + self.raw_transformation,
                          actual_transformation_str)
 
         # Should support chaining transformations, when default options have no transformations
-        actual_options = chain_transformations(chained_transformations)
+        actual_options = chain_transformations({}, chained_transformations)
         actual_transformation_str = generate_transformation_string(**actual_options)[0]
 
         self.assertEqual("c_fill,w_200,x_100,y_100/r_10/" + self.raw_transformation,
                          actual_transformation_str)
 
+        # Should handle  empty list of chained transformations
+
+        actual_options = chain_transformations(options, [])
+        actual_transformation_str = generate_transformation_string(**actual_options)[0]
+        self.assertEqual("e_art:incognito", actual_transformation_str)
+
         # Should handle empty options and empty list of chained transformations
 
-        actual_options = chain_transformations([])
+        actual_options = chain_transformations({}, [])
         actual_transformation_str = generate_transformation_string(**actual_options)[0]
 
         self.assertEqual("", actual_transformation_str)
 
         # Should remove transformation options from resulting options
-        actual_options = chain_transformations(chained_transformations, width=200, height=100)
+        actual_options = chain_transformations(dict(width=200, height=100), chained_transformations)
 
         self.assertNotIn("width", actual_options)
         self.assertNotIn("height", actual_options)
@@ -254,7 +260,7 @@ class TestUtils(unittest.TestCase):
         options["type"] = "fetch"
 
         patch_fetch_format(options)
-        actual_options = chain_transformations(chained_transformations, **options)
+        actual_options = chain_transformations(options, chained_transformations)
 
         # format should be removed when we use fetch
         self.assertNotIn("format", actual_options)
@@ -267,7 +273,7 @@ class TestUtils(unittest.TestCase):
 
         options["fetch_format"] = "gif"
 
-        actual_options = chain_transformations(chained_transformations, **options)
+        actual_options = chain_transformations(options, chained_transformations)
         actual_transformation_str = generate_transformation_string(**actual_options)[0]
 
         # Should use fetch_format

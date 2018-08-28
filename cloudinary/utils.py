@@ -329,19 +329,17 @@ def generate_transformation_string(**options):
     return url, options
 
 
-def chain_transformations(transformations, **options):
+def chain_transformations(options, transformations):
     """
     Helper function, allows chaining transformations to the end of transformations list
 
     The result of this function is an updated options parameter
 
-    :param transformations: Transformations to chain at the end
     :param options:         Original options
+    :param transformations: Transformations to chain at the end
 
     :return: Resulting options
     """
-    if not transformations:
-        return options
 
     transformations = copy.deepcopy(transformations)
 
@@ -628,7 +626,7 @@ def cloudinary_scaled_url(source, width, transformation, options):
 
     url_options = options
     patch_fetch_format(url_options)
-    url_options = chain_transformations(scale_transformation, **url_options)
+    url_options = chain_transformations(url_options, scale_transformation)
 
     return cloudinary_url(source, **url_options)[0]
 

@@ -457,11 +457,18 @@ class CloudinaryResource(object):
         if options.get("resource_type", self.resource_type) == "video":
             self.default_poster_options(options)
 
-        srcset_data = config().srcset or dict()
-        srcset_data = srcset_data.copy()
-        srcset_data.update(options.pop("srcset", dict()))
-
         custom_attributes = options.pop("attributes", dict())
+
+        srcset_option = options.pop("srcset", dict())
+        srcset_data = dict()
+
+        if isinstance(srcset_option, dict):
+            srcset_data = config().srcset or dict()
+            srcset_data = srcset_data.copy()
+            srcset_data.update(srcset_option)
+        else:
+            if "srcset" not in custom_attributes:
+                custom_attributes["srcset"] = srcset_option
 
         src, attrs = self.__build_url(**options)
 
@@ -603,7 +610,7 @@ class CloudinaryResource(object):
             curr_options = deepcopy(options)
 
             if "transformation" in source:
-                curr_options = utils.chain_transformations(source["transformation"], **curr_options)
+                curr_options = utils.chain_transformations(curr_options, source["transformation"])
 
             curr_options["media"] = dict((k, source[k]) for k in ['min_width', 'max_width'] if k in source)
 
