@@ -34,8 +34,8 @@ class TestUtils(unittest.TestCase):
         if options is None:
             options = {}
         url, options = cloudinary.utils.cloudinary_url(public_id, **options)
-        self.assertEqual(url, expected_url)
-        self.assertEqual(options, expected_options)
+        self.assertEqual(expected_url, url)
+        self.assertEqual(expected_options, options)
 
     def test_cloud_name(self):
         """should use cloud_name from config"""
@@ -309,6 +309,36 @@ class TestUtils(unittest.TestCase):
         # Should not pass width height to HTML with underlay
         self.__test_cloudinary_url(options={"underlay": "text:hello", "height": 100, "width": 100},
                                    expected_url=DEFAULT_UPLOAD_PATH + "h_100,u_text:hello,w_100/test")
+
+    def test_custom_action(self):
+        custom_action_wasm = {"action_type": "wasm", "source": "blur.wasm"}
+        custom_action_wasm_str = "wasm:blur.wasm"
+
+        custom_action_remote = {
+            "action_type": "remote",
+            "source": "https://df34ra4a.execute-api.us-west-2.amazonaws.com/default/cloudinaryAction"}
+        custom_action_remote_str = "remote:" + \
+            "aHR0cHM6Ly9kZjM0cmE0YS5leGVjdXRlLWFwaS51cy13ZXN0LTIuYW1hem9uYXdzLmNvbS9kZWZhdWx0L2Nsb3VkaW5hcnlBY3Rpb24"
+
+        # should support custom action from string
+        options = {"custom_action": custom_action_wasm_str}
+        self.__test_cloudinary_url(
+            options=options,
+            expected_url=DEFAULT_UPLOAD_PATH + "fn_" + custom_action_wasm_str + "/test"
+        )
+
+        # should support custom action from dictionary
+        options = {"custom_action": custom_action_wasm}
+        self.__test_cloudinary_url(
+            options=options,
+            expected_url=DEFAULT_UPLOAD_PATH + "fn_" + custom_action_wasm_str + "/test"
+        )
+        # should encode custom action source for remote action
+        options = {"custom_action": custom_action_remote}
+        self.__test_cloudinary_url(
+            options=options,
+            expected_url=DEFAULT_UPLOAD_PATH + "fn_" + custom_action_remote_str + "/test"
+        )
 
     def test_fetch_format(self):
         """should support format for fetch urls"""

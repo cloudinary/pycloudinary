@@ -206,6 +206,7 @@ def generate_transformation_string(**options):
     overlay = process_layer(options.pop("overlay", None), "overlay")
     underlay = process_layer(options.pop("underlay", None), "underlay")
     if_value = process_conditional(options.pop("if", None))
+    custom_action = process_custom_action(options.pop("custom_action", None))
 
     params = {
         "a": normalize_expression(angle),
@@ -219,6 +220,7 @@ def generate_transformation_string(**options):
         "e": normalize_expression(effect),
         "eo": normalize_expression(end_offset),
         "fl": flags,
+        "fn": custom_action,
         "h": normalize_expression(height),
         "l": overlay,
         "o": normalize_expression(options.pop('opacity', None)),
@@ -896,6 +898,18 @@ def translate_if(match):
     return IF_OPERATORS.get(name,
                             PREDEFINED_VARS.get(name,
                                                 name))
+
+
+def process_custom_action(custom_action):
+    if not isinstance(custom_action, dict):
+        return custom_action
+
+    action_type = custom_action.get("action_type")
+    source = custom_action.get("source")
+    if action_type == "remote":
+        source = base64url_encode(source)
+
+    return ":".join([action_type, source])
 
 
 def process_conditional(conditional):
