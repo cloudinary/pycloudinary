@@ -965,6 +965,17 @@ def base64_encode_url(url):
     return b64.decode('ascii')
 
 
+def base64url_encode(data):
+    """
+    Url safe version of urlsafe_b64encode with stripped `=` sign at the end.
+
+    :param data: input data
+
+    :return: Base64 URL safe encoded string
+    """
+    return to_string(base64.urlsafe_b64encode(to_bytes(data))).rstrip("=")
+
+
 def encode_unicode_url(url_str):
     """
     Quote and encode possible unicode url string (applicable for python2)
