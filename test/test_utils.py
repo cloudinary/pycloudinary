@@ -12,7 +12,7 @@ import six
 from mock import patch
 
 import cloudinary.utils
-from cloudinary.utils import build_list_of_dicts, json_encode, encode_unicode_url
+from cloudinary.utils import build_list_of_dicts, json_encode, encode_unicode_url, base64url_encode
 from test.helper_test import TEST_IMAGE, REMOTE_TEST_IMAGE
 
 DEFAULT_ROOT_PATH = 'http://res.cloudinary.com/test123/'
@@ -820,6 +820,9 @@ class TestUtils(unittest.TestCase):
     def test_encode_unicode_url(self):
         self.assertEqual("string", encode_unicode_url("string"))
         self.assertEqual("encoded", encode_unicode_url(u"encoded"))
+
+    def test_base64url_encode(self):
+        self.assertEqual("YWQ_Lix4MDl-IUAhYQ", base64url_encode("ad?.,x09~!@!a"))
 
     def test_is_remote_url(self):
         self.assertFalse(cloudinary.utils.is_remote_url(TEST_IMAGE))
