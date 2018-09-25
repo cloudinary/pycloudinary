@@ -1,13 +1,15 @@
 import os
 import random
 import re
+import time
 from datetime import timedelta, tzinfo
+from functools import wraps
 
 import six
 from urllib3 import HTTPResponse
 from urllib3._collections import HTTPHeaderDict
 
-from cloudinary import utils
+from cloudinary import utils, logger
 
 SUFFIX = os.environ.get('TRAVIS_JOB_ID') or random.randint(10000, 99999)
 
@@ -111,3 +113,30 @@ def populate_large_file(file_io, size, chunk_size=4096):
 
     file_io.flush()
     file_io.seek(0)
+
+
+def retry_assertion(num_tries=3, delay=3):
+    """
+    Helper for retrying inconsistent unit tests
+
+    :param num_tries: Number of tries to perform
+    :param delay: Delay in seconds between retries
+    """
+    def retry_decorator(func):
+        @wraps(func)
+        def retry_func(*args, **kwargs):
+            try_num = 1
+            while try_num < num_tries:
+                try:
+                    return func(*args, **kwargs)
+                except AssertionError:
+                    logger.warning("Assertion #{} out of {} failed, retrying in {} seconds".format(try_num, num_tries,
+                                                                                                   delay))
+                    time.sleep(delay)
+                    try_num += 1
+
+            return func(*args, **kwargs)
+
+        return retry_func
+
+    return retry_decorator

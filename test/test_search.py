@@ -8,7 +8,7 @@ from urllib3 import disable_warnings
 import cloudinary
 from cloudinary import api, logger, uploader
 from cloudinary.search import Search
-from test.helper_test import SUFFIX, TEST_IMAGE, TEST_TAG, UNIQUE_TAG
+from test.helper_test import SUFFIX, TEST_IMAGE, TEST_TAG, UNIQUE_TAG, retry_assertion
 
 TEST_TAG = 'search_{}'.format(TEST_TAG)
 UNIQUE_TAG = 'search_{}'.format(UNIQUE_TAG)
@@ -106,6 +106,7 @@ class SearchTest(unittest.TestCase):
     @unittest.skipIf(not os.environ.get('RUN_SEARCH_TESTS', False),
                      "For this test to work, 'Advanced search' should be enabled for your cloud. " +
                      "Use env variable RUN_SEARCH_TESTS=1 if you really want to test it.")
+    @retry_assertion()
     def test_should_return_all_images_tagged(self):
 
         results = Search().expression("tags={0}".format(UNIQUE_TAG)).execute()
@@ -115,6 +116,7 @@ class SearchTest(unittest.TestCase):
     @unittest.skipIf(not os.environ.get('RUN_SEARCH_TESTS', False),
                      "For this test to work, 'Advanced search' should be enabled for your cloud. " +
                      "Use env variable RUN_SEARCH_TESTS=1 if you really want to test it.")
+    @retry_assertion()
     def test_should_return_resource(self):
 
         results = Search().expression("public_id={0}".format(public_ids[0])).execute()
@@ -124,6 +126,7 @@ class SearchTest(unittest.TestCase):
     @unittest.skipIf(not os.environ.get('RUN_SEARCH_TESTS', False),
                      "For this test to work, 'Advanced search' should be enabled for your cloud. " +
                      "Use env variable RUN_SEARCH_TESTS=1 if you really want to test it.")
+    @retry_assertion()
     def test_should_paginate_resources_limited_by_tag_and_ordered_by_ascending_public_id(self):
         results = Search().max_results(1).expression("tags={0}".format(UNIQUE_TAG)).sort_by('public_id',
                                                                                             'asc').execute()
@@ -147,6 +150,7 @@ class SearchTest(unittest.TestCase):
     @unittest.skipIf(not os.environ.get('RUN_SEARCH_TESTS', False),
                      "For this test to work, 'Advanced search' should be enabled for your cloud. " +
                      "Use env variable RUN_SEARCH_TESTS=1 if you really want to test it.")
+    @retry_assertion()
     def test_should_include_context(self):
 
         results = Search().expression("tags={0}".format(UNIQUE_TAG)).with_field('context').execute()
@@ -158,6 +162,7 @@ class SearchTest(unittest.TestCase):
     @unittest.skipIf(not os.environ.get('RUN_SEARCH_TESTS', False),
                      "For this test to work, 'Advanced search' should be enabled for your cloud. " +
                      "Use env variable RUN_SEARCH_TESTS=1 if you really want to test it.")
+    @retry_assertion()
     def test_should_include_context_tags_and_image_metadata(self):
 
         results = Search().expression("tags={0}".format(UNIQUE_TAG)).\
