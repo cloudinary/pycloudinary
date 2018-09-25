@@ -416,7 +416,7 @@ def _call_api(method, uri, params=None, body=None, headers=None, **options):
     if isinstance(params, dict):
         processed_params = {}
         for key, value in params.items():
-            if isinstance(value, list):
+            if isinstance(value, list) or isinstance(value, tuple):
                 value_list = {"{}[{}]".format(key, i): i_value for i, i_value in enumerate(value)}
                 processed_params.update(value_list)
             elif value:

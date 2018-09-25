@@ -278,6 +278,19 @@ class ApiTest(unittest.TestCase):
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test09_delete_resources_tuple(self, mocker):
+        """ should allow deleting resources """
+        mocker.return_value = MOCK_RESPONSE
+        api.delete_resources((API_TEST_ID, API_TEST_ID2,))
+        args, kargs = mocker.call_args
+        self.assertEqual(args[0], 'DELETE')
+        self.assertTrue(get_uri(args).endswith('/resources/image/upload'))
+        param = get_list_param(mocker, 'public_ids')
+        self.assertIn(API_TEST_ID, param)
+        self.assertIn(API_TEST_ID2, param)
+
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test10_tags(self, mocker):
         """ should allow listing tags """
         mocker.return_value = MOCK_RESPONSE
