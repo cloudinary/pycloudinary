@@ -12,6 +12,7 @@ import six
 from mock import patch
 
 import cloudinary.utils
+from cloudinary import CL_BLANK
 from cloudinary.utils import build_list_of_dicts, json_encode, encode_unicode_url, base64url_encode, \
     patch_fetch_format, cloudinary_scaled_url, chain_transformations, generate_transformation_string
 from test.helper_test import TEST_IMAGE, REMOTE_TEST_IMAGE
@@ -935,7 +936,18 @@ class TestUtils(unittest.TestCase):
 
     def test_is_remote_url(self):
         self.assertFalse(cloudinary.utils.is_remote_url(TEST_IMAGE))
-        self.assertTrue(cloudinary.utils.is_remote_url(REMOTE_TEST_IMAGE))
+
+        remote_urls = [
+            "ftp://ftp.cloudinary.com/images/old_logo.png",
+            "http://cloudinary.com/images/old_logo.png",
+            "https://cloudinary.com/images/old_logo.png",
+            "s3://s3-us-west-2.amazonaws.com/cloudinary/images/old_logo.png",
+            "gs://cloudinary/images/old_logo.png",
+            CL_BLANK
+        ]
+
+        for url in remote_urls:
+            self.assertTrue(cloudinary.utils.is_remote_url(url))
 
     def test_file_io_size(self):
         """Should return correct file size"""
