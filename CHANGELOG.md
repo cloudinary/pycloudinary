@@ -1,4 +1,31 @@
 
+1.13.0 / 2018-10-01
+===================
+
+New functionality and features
+------------------------------
+
+  * Add `picture` and `source` tags
+  * Add responsive breakpoints cache
+  * Add support of streams in `upload_large`. Fixes #120
+  * Add support for web assembly and lambda functions in transformations.
+  * Support remote URLs in upload_large API (#155)
+ 
+Other Changes
+-------------
+
+  * Fix `CloudinaryInput` interface compatibility
+  * Fix `test_support_secure_cdn_subdomain_false_override_with_secure` unit test
+  * Add `retry_assertion` unit test decorator
+  * Add `base64url_encode` utility function
+  * Fix unicode encoding in url (python2). Fixes #87
+  * Fix account cleanup after tests
+  * Improve PEP8 compliance (#156)
+  * Use exact match `=` instead of partial search `:` in `search_test`
+  * Improve `search_test` slow indexing failures
+  * Fix `test_explicit` dependency on the file format of the image
+  * Update version script
+
 1.12.0 / 2018-05-16
 ===================
 
