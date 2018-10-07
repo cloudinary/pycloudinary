@@ -18,6 +18,7 @@ REMOTE_TEST_IMAGE = "http://cloudinary.com/images/old_logo.png"
 RESOURCES_PATH = "test/resources/"
 
 TEST_IMAGE = RESOURCES_PATH + "logo.png"
+TEST_UNICODE_IMAGE = RESOURCES_PATH + u"üni_näme_lögö.png"
 TEST_DOC = RESOURCES_PATH + "docx.docx"
 TEST_ICON = RESOURCES_PATH + "favicon.ico"
 

@@ -15,7 +15,7 @@ from cloudinary import api, uploader, utils
 from cloudinary.cache import responsive_breakpoints_cache
 from cloudinary.cache.adapter.key_value_cache_adapter import KeyValueCacheAdapter
 from test.helper_test import uploader_response_mock, SUFFIX, TEST_IMAGE, get_params, TEST_ICON, TEST_DOC, \
-    REMOTE_TEST_IMAGE, UTC, populate_large_file
+    REMOTE_TEST_IMAGE, UTC, populate_large_file, TEST_UNICODE_IMAGE
 from test.cache.storage.dummy_cache_storage import DummyCacheStorage
 
 MOCK_RESPONSE = uploader_response_mock()
@@ -102,6 +102,19 @@ class UploaderTest(unittest.TestCase):
             dict(public_id=result["public_id"], version=result["version"]),
             cloudinary.config().api_secret)
         self.assertEqual(result["signature"], expected_signature)
+
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_upload_unicode_filename(self):
+        """should successfully upload file with unicode characters"""
+        expected_name = os.path.splitext(os.path.basename(TEST_UNICODE_IMAGE))[0]
+
+        result = uploader.upload(TEST_UNICODE_IMAGE, tags=[UNIQUE_TAG], use_filename=True, unique_filename=False)
+
+        self.assertEqual(result["width"], TEST_IMAGE_WIDTH)
+        self.assertEqual(result["height"], TEST_IMAGE_HEIGHT)
+
+        self.assertEqual(expected_name, result["public_id"])
+        self.assertEqual(expected_name, result["original_filename"])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_file_io_without_filename(self):
@@ -219,8 +232,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         """should successfully take use file name of uploaded file in public id if specified use_filename """
         result = uploader.upload(TEST_IMAGE, use_filename=True, tags=[UNIQUE_TAG])
         six.assertRegex(self, result["public_id"], 'logo_[a-z0-9]{6}')
-        result = uploader.upload(
-            TEST_IMAGE, use_filename=True, unique_filename=False, tags=[UNIQUE_TAG])
+        result = uploader.upload(TEST_IMAGE, use_filename=True, unique_filename=False, tags=[UNIQUE_TAG])
         self.assertEqual(result["public_id"], 'logo')
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
