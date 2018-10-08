@@ -1,3 +1,5 @@
+# -*- coding: latin-1 -*-
+
 import os
 import random
 import re
