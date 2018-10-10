@@ -170,6 +170,27 @@ _http_client = HttpClient()
 
 @python_2_unicode_compatible
 class CloudinaryResource(object):
+    """
+    Recommended sources for video tag
+    """
+    default_video_sources = [
+        {
+            "type": "mp4",
+            "codecs": "hev1",
+            "transformations": {"video_codec": "h265"}
+        }, {
+            "type": "webm",
+            "codecs": "vp9",
+            "transformations": {"video_codec": "vp9"}
+        }, {
+            "type": "mp4",
+            "transformations": {"video_codec": "auto"}
+        }, {
+            "type": "webm",
+            "transformations": {"video_codec": "auto"}
+        },
+    ]
+
     def __init__(self, public_id=None, format=None, version=None,
                  signature=None, url_options=None, metadata=None, type=None, resource_type=None,
                  default_resource_type=None):
@@ -510,6 +531,120 @@ class CloudinaryResource(object):
         self.default_poster_options(options)
         return self.build_url(**options)
 
+    @staticmethod
+    def _video_mime_type(video_type, codecs=None):
+        """
+        Helper function for video(), generates video MIME type string from video_type and codecs.
+        Example: video/mp4; codecs=mp4a.40.2
+
+        :param video_type: mp4, webm, ogg etc.
+        :param codecs: List or string of codecs. E.g.: "avc1.42E01E" or "avc1.42E01E, mp4a.40.2" or
+                       ["avc1.42E01E", "mp4a.40.2"]
+
+        :return: Resulting mime type
+        """
+
+        video_type = 'ogg' if video_type == 'ogv' else video_type
+
+        if not video_type:
+            return ""
+
+        codecs_str = ", ".join(codecs) if isinstance(codecs, (list, tuple)) else codecs
+        codecs_attr = "; codecs={codecs_str}".format(codecs_str=codecs_str) if codecs_str else ""
+
+        return "video/{}{}".format(video_type, codecs_attr)
+
+    @staticmethod
+    def _collect_video_tag_attributes(video_options):
+        """
+        Helper function for video tag, collects remaining options and returns them as attributes
+
+        :param video_options: Remaining options
+
+        :return: Resulting attributes
+        """
+        attributes = video_options.copy()
+
+        if 'html_width' in attributes:
+            attributes['width'] = attributes.pop('html_width')
+        if 'html_height' in attributes:
+            attributes['height'] = attributes.pop('html_height')
+
+        if "poster" in attributes and not attributes["poster"]:
+            attributes.pop("poster", None)
+
+        return attributes
+
+    def _generate_video_poster_attr(self, source, video_options):
+        """
+        Helper function for video tag, generates video poster URL
+
+        :param source: The public ID of the resource
+        :param video_options: Additional options
+
+        :return: Resulting video poster URL
+        """
+        if 'poster' not in video_options:
+            return self.video_thumbnail(public_id=source, **video_options)
+
+        poster_options = video_options['poster']
+
+        if not isinstance(poster_options, dict):
+            return poster_options
+
+        if 'public_id' not in poster_options:
+            return self.video_thumbnail(public_id=source, **poster_options)
+
+        return utils.cloudinary_url(poster_options['public_id'], **poster_options)[0]
+
+    def _populate_video_source_tags(self, source,  options):
+        """
+        Helper function for video tag, populates source tags from provided options.
+
+        source_types and sources are mutually exclusive, only one of them can be used.
+        If both are not provided, source types are used (for backwards compatibility)
+
+        :param source: The public ID of the video
+        :param options: Additional options
+
+        :return: Resulting source tags (may be empty)
+        """
+        source_tags = []
+
+        # Consume all relevant options, otherwise they are left and passed as attributes
+        video_sources = options.pop('sources', [])
+        source_types = options.pop('source_types', [])
+        source_transformation = options.pop('source_transformation', {})
+
+        if video_sources and isinstance(video_sources, list):
+            # processing new source structure with codecs
+            for source_data in video_sources:
+                transformation = options.copy()
+                transformation.update(source_data.get("transformations", {}))
+                source_type = source_data.get("type", '')
+                src = utils.cloudinary_url(source, format=source_type, **transformation)[0]
+                codecs = source_data.get("codecs", [])
+                source_tags.append("<source {attributes}>".format(
+                    attributes=utils.html_attrs({'src': src, 'type': self._video_mime_type(source_type, codecs)})))
+
+            return source_tags
+
+        # processing old source_types structure with out codecs
+        if not source_types:
+            source_types = self.default_source_types()
+
+        if not isinstance(source_types, (list, tuple)):
+            return source_tags
+
+        for source_type in source_types:
+            transformation = options.copy()
+            transformation.update(source_transformation.get(source_type, {}))
+            src = utils.cloudinary_url(source, format=source_type, **transformation)[0]
+            source_tags.append("<source {attributes}>".format(
+                attributes=utils.html_attrs({'src': src, 'type': self._video_mime_type(source_type)})))
+
+        return source_tags
+
     def video(self, **options):
         """
         Creates an HTML video tag for the provided +source+
@@ -523,6 +658,10 @@ class CloudinaryResource(object):
         :param options:
          * <tt>source_types</tt>            - Specify which source type the tag should include.
                                               defaults to webm, mp4 and ogv.
+         * <tt>sources</tt>                 - Similar to source_types, but may contain codecs list.
+                                              source_types and sources are mutually exclusive, only one of
+                                              them can be used. If both are not provided, default source types
+                                              are used.
          * <tt>source_transformation</tt>   - specific transformations to use
                                               for a specific source type.
          * <tt>poster</tt>                  - override default thumbnail:
@@ -534,54 +673,38 @@ class CloudinaryResource(object):
         public_id = options.get('public_id', self.public_id)
         source = re.sub(r"\.({0})$".format("|".join(self.default_source_types())), '', public_id)
 
-        source_types = options.pop('source_types', [])
-        source_transformation = options.pop('source_transformation', {})
+        custom_attributes = options.pop("attributes", dict())
+
         fallback = options.pop('fallback_content', '')
-        options['resource_type'] = options.pop('resource_type', self.resource_type or 'video')
 
-        if not source_types:
-            source_types = self.default_source_types()
-        video_options = options.copy()
+        # Save source types for a single video source handling (it can be a single type)
+        source_types = options.get('source_types', "")
 
-        if 'poster' in video_options:
-            poster_options = video_options['poster']
-            if isinstance(poster_options, dict):
-                if 'public_id' in poster_options:
-                    video_options['poster'] = utils.cloudinary_url(poster_options['public_id'], **poster_options)[0]
-                else:
-                    video_options['poster'] = self.video_thumbnail(
-                        public_id=source, **poster_options)
-        else:
-            video_options['poster'] = self.video_thumbnail(public_id=source, **options)
+        poster_options = options.copy()
+        if "poster" not in custom_attributes:
+            options["poster"] = self._generate_video_poster_attr(source, poster_options)
 
-        if not video_options['poster']:
-            del video_options['poster']
+        if "resource_type" not in options:
+            options["resource_type"] = self.resource_type or "video"
 
-        nested_source_types = isinstance(source_types, list) and len(source_types) > 1
-        if not nested_source_types:
+        # populate video source tags
+        source_tags = self._populate_video_source_tags(source, options)
+
+        if not source_tags:
             source = source + '.' + utils.build_array(source_types)[0]
 
-        video_url = utils.cloudinary_url(source, **video_options)
-        video_options = video_url[1]
-        if not nested_source_types:
-            video_options['src'] = video_url[0]
-        if 'html_width' in video_options:
-            video_options['width'] = video_options.pop('html_width')
-        if 'html_height' in video_options:
-            video_options['height'] = video_options.pop('html_height')
+        video_url, video_options = utils.cloudinary_url(source, **options)
 
-        sources = ""
-        if nested_source_types:
-            for source_type in source_types:
-                transformation = options.copy()
-                transformation.update(source_transformation.get(source_type, {}))
-                src = utils.cloudinary_url(source, format=source_type, **transformation)[0]
-                video_type = "ogg" if source_type == 'ogv' else source_type
-                mime_type = "video/" + video_type
-                sources += "<source {attributes}>".format(attributes=utils.html_attrs({'src': src, 'type': mime_type}))
+        if not source_tags:
+            custom_attributes['src'] = video_url
 
+        attributes = self._collect_video_tag_attributes(video_options)
+        attributes.update(custom_attributes)
+
+        sources_str = ''.join(str(x) for x in source_tags)
         html = "<video {attributes}>{sources}{fallback}</video>".format(
-            attributes=utils.html_attrs(video_options), sources=sources, fallback=fallback)
+            attributes=utils.html_attrs(attributes), sources=sources_str, fallback=fallback)
+
         return html
 
     @staticmethod
