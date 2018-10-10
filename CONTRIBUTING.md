@@ -25,7 +25,7 @@ Please be aware that the package is used in a wide variety of environments and t
 - Make sure that your code works both with and without Django
 - The code should support:
   - Python >= 2.7
-  - Django >= 1.4
+  - Django >= 1.8
 
 ## Code contribution
 
@@ -75,7 +75,7 @@ Make sure that your code works both with and without Django
 The code should support:
 
   - Python >= 2.7
-  - Django >= 1.4
+  - Django >= 1.8
 
 Make sure that tests completes without errors.
 
@@ -93,7 +93,7 @@ This only runs the tests for the current environment.
 Travis-CI will run the full suite when you submit your pull request.
 
 The full test suite takes a long time to run because it tests multiple combinations of Python and Django.
-You need to have Python 2.7, 3.3, 3.4, 3.5, 3.6 installed to run all of the environments. Then run::
+You need to have Python 2.7, 3.4, 3.5, 3.6, 3.7 installed to run all of the environments. Then run::
 
     CLOUDINARY_URL=cloudinary://apikey:apisecret@cloudname tox
 
