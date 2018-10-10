@@ -134,7 +134,8 @@ class UploaderTest(unittest.TestCase):
     def test_upload_async(self, mocker):
         """should pass async value """
         mocker.return_value = MOCK_RESPONSE
-        uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG], async=True)
+        async_option = {"async": True}
+        uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG], **async_option)
         params = mocker.call_args[0][2]
         self.assertTrue(params['async'])
 
