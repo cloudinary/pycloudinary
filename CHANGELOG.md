@@ -1,4 +1,19 @@
 
+1.14.0 / 2018-10-11
+===================
+
+New functionality and features
+------------------------------
+  * Add support of custom codecs in video tag
+  * Add Google Cloud Storage protocol support in upload
+  * Add support of Python 3.7 and Django 2.1
+  * Add support for using tuples for list arguments
+
+Other Changes
+-------------
+  * Rename `custom_action` to `custom_function`
+  * Test unicode filename
+
 1.13.0 / 2018-10-01
 ===================
 
