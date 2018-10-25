@@ -228,6 +228,18 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         uploader.rename(result2["public_id"], result["public_id"]+"2", overwrite=True)
         self.assertEqual(api.resource(result["public_id"]+"2")["format"], "ico")
 
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_rename_parameters(self, mocker):
+        """should support to_type, invalidate, and overwrite """
+        mocker.return_value = MOCK_RESPONSE
+        uploader.rename(TEST_IMAGE, TEST_IMAGE + "2", to_type='raw', invalidate=True, overwrite=False)
+        args, kargs = mocker.call_args
+        self.assertEqual(get_params(args)['to_type'], 'raw')
+        self.assertTrue(get_params(args)['invalidate'])
+        self.assertTrue(get_params(args)['overwrite'])
+
+
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_use_filename(self):
         """should successfully take use file name of uploaded file in public id if specified use_filename """
