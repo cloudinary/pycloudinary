@@ -124,7 +124,8 @@ def rename(from_public_id, to_public_id, **options):
         "overwrite": options.get("overwrite"),
         "invalidate": options.get("invalidate"),
         "from_public_id": from_public_id,
-        "to_public_id": to_public_id
+        "to_public_id": to_public_id,
+        "to_type": options.get("to_type")
     }
     return call_api("rename", params, **options)
 
