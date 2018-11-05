@@ -9,7 +9,7 @@ DEFAULT_UPLOAD_PATH = 'http://res.cloudinary.com/test123/image/upload/'
 
 class VideoTest(unittest.TestCase):
     def setUp(self):
-        cloudinary.config(cloud_name="test123", api_secret="1234")
+        cloudinary.config(cloud_name="test123", api_secret="1234", cname=None)
         self.video = CloudinaryVideo("movie")
 
     def test_video_thumbail(self):
