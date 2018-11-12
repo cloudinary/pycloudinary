@@ -230,7 +230,7 @@ def tags(**options):
 
 def transformations(**options):
     uri = ["transformations"]
-    return call_api("get", uri, only(options, "next_cursor", "max_results"), **options)
+    return call_api("get", uri, only(options, "named", "next_cursor", "max_results"), **options)
 
 
 def transformation(transformation, **options):
