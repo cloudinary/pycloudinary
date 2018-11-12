@@ -14,7 +14,7 @@ def generate(url=None, acl=None, start_time=None, duration=None,
 
     if expiration is None:
         if duration is not None:
-            start = start_time if start_time is not None else int(time.mktime(time.gmtime()))
+            start = start_time if start_time is not None else int(time.time())
             expiration = start + duration
         else:
             raise Exception("Must provide either expiration or duration")
