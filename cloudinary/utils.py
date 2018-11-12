@@ -1019,7 +1019,7 @@ def process_fps(fps):
     :return: string
     """
     if not isinstance(fps, (list, tuple)):
-        return str(fps)
+        return fps
 
     return "-".join(normalize_expression(f) for f in fps)
 

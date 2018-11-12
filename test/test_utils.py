@@ -653,7 +653,6 @@ class TestUtils(unittest.TestCase):
             self.__test_cloudinary_url(public_id="video_id", options={'resource_type': 'video', 'fps': value},
                                        expected_url=VIDEO_UPLOAD_PATH + expected + "/video_id")
 
-
     def test_video_codec(self):
         # should support a string value
         self.__test_cloudinary_url(public_id="video_id", options={'resource_type': 'video', 'video_codec': 'auto'},
