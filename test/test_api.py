@@ -327,6 +327,15 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(params['next_cursor'], '2412515')
         self.assertEqual(params['max_results'], 10)
 
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_transformations_list_named(self, mocker):
+        """ should allow listing only named transformations"""
+        mocker.return_value = MOCK_RESPONSE
+        api.transformations(named=True)
+        params = mocker.call_args[0][2]
+        self.assertEqual(params['named'], True)
+
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test13_transformation_metadata(self):
         """ should allow getting transformation metadata """
