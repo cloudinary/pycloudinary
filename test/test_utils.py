@@ -637,6 +637,23 @@ class TestUtils(unittest.TestCase):
         # Should handle regular norm_range_value values
         self.assertEqual(cloudinary.utils.norm_auto_range_value("20P"), "20p")
 
+    def test_fps(self):
+        """ Should support a single number, a list of mixed type and a string, including open-ended and closed ranges"""
+        fps_test_values = (
+            ('24-29.97', 'fps_24-29.97'),
+            (24, 'fps_24'),
+            (24.973, 'fps_24.973'),
+            ('24', 'fps_24'),
+            ('-24', 'fps_-24'),
+            ('$v', 'fps_$v'),
+            ((24, 29.97), 'fps_24-29.97'),
+            (['24', '$v'], 'fps_24-$v')
+        )
+        for value, expected in fps_test_values:
+            self.__test_cloudinary_url(public_id="video_id", options={'resource_type': 'video', 'fps': value},
+                                       expected_url=VIDEO_UPLOAD_PATH + expected + "/video_id")
+
+
     def test_video_codec(self):
         # should support a string value
         self.__test_cloudinary_url(public_id="video_id", options={'resource_type': 'video', 'video_codec': 'auto'},
