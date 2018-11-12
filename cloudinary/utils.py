@@ -1082,7 +1082,7 @@ def base64url_encode(data):
 
     :return: Base64 URL safe encoded string
     """
-    return to_string(base64.urlsafe_b64encode(to_bytes(data))).rstrip("=")
+    return to_string(base64.urlsafe_b64encode(to_bytes(data)))
 
 
 def encode_unicode_url(url_str):
