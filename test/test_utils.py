@@ -398,7 +398,7 @@ class TestUtils(unittest.TestCase):
             "function_type": "remote",
             "source": "https://df34ra4a.execute-api.us-west-2.amazonaws.com/default/cloudinaryFunction"}
         custom_function_remote_str = "remote:" + \
-            "aHR0cHM6Ly9kZjM0cmE0YS5leGVjdXRlLWFwaS51cy13ZXN0LTIuYW1hem9uYXdzLmNvbS9kZWZhdWx0L2Nsb3VkaW5hcnlGdW5jdGlvbg"
+            "aHR0cHM6Ly9kZjM0cmE0YS5leGVjdXRlLWFwaS51cy13ZXN0LTIuYW1hem9uYXdzLmNvbS9kZWZhdWx0L2Nsb3VkaW5hcnlGdW5jdGlvbg=="
 
         # should support custom function from string
         options = {"custom_function": custom_function_wasm_str}
@@ -932,7 +932,7 @@ class TestUtils(unittest.TestCase):
         self.assertEqual("encoded", encode_unicode_url(u"encoded"))
 
     def test_base64url_encode(self):
-        self.assertEqual("YWQ_Lix4MDl-IUAhYQ", base64url_encode("ad?.,x09~!@!a"))
+        self.assertEqual("YWQ_Lix4MDl-IUAhYQ==", base64url_encode("ad?.,x09~!@!a"))
 
     def test_is_remote_url(self):
         self.assertFalse(cloudinary.utils.is_remote_url(TEST_IMAGE))
