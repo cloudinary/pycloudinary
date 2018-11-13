@@ -245,6 +245,7 @@ def generate_transformation_string(**options):
     underlay = process_layer(options.pop("underlay", None), "underlay")
     if_value = process_conditional(options.pop("if", None))
     custom_function = process_custom_function(options.pop("custom_function", None))
+    fps = process_fps(options.pop("fps", None))
 
     params = {
         "a": normalize_expression(angle),
@@ -259,6 +260,7 @@ def generate_transformation_string(**options):
         "eo": normalize_expression(end_offset),
         "fl": flags,
         "fn": custom_function,
+        "fps": fps,
         "h": normalize_expression(height),
         "l": overlay,
         "o": normalize_expression(options.pop('opacity', None)),
@@ -1005,6 +1007,21 @@ def process_custom_function(custom_function):
         source = base64url_encode(source)
 
     return ":".join([function_type, source])
+
+
+def process_fps(fps):
+    """
+    Serializes fps transformation parameter
+
+    :param fps: A single number, a list of mixed type, a string, including open-ended and closed range values
+                Examples: '24-29.97', 24, 24.973, '-24', [24, 29.97]
+
+    :return: string
+    """
+    if not isinstance(fps, (list, tuple)):
+        return fps
+
+    return "-".join(normalize_expression(f) for f in fps)
 
 
 def process_conditional(conditional):
