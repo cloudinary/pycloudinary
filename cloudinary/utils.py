@@ -16,6 +16,7 @@ from datetime import datetime, date
 from fractions import Fraction
 
 import six.moves.urllib.parse
+from numbers import Number
 from six import iteritems
 
 import cloudinary
@@ -262,6 +263,7 @@ def generate_transformation_string(**options):
         "fn": custom_function,
         "fps": fps,
         "h": normalize_expression(height),
+        "ki": process_ki(options.pop("keyframe_interval", None)),
         "l": overlay,
         "o": normalize_expression(options.pop('opacity', None)),
         "q": normalize_expression(options.pop('quality', None)),
@@ -285,7 +287,6 @@ def generate_transformation_string(**options):
         "dn": "density",
         "f": "fetch_format",
         "g": "gravity",
-        "ki": "keyframe_interval",
         "p": "prefix",
         "pg": "page",
         "sp": "streaming_profile",
@@ -1022,6 +1023,23 @@ def process_fps(fps):
         return fps
 
     return "-".join(normalize_expression(f) for f in fps)
+
+
+def process_ki(ki):
+    """
+    Serializes keyframe_interval parameter
+    :param ki: Keyframe interval. Should be either a string or a positive real number.
+    :return: string
+    """
+    if ki is None:
+        return None
+    if isinstance(ki, string_types):
+        return ki
+    if not isinstance(ki, Number):
+        raise ValueError("Keyframe interval should be a number or a string")
+    if ki <= 0:
+        raise ValueError("Keyframe interval should be greater than zero")
+    return str(float(ki))
 
 
 def process_conditional(conditional):

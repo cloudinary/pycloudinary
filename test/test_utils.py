@@ -444,8 +444,18 @@ class TestUtils(unittest.TestCase):
 
     def test_keyframe_interval(self):
         """should support keyframe_interval"""
-        self.__test_cloudinary_url(options={"keyframe_interval": 10},
-                                   expected_url=DEFAULT_UPLOAD_PATH + "ki_10/test")
+        test_values = (
+            (10, "ki_10.0"),
+            (0.05, "ki_0.05"),
+            (3.45, "ki_3.45"),
+            (300, "ki_300.0"),
+            ("10", "ki_10"),
+        )
+        for value, expected in test_values:
+            self.__test_cloudinary_url(options={"resource_type": "video", "keyframe_interval": value},
+                                       expected_url=VIDEO_UPLOAD_PATH + expected + "/test")
+        with self.assertRaises(ValueError):
+            cloudinary.utils.cloudinary_url("test", keyframe_interval=-1)
 
     def test_streaming_profile(self):
         """should support streaming_profile"""
