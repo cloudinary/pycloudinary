@@ -872,6 +872,14 @@ def __process_text_options(layer, layer_parameter):
     if line_spacing is not None:
         keywords.append("line_spacing_" + str(line_spacing))
 
+    font_antialiasing = layer.get("font_antialiasing")
+    if font_antialiasing is not None:
+        keywords.append("antialias_" + str(font_antialiasing))
+
+    font_hinting = layer.get("font_hinting")
+    if font_hinting is not None:
+        keywords.append("hinting_" + str(font_hinting))
+
     if font_size is None and font_family is None and len(keywords) == 0:
         return None
 
