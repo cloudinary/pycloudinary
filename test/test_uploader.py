@@ -148,6 +148,28 @@ class UploaderTest(unittest.TestCase):
         args, kargs = mocker.call_args
         self.assertEqual(get_params(args)['ocr'], 'adv_ocr')
 
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_quality_analysis(self):
+        """ should return quality analysis information """
+        result = uploader.upload(
+            TEST_IMAGE,
+            tags=[UNIQUE_TAG],
+            quality_analysis=True)
+
+        self.assertIn("quality_analysis", result)
+        self.assertIn("focus", result["quality_analysis"])
+        self.assertIsInstance(result["quality_analysis"]["focus"], float)
+
+        result = uploader.explicit(
+            result["public_id"],
+            type="upload",
+            tags=[UNIQUE_TAG],
+            quality_analysis=True)
+
+        self.assertIn("quality_analysis", result)
+        self.assertIn("focus", result["quality_analysis"])
+        self.assertIsInstance(result["quality_analysis"]["focus"], float)
+
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_quality_override(self, mocker):

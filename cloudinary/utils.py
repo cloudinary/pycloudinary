@@ -836,6 +836,7 @@ def build_upload_params(**options):
         "moderation": options.get("moderation"),
         "raw_convert": options.get("raw_convert"),
         "quality_override": options.get("quality_override"),
+        "quality_analysis": options.get("quality_analysis"),
         "ocr": options.get("ocr"),
         "categorization": options.get("categorization"),
         "detection": options.get("detection"),
