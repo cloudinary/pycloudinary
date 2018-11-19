@@ -404,7 +404,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_detection(self):
         """ should support requesting detection """
-        with six.assertRaisesRegex(self, api.Error, 'illegal is not a valid'):
+        with six.assertRaisesRegex(self, api.Error, 'Detection is invalid'):
             uploader.upload(TEST_IMAGE, detection="illegal", tags=[UNIQUE_TAG])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
