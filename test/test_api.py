@@ -179,6 +179,16 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(resource["bytes"], 3381)
         self.assertEqual(len(resource["derived"]), 1, "{} should have one derived resource.".format(API_TEST_ID))
 
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test07a_resource_quality_analysis(self):
+        """ should allow getting resource quality analysis """
+        resource = api.resource(API_TEST_ID, quality_analysis=True)
+        self.assertNotEqual(resource, None)
+        self.assertEqual(resource["public_id"], API_TEST_ID)
+        self.assertIn("quality_analysis", resource)
+        self.assertIn("focus", resource["quality_analysis"])
+        self.assertIsInstance(resource["quality_analysis"]["focus"], float)
+
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test08_delete_derived(self, mocker):
