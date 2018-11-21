@@ -15,7 +15,7 @@ from cloudinary import api, uploader, utils
 from cloudinary.cache import responsive_breakpoints_cache
 from cloudinary.cache.adapter.key_value_cache_adapter import KeyValueCacheAdapter
 from test.helper_test import uploader_response_mock, SUFFIX, TEST_IMAGE, get_params, TEST_ICON, TEST_DOC, \
-    REMOTE_TEST_IMAGE, UTC, populate_large_file, TEST_UNICODE_IMAGE
+    REMOTE_TEST_IMAGE, UTC, populate_large_file, TEST_UNICODE_IMAGE, get_uri, get_method, get_param
 from test.cache.storage.dummy_cache_storage import DummyCacheStorage
 
 MOCK_RESPONSE = uploader_response_mock()
@@ -37,6 +37,7 @@ TEST_DOCX_ID = "test_docx_{}".format(SUFFIX)
 TEXT_ID = "text_{}".format(SUFFIX)
 TEST_ID1 = "uploader_test_{}".format(SUFFIX)
 TEST_ID2 = "uploader_test_{}2".format(SUFFIX)
+API_TEST_PRESET = "api_test_upload_preset"
 
 LARGE_FILE_SIZE = 5880138
 LARGE_CHUNK_SIZE = 5243000
@@ -484,13 +485,21 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
             self.assertEqual(resource["width"], LARGE_FILE_WIDTH)
             self.assertEqual(resource["height"], LARGE_FILE_HEIGHT)
 
+    @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
-    def test_upload_preset(self):
+    def test_upload_preset(self, mocker):
         """ should support unsigned uploading using presets """
-        preset = api.create_upload_preset(folder="upload_folder", unsigned=True, tags=[UNIQUE_TAG])
-        result = uploader.unsigned_upload(TEST_IMAGE, preset["name"], tags=[UNIQUE_TAG])
-        six.assertRegex(self, result["public_id"], r'^upload_folder\/[a-z0-9]+$')
-        api.delete_upload_preset(preset["name"])
+        mocker.return_value = MOCK_RESPONSE
+
+        uploader.unsigned_upload(TEST_IMAGE, API_TEST_PRESET)
+
+        args, kargs = mocker.call_args
+
+        self.assertTrue(get_uri(args).endswith("/image/upload"))
+        self.assertEqual("POST", get_method(mocker))
+        self.assertIsNotNone(get_param(mocker, "file"))
+        self.assertIsNone(get_param(mocker, "signature"))
+        self.assertEqual(get_param(mocker, "upload_preset"), API_TEST_PRESET)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_background_removal(self):

@@ -28,10 +28,7 @@ API_TEST_TRANS_OVERLAY = {"font_family": "arial", "font_size": 20, "text": SUFFI
 API_TEST_TRANS_OVERLAY_STR = "text:arial_20:{}".format(SUFFIX)
 API_TEST_TRANS_SCALE100 = {"crop": "scale", "width": 100, "overlay": API_TEST_TRANS_OVERLAY_STR}
 API_TEST_TRANS_SCALE100_STR = "c_scale,l_{},w_100".format(API_TEST_TRANS_OVERLAY_STR)
-API_TEST_PRESET = "api_test_upload_preset_{}".format(SUFFIX)
-API_TEST_PRESET2 = "api_test_upload_preset_{}2".format(SUFFIX)
-API_TEST_PRESET3 = "api_test_upload_preset_{}3".format(SUFFIX)
-API_TEST_PRESET4 = "api_test_upload_preset_{}4".format(SUFFIX)
+API_TEST_PRESET = "api_test_upload_preset"
 PREFIX = "test_folder_{}".format(SUFFIX)
 MAPPING_TEST_ID = "api_test_upload_mapping_{}".format(SUFFIX)
 RESTORE_TEST_ID = "api_test_restore_{}".format(SUFFIX)
@@ -61,15 +58,6 @@ class ApiTest(unittest.TestCase):
         for transformation in [API_TEST_TRANS, API_TEST_TRANS2, API_TEST_TRANS3, API_TEST_TRANS_SCALE100_STR]:
             try:
                 api.delete_transformation(transformation)
-            except Exception:
-                pass
-        presets_response = api.upload_presets(max_results=200)
-        preset_names = [
-            preset["name"] for preset in presets_response.get('presets', [])
-            if UNIQUE_API_TAG in preset.get('settings', {}).get('tags', '')]
-        for name in preset_names:
-            try:
-                api.delete_upload_preset(name)
             except Exception:
                 pass
         cloudinary.api.delete_resources_by_tag(UNIQUE_API_TAG)
@@ -496,35 +484,46 @@ class ApiTest(unittest.TestCase):
         params = get_params(args)
         self.assertEqual(params['start_at'], start_at)
 
+    @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
-    def test28_create_list_upload_presets(self):
-        """ should allow creating and listing upload_presets """
-        api.create_upload_preset(name=API_TEST_PRESET, folder="folder", tags=[UNIQUE_API_TAG])
-        api.create_upload_preset(name=API_TEST_PRESET2, folder="folder2", tags=[UNIQUE_API_TAG])
-        api.create_upload_preset(name=API_TEST_PRESET3, folder="folder3", tags=[UNIQUE_API_TAG])
+    def test28_create_upload_preset(self, mocker):
+        """ should allow creating upload_presets """
+        mocker.return_value = MOCK_RESPONSE
 
-        api_response = api.upload_presets()
-        presets = api_response["presets"]
-        self.assertGreaterEqual(len(presets), 3)
-        names = [preset["name"] for preset in presets]
-        self.assertIn(API_TEST_PRESET3, names)
-        self.assertIn(API_TEST_PRESET2, names)
-        self.assertIn(API_TEST_PRESET, names)
+        api.create_upload_preset(name=API_TEST_PRESET, folder="folder")
 
+        args, kargs = mocker.call_args
+
+        self.assertTrue(get_uri(args).endswith("/upload_presets"))
+        self.assertEqual("POST", get_method(mocker))
+        self.assertEqual(get_param(mocker, "name"), API_TEST_PRESET)
+        self.assertEqual(get_param(mocker, "folder"), "folder")
+
+    @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
-    def test29_get_upload_presets(self):
+    def test28a_list_upload_presets(self, mocker):
+        """ should allow listing upload_presets """
+        mocker.return_value = MOCK_RESPONSE
+
+        api.upload_presets()
+
+        args, kargs = mocker.call_args
+
+        self.assertTrue(get_uri(args).endswith("/upload_presets"))
+        self.assertEqual("GET", get_method(mocker))
+
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test29_get_upload_presets(self, mocker):
         """ should allow getting a single upload_preset """
-        result = api.create_upload_preset(unsigned=True, folder="folder", width=100, crop="scale",
-                                          tags=["a", "b", "c", UNIQUE_API_TAG], context={"a": "b", "c": "d"})
-        name = result["name"]
-        preset = api.upload_preset(name)
-        self.assertEqual(preset["name"], name)
-        self.assertIs(preset["unsigned"], True)
-        settings = preset["settings"]
-        self.assertEqual(settings["folder"], "folder")
-        self.assertEqual(settings["transformation"], [{"width": 100, "crop": "scale"}])
-        self.assertEqual(settings["context"], {"a": "b", "c": "d"})
-        self.assertEqual(settings["tags"], ["a", "b", "c", UNIQUE_API_TAG])
+        mocker.return_value = MOCK_RESPONSE
+
+        api.upload_preset(API_TEST_PRESET)
+
+        args, kargs = mocker.call_args
+
+        self.assertTrue(get_uri(args).endswith("/upload_presets/" + API_TEST_PRESET))
+        self.assertEqual("GET", get_method(mocker))
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
