@@ -490,9 +490,11 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
     def test_upload_preset(self, mocker):
         """ should support unsigned uploading using presets """
         mocker.return_value = MOCK_RESPONSE
+
         uploader.unsigned_upload(TEST_IMAGE, API_TEST_PRESET)
 
         args, kargs = mocker.call_args
+
         self.assertTrue(get_uri(args).endswith("/image/upload"))
         self.assertEqual("POST", get_method(mocker))
         self.assertIsNotNone(get_param(mocker, "file"))

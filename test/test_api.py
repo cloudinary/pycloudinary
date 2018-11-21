@@ -487,11 +487,13 @@ class ApiTest(unittest.TestCase):
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test28_create_upload_preset(self, mocker):
-        """ should allow creating and listing upload_presets """
+        """ should allow creating upload_presets """
         mocker.return_value = MOCK_RESPONSE
+
         api.create_upload_preset(name=API_TEST_PRESET, folder="folder")
 
         args, kargs = mocker.call_args
+
         self.assertTrue(get_uri(args).endswith("/upload_presets"))
         self.assertEqual("POST", get_method(mocker))
         self.assertEqual(get_param(mocker, "name"), API_TEST_PRESET)
@@ -500,11 +502,13 @@ class ApiTest(unittest.TestCase):
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test28a_list_upload_presets(self, mocker):
-        """ should allow creating and listing upload_presets """
+        """ should allow listing upload_presets """
         mocker.return_value = MOCK_RESPONSE
+
         api.upload_presets()
 
         args, kargs = mocker.call_args
+
         self.assertTrue(get_uri(args).endswith("/upload_presets"))
         self.assertEqual("GET", get_method(mocker))
 
@@ -513,9 +517,11 @@ class ApiTest(unittest.TestCase):
     def test29_get_upload_presets(self, mocker):
         """ should allow getting a single upload_preset """
         mocker.return_value = MOCK_RESPONSE
+
         api.upload_preset(API_TEST_PRESET)
 
         args, kargs = mocker.call_args
+
         self.assertTrue(get_uri(args).endswith("/upload_presets/" + API_TEST_PRESET))
         self.assertEqual("GET", get_method(mocker))
 
