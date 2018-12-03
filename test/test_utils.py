@@ -31,6 +31,15 @@ class TestUtils(unittest.TestCase):
     crop_transformation_str = 'c_crop,w_100'
     raw_transformation = "c_fill,e_grayscale,q_auto"
 
+    custom_function_wasm = {"function_type": "wasm", "source": "blur.wasm"}
+    custom_function_wasm_str = "wasm:blur.wasm"
+
+    custom_function_remote = {
+        "function_type": "remote",
+        "source": "https://df34ra4a.execute-api.us-west-2.amazonaws.com/default/cloudinaryFn"}
+    custom_function_remote_str = \
+        "remote:aHR0cHM6Ly9kZjM0cmE0YS5leGVjdXRlLWFwaS51cy13ZXN0LTIuYW1hem9uYXdzLmNvbS9kZWZhdWx0L2Nsb3VkaW5hcnlGbg=="
+
     def setUp(self):
         cloudinary.config(cloud_name="test123",
                           cname=None,  # for these tests without actual upload, we ignore cname
@@ -391,33 +400,49 @@ class TestUtils(unittest.TestCase):
                                    expected_url=DEFAULT_UPLOAD_PATH + "h_100,u_text:hello,w_100/test")
 
     def test_custom_function(self):
-        custom_function_wasm = {"function_type": "wasm", "source": "blur.wasm"}
-        custom_function_wasm_str = "wasm:blur.wasm"
-
-        custom_function_remote = {
-            "function_type": "remote",
-            "source": "https://df34ra4a.execute-api.us-west-2.amazonaws.com/default/cloudinaryFunction"}
-        custom_function_remote_str = "remote:" + \
-            "aHR0cHM6Ly9kZjM0cmE0YS5leGVjdXRlLWFwaS51cy13ZXN0LTIuYW1hem9uYXdzLmNvbS9kZWZhdWx0L2Nsb3VkaW5hcnlGdW5jdGlvbg=="
 
         # should support custom function from string
-        options = {"custom_function": custom_function_wasm_str}
+        options = {"custom_function": self.custom_function_wasm_str}
         self.__test_cloudinary_url(
             options=options,
-            expected_url=DEFAULT_UPLOAD_PATH + "fn_" + custom_function_wasm_str + "/test"
+            expected_url=DEFAULT_UPLOAD_PATH + "fn_" + self.custom_function_wasm_str + "/test"
         )
 
         # should support custom function from dictionary
-        options = {"custom_function": custom_function_wasm}
+        options = {"custom_function": self.custom_function_wasm}
         self.__test_cloudinary_url(
             options=options,
-            expected_url=DEFAULT_UPLOAD_PATH + "fn_" + custom_function_wasm_str + "/test"
+            expected_url=DEFAULT_UPLOAD_PATH + "fn_" + self.custom_function_wasm_str + "/test"
         )
         # should encode custom function source for remote function
-        options = {"custom_function": custom_function_remote}
+        options = {"custom_function": self.custom_function_remote}
         self.__test_cloudinary_url(
             options=options,
-            expected_url=DEFAULT_UPLOAD_PATH + "fn_" + custom_function_remote_str + "/test"
+            expected_url=DEFAULT_UPLOAD_PATH + "fn_" + self.custom_function_remote_str + "/test"
+        )
+
+    def test_custom_pre_function_wasm_str(self):
+        # should support custom pre function from string
+        options = {"custom_pre_function": self.custom_function_wasm_str}
+        self.__test_cloudinary_url(
+            options=options,
+            expected_url=DEFAULT_UPLOAD_PATH + "fn_pre:" + self.custom_function_wasm_str + "/test"
+        )
+
+    def test_custom_pre_function_wasm_dictionary(self):
+        # should support custom pre function from dictionary
+        options = {"custom_pre_function": self.custom_function_wasm}
+        self.__test_cloudinary_url(
+            options=options,
+            expected_url=DEFAULT_UPLOAD_PATH + "fn_pre:" + self.custom_function_wasm_str + "/test"
+        )
+
+    def test_custom_pre_function_remote(self):
+        # should encode custom function source for remote function
+        options = {"custom_pre_function": self.custom_function_remote}
+        self.__test_cloudinary_url(
+            options=options,
+            expected_url=DEFAULT_UPLOAD_PATH + "fn_pre:" + self.custom_function_remote_str + "/test"
         )
 
     def test_fetch_format(self):

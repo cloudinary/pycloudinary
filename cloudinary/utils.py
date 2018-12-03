@@ -246,6 +246,7 @@ def generate_transformation_string(**options):
     underlay = process_layer(options.pop("underlay", None), "underlay")
     if_value = process_conditional(options.pop("if", None))
     custom_function = process_custom_function(options.pop("custom_function", None))
+    custom_pre_function = process_custom_pre_function(options.pop("custom_pre_function", None))
     fps = process_fps(options.pop("fps", None))
 
     params = {
@@ -260,7 +261,7 @@ def generate_transformation_string(**options):
         "e": normalize_expression(effect),
         "eo": normalize_expression(end_offset),
         "fl": flags,
-        "fn": custom_function,
+        "fn": custom_function or custom_pre_function,
         "fps": fps,
         "h": normalize_expression(height),
         "ki": process_ki(options.pop("keyframe_interval", None)),
@@ -1017,6 +1018,11 @@ def process_custom_function(custom_function):
         source = base64url_encode(source)
 
     return ":".join([function_type, source])
+
+
+def process_custom_pre_function(custom_function):
+    value = process_custom_function(custom_function)
+    return "pre:{0}".format(value) if value else None
 
 
 def process_fps(fps):
