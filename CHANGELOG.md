@@ -1,4 +1,27 @@
 
+1.15.0 / 2018-12-16
+===================
+
+New functionality and features
+------------------------------
+
+  * Add custom `pre` function support
+  * Add `fps` video transformation parameter
+  * Add `quality_analysis` upload parameter
+  * Add `font_antialiasing` and `font_hinting` text style parameters
+  * Add `named` parameter to `transformations` admin API
+  * Add `to_type` parameter to `rename` upload API
+  
+Other Changes
+-------------
+
+  * Fix `AuthToken` default start time (use epoch instead of local time)
+  * Validate `keyframe_interval` parameter value
+  * Add padding in `base64url_encode`
+  * Mock upload presets tests
+  * Fix `test_detection` unit test
+  * Fix video tag tests.
+
 1.14.0 / 2018-10-11
 ===================
 
