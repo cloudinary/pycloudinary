@@ -132,6 +132,6 @@ if len(sys.argv) > 1:
         cleanup()
 else:
     print("--- Uploading files and then cleaning up")
-    print("    you can only one instead by passing 'upload' or 'cleanup' as an argument")
+    print("    you can only choose one instead by passing 'upload' or 'cleanup' as an argument")
     print("")
     upload_files()
