@@ -268,7 +268,7 @@ def generate_transformation_string(**options):
         "l": overlay,
         "o": normalize_expression(options.pop('opacity', None)),
         "q": normalize_expression(options.pop('quality', None)),
-        "r": normalize_expression(options.pop('radius', None)),
+        "r": process_radius(options.pop('radius', None)),
         "so": normalize_expression(start_offset),
         "t": named_transformation,
         "u": underlay,
@@ -407,6 +407,22 @@ def process_video_codec_param(param):
             if 'level' in param:
                 out_param = out_param + ':' + param['level']
     return out_param
+
+
+def process_radius(param):
+    if param is None:
+        return
+
+    if isinstance(param, (list, tuple)) and 1 <= len(param) <= 4:
+        return ':'.join(normalize_expression(t) for t in param)
+
+    if isinstance(param, six.string_types) and param:
+        return process_radius(param.split(':'))
+
+    if isinstance(param, int) and not isinstance(param, bool):
+        return str(param)
+
+    raise ValueError("Invalid radius param")
 
 
 def cleanup_params(params):
