@@ -2,6 +2,7 @@ import os
 import unittest
 
 import cloudinary
+from test.helper_test import ignore_exception
 
 KEY = '00112233FF99'
 ALT_KEY = "CCBB2233FF00"
@@ -15,8 +16,9 @@ class AuthTokenTest(unittest.TestCase):
         cloudinary.config(auth_token={"key": KEY, "duration": 300, "start_time": 11111111})
 
     def tearDown(self):
-        os.environ["CLOUDINARY_URL"] = self.url_backup
-        cloudinary.reset_config()
+        with ignore_exception():
+            os.environ["CLOUDINARY_URL"] = self.url_backup
+            cloudinary.reset_config()
 
     def test_generate_with_start_time_and_duration(self):
         token = cloudinary.utils.generate_auth_token(acl='/image/*', start_time=1111111111, duration=300)

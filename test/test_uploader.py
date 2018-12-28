@@ -15,7 +15,7 @@ from cloudinary import api, uploader, utils
 from cloudinary.cache import responsive_breakpoints_cache
 from cloudinary.cache.adapter.key_value_cache_adapter import KeyValueCacheAdapter
 from test.helper_test import uploader_response_mock, SUFFIX, TEST_IMAGE, get_params, TEST_ICON, TEST_DOC, \
-    REMOTE_TEST_IMAGE, UTC, populate_large_file, TEST_UNICODE_IMAGE, get_uri, get_method, get_param
+    REMOTE_TEST_IMAGE, UTC, populate_large_file, TEST_UNICODE_IMAGE, get_uri, get_method, get_param, ignore_exception
 from test.cache.storage.dummy_cache_storage import DummyCacheStorage
 
 MOCK_RESPONSE = uploader_response_mock()
@@ -80,12 +80,23 @@ class UploaderTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        cloudinary.api.delete_resources_by_tag(UNIQUE_TAG)
-        cloudinary.api.delete_resources_by_tag(UNIQUE_TAG, resource_type='raw')
-        cloudinary.api.delete_resources_by_tag(UNIQUE_TAG, type='twitter_name')
-        cloudinary.api.delete_resources([TEST_ID1, TEST_ID2])
-        cloudinary.api.delete_resources([TEXT_ID], type='text')
-        cloudinary.api.delete_resources([TEST_DOCX_ID], resource_type='raw')
+        with ignore_exception():
+            cloudinary.api.delete_resources_by_tag(UNIQUE_TAG)
+
+        with ignore_exception():
+            cloudinary.api.delete_resources_by_tag(UNIQUE_TAG, resource_type='raw')
+
+        with ignore_exception():
+            cloudinary.api.delete_resources_by_tag(UNIQUE_TAG, type='twitter_name')
+
+        with ignore_exception():
+            cloudinary.api.delete_resources([TEST_ID1, TEST_ID2])
+
+        with ignore_exception():
+            cloudinary.api.delete_resources([TEXT_ID], type='text')
+
+        with ignore_exception():
+            cloudinary.api.delete_resources([TEST_DOCX_ID], resource_type='raw')
 
         for trans in [TEST_TRANS_SCALE2_STR, TEST_TRANS_SCALE2_PNG_STR]:
             try:

@@ -4,7 +4,7 @@ import tempfile
 import unittest
 
 from cloudinary.cache.storage.file_system_key_value_storage import FileSystemKeyValueStorage
-from test.helper_test import UNIQUE_TEST_ID
+from test.helper_test import UNIQUE_TEST_ID, ignore_exception
 
 
 class FileSystemKeyValueStorageTest(unittest.TestCase):
@@ -19,7 +19,8 @@ class FileSystemKeyValueStorageTest(unittest.TestCase):
         self.storage = FileSystemKeyValueStorage(self.root_path)
 
     def tearDown(self):
-        shutil.rmtree(self.root_path, True)
+        with ignore_exception():
+            shutil.rmtree(self.root_path, True)
 
     def set_test_value(self, key, value):
         """Helper method for setting value for the key"""

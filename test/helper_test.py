@@ -1,11 +1,13 @@
 # -*- coding: latin-1 -*-
-
+from contextlib import contextmanager
 import os
 import random
 import re
+import sys
 import time
 from datetime import timedelta, tzinfo
 from functools import wraps
+import traceback
 
 import six
 from urllib3 import HTTPResponse
@@ -148,3 +150,13 @@ def retry_assertion(num_tries=3, delay=3):
         return retry_func
 
     return retry_decorator
+
+
+@contextmanager
+def ignore_exception(o=None, error_classes=(Exception,)):
+    if o is None:
+        o = sys.stderr
+    try:
+        yield
+    except error_classes:
+        traceback.print_exc(file=o)

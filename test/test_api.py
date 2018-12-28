@@ -9,7 +9,8 @@ from urllib3 import disable_warnings
 import cloudinary
 from cloudinary import api, uploader, utils
 from test.helper_test import SUFFIX, TEST_IMAGE, get_uri, get_params, get_list_param, get_param, TEST_DOC, get_method, \
-    UNIQUE_TAG, api_response_mock
+    UNIQUE_TAG, api_response_mock, ignore_exception
+
 
 MOCK_RESPONSE = api_response_mock()
 
@@ -60,8 +61,12 @@ class ApiTest(unittest.TestCase):
                 api.delete_transformation(transformation)
             except Exception:
                 pass
-        cloudinary.api.delete_resources_by_tag(UNIQUE_API_TAG)
-        cloudinary.api.delete_resources_by_tag(UNIQUE_API_TAG, resource_type='raw')
+
+        with ignore_exception():
+            cloudinary.api.delete_resources_by_tag(UNIQUE_API_TAG)
+
+        with ignore_exception():
+            cloudinary.api.delete_resources_by_tag(UNIQUE_API_TAG, resource_type='raw')
 
         try:
             api.delete_upload_mapping(MAPPING_TEST_ID)
