@@ -134,30 +134,26 @@ class TestUtils(unittest.TestCase):
 
     def test_radius(self):
         cases = (
-            ({"radius": 10}, "r_10/test"),
-            ({"radius": "10"}, "r_10/test"),
-            ({"radius": "$v", "variables": [("$v", 10)]}, "$v_10,r_$v/test"),
-            ({"radius": [10, 20]}, "r_10:20/test"),
-            ({"radius": "10:20"}, "r_10:20/test"),
-            ({"radius": "10:$v", "variables": [("$v", 20)]}, "$v_20,r_10:$v/test"),
-            ({"radius": [10, 20, 30]}, "r_10:20:30/test"),
-            ({"radius": "10:20:30"}, "r_10:20:30/test"),
-            ({"radius": "10:$v:30", "variables": [("$v", 20)]}, "$v_20,r_10:$v:30/test"),
-            ({"radius": [10, 20, 30, 40]}, "r_10:20:30:40/test"),
-            ({"radius": "10:20:30:40"}, "r_10:20:30:40/test"),
-            ({"radius": "10:$v:30:40", "variables": [("$v", 20)]}, "$v_20,r_10:$v:30:40/test"),
+            ({"radius": 10}, "r_10"),
+            ({"radius": "10"}, "r_10"),
+            ({"radius": "$v", "variables": [("$v", 10)]}, "$v_10,r_$v"),
+            ({"radius": [10, 20]}, "r_10:20"),
+            ({"radius": "10:20"}, "r_10:20"),
+            ({"radius": "10:$v", "variables": [("$v", 20)]}, "$v_20,r_10:$v"),
+            ({"radius": [10, 20, 30]}, "r_10:20:30"),
+            ({"radius": "10:20:30"}, "r_10:20:30"),
+            ({"radius": "10:$v:30", "variables": [("$v", 20)]}, "$v_20,r_10:$v:30"),
+            ({"radius": [10, 20, 30, 40]}, "r_10:20:30:40"),
+            ({"radius": "10:20:30:40"}, "r_10:20:30:40"),
+            ({"radius": "10:$v:30:40", "variables": [("$v", 20)]}, "$v_20,r_10:$v:30:40"),
         )
         for options, expected_part_url in cases:
-            self.__test_cloudinary_url(options=options, expected_url=DEFAULT_UPLOAD_PATH + expected_part_url)
+            self.__test_cloudinary_url(options=options, expected_url=DEFAULT_UPLOAD_PATH + expected_part_url + "/test")
 
         wrong_options = (
-            {"radius": True},
-            {"radius": {1}},
             {"radius": []},
             {"radius": ()},
-            {"radius": ""},
             {"radius": [10, 20, 30, 40, 50]},
-            {"radius": "10:20:30:40:50"},
         )
         for options in wrong_options:
             with self.assertRaises(ValueError):
