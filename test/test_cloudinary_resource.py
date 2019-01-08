@@ -5,8 +5,8 @@ from urllib3 import disable_warnings
 
 import cloudinary
 from cloudinary import CloudinaryResource
-from cloudinary import uploader, api
-from test.helper_test import SUFFIX, TEST_IMAGE, http_response_mock, get_request_url, ignore_exception
+from cloudinary import uploader
+from test.helper_test import SUFFIX, TEST_IMAGE, http_response_mock, get_request_url, cleanup_test_resources_by_tag
 
 disable_warnings()
 
@@ -29,8 +29,7 @@ class TestCloudinaryResource(TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        with ignore_exception():
-            api.delete_resources_by_tag(TEST_TAG)
+        cleanup_test_resources_by_tag([(TEST_TAG, {})])
 
     def setUp(self):
         self.res = CloudinaryResource(metadata=self.uploaded)
