@@ -82,6 +82,18 @@ class AuthTokenTest(unittest.TestCase):
             "1284376353c1c43d6f6a98f2813c5596f4ff6f34d837cd853fd8c3c9e7f8428c"
         )
 
+    def test_should_ignore_url_if_acl_is_provided(self):
+        token_options = {"key": KEY, "duration": 300, "acl": '/image/*', "start_time": 222222222}
+        acl_token = cloudinary.utils.generate_auth_token(**token_options)
+
+        token_options["url"] = "sample.jpg"
+        acl_token_url_ignored = cloudinary.utils.generate_auth_token(**token_options)
+
+        self.assertEqual(
+            acl_token,
+            acl_token_url_ignored
+        )
+
     def test_must_provide_expiration_or_duration(self):
         self.assertRaises(Exception, cloudinary.utils.generate_auth_token, acl="*", expiration=None, duration=None)
 

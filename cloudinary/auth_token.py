@@ -28,7 +28,7 @@ def generate(url=None, acl=None, start_time=None, duration=None,
     if acl is not None:
         token_parts.append("acl=%s" % _escape_to_lower(acl))
     to_sign = list(token_parts)
-    if url is not None:
+    if url is not None and acl is None:
         to_sign.append("url=%s" % _escape_to_lower(url))
     auth = _digest("~".join(to_sign), key)
     token_parts.append("hmac=%s" % auth)
