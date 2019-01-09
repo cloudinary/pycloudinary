@@ -437,9 +437,10 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_large(self):
         """ should support uploading large files """
-        with tempfile.NamedTemporaryFile() as temp_file:
+        with tempfile.NamedTemporaryFile(suffix='.bmp') as temp_file:
             populate_large_file(temp_file, LARGE_FILE_SIZE)
             temp_file_name = temp_file.name
+            temp_file_filename = os.path.splitext(os.path.basename(temp_file_name))[0]
 
             self.assertEqual(LARGE_FILE_SIZE, os.path.getsize(temp_file_name))
 
@@ -448,12 +449,16 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
 
             self.assertEqual(resource["tags"], ["upload_large_tag", UNIQUE_TAG])
             self.assertEqual(resource["resource_type"], "raw")
+            self.assertEqual(resource["original_filename"], temp_file_filename)
 
             resource2 = uploader.upload_large(temp_file_name, chunk_size=LARGE_CHUNK_SIZE,
-                                              tags=["upload_large_tag", UNIQUE_TAG], resource_type="image")
+                                              tags=["upload_large_tag", UNIQUE_TAG], resource_type="image",
+                                              use_filename=True, unique_filename=False)
 
             self.assertEqual(resource2["tags"], ["upload_large_tag", UNIQUE_TAG])
             self.assertEqual(resource2["resource_type"], "image")
+            self.assertEqual(resource2["original_filename"], temp_file_filename)
+            self.assertEqual(resource2["original_filename"], resource2["public_id"])
             self.assertEqual(resource2["width"], LARGE_FILE_WIDTH)
             self.assertEqual(resource2["height"], LARGE_FILE_HEIGHT)
 

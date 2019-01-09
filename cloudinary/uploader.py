@@ -79,7 +79,7 @@ def upload_large(file, **options):
         chunk_size = options.get("chunk_size", UPLOAD_LARGE_CHUNK_SIZE)
         file_size = utils.file_io_size(file_io)
 
-        file_name = file.name if hasattr(file, 'name') and isinstance(file.name, str) else "stream"
+        file_name = file_io.name if hasattr(file_io, 'name') and isinstance(file_io.name, str) else "stream"
 
         chunk = file_io.read(chunk_size)
 
