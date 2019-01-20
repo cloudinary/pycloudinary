@@ -29,7 +29,7 @@ class TestCloudinaryResource(TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        cleanup_test_resources_by_tag([(TEST_TAG, {})])
+        cleanup_test_resources_by_tag([(TEST_TAG,)])
 
     def setUp(self):
         self.res = CloudinaryResource(metadata=self.uploaded)

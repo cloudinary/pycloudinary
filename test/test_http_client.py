@@ -23,7 +23,7 @@ class HttpClientTest(TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        cleanup_test_resources_by_tag([(HTTP_CLIENT_UNIQUE_TEST_TAG, {})])
+        cleanup_test_resources_by_tag([(HTTP_CLIENT_UNIQUE_TEST_TAG,)])
 
     def setUp(self):
         cloudinary.reset_config()

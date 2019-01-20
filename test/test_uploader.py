@@ -82,19 +82,19 @@ class UploaderTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cleanup_test_resources_by_tag([
-            (UNIQUE_TAG, {}),
+            (UNIQUE_TAG,),
             (UNIQUE_TAG, {'resource_type': 'raw'}),
             (UNIQUE_TAG, {'type': 'twitter_name'}),
         ])
 
         cleanup_test_resources([
-            ([TEST_ID1, TEST_ID2], {}),
+            ([TEST_ID1, TEST_ID2],),
             ([TEXT_ID], {'type': 'text'}),
             ([TEST_DOCX_ID], {'resource_type': 'raw'}),
         ])
 
         cleanup_test_transformation([
-            ([TEST_TRANS_SCALE2_STR, TEST_TRANS_SCALE2_PNG_STR], {}),
+            ([TEST_TRANS_SCALE2_STR, TEST_TRANS_SCALE2_PNG_STR],),
         ])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")

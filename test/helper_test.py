@@ -153,27 +153,31 @@ def retry_assertion(num_tries=3, delay=3):
 
 
 @contextmanager
-def ignore_exception(error_classes=(Exception,)):
+def ignore_exception(error_classes=(Exception,), suppress_traceback_classes=()):
     try:
         yield
-    except error_classes:
-        traceback.print_exc(file=sys.stderr)
+    except error_classes as e:
+        if not isinstance(e, suppress_traceback_classes):
+            traceback.print_exc(file=sys.stderr)
 
 
 def cleanup_test_resources_by_tag(params):
-    for tag, options in params:
+    for tag_with_options in params:
+        options = tag_with_options[1] if len(tag_with_options) > 1 else {}
         with ignore_exception():
-            api.delete_resources_by_tag(tag, **options)
+            api.delete_resources_by_tag(tag_with_options[0], **options)
 
 
 def cleanup_test_resources(params):
-    for public_ids, options in params:
+    for public_ids_with_options in params:
+        options = public_ids_with_options[1] if len(public_ids_with_options) > 1 else {}
         with ignore_exception():
-            api.delete_resources(public_ids, **options)
+            api.delete_resources(public_ids_with_options[0], **options)
 
 
 def cleanup_test_transformation(params):
-    for transformations, options in params:
-        for transformation in transformations:
-            with ignore_exception():
+    for transformations_with_options in params:
+        options = transformations_with_options[1] if len(transformations_with_options) > 1 else {}
+        for transformation in transformations_with_options[0]:
+            with ignore_exception(suppress_traceback_classes=(api.NotFound,)):
                 api.delete_transformation(transformation, **options)

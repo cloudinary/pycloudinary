@@ -54,7 +54,7 @@ class SearchTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        cleanup_test_resources_by_tag([(UNIQUE_TAG, {})])
+        cleanup_test_resources_by_tag([(UNIQUE_TAG,)])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_should_create_empty_json(self):
