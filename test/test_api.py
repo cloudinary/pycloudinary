@@ -9,7 +9,8 @@ from urllib3 import disable_warnings
 import cloudinary
 from cloudinary import api, uploader, utils
 from test.helper_test import SUFFIX, TEST_IMAGE, get_uri, get_params, get_list_param, get_param, TEST_DOC, get_method, \
-    UNIQUE_TAG, api_response_mock
+    UNIQUE_TAG, api_response_mock, ignore_exception, cleanup_test_resources_by_tag, cleanup_test_transformation, \
+    cleanup_test_resources
 
 MOCK_RESPONSE = api_response_mock()
 
@@ -51,22 +52,19 @@ class ApiTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        try:
-            api.delete_resources([API_TEST_ID, API_TEST_ID2, API_TEST_ID3, API_TEST_ID4, API_TEST_ID5])
-        except Exception:
-            pass
-        for transformation in [API_TEST_TRANS, API_TEST_TRANS2, API_TEST_TRANS3, API_TEST_TRANS_SCALE100_STR]:
-            try:
-                api.delete_transformation(transformation)
-            except Exception:
-                pass
-        cloudinary.api.delete_resources_by_tag(UNIQUE_API_TAG)
-        cloudinary.api.delete_resources_by_tag(UNIQUE_API_TAG, resource_type='raw')
+        cleanup_test_resources([([API_TEST_ID, API_TEST_ID2, API_TEST_ID3, API_TEST_ID4, API_TEST_ID5],)])
 
-        try:
+        cleanup_test_transformation([
+            ([API_TEST_TRANS, API_TEST_TRANS2, API_TEST_TRANS3, API_TEST_TRANS_SCALE100_STR],),
+        ])
+
+        cleanup_test_resources_by_tag([
+            (UNIQUE_API_TAG,),
+            (UNIQUE_API_TAG, {'resource_type': 'raw'}),
+        ])
+
+        with ignore_exception(suppress_traceback_classes=(api.NotFound,)):
             api.delete_upload_mapping(MAPPING_TEST_ID)
-        except Exception:
-            pass
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test01_resource_types(self):

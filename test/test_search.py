@@ -6,9 +6,9 @@ from six import iterkeys
 from urllib3 import disable_warnings
 
 import cloudinary
-from cloudinary import api, logger, uploader
+from cloudinary import uploader
 from cloudinary.search import Search
-from test.helper_test import SUFFIX, TEST_IMAGE, TEST_TAG, UNIQUE_TAG, retry_assertion
+from test.helper_test import SUFFIX, TEST_IMAGE, TEST_TAG, UNIQUE_TAG, retry_assertion, cleanup_test_resources_by_tag
 
 TEST_TAG = 'search_{}'.format(TEST_TAG)
 UNIQUE_TAG = 'search_{}'.format(UNIQUE_TAG)
@@ -54,10 +54,7 @@ class SearchTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        try:
-            api.delete_resources_by_tag(UNIQUE_TAG)
-        except Exception as e:
-            logger.exception("Failed to delete test resources %s", e)
+        cleanup_test_resources_by_tag([(UNIQUE_TAG,)])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_should_create_empty_json(self):

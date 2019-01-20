@@ -7,14 +7,14 @@ import certifi
 
 import cloudinary
 import cloudinary.poster.streaminghttp
-from cloudinary import api, uploader, utils
+from cloudinary import uploader, utils
 
 from mock import patch
 import six
 import urllib3
 from urllib3 import disable_warnings
 
-from test.helper_test import SUFFIX, TEST_IMAGE, api_response_mock
+from test.helper_test import SUFFIX, TEST_IMAGE, api_response_mock, cleanup_test_resources_by_tag
 
 MOCK_RESPONSE = api_response_mock()
 
@@ -33,8 +33,10 @@ class ArchiveTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        api.delete_resources_by_tag(TEST_TAG)
-        api.delete_resources_by_tag(TEST_TAG_RAW, resource_type='raw')
+        cleanup_test_resources_by_tag([
+            (TEST_TAG,),
+            (TEST_TAG_RAW, {'resource_type': 'raw'}),
+        ])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_create_archive(self):

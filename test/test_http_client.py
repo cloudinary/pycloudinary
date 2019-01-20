@@ -7,7 +7,7 @@ from cloudinary import uploader, HttpClient, GeneralError
 import cloudinary
 from cloudinary.utils import cloudinary_url
 
-from test.helper_test import UNIQUE_TAG, SUFFIX, TEST_IMAGE
+from test.helper_test import UNIQUE_TAG, SUFFIX, TEST_IMAGE, cleanup_test_resources_by_tag
 
 HTTP_CLIENT_UNIQUE_TEST_TAG = 'http_client_{}'.format(UNIQUE_TAG)
 HTTP_CLIENT_TEST_ID = "http_client_{}".format(SUFFIX)
@@ -23,10 +23,7 @@ class HttpClientTest(TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        try:
-            cloudinary.api.delete_resources_by_tag(HTTP_CLIENT_UNIQUE_TEST_TAG)
-        except Exception:
-            pass
+        cleanup_test_resources_by_tag([(HTTP_CLIENT_UNIQUE_TEST_TAG,)])
 
     def setUp(self):
         cloudinary.reset_config()

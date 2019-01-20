@@ -15,7 +15,8 @@ from cloudinary import api, uploader, utils
 from cloudinary.cache import responsive_breakpoints_cache
 from cloudinary.cache.adapter.key_value_cache_adapter import KeyValueCacheAdapter
 from test.helper_test import uploader_response_mock, SUFFIX, TEST_IMAGE, get_params, TEST_ICON, TEST_DOC, \
-    REMOTE_TEST_IMAGE, UTC, populate_large_file, TEST_UNICODE_IMAGE, get_uri, get_method, get_param
+    REMOTE_TEST_IMAGE, UTC, populate_large_file, TEST_UNICODE_IMAGE, get_uri, get_method, get_param, \
+    cleanup_test_resources_by_tag, cleanup_test_transformation, cleanup_test_resources
 from test.cache.storage.dummy_cache_storage import DummyCacheStorage
 
 MOCK_RESPONSE = uploader_response_mock()
@@ -80,18 +81,21 @@ class UploaderTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        cloudinary.api.delete_resources_by_tag(UNIQUE_TAG)
-        cloudinary.api.delete_resources_by_tag(UNIQUE_TAG, resource_type='raw')
-        cloudinary.api.delete_resources_by_tag(UNIQUE_TAG, type='twitter_name')
-        cloudinary.api.delete_resources([TEST_ID1, TEST_ID2])
-        cloudinary.api.delete_resources([TEXT_ID], type='text')
-        cloudinary.api.delete_resources([TEST_DOCX_ID], resource_type='raw')
+        cleanup_test_resources_by_tag([
+            (UNIQUE_TAG,),
+            (UNIQUE_TAG, {'resource_type': 'raw'}),
+            (UNIQUE_TAG, {'type': 'twitter_name'}),
+        ])
 
-        for trans in [TEST_TRANS_SCALE2_STR, TEST_TRANS_SCALE2_PNG_STR]:
-            try:
-                api.delete_transformation(trans)
-            except Exception:
-                pass
+        cleanup_test_resources([
+            ([TEST_ID1, TEST_ID2],),
+            ([TEXT_ID], {'type': 'text'}),
+            ([TEST_DOCX_ID], {'resource_type': 'raw'}),
+        ])
+
+        cleanup_test_transformation([
+            ([TEST_TRANS_SCALE2_STR, TEST_TRANS_SCALE2_PNG_STR],),
+        ])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload(self):

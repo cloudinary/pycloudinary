@@ -1,17 +1,19 @@
 # -*- coding: latin-1 -*-
-
+from contextlib import contextmanager
 import os
 import random
 import re
+import sys
 import time
 from datetime import timedelta, tzinfo
 from functools import wraps
+import traceback
 
 import six
 from urllib3 import HTTPResponse
 from urllib3._collections import HTTPHeaderDict
 
-from cloudinary import utils, logger
+from cloudinary import utils, logger, api
 
 SUFFIX = os.environ.get('TRAVIS_JOB_ID') or random.randint(10000, 99999)
 
@@ -148,3 +150,34 @@ def retry_assertion(num_tries=3, delay=3):
         return retry_func
 
     return retry_decorator
+
+
+@contextmanager
+def ignore_exception(error_classes=(Exception,), suppress_traceback_classes=()):
+    try:
+        yield
+    except error_classes as e:
+        if not isinstance(e, suppress_traceback_classes):
+            traceback.print_exc(file=sys.stderr)
+
+
+def cleanup_test_resources_by_tag(params):
+    for tag_with_options in params:
+        options = tag_with_options[1] if len(tag_with_options) > 1 else {}
+        with ignore_exception():
+            api.delete_resources_by_tag(tag_with_options[0], **options)
+
+
+def cleanup_test_resources(params):
+    for public_ids_with_options in params:
+        options = public_ids_with_options[1] if len(public_ids_with_options) > 1 else {}
+        with ignore_exception():
+            api.delete_resources(public_ids_with_options[0], **options)
+
+
+def cleanup_test_transformation(params):
+    for transformations_with_options in params:
+        options = transformations_with_options[1] if len(transformations_with_options) > 1 else {}
+        for transformation in transformations_with_options[0]:
+            with ignore_exception(suppress_traceback_classes=(api.NotFound,)):
+                api.delete_transformation(transformation, **options)
