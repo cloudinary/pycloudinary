@@ -435,7 +435,7 @@ def _call_api(method, uri, params=None, body=None, headers=None, **options):
     if body is not None:
         kw['body'] = body
     try:
-        response = _http.request(method.upper(), api_url, processed_params, req_headers, **kw)
+        response = _http.request(method.upper(), api_url.replace(" ", "%20"), processed_params, req_headers, **kw)
         body = response.data
     except HTTPError as e:
         raise GeneralError("Unexpected error {0}", e.message)
