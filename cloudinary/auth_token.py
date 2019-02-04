@@ -4,9 +4,10 @@ import re
 import time
 from binascii import a2b_hex
 
-from cloudinary.compat import quote_plus
 
 AUTH_TOKEN_NAME = "__cld_token__"
+AUTH_TOKEN_SEPARATOR = "~"
+AUTH_TOKEN_UNSAFE_RE = r'([ "#%&\'\/:;<=>?@\[\\\]^`{\|}~]+)'
 
 
 def generate(url=None, acl=None, start_time=None, duration=None,
@@ -30,9 +31,9 @@ def generate(url=None, acl=None, start_time=None, duration=None,
     to_sign = list(token_parts)
     if url is not None and acl is None:
         to_sign.append("url=%s" % _escape_to_lower(url))
-    auth = _digest("~".join(to_sign), key)
+    auth = _digest(AUTH_TOKEN_SEPARATOR.join(to_sign), key)
     token_parts.append("hmac=%s" % auth)
-    return "%(token_name)s=%(token)s" % {"token_name": token_name, "token": "~".join(token_parts)}
+    return "%(token_name)s=%(token)s" % {"token_name": token_name, "token": AUTH_TOKEN_SEPARATOR.join(token_parts)}
 
 
 def _digest(message, key):
@@ -41,6 +42,7 @@ def _digest(message, key):
 
 
 def _escape_to_lower(url):
-    escaped_url = quote_plus(url)
-    escaped_url = re.sub(r'%..', lambda x: x.group(0).lower(), escaped_url)
+    from cloudinary.utils import smart_escape
+    escaped_url = smart_escape(url, unsafe=AUTH_TOKEN_UNSAFE_RE)
+    escaped_url = re.sub(r"%[0-9A-F]{2}", lambda x: x.group(0).lower(), escaped_url)
     return escaped_url
