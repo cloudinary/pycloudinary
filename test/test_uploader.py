@@ -34,6 +34,7 @@ TEST_TRANS_SCALE2_PNG = dict(crop="scale", width="2.0", format="png", overlay=TE
 TEST_TRANS_SCALE2_PNG_STR = "c_scale,l_{},w_2.0/png".format(TEST_TRANS_OVERLAY_STR)
 
 UNIQUE_TAG = "up_test_uploader_{}".format(SUFFIX)
+UNIQUE_ID = UNIQUE_TAG
 TEST_DOCX_ID = "test_docx_{}".format(SUFFIX)
 TEXT_ID = "text_{}".format(SUFFIX)
 TEST_ID1 = "uploader_test_{}".format(SUFFIX)
@@ -133,6 +134,25 @@ class UploaderTest(unittest.TestCase):
         self.assertEqual(result["width"], TEST_IMAGE_WIDTH)
         self.assertEqual(result["height"], TEST_IMAGE_HEIGHT)
         self.assertEqual('stream', result["original_filename"])
+
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_upload_custom_filename(self):
+        """should successfully use custom filename regardless actual file path"""
+
+        custom_filename = UNIQUE_ID + "_" + os.path.basename(TEST_IMAGE)
+
+        result = uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG], filename=custom_filename)
+
+        self.assertEqual(os.path.splitext(custom_filename)[0], result["original_filename"])
+
+        with io.BytesIO() as temp_file, open(TEST_IMAGE, 'rb') as input_file:
+            temp_file.write(input_file.read())
+            temp_file.seek(0)
+
+            result = uploader.upload(temp_file, tags=[UNIQUE_TAG], filename=custom_filename)
+
+        self.assertEqual(os.path.splitext(custom_filename)[0], result["original_filename"])
+
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -437,7 +457,8 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_large(self):
         """ should support uploading large files """
-        with tempfile.NamedTemporaryFile(suffix='.bmp') as temp_file:
+        filename = UNIQUE_ID + "_cld_upload_large"
+        with tempfile.NamedTemporaryFile(prefix=filename, suffix='.bmp') as temp_file:
             populate_large_file(temp_file, LARGE_FILE_SIZE)
             temp_file_name = temp_file.name
             temp_file_filename = os.path.splitext(os.path.basename(temp_file_name))[0]
@@ -453,11 +474,11 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
 
             resource2 = uploader.upload_large(temp_file_name, chunk_size=LARGE_CHUNK_SIZE,
                                               tags=["upload_large_tag", UNIQUE_TAG], resource_type="image",
-                                              use_filename=True, unique_filename=False)
+                                              use_filename=True, unique_filename=False, filename=filename)
 
             self.assertEqual(resource2["tags"], ["upload_large_tag", UNIQUE_TAG])
             self.assertEqual(resource2["resource_type"], "image")
-            self.assertEqual(resource2["original_filename"], temp_file_filename)
+            self.assertEqual(resource2["original_filename"], filename)
             self.assertEqual(resource2["original_filename"], resource2["public_id"])
             self.assertEqual(resource2["width"], LARGE_FILE_WIDTH)
             self.assertEqual(resource2["height"], LARGE_FILE_HEIGHT)
