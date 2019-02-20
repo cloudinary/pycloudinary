@@ -260,10 +260,7 @@ def update_transformation(transformation, **options):
     updates = only(options, "allowed_for_strict")
 
     if "unsafe_update" in options:
-        updates["unsafe_update"] = utils.build_single_eager(options.get("unsafe_update"))
-
-    if not updates:
-        raise Exception("No updates given")
+        updates["unsafe_update"] = transformation_string(options.get("unsafe_update"))
 
     updates["transformation"] = utils.build_single_eager(transformation)
 
