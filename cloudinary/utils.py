@@ -793,15 +793,32 @@ def archive_params(**options):
 def build_eager(transformations):
     if transformations is None:
         return None
-    eager = []
-    for tr in build_array(transformations):
-        if isinstance(tr, string_types):
-            single_eager = tr
-        else:
-            ext = tr.get("format")
-            single_eager = "/".join([x for x in [generate_transformation_string(**tr)[0], ext] if x])
-        eager.append(single_eager)
-    return "|".join(eager)
+
+    return "|".join([build_single_eager(et) for et in build_array(transformations)])
+
+
+def build_single_eager(options):
+    """
+    Builds a single eager transformation which consists of transformation and (optionally) format joined by "/"
+
+    :param options: Options containing transformation parameters and (optionally) a "format" key
+        format can be a string value (jpg, gif, etc) or can be set to "" (empty string).
+        The latter leads to transformation ending with "/", which means "No extension, use original format"
+        If format is not provided or set to None, only transformation is used (without the trailing "/")
+
+    :return: Resulting eager transformation string
+    """
+    if isinstance(options, string_types):
+        return options
+
+    trans_str = generate_transformation_string(**options)[0]
+
+    if not trans_str:
+        return ""
+
+    file_format = options.get("format")
+
+    return trans_str + ("/" + file_format if file_format is not None else "")
 
 
 def build_custom_headers(headers):

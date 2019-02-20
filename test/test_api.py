@@ -350,8 +350,9 @@ class ApiTest(unittest.TestCase):
         api.update_transformation(API_TEST_TRANS_SCALE100_STR, allowed_for_strict=True)
         args, kargs = mocker.call_args
         self.assertEqual(args[0], 'PUT')
-        self.assertTrue(get_uri(args).endswith('/transformations/{0}'.format(API_TEST_TRANS_SCALE100_STR)))
+        self.assertTrue(get_uri(args).endswith('/transformations'))
         self.assertTrue(get_params(args)['allowed_for_strict'])
+        self.assertEqual(API_TEST_TRANS_SCALE100_STR, get_params(args)['transformation'])
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -361,8 +362,9 @@ class ApiTest(unittest.TestCase):
         api.create_transformation(API_TEST_TRANS, {"crop": "scale", "width": 102})
         args, kargs = mocker.call_args
         self.assertEqual(args[0], 'POST')
-        self.assertTrue(get_uri(args).endswith('/transformations/{}'.format(API_TEST_TRANS)), get_uri(args))
+        self.assertTrue(get_uri(args).endswith('/transformations'), get_uri(args))
         self.assertEqual(get_params(args)['transformation'], 'c_scale,w_102')
+        self.assertEqual(API_TEST_TRANS, get_params(args)['name'])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test15a_transformation_unsafe_update(self):
@@ -373,6 +375,46 @@ class ApiTest(unittest.TestCase):
         self.assertNotEqual(transformation, None)
         self.assertEqual(transformation["info"], [{"crop": "scale", "width": 103}])
         self.assertEqual(transformation["used"], False)
+
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test15b_transformation_create_unnamed_with_format(self, mocker):
+        """ should allow creating unnamed transformation with extension"""
+        mocker.return_value = MOCK_RESPONSE
+
+        with_extension = dict(API_TEST_TRANS_SCALE100)
+        with_extension.update(format="jpg")
+
+        with_extension_str = API_TEST_TRANS_SCALE100_STR + "/jpg"
+
+        api.create_transformation(with_extension_str, with_extension)
+
+        args, kargs = mocker.call_args
+
+        self.assertEqual(args[0], 'POST')
+        self.assertTrue(get_uri(args).endswith('/transformations'), get_uri(args))
+        self.assertEqual(with_extension_str, get_params(args)['transformation'])
+        self.assertEqual(with_extension_str, get_params(args)['name'])
+
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test15c_transformation_create_unnamed_with_empty_format(self, mocker):
+        """ should allow creating unnamed transformation with empty extension"""
+        mocker.return_value = MOCK_RESPONSE
+
+        with_extension = dict(API_TEST_TRANS_SCALE100)
+        with_extension.update(format="")
+
+        with_extension_str = API_TEST_TRANS_SCALE100_STR + "/"
+
+        api.create_transformation(with_extension_str, with_extension)
+
+        args, kargs = mocker.call_args
+
+        self.assertEqual(args[0], 'POST')
+        self.assertTrue(get_uri(args).endswith('/transformations'), get_uri(args))
+        self.assertEqual(with_extension_str, get_params(args)['transformation'])
+        self.assertEqual(with_extension_str, get_params(args)['name'])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test16_transformation_delete(self):
@@ -390,7 +432,8 @@ class ApiTest(unittest.TestCase):
         api.delete_transformation(API_TEST_TRANS_SCALE100)
         args, kargs = mocker.call_args
         self.assertEqual(args[0], 'DELETE')
-        self.assertTrue(get_uri(args).endswith('/transformations/{0}'.format(API_TEST_TRANS_SCALE100_STR)))
+        self.assertTrue(get_uri(args).endswith('/transformations'))
+        self.assertEqual(API_TEST_TRANS_SCALE100_STR, get_params(args)['transformation'])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test18_usage(self):
