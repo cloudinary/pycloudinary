@@ -42,6 +42,7 @@ def _digest(message, key):
 
 
 def _escape_to_lower(url):
+    # There is a circular import issue in this file, need to resolve it in the next major release
     from cloudinary.utils import smart_escape
     escaped_url = smart_escape(url, unsafe=AUTH_TOKEN_UNSAFE_RE)
     escaped_url = re.sub(r"%[0-9A-F]{2}", lambda x: x.group(0).lower(), escaped_url)
