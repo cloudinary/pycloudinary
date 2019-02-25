@@ -376,7 +376,7 @@ def call_api(action, params, http_headers=None, return_error=False, unsigned=Fal
             result = json.loads(response.data.decode('utf-8'))
         except Exception as e:
             # Error is parsing json
-            raise Error("Error parsing server response (%d) - %s. Got - %s", response.status, response, e)
+            raise Error("Error parsing server response (%d) - %s. Got - %s" % (response.status, response.data, e))
 
         if "error" in result:
             if response.status not in [200, 400, 401, 403, 404, 500]:
