@@ -91,7 +91,7 @@ class CloudinaryField(models.Field):
             return value
         elif isinstance(value, UploadedFile):
             return value
-        elif value is None:
+        elif value is None or value is False:
             return value
         else:
             return self.parse_cloudinary_resource(value)
