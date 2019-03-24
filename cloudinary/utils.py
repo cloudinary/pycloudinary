@@ -574,7 +574,11 @@ def cloudinary_url(source, **options):
     transformation, options = generate_transformation_string(**options)
 
     resource_type = options.pop("resource_type", "image")
+
+    exclude_version = options.pop("exclude_version", cloudinary.config().exclude_version)
+
     version = options.pop("version", None)
+
     format = options.pop("format", None)
     cdn_subdomain = options.pop("cdn_subdomain", cloudinary.config().cdn_subdomain)
     secure_cdn_subdomain = options.pop("secure_cdn_subdomain",
@@ -609,8 +613,10 @@ def cloudinary_url(source, **options):
             and not re.match(r'^v[0-9]+', source_to_sign) \
             and not version:
         version = "1"
-    if version:
+    if version and not exclude_version:
         version = "v" + str(version)
+    else:
+        version = None
 
     transformation = re.sub(r'([^:])/+', r'\1/', transformation)
 
