@@ -46,7 +46,8 @@ class TestCloudinaryField(TestCase):
         p = Poll()
         p.image = SimpleUploadedFile(TEST_IMAGE, b'')
 
-        c = CloudinaryField('image', width_field="image_width", height_field="image_height")
+        c = CloudinaryField('image', width_field="image_width", height_field="image_height", unique_filename='true',
+                            use_filename='true', phash='true')
         c.set_attributes_from_name('image')
         mocked_resource = cloudinary.CloudinaryResource(metadata={"width": TEST_IMAGE_W, "height": TEST_IMAGE_H},
                                                         type="upload", public_id=TEST_IMAGE, resource_type="image")
@@ -58,6 +59,8 @@ class TestCloudinaryField(TestCase):
         self.assertEqual(".png", os.path.splitext(prep_value)[1])
         self.assertEqual(TEST_IMAGE_W, p.image_width)
         self.assertEqual(TEST_IMAGE_H, p.image_height)
+        self.assertEqual(upload_mock.call_args[1]['phash'], 'true')
+        self.assertEqual(upload_mock.call_args[1]['use_filename'], 'true')
 
         # check empty values handling
         p.image = SimpleUploadedFile(TEST_IMAGE, b'')
