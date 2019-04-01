@@ -412,13 +412,13 @@ class TestUtils(unittest.TestCase):
             options={
                 "overlay": {
                     "url":
-                    "https://upload.wikimedia.org/wikipedia/commons/2/2b/고창갯벌.jpg"}},
+                        "https://upload.wikimedia.org/wikipedia/commons/2/2b/고창갯벌.jpg"}},
             expected_url=(
-                DEFAULT_UPLOAD_PATH +
-                "l_fetch:"
-                "aHR0cHM6Ly91cGxvYWQud2lraW1lZGlhLm9yZy93aWtpcGVkaWEvY29"
-                "tbW9ucy8yLzJiLyVFQSVCMyVBMCVFQyVCMCVCRCVFQSVCMCVBRiVFQiVCMiU4Qy5qcGc=/"
-                "test"))
+                    DEFAULT_UPLOAD_PATH +
+                    "l_fetch:"
+                    "aHR0cHM6Ly91cGxvYWQud2lraW1lZGlhLm9yZy93aWtpcGVkaWEvY29"
+                    "tbW9ucy8yLzJiLyVFQSVCMyVBMCVFQyVCMCVCRCVFQSVCMCVBRiVFQiVCMiU4Qy5qcGc=/"
+                    "test"))
 
     def test_underlay(self):
         """should support underlay"""
@@ -905,7 +905,7 @@ class TestUtils(unittest.TestCase):
 
     def test_array_should_define_a_set_of_variables(self):
         options = {
-            "if":  "face_count > 2",
+            "if": "face_count > 2",
             "variables": [["$z", 5], ["$foo", "$z * 2"]],
             "crop": "scale",
             "width": "$foo * 200"
@@ -961,7 +961,7 @@ class TestUtils(unittest.TestCase):
         self.assertEqual("a=!@#$%^&*()_+<>?,./", cloudinary.utils.encode_context({"a": "!@#$%^&*()_+<>?,./"}))
         # check value escaping
         self.assertEqual(r"a=b\|\|\=|c=d\=a\=\|", cloudinary.utils.encode_context(OrderedDict((("a", "b||="),
-                                                                                              ("c", "d=a=|")))))
+                                                                                               ("c", "d=a=|")))))
         # check fallback
         self.assertEqual("not a dict", cloudinary.utils.encode_context("not a dict"))
 
