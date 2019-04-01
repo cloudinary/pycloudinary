@@ -230,34 +230,49 @@ def tags(**options):
 
 def transformations(**options):
     uri = ["transformations"]
-    return call_api("get", uri, only(options, "named", "next_cursor", "max_results"), **options)
+    params = only(options, "named", "next_cursor", "max_results")
+
+    return call_api("get", uri, params, **options)
 
 
 def transformation(transformation, **options):
-    uri = ["transformations", transformation_string(transformation)]
-    return call_api("get", uri, only(options, "next_cursor", "max_results"), **options)
+    uri = ["transformations"]
+
+    params = only(options, "next_cursor", "max_results")
+    params["transformation"] = utils.build_single_eager(transformation)
+
+    return call_api("get", uri, params, **options)
 
 
 def delete_transformation(transformation, **options):
-    uri = ["transformations", transformation_string(transformation)]
-    return call_api("delete", uri, {}, **options)
+    uri = ["transformations"]
+
+    params = {"transformation": utils.build_single_eager(transformation)}
+
+    return call_api("delete", uri, params, **options)
 
 
 # updates - currently only supported update is the "allowed_for_strict"
 # boolean flag and unsafe_update
 def update_transformation(transformation, **options):
-    uri = ["transformations", transformation_string(transformation)]
+    uri = ["transformations"]
+
     updates = only(options, "allowed_for_strict")
+
     if "unsafe_update" in options:
         updates["unsafe_update"] = transformation_string(options.get("unsafe_update"))
-    if not updates:
-        raise Exception("No updates given")
+
+    updates["transformation"] = utils.build_single_eager(transformation)
+
     return call_api("put", uri, updates, **options)
 
 
 def create_transformation(name, definition, **options):
-    uri = ["transformations", name]
-    return call_api("post", uri, {"transformation": transformation_string(definition)}, **options)
+    uri = ["transformations"]
+
+    params = {"name": name, "transformation": utils.build_single_eager(definition)}
+
+    return call_api("post", uri, params, **options)
 
 
 def publish_by_ids(public_ids, **options):
