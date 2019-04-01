@@ -14,8 +14,10 @@ from mock import patch
 import cloudinary.utils
 from cloudinary import CL_BLANK
 from cloudinary.utils import build_list_of_dicts, json_encode, encode_unicode_url, base64url_encode, \
-    patch_fetch_format, cloudinary_scaled_url, chain_transformations, generate_transformation_string
+    patch_fetch_format, cloudinary_scaled_url, chain_transformations, generate_transformation_string, build_eager
 from test.helper_test import TEST_IMAGE, REMOTE_TEST_IMAGE
+from test.test_api import API_TEST_TRANS_SCALE100, API_TEST_TRANS_SCALE100_STR, API_TEST_TRANS_SEPIA_STR, \
+    API_TEST_TRANS_SEPIA
 
 DEFAULT_ROOT_PATH = 'http://res.cloudinary.com/test123/'
 
@@ -1101,6 +1103,39 @@ class TestUtils(unittest.TestCase):
         self.assertEqual("{p}e_{e},f_{ff},{rt}/{t}/{fu}".format(p=DEFAULT_FETCH_PATH, e=effect, ff=fetch_format,
                                                                 rt=self.raw_transformation, t=resp_trans, fu=FETCH_URL),
                          actual_url)
+
+    def test_build_eager(self):
+        test_data = [
+            ["should support strings",
+             [API_TEST_TRANS_SCALE100_STR, API_TEST_TRANS_SEPIA_STR + "/jpg"],
+             "{}|{}/jpg".format(API_TEST_TRANS_SCALE100_STR, API_TEST_TRANS_SEPIA_STR)],
+            ["should concatenate transformations using pipe",
+             [API_TEST_TRANS_SCALE100, API_TEST_TRANS_SEPIA],
+             "{}|{}".format(API_TEST_TRANS_SCALE100_STR, API_TEST_TRANS_SEPIA_STR)],
+            ["should support transformations with multiple components",
+             [{"transformation": [API_TEST_TRANS_SCALE100, API_TEST_TRANS_SEPIA]}, API_TEST_TRANS_SEPIA],
+             "{}/{}|{}".format(API_TEST_TRANS_SCALE100_STR, API_TEST_TRANS_SEPIA_STR, API_TEST_TRANS_SEPIA_STR)],
+            ["should concatenate format at the end of the transformation",
+             ([dict(API_TEST_TRANS_SCALE100, **{"format": "gif"}), API_TEST_TRANS_SEPIA]),
+             "{}/gif|{}".format(API_TEST_TRANS_SCALE100_STR, API_TEST_TRANS_SEPIA_STR)],
+            ["should support an empty format",
+             ([dict(API_TEST_TRANS_SCALE100, **{"format": ""}), API_TEST_TRANS_SEPIA]),
+             "{}/|{}".format(API_TEST_TRANS_SCALE100_STR, API_TEST_TRANS_SEPIA_STR)],
+            ["should treat a null format as none",
+             ([dict(API_TEST_TRANS_SCALE100, **{"format": None}), API_TEST_TRANS_SEPIA]),
+             "{}|{}".format(API_TEST_TRANS_SCALE100_STR, API_TEST_TRANS_SEPIA_STR)],
+            ["should concatenate format at the end of the transformation",
+             [dict(API_TEST_TRANS_SCALE100, **{"format": "gif"}),
+              dict(API_TEST_TRANS_SEPIA, **{"format": "jpg"})],
+             "{}/gif|{}/jpg".format(API_TEST_TRANS_SCALE100_STR, API_TEST_TRANS_SEPIA_STR)],
+            ["should support transformations with multiple components and format",
+             [{"transformation": [API_TEST_TRANS_SCALE100, API_TEST_TRANS_SEPIA], "format": "gif"},
+              API_TEST_TRANS_SEPIA],
+             "{}/{}/gif|{}".format(API_TEST_TRANS_SCALE100_STR, API_TEST_TRANS_SEPIA_STR, API_TEST_TRANS_SEPIA_STR)],
+        ]
+
+        for message, value, expected in test_data:
+            self.assertEqual(expected, build_eager(value), message)
 
 
 if __name__ == '__main__':
