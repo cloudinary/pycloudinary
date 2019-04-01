@@ -79,7 +79,9 @@ def upload_large(file, **options):
         chunk_size = options.get("chunk_size", UPLOAD_LARGE_CHUNK_SIZE)
         file_size = utils.file_io_size(file_io)
 
-        file_name = file.name if hasattr(file, 'name') and isinstance(file.name, str) else "stream"
+        file_name = options.get(
+            "filename",
+            file_io.name if hasattr(file_io, 'name') and isinstance(file_io.name, str) else "stream")
 
         chunk = file_io.read(chunk_size)
 
@@ -333,6 +335,8 @@ def call_api(action, params, http_headers=None, return_error=False, unsigned=Fal
 
         api_url = utils.cloudinary_api_url(action, **options)
         if file:
+            filename = options.get("filename")  # Custom filename provided by user (relevant only for streams and files)
+
             if isinstance(file, string_types):
                 if utils.is_remote_url(file):
                     # URL
@@ -340,19 +344,18 @@ def call_api(action, params, http_headers=None, return_error=False, unsigned=Fal
                     data = file
                 else:
                     # file path
-                    name = file
+                    name = filename or file
                     with open(file, "rb") as opened:
                         data = opened.read()
             elif hasattr(file, 'read') and callable(file.read):
                 # stream
                 data = file.read()
-                name = file.name if hasattr(file, 'name') and isinstance(file.name, str) else "stream"
+                name = filename or (file.name if hasattr(file, 'name') and isinstance(file.name, str) else "stream")
             elif isinstance(file, tuple):
-                name = None
-                data = file
+                name, data = file
             else:
                 # Not a string, not a stream
-                name = "file"
+                name = filename or "file"
                 data = file
 
             param_list["file"] = (name, data) if name else data
