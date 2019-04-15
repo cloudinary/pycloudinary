@@ -887,8 +887,7 @@ def build_upload_params(**options):
             options.get("responsive_breakpoints")),
         "async": options.get("async"),
         "access_control": options.get("access_control") and json_encode(
-            build_list_of_dicts(options.get("access_control"))),
-        "access_mode": options.get("access_mode")
+            build_list_of_dicts(options.get("access_control")))
     }
     return params
 
