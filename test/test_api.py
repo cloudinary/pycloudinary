@@ -179,6 +179,24 @@ class ApiTest(unittest.TestCase):
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test07b_resource_allows_next_cursor_parameter(self, mocker):
+        """ should allow next_cursor parameter """
+        mocker.return_value = MOCK_RESPONSE
+        api.resource(API_TEST_ID, next_cursor="foo")
+        args, kwargs = mocker.call_args
+        self.assertTrue("next_cursor" in get_params(args))
+
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test07c_resource_allows_derived_next_cursor_parameter(self, mocker):
+        """ should allow derived_next_cursor parameter """
+        mocker.return_value = MOCK_RESPONSE
+        api.resource(API_TEST_ID, derived_next_cursor="foo")
+        args, kwargs = mocker.call_args
+        self.assertTrue("derived_next_cursor" in get_params(args))
+    
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test08_delete_derived(self, mocker):
         """ should allow deleting derived resource """
         mocker.return_value = MOCK_RESPONSE
