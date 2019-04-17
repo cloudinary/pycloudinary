@@ -14,7 +14,7 @@ from mock import patch
 import cloudinary.utils
 from cloudinary import CL_BLANK
 from cloudinary.utils import build_list_of_dicts, json_encode, encode_unicode_url, base64url_encode, \
-    patch_fetch_format, cloudinary_scaled_url, chain_transformations, generate_transformation_string, build_eager
+    patch_fetch_format, cloudinary_scaled_url, chain_transformations, generate_transformation_string, build_eager, build_upload_params
 from test.helper_test import TEST_IMAGE, REMOTE_TEST_IMAGE
 from test.test_api import API_TEST_TRANS_SCALE100, API_TEST_TRANS_SCALE100_STR, API_TEST_TRANS_SEPIA_STR, \
     API_TEST_TRANS_SEPIA
@@ -1171,5 +1171,12 @@ class TestUtils(unittest.TestCase):
             self.assertEqual(expected, build_eager(value), message)
 
 
+    def test_build_upload_params(self):
+        test_data = {
+            "access_mode": "authenticated"
+        }
+        # should allow access mode parameter
+        self.assertEqual(build_upload_params(**test_data)['access_mode'], "authenticated")
+    
 if __name__ == '__main__':
     unittest.main()
