@@ -24,11 +24,14 @@ DEFAULT_ROOT_PATH = 'http://res.cloudinary.com/test123/'
 DEFAULT_UPLOAD_PATH = DEFAULT_ROOT_PATH + 'image/upload/'
 DEFAULT_FETCH_PATH = DEFAULT_ROOT_PATH + 'image/fetch/'
 VIDEO_UPLOAD_PATH = DEFAULT_ROOT_PATH + 'video/upload/'
+TEST_ID = 'test'
 
 FETCH_URL = "http://cloudinary.com/images/logo.png"
 
 IMAGE_VERSION = "1234"
 IMAGE_VERSION_STR = "v" + IMAGE_VERSION
+DEFAULT_VERSION_STR = 'v1'
+TEST_FOLDER = 'folder/test'
 
 
 class TestUtils(unittest.TestCase):
@@ -52,7 +55,7 @@ class TestUtils(unittest.TestCase):
                           secure_distribution=None,
                           private_cdn=False)
 
-    def __test_cloudinary_url(self, public_id="test", options=None, expected_url=None, expected_options=None):
+    def __test_cloudinary_url(self, public_id=TEST_ID, options=None, expected_url=None, expected_options=None):
         if expected_options is None:
             expected_options = {}
         if options is None:
@@ -553,32 +556,33 @@ class TestUtils(unittest.TestCase):
                                    expected_url=DEFAULT_UPLOAD_PATH + "v123/folder/test")
         self.__test_cloudinary_url(public_id="v1234/test", expected_url=DEFAULT_UPLOAD_PATH + "v1234/test")
 
-    def test_exclude_version(self):
-        """Should ignore the version parameter if exclude_version is set to true """
-        self.__test_cloudinary_url(options={"exclude_version": True},
-                                   expected_url=DEFAULT_UPLOAD_PATH + "test")
-        self.__test_cloudinary_url(options={"exclude_version": True, "version": IMAGE_VERSION},
-                                   expected_url=DEFAULT_UPLOAD_PATH + "test")
-        self.__test_cloudinary_url(options={"exclude_version": False},
-                                   expected_url=DEFAULT_UPLOAD_PATH + "test")
-        self.__test_cloudinary_url(options={"exclude_version": False, "version": IMAGE_VERSION},
-                                   expected_url=DEFAULT_UPLOAD_PATH + IMAGE_VERSION_STR + "/test")
+    def test_force_version(self):
+        """Should not set default version v1 to resources stored in folders if force_version is set to False"""
+        self.__test_cloudinary_url(TEST_FOLDER,
+                                   expected_url=DEFAULT_UPLOAD_PATH + DEFAULT_VERSION_STR + "/" + TEST_FOLDER)
 
-        """Should use exclude_version from config """
-        cloudinary.config(exclude_version=True)
+        self.__test_cloudinary_url(TEST_FOLDER,
+                                   options={"force_version": False},
+                                   expected_url=DEFAULT_UPLOAD_PATH + TEST_FOLDER)
 
-        self.__test_cloudinary_url(expected_url=DEFAULT_UPLOAD_PATH + "test")
-        self.__test_cloudinary_url(options={"version": IMAGE_VERSION}, expected_url=DEFAULT_UPLOAD_PATH + "test")
-        self.__test_cloudinary_url(options={"exclude_version": False}, expected_url=DEFAULT_UPLOAD_PATH + "test")
-        self.__test_cloudinary_url(options={"version": IMAGE_VERSION, "exclude_version": False},
-                                   expected_url=DEFAULT_UPLOAD_PATH + IMAGE_VERSION_STR + "/test")
+        # Explicitly set version is always passed
+        self.__test_cloudinary_url(TEST_ID,
+                                   options={"force_version": False, "version": IMAGE_VERSION},
+                                   expected_url=DEFAULT_UPLOAD_PATH + IMAGE_VERSION_STR + "/" + TEST_ID)
 
-        """Should overide config with options"""
-        cloudinary.config(exclude_version=False)
+        self.__test_cloudinary_url(TEST_FOLDER,
+                                   options={"force_version": False, "version": IMAGE_VERSION},
+                                   expected_url=DEFAULT_UPLOAD_PATH + IMAGE_VERSION_STR + "/" + TEST_FOLDER)
 
-        self.__test_cloudinary_url(expected_url=DEFAULT_UPLOAD_PATH + "test")
-        self.__test_cloudinary_url(options={"version": IMAGE_VERSION},
-                                   expected_url=DEFAULT_UPLOAD_PATH + IMAGE_VERSION_STR + "/test")
+        # Should use force_version from config
+        cloudinary.config(force_version=False)
+
+        self.__test_cloudinary_url(TEST_FOLDER, expected_url=DEFAULT_UPLOAD_PATH + TEST_FOLDER)
+
+        # Should override config with options
+        self.__test_cloudinary_url(TEST_FOLDER,
+                                   options={"force_version": True},
+                                   expected_url=DEFAULT_UPLOAD_PATH + DEFAULT_VERSION_STR + "/" + TEST_FOLDER)
 
     def test_shorten(self):
         self.__test_cloudinary_url(options={"shorten": True}, expected_url=DEFAULT_ROOT_PATH + "iu/test")

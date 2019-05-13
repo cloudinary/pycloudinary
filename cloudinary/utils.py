@@ -575,7 +575,9 @@ def cloudinary_url(source, **options):
 
     resource_type = options.pop("resource_type", "image")
 
-    exclude_version = options.pop("exclude_version", cloudinary.config().exclude_version)
+    force_version = options.pop("force_version", cloudinary.config().force_version)
+    if force_version is None:
+        force_version = True
 
     version = options.pop("version", None)
 
@@ -608,12 +610,12 @@ def cloudinary_url(source, **options):
         resource_type, type, url_suffix, use_root_path, shorten)
     source, source_to_sign = finalize_source(source, format, url_suffix)
 
-    if source_to_sign.find("/") >= 0 \
+    if not version and force_version \
+            and source_to_sign.find("/") >= 0 \
             and not re.match(r'^https?:/', source_to_sign) \
-            and not re.match(r'^v[0-9]+', source_to_sign) \
-            and not version:
+            and not re.match(r'^v[0-9]+', source_to_sign):
         version = "1"
-    if version and not exclude_version:
+    if version:
         version = "v" + str(version)
     else:
         version = None
