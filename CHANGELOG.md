@@ -1,4 +1,27 @@
 
+1.16.0 / 2019-05-13
+===================
+
+New functionality and features
+------------------------------
+  * Add `derived_next_cursor` parameter to `resource` admin API
+  * Add `filename` option to `upload` and `upload_large` APIs
+  * Add `force_version` option to `cloudinary_url`
+  
+Other Changes
+-------------
+
+  * Fix `False` value handling in `CloudinaryField`
+  * Fix acl and url escaping in `auth_token` generation
+  * Fix base64 data validation regex
+  * Fix transformations API call
+  * Fix error raising in uploader for invalid server response
+  * Ignore URL in AuthToken generation if ACL is provided
+  * Print traceback if error in tearDown methods
+  * Support per corner values in `radius` transformation parameter
+  * Fix basic sample incoherent response output
+  * Fix user-agent unit test assertion
+
 1.15.0 / 2018-12-16
 ===================
 
