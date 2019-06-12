@@ -14,7 +14,8 @@ import six
 import urllib3
 from urllib3 import disable_warnings
 
-from test.helper_test import SUFFIX, TEST_IMAGE, api_response_mock, cleanup_test_resources_by_tag
+from test.helper_test import SUFFIX, TEST_IMAGE, api_response_mock, cleanup_test_resources_by_tag, UNIQUE_TEST_ID, \
+    get_uri, get_list_param
 
 MOCK_RESPONSE = api_response_mock()
 
@@ -87,6 +88,28 @@ class ArchiveTest(unittest.TestCase):
                                         cloud_name="demo")
         upload_prefix = cloudinary.config().upload_prefix or "https://api.cloudinary.com"
         six.assertRegex(self, result, r'^{0}/v1_1/demo/.*$'.format(upload_prefix))
+
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_create_archive_multiple_resource_types(self, mocker):
+        """should allow fully_qualified_public_ids"""
+
+        mocker.return_value = MOCK_RESPONSE
+
+        test_ids = [
+            "image/upload/" + UNIQUE_TEST_ID,
+            "video/upload/" + UNIQUE_TEST_ID,
+            "raw/upload/" + UNIQUE_TEST_ID,
+        ]
+        uploader.create_zip(
+            resource_type='auto',
+            fully_qualified_public_ids=test_ids
+        )
+
+        args, kargs = mocker.call_args
+
+        self.assertTrue(get_uri(args).endswith('/auto/generate_archive'))
+        self.assertEqual(test_ids, get_list_param(mocker, 'fully_qualified_public_ids'))
 
 
 if __name__ == '__main__':
