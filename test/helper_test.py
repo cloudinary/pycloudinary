@@ -29,6 +29,7 @@ TEST_ICON = RESOURCES_PATH + "favicon.ico"
 TEST_TAG = "pycloudinary_test"
 UNIQUE_TAG = "{0}_{1}".format(TEST_TAG, SUFFIX)
 UNIQUE_TEST_ID = UNIQUE_TAG
+UNIQUE_TEST_FOLDER = UNIQUE_TAG + "_folder"
 
 ZERO = timedelta(0)
 

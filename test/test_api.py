@@ -10,7 +10,7 @@ import cloudinary
 from cloudinary import api, uploader, utils
 from test.helper_test import SUFFIX, TEST_IMAGE, get_uri, get_params, get_list_param, get_param, TEST_DOC, get_method, \
     UNIQUE_TAG, api_response_mock, ignore_exception, cleanup_test_resources_by_tag, cleanup_test_transformation, \
-    cleanup_test_resources
+    cleanup_test_resources, UNIQUE_TEST_FOLDER
 
 MOCK_RESPONSE = api_response_mock()
 
@@ -626,6 +626,17 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(result["folders"][1]["path"], "{}1/test_subfolder2".format(PREFIX))
         with six.assertRaisesRegex(self, api.NotFound):
             api.subfolders(PREFIX)
+
+    @patch('urllib3.request.RequestMethods.request')
+    def test_delete_folder(self, mocker):
+        """ should delete folder """
+        mocker.return_value = MOCK_RESPONSE
+
+        api.delete_folder(UNIQUE_TEST_FOLDER)
+
+        args, kargs = mocker.call_args
+        self.assertEqual("DELETE", get_method(mocker))
+        self.assertTrue(get_uri(args).endswith('/folders/' + UNIQUE_TEST_FOLDER))
 
     def test_CloudinaryImage_len(self):
         """Tests the __len__ function on CloudinaryImage"""

@@ -335,6 +335,20 @@ def subfolders(of_folder_path, **options):
     return call_api("get", ["folders", of_folder_path], {}, **options)
 
 
+def delete_folder(path, **options):
+    """
+    Deletes folder
+
+    Deleted folder must be empty, but can have descendant empty sub folders
+
+    :param path: The folder to delete
+    :param options: Additional options
+
+    :return: Response
+    """
+    return call_api("delete", ["folders", path], {}, **options)
+
+
 def restore(public_ids, **options):
     resource_type = options.pop("resource_type", "image")
     upload_type = options.pop("type", "upload")
