@@ -785,6 +785,8 @@ def archive_params(**options):
         "phash": options.get("phash"),
         "prefixes": options.get("prefixes") and build_array(options.get("prefixes")),
         "public_ids": options.get("public_ids") and build_array(options.get("public_ids")),
+        "fully_qualified_public_ids": options.get("fully_qualified_public_ids") and build_array(
+            options.get("fully_qualified_public_ids")),
         "skip_transformation_name": options.get("skip_transformation_name"),
         "tags": options.get("tags") and build_array(options.get("tags")),
         "target_format": options.get("target_format"),
