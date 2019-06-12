@@ -542,7 +542,7 @@ class ApiTest(unittest.TestCase):
         """ should allow creating upload_presets """
         mocker.return_value = MOCK_RESPONSE
 
-        api.create_upload_preset(name=API_TEST_PRESET, folder="folder")
+        api.create_upload_preset(name=API_TEST_PRESET, folder="folder", live=True)
 
         args, kargs = mocker.call_args
 
@@ -550,6 +550,7 @@ class ApiTest(unittest.TestCase):
         self.assertEqual("POST", get_method(mocker))
         self.assertEqual(get_param(mocker, "name"), API_TEST_PRESET)
         self.assertEqual(get_param(mocker, "folder"), "folder")
+        self.assertTrue(get_param(mocker, "live"))
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -592,13 +593,14 @@ class ApiTest(unittest.TestCase):
     def test31_update_upload_presets(self, mocker):
         """ should allow getting a single upload_preset """
         mocker.return_value = MOCK_RESPONSE
-        api.update_upload_preset(API_TEST_PRESET, colors=True, unsigned=True, disallow_public_id=True)
+        api.update_upload_preset(API_TEST_PRESET, colors=True, unsigned=True, disallow_public_id=True, live=True)
         args, kargs = mocker.call_args
         self.assertEqual(args[0], 'PUT')
         self.assertTrue(get_uri(args).endswith('/upload_presets/{}'.format(API_TEST_PRESET)))
         self.assertTrue(get_params(args)['colors'])
         self.assertTrue(get_params(args)['unsigned'])
         self.assertTrue(get_params(args)['disallow_public_id'])
+        self.assertTrue(get_params(args)['live'])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test32_background_removal(self):

@@ -315,7 +315,7 @@ def update_upload_preset(name, **options):
     uri = ["upload_presets", name]
     params = utils.build_upload_params(**options)
     params = utils.cleanup_params(params)
-    params.update(only(options, "unsigned", "disallow_public_id"))
+    params.update(only(options, "unsigned", "disallow_public_id", "live"))
     return call_api("put", uri, params, **options)
 
 
@@ -323,7 +323,7 @@ def create_upload_preset(**options):
     uri = ["upload_presets"]
     params = utils.build_upload_params(**options)
     params = utils.cleanup_params(params)
-    params.update(only(options, "unsigned", "disallow_public_id", "name"))
+    params.update(only(options, "unsigned", "disallow_public_id", "name", "live"))
     return call_api("post", uri, params, **options)
 
 
