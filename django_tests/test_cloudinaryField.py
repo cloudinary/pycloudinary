@@ -12,17 +12,20 @@ from django.test import TestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 from .models import Poll
-from django_tests.helper_test import SUFFIX, TEST_IMAGE, TEST_IMAGE_W, TEST_IMAGE_H
+from django_tests.helper_test import SUFFIX, TEST_IMAGE, TEST_IMAGE_W, TEST_IMAGE_H, UNIQUE_TEST_ID
 
 API_TEST_ID = "dj_test_{}".format(SUFFIX)
 
 
 class TestCloudinaryField(TestCase):
-
     @classmethod
     def setUpTestData(cls):
         Poll.objects.create(question="with image", image="image/upload/v1234/{}.jpg".format(API_TEST_ID))
         Poll.objects.create(question="empty")
+
+    def setUp(self):
+        self.p = Poll()
+        self.p.image = SimpleUploadedFile(TEST_IMAGE, b'')
 
     def test_get_internal_type(self):
         c = CloudinaryField('image', null=True)
@@ -34,18 +37,18 @@ class TestCloudinaryField(TestCase):
         # Can't compare the objects, so compare url instead
         self.assertEqual(c.to_python('{}.jpg'.format(API_TEST_ID)).build_url(), res.build_url())
 
-    @unittest.skip("TODO: write test")
     def test_upload_options_with_filename(self):
-        self.assertEqual(True, True)
+        c = CloudinaryField('image', filename=UNIQUE_TEST_ID)
+        c.set_attributes_from_name('image')
+        mocked_resource = cloudinary.CloudinaryResource(type="upload", public_id=TEST_IMAGE, resource_type="image")
 
-    @unittest.skip("TODO: write test")
+        with mock.patch('cloudinary.uploader.upload_resource', return_value=mocked_resource) as upload_mock:
+            c.pre_save(self.p, None)
+
+        self.assertTrue(upload_mock.called)
+        self.assertEqual(upload_mock.call_args[1]['filename'], UNIQUE_TEST_ID)
+
     def test_upload_options(self):
-        self.assertEqual(True, True)
-
-    def test_pre_save(self):
-        p = Poll()
-        p.image = SimpleUploadedFile(TEST_IMAGE, b'')
-
         c = CloudinaryField('image', width_field="image_width", height_field="image_height", unique_filename='true',
                             use_filename='true', phash='true')
         c.set_attributes_from_name('image')
@@ -53,24 +56,37 @@ class TestCloudinaryField(TestCase):
                                                         type="upload", public_id=TEST_IMAGE, resource_type="image")
 
         with mock.patch('cloudinary.uploader.upload_resource', return_value=mocked_resource) as upload_mock:
-            prep_value = c.pre_save(p, None)
+            c.pre_save(self.p, None)
+
+        self.assertTrue(upload_mock.called)
+        self.assertEqual(upload_mock.call_args[1]['unique_filename'], 'true')
+        self.assertEqual(upload_mock.call_args[1]['use_filename'], 'true')
+        self.assertEqual(upload_mock.call_args[1]['phash'], 'true')
+
+    def test_pre_save(self):
+        c = CloudinaryField('image', width_field="image_width", height_field="image_height")
+        c.set_attributes_from_name('image')
+        mocked_resource = cloudinary.CloudinaryResource(metadata={"width": TEST_IMAGE_W, "height": TEST_IMAGE_H},
+                                                        type="upload", public_id=TEST_IMAGE, resource_type="image")
+
+        with mock.patch('cloudinary.uploader.upload_resource', return_value=mocked_resource) as upload_mock:
+            prep_value = c.pre_save(self.p, None)
 
         self.assertTrue(upload_mock.called)
         self.assertEqual(".png", os.path.splitext(prep_value)[1])
-        self.assertEqual(TEST_IMAGE_W, p.image_width)
-        self.assertEqual(TEST_IMAGE_H, p.image_height)
-        self.assertEqual(upload_mock.call_args[1]['phash'], 'true')
-        self.assertEqual(upload_mock.call_args[1]['use_filename'], 'true')
+        self.assertEqual(TEST_IMAGE_W, self.p.image_width)
+        self.assertEqual(TEST_IMAGE_H, self.p.image_height)
+
 
         # check empty values handling
-        p.image = SimpleUploadedFile(TEST_IMAGE, b'')
+        self.p.image = SimpleUploadedFile(TEST_IMAGE, b'')
         mocked_resource_empty = cloudinary.CloudinaryResource(metadata={})
         with mock.patch('cloudinary.uploader.upload_resource', return_value=mocked_resource_empty) as upload_mock:
-            c.pre_save(p, None)
+            c.pre_save(self.p, None)
 
         self.assertTrue(upload_mock.called)
-        self.assertIsNone(p.image_width)
-        self.assertIsNone(p.image_height)
+        self.assertIsNone(self.p.image_width)
+        self.assertIsNone(self.p.image_height)
 
     def test_get_prep_value(self):
         c = CloudinaryField('image')

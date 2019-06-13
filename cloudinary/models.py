@@ -59,9 +59,7 @@ class CloudinaryField(models.Field):
     description = "A resource stored in Cloudinary"
 
     def __init__(self, *args, **kwargs):
-
-        field_options = {key: kwargs.pop(key) for key in set(kwargs.keys()) & set(DJANGO_FIELD_PARAMETERS)
-                         if key in DJANGO_FIELD_PARAMETERS}
+        field_options = {key: kwargs.pop(key) for key in set(kwargs.keys()) if key in DJANGO_FIELD_PARAMETERS}
         field_options['max_length'] = 255
         self.default_form_class = kwargs.pop("default_form_class", forms.CloudinaryFileField)
         self.type = kwargs.pop("type", "upload")
@@ -121,18 +119,11 @@ class CloudinaryField(models.Field):
         else:
             return self.parse_cloudinary_resource(value)
 
-    def upload_options_with_filename(self, model_instance, filename):
-        return self.upload_options(model_instance)
-
-    def upload_options(self, model_instance):
-        return {}
-
     def pre_save(self, model_instance, add):
         value = super(CloudinaryField, self).pre_save(model_instance, add)
         if isinstance(value, UploadedFile):
             options = {"type": self.type, "resource_type": self.resource_type}
             options.update(self.options)
-            #options.update(self.upload_options_with_filename(model_instance, value.name))
             instance_value = uploader.upload_resource(value, **options)
             setattr(model_instance, self.attname, instance_value)
             if self.width_field:
