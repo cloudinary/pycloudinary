@@ -16,6 +16,27 @@ CLOUDINARY_FIELD_DB_RE = r'(?:(?P<resource_type>image|raw|video)/' \
                          r'(?:v(?P<version>\d+)/)?' \
                          r'(?P<public_id>.*?)' \
                          r'(\.(?P<format>[^.]+))?$'
+DJANGO_FIELD_PARAMETERS = [
+    'verbose_name',
+    'name',
+    'primary_key',
+    'max_length',
+    'unique',
+    'null',
+    'db_index',
+    'rel',
+    'default',
+    'editable',
+    'serialize',
+    'unique_for_date',
+    'unique_for_month',
+    'unique_for_year',
+    'choices',
+    'help_text',
+    'db_column',
+    'db_tablespace',
+    'auto_created'
+]
 
 
 def with_metaclass(meta, *bases):
@@ -38,14 +59,16 @@ class CloudinaryField(models.Field):
     description = "A resource stored in Cloudinary"
 
     def __init__(self, *args, **kwargs):
-        options = {'max_length': 255}
+        field_options = {key: kwargs.pop(key) for key in set(kwargs.keys()) if key in DJANGO_FIELD_PARAMETERS}
+        field_options['max_length'] = 255
         self.default_form_class = kwargs.pop("default_form_class", forms.CloudinaryFileField)
-        options.update(kwargs)
-        self.type = options.pop("type", "upload")
-        self.resource_type = options.pop("resource_type", "image")
-        self.width_field = options.pop("width_field", None)
-        self.height_field = options.pop("height_field", None)
-        super(CloudinaryField, self).__init__(*args, **options)
+        self.type = kwargs.pop("type", "upload")
+        self.resource_type = kwargs.pop("resource_type", "image")
+        self.width_field = kwargs.pop("width_field", None)
+        self.height_field = kwargs.pop("height_field", None)
+        self.options = {key: value for key, value in kwargs.items()}
+
+        super(CloudinaryField, self).__init__(*args, **field_options)
 
     def get_internal_type(self):
         return 'CharField'
@@ -96,17 +119,11 @@ class CloudinaryField(models.Field):
         else:
             return self.parse_cloudinary_resource(value)
 
-    def upload_options_with_filename(self, model_instance, filename):
-        return self.upload_options(model_instance)
-
-    def upload_options(self, model_instance):
-        return {}
-
     def pre_save(self, model_instance, add):
         value = super(CloudinaryField, self).pre_save(model_instance, add)
         if isinstance(value, UploadedFile):
             options = {"type": self.type, "resource_type": self.resource_type}
-            options.update(self.upload_options_with_filename(model_instance, value.name))
+            options.update(self.options)
             instance_value = uploader.upload_resource(value, **options)
             setattr(model_instance, self.attname, instance_value)
             if self.width_field:
