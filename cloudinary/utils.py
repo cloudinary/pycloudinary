@@ -14,9 +14,9 @@ import zlib
 from collections import OrderedDict
 from datetime import datetime, date
 from fractions import Fraction
+from numbers import Number
 
 import six.moves.urllib.parse
-from numbers import Number
 from six import iteritems
 
 import cloudinary
@@ -64,6 +64,59 @@ __URL_KEYS = [
     'use_root_path',
     'version'
 ]
+
+__SIMPLE_UPLOAD_PARAMS = [
+    "public_id",
+    "callback",
+    "format",
+    "type",
+    "backup",
+    "faces",
+    "image_metadata",
+    "exif",
+    "colors",
+    "use_filename",
+    "unique_filename",
+    "discard_original_filename",
+    "invalidate",
+    "notification_url",
+    "eager_notification_url",
+    "eager_async",
+    "proxy",
+    "folder",
+    "overwrite",
+    "moderation",
+    "raw_convert",
+    "quality_override",
+    "quality_analysis",
+    "ocr",
+    "categorization",
+    "detection",
+    "similarity_search",
+    "background_removal",
+    "upload_preset",
+    "phash",
+    "return_delete_token",
+    "auto_tagging",
+    "async",
+]
+
+__SERIALIZED_UPLOAD_PARAMS = [
+    "timestamp",
+    "transformation",
+    "headers",
+    "eager",
+    "tags",
+    "allowed_formats",
+    "face_coordinates",
+    "custom_coordinates",
+    "context",
+    "auto_tagging",
+    "responsive_breakpoints",
+    "access_control"
+]
+
+upload_params = __SIMPLE_UPLOAD_PARAMS + __SERIALIZED_UPLOAD_PARAMS
 
 
 def build_array(arg):
@@ -844,55 +897,29 @@ def build_custom_headers(headers):
 
 
 def build_upload_params(**options):
-    params = {
+    params = {param_name: options.get(param_name) for param_name in __SIMPLE_UPLOAD_PARAMS}
+
+    serialized_params = {
         "timestamp": now(),
         "transformation": generate_transformation_string(**options)[0],
-        "public_id": options.get("public_id"),
-        "callback": options.get("callback"),
-        "format": options.get("format"),
-        "type": options.get("type"),
-        "backup": options.get("backup"),
-        "faces": options.get("faces"),
-        "image_metadata": options.get("image_metadata"),
-        "exif": options.get("exif"),
-        "colors": options.get("colors"),
         "headers": build_custom_headers(options.get("headers")),
         "eager": build_eager(options.get("eager")),
-        "use_filename": options.get("use_filename"),
-        "unique_filename": options.get("unique_filename"),
-        "discard_original_filename": options.get("discard_original_filename"),
-        "invalidate": options.get("invalidate"),
-        "notification_url": options.get("notification_url"),
-        "eager_notification_url": options.get("eager_notification_url"),
-        "eager_async": options.get("eager_async"),
-        "proxy": options.get("proxy"),
-        "folder": options.get("folder"),
-        "overwrite": options.get("overwrite"),
         "tags": options.get("tags") and ",".join(build_array(options["tags"])),
-        "allowed_formats": options.get("allowed_formats") and ",".join(
-            build_array(options["allowed_formats"])),
+        "allowed_formats": options.get("allowed_formats") and ",".join(build_array(options["allowed_formats"])),
         "face_coordinates": encode_double_array(options.get("face_coordinates")),
         "custom_coordinates": encode_double_array(options.get("custom_coordinates")),
         "context": encode_context(options.get("context")),
-        "moderation": options.get("moderation"),
-        "raw_convert": options.get("raw_convert"),
-        "quality_override": options.get("quality_override"),
-        "quality_analysis": options.get("quality_analysis"),
-        "ocr": options.get("ocr"),
-        "categorization": options.get("categorization"),
-        "detection": options.get("detection"),
-        "similarity_search": options.get("similarity_search"),
-        "background_removal": options.get("background_removal"),
-        "upload_preset": options.get("upload_preset"),
-        "phash": options.get("phash"),
-        "return_delete_token": options.get("return_delete_token"),
         "auto_tagging": options.get("auto_tagging") and str(options.get("auto_tagging")),
-        "responsive_breakpoints": generate_responsive_breakpoints_string(
-            options.get("responsive_breakpoints")),
-        "async": options.get("async"),
+        "responsive_breakpoints": generate_responsive_breakpoints_string(options.get("responsive_breakpoints")),
         "access_control": options.get("access_control") and json_encode(
             build_list_of_dicts(options.get("access_control")))
     }
+
+    # make sure that we are in-sync with __SERIALIZED_UPLOAD_PARAMS which are in use by other methods
+    serialized_params = {param_name: serialized_params[param_name] for param_name in __SERIALIZED_UPLOAD_PARAMS}
+
+    params.update(serialized_params)
+
     return params
 
 
@@ -1214,6 +1241,7 @@ def file_io_size(file_io):
     file_io.seek(initial_position, os.SEEK_SET)
 
     return size
+
 
 def check_property_enabled(f):
     """
