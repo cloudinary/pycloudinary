@@ -229,6 +229,7 @@ def generate_transformation_string(**options):
     flags = ".".join(build_array(options.pop("flags", None)))
     dpr = options.pop("dpr", cloudinary.config().dpr)
     duration = norm_range_value(options.pop("duration", None))
+    initial_duration = norm_range_value(options.pop("initial_duration", None))
     start_offset = norm_auto_range_value(options.pop("start_offset", None))
     end_offset = norm_range_value(options.pop("end_offset", None))
     offset = split_range(options.pop("offset", None))
@@ -264,6 +265,7 @@ def generate_transformation_string(**options):
         "fn": custom_function or custom_pre_function,
         "fps": fps,
         "h": normalize_expression(height),
+        "idu": normalize_expression(initial_duration),
         "ki": process_ki(options.pop("keyframe_interval", None)),
         "l": overlay,
         "o": normalize_expression(options.pop('opacity', None)),
@@ -1034,7 +1036,9 @@ PREDEFINED_VARS = {
     "page_x": "px",
     "page_y": "py",
     "tags": "tags",
-    "width": "w"
+    "width": "w",
+    "duration": "du",
+    "initial_duration": "idu",
 }
 
 replaceRE = "((\\|\\||>=|<=|&&|!=|>|=|<|/|-|\\+|\\*)(?=[ _])|" + '|'.join(PREDEFINED_VARS.keys()) + ")"
