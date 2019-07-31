@@ -45,6 +45,7 @@ class CloudinaryField(models.Field):
         self.resource_type = kwargs.pop("resource_type", "image")
         self.width_field = kwargs.pop("width_field", None)
         self.height_field = kwargs.pop("height_field", None)
+        # Collect all options related to Cloudinary upload
         self.options = {key: kwargs.pop(key) for key in set(kwargs.keys()) if key in upload_params + upload_options}
 
         field_options = kwargs
