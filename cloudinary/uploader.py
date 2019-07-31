@@ -34,6 +34,13 @@ else:
         ca_certs=certifi.where()
     )
 
+upload_options = [
+    "filename",
+    "timeout",
+    "chunk_size",
+    "use_cache"
+]
+
 UPLOAD_LARGE_CHUNK_SIZE = 20000000
 
 

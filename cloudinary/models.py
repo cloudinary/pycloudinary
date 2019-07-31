@@ -3,6 +3,8 @@ import re
 from cloudinary import CloudinaryResource, forms, uploader
 from django.core.files.uploadedfile import UploadedFile
 from django.db import models
+from cloudinary.uploader import upload_options
+from cloudinary.utils import upload_params
 
 # Add introspection rules for South, if it's installed.
 try:
@@ -16,27 +18,6 @@ CLOUDINARY_FIELD_DB_RE = r'(?:(?P<resource_type>image|raw|video)/' \
                          r'(?:v(?P<version>\d+)/)?' \
                          r'(?P<public_id>.*?)' \
                          r'(\.(?P<format>[^.]+))?$'
-DJANGO_FIELD_PARAMETERS = [
-    'verbose_name',
-    'name',
-    'primary_key',
-    'max_length',
-    'unique',
-    'null',
-    'db_index',
-    'rel',
-    'default',
-    'editable',
-    'serialize',
-    'unique_for_date',
-    'unique_for_month',
-    'unique_for_year',
-    'choices',
-    'help_text',
-    'db_column',
-    'db_tablespace',
-    'auto_created'
-]
 
 
 def with_metaclass(meta, *bases):
@@ -59,15 +40,16 @@ class CloudinaryField(models.Field):
     description = "A resource stored in Cloudinary"
 
     def __init__(self, *args, **kwargs):
-        field_options = {key: kwargs.pop(key) for key in set(kwargs.keys()) if key in DJANGO_FIELD_PARAMETERS}
-        field_options['max_length'] = 255
         self.default_form_class = kwargs.pop("default_form_class", forms.CloudinaryFileField)
         self.type = kwargs.pop("type", "upload")
         self.resource_type = kwargs.pop("resource_type", "image")
         self.width_field = kwargs.pop("width_field", None)
         self.height_field = kwargs.pop("height_field", None)
-        self.options = {key: value for key, value in kwargs.items()}
+        # Collect all options related to Cloudinary upload
+        self.options = {key: kwargs.pop(key) for key in set(kwargs.keys()) if key in upload_params + upload_options}
 
+        field_options = kwargs
+        field_options['max_length'] = 255
         super(CloudinaryField, self).__init__(*args, **field_options)
 
     def get_internal_type(self):
