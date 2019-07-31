@@ -1,4 +1,20 @@
 
+1.17.0 / 2019-07-31
+===================
+New functionality and features
+------------------------------
+  * Add `delete_folder` admin API
+  * Add `live` parameter to `create_upload_preset` and `update_upload_preset` admin APIs
+  * Add api options to `CloudinaryField`
+  * Allow generating archive with multiple resource types
+  * Add support of Django2.2
+  
+Other Changes
+-------------
+  * Fix missing options in CloudinaryJsFileField
+  * Fix CloudinaryField options consumption
+  * Bump urllib3 from 1.19 to 1.24.2 in /samples/gae
+
 1.16.0 / 2019-05-13
 ===================
 
