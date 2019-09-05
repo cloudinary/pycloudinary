@@ -1061,7 +1061,9 @@ PREDEFINED_VARS = {
     "page_x": "px",
     "page_y": "py",
     "tags": "tags",
-    "width": "w"
+    "width": "w",
+    "duration": "du",
+    "initial_duration": "idu",
 }
 
 replaceRE = "((\\|\\||>=|<=|&&|!=|>|=|<|/|-|\\+|\\*)(?=[ _])|" + '|'.join(PREDEFINED_VARS.keys()) + ")"

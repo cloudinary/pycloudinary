@@ -1174,6 +1174,16 @@ class TestUtils(unittest.TestCase):
         for message, value, expected in test_data:
             self.assertEqual(expected, build_eager(value), message)
 
+    def test_duration_condition(self):
+        du_options = {"if": "duration > 50", "crop": "scale", "width": "200"}
+        idu_options = {"if": "initial_duration > 300", "crop": "scale", "width": "200"}
+
+        transformation, options = cloudinary.utils.generate_transformation_string(**du_options)
+        self.assertEqual("if_du_gt_50,c_scale,w_200", transformation)
+
+        transformation, options = cloudinary.utils.generate_transformation_string(**idu_options)
+        self.assertEqual("if_idu_gt_300,c_scale,w_200", transformation)
+
 
 if __name__ == '__main__':
     unittest.main()
