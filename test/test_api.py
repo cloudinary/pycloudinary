@@ -4,7 +4,7 @@ from collections import OrderedDict
 
 import six
 from mock import patch
-from urllib3 import disable_warnings
+from urllib3 import disable_warnings, ProxyManager, PoolManager
 
 import cloudinary
 from cloudinary import api, uploader, utils
@@ -67,6 +67,22 @@ class ApiTest(unittest.TestCase):
 
         with ignore_exception(suppress_traceback_classes=(api.NotFound,)):
             api.delete_upload_mapping(MAPPING_TEST_ID)
+
+    def test_http_connector(self):
+        """ should create proper http connector in case proxy variables set  """
+        cert_kwargs = {
+            'cert_reqs': 'CERT_NONE',
+        }
+
+        conf = cloudinary.config(proxy_host=None, proxy_port=None)
+        http = utils.get_http_connector(conf, cert_kwargs)
+        self.assertIsInstance(http, PoolManager)
+
+        conf = cloudinary.config(proxy_host='www.google.com', proxy_port=3128)
+        http = utils.get_http_connector(conf, cert_kwargs)
+        cloudinary.reset_config()
+
+        self.assertIsInstance(http, ProxyManager)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test01_resource_types(self):
