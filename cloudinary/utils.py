@@ -1257,3 +1257,14 @@ def check_property_enabled(f):
         return f(*args, **kwargs)
     
     return wrapper
+
+
+def compute_hex_hash(s):
+    """
+    Compute hash and convert the result to HEX string
+
+    :param s: string to process
+
+    :return: HEX string
+    """
+    return hashlib.sha1(to_bytes(s)).hexdigest()

@@ -3,6 +3,7 @@ import io
 import re
 import tempfile
 import unittest
+import uuid
 from collections import OrderedDict
 from datetime import datetime, date
 from fractions import Fraction
@@ -14,7 +15,8 @@ from mock import patch
 import cloudinary.utils
 from cloudinary import CL_BLANK
 from cloudinary.utils import build_list_of_dicts, json_encode, encode_unicode_url, base64url_encode, \
-    patch_fetch_format, cloudinary_scaled_url, chain_transformations, generate_transformation_string, build_eager
+    patch_fetch_format, cloudinary_scaled_url, chain_transformations, generate_transformation_string, build_eager, \
+    compute_hex_hash
 from test.helper_test import TEST_IMAGE, REMOTE_TEST_IMAGE
 from test.test_api import API_TEST_TRANS_SCALE100, API_TEST_TRANS_SCALE100_STR, API_TEST_TRANS_SEPIA_STR, \
     API_TEST_TRANS_SEPIA
@@ -1173,6 +1175,18 @@ class TestUtils(unittest.TestCase):
 
         for message, value, expected in test_data:
             self.assertEqual(expected, build_eager(value), message)
+
+    def test_compute_hash(self):
+        self.assertEqual("4de279c82056603e91aab3930a593b8b887d9e48",
+                         compute_hex_hash("https://cloudinary.com/images/old_logo.png"))
+
+        original_value = str(uuid.uuid4())
+
+        self.assertEqual(compute_hex_hash(original_value), compute_hex_hash(original_value),
+                         "Equal inputs should be hashed the same way")
+
+        self.assertNotEqual(compute_hex_hash(original_value), compute_hex_hash("some string"),
+                            "Unequal inputs hashes should not match")
 
 
 if __name__ == '__main__':
