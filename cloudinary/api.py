@@ -124,7 +124,7 @@ def resource(public_id, **options):
     resource_type = options.pop("resource_type", "image")
     upload_type = options.pop("type", "upload")
     uri = ["resources", resource_type, upload_type, public_id]
-    params = only(options, "exif", "faces", "colors", "image_metadata",
+    params = only(options, "exif", "faces", "colors", "image_metadata", "cinemagraph_analysis",
                   "pages", "phash", "coordinates", "max_results", "quality_analysis", "derived_next_cursor")
     return call_api("get", uri, params, **options)
 

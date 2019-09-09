@@ -99,6 +99,7 @@ __SIMPLE_UPLOAD_PARAMS = [
     "return_delete_token",
     "auto_tagging",
     "async",
+    "cinemagraph_analysis",
 ]
 
 __SERIALIZED_UPLOAD_PARAMS = [
