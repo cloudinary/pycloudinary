@@ -334,6 +334,8 @@ def root_folders(**options):
 def subfolders(of_folder_path, **options):
     return call_api("get", ["folders", of_folder_path], {}, **options)
 
+def download_folder(**options):
+    return call_api("get", ["folder_operations", "download"], only(options, "path"),  **options)
 
 def delete_folder(path, **options):
     """

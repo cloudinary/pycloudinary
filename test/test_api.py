@@ -638,6 +638,19 @@ class ApiTest(unittest.TestCase):
         self.assertEqual("DELETE", get_method(mocker))
         self.assertTrue(get_uri(args).endswith('/folders/' + UNIQUE_TEST_FOLDER))
 
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_download_folder(self, mocker):
+        """ should delete folder """
+        mocker.return_value = MOCK_RESPONSE
+
+        api.download_folder(path="foo")
+
+        args, kargs = mocker.call_args
+        self.assertEqual("GET", get_method(mocker))
+        self.assertTrue(get_uri(args).endswith('/folder_operations/download'))
+        self.assertTrue("path" in get_params(args))
+
     def test_CloudinaryImage_len(self):
         """Tests the __len__ function on CloudinaryImage"""
         metadata = {
