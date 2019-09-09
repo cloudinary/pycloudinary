@@ -728,6 +728,16 @@ class ApiTest(unittest.TestCase):
         self.assertIn("access_control", params)
         self.assertEqual(exp_acl, params["access_control"])
 
+    @patch('urllib3.request.RequestMethods.request')
+    def test_cinemagraph_analysis_resource(self, mocker):
+        """ should allow the user to pass cinemagraph_analysis in the resource function """
+        mocker.return_value = MOCK_RESPONSE
+
+        api.resource(API_TEST_ID, cinemagraph_analysis=True)
+
+        params = get_params(mocker.call_args[0])
+
+        self.assertIn("cinemagraph_analysis", params)
 
 if __name__ == '__main__':
     unittest.main()

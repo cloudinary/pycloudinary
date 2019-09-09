@@ -623,6 +623,20 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
             with self.assertRaises(ValueError):
                 uploader.upload(TEST_IMAGE, access_control=invalid_value)
 
+    @patch('urllib3.request.RequestMethods.request')
+    def test_cinemagraph_analysis(self, request_mock):
+        """ should support cinemagraph analysis in upload and explicit"""
+        request_mock.return_value = MOCK_RESPONSE
+
+        uploader.upload(TEST_IMAGE, cinemagraph_analysis=True)
+
+        params = request_mock.call_args[0][2]
+        self.assertIn("cinemagraph_analysis", params)
+
+        uploader.explicit(TEST_IMAGE, cinemagraph_analysis=True)
+
+        params = request_mock.call_args[0][2]
+        self.assertIn("cinemagraph_analysis", params)
 
 if __name__ == '__main__':
     unittest.main()
