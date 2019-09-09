@@ -35,6 +35,7 @@ API_TEST_PRESET = "api_test_upload_preset"
 PREFIX = "test_folder_{}".format(SUFFIX)
 MAPPING_TEST_ID = "api_test_upload_mapping_{}".format(SUFFIX)
 RESTORE_TEST_ID = "api_test_restore_{}".format(SUFFIX)
+NEXT_CURSOR = "db27cfb02b3f69cb39049969c23ca430c6d33d5a3a7c3ad1d870c54e1a54ee0faa5acdd9f6d288666986001711759d10"
 
 disable_warnings()
 
@@ -182,7 +183,7 @@ class ApiTest(unittest.TestCase):
     def test07b_resource_allows_derived_next_cursor_parameter(self, mocker):
         """ should allow derived_next_cursor parameter """
         mocker.return_value = MOCK_RESPONSE
-        api.resource(API_TEST_ID, derived_next_cursor="foo")
+        api.resource(API_TEST_ID, derived_next_cursor=NEXT_CURSOR)
         args, kwargs = mocker.call_args
         self.assertTrue("derived_next_cursor" in get_params(args))
     
@@ -329,9 +330,9 @@ class ApiTest(unittest.TestCase):
     def test12a_transformations_cursor(self, mocker):
         """ should allow listing transformations with cursor """
         mocker.return_value = MOCK_RESPONSE
-        api.transformation(API_TEST_TRANS_SCALE100, next_cursor='2412515', max_results=10)
+        api.transformation(API_TEST_TRANS_SCALE100, next_cursor=NEXT_CURSOR, max_results=10)
         params = mocker.call_args[0][2]
-        self.assertEqual(params['next_cursor'], '2412515')
+        self.assertEqual(params['next_cursor'], NEXT_CURSOR)
         self.assertEqual(params['max_results'], 10)
 
     @patch('urllib3.request.RequestMethods.request')
@@ -641,23 +642,21 @@ class ApiTest(unittest.TestCase):
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_root_folders_allows_next_cursor_and_max_results_parameter(self, mocker):
-        """ should allow next_cursor parameter """
+        """ should allow next_cursor and max_results parameters """
         mocker.return_value = MOCK_RESPONSE
-        api.root_folders(next_cursor="foo", max_results=10)
+        api.root_folders(next_cursor=NEXT_CURSOR, max_results=10)
         args, kwargs = mocker.call_args
         self.assertTrue("next_cursor" in get_params(args))
-        """ should allow max_results parameter """
         self.assertTrue("max_results" in get_params(args))
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_subfolders_allows_next_cursor_and_max_results_parameter(self, mocker):
-        """ should allow next_cursor parameter """
+        """ should allow next_cursor and max_results parameters """
         mocker.return_value = MOCK_RESPONSE
-        api.subfolders(API_TEST_ID, next_cursor="foo", max_results=10)
+        api.subfolders(API_TEST_ID, next_cursor=NEXT_CURSOR, max_results=10)
         args, kwargs = mocker.call_args
         self.assertTrue("next_cursor" in get_params(args))
-        """ should allow max_results parameter """
         self.assertTrue("max_results" in get_params(args))
 
     def test_CloudinaryImage_len(self):
