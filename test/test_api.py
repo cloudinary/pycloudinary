@@ -644,8 +644,11 @@ class ApiTest(unittest.TestCase):
     def test_root_folders_allows_next_cursor_and_max_results_parameter(self, mocker):
         """ should allow next_cursor and max_results parameters """
         mocker.return_value = MOCK_RESPONSE
+        
         api.root_folders(next_cursor=NEXT_CURSOR, max_results=10)
+        
         args, kwargs = mocker.call_args
+        
         self.assertTrue("next_cursor" in get_params(args))
         self.assertTrue("max_results" in get_params(args))
 
@@ -654,8 +657,11 @@ class ApiTest(unittest.TestCase):
     def test_subfolders_allows_next_cursor_and_max_results_parameter(self, mocker):
         """ should allow next_cursor and max_results parameters """
         mocker.return_value = MOCK_RESPONSE
+        
         api.subfolders(API_TEST_ID, next_cursor=NEXT_CURSOR, max_results=10)
+        
         args, kwargs = mocker.call_args
+        
         self.assertTrue("next_cursor" in get_params(args))
         self.assertTrue("max_results" in get_params(args))
 
