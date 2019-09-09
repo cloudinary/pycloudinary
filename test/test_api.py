@@ -628,6 +628,18 @@ class ApiTest(unittest.TestCase):
             api.subfolders(PREFIX)
 
     @patch('urllib3.request.RequestMethods.request')
+    def test_create_folder(self, mocker):
+        """ should create folder """
+        mocker.return_value = MOCK_RESPONSE
+
+        api.create_folder(UNIQUE_TEST_FOLDER)
+
+        args, kargs = mocker.call_args
+
+        self.assertEqual("POST", get_method(mocker))
+        self.assertTrue(get_uri(args).endswith('/folders/' + UNIQUE_TEST_FOLDER))
+
+    @patch('urllib3.request.RequestMethods.request')
     def test_delete_folder(self, mocker):
         """ should delete folder """
         mocker.return_value = MOCK_RESPONSE
@@ -635,6 +647,7 @@ class ApiTest(unittest.TestCase):
         api.delete_folder(UNIQUE_TEST_FOLDER)
 
         args, kargs = mocker.call_args
+
         self.assertEqual("DELETE", get_method(mocker))
         self.assertTrue(get_uri(args).endswith('/folders/' + UNIQUE_TEST_FOLDER))
 
