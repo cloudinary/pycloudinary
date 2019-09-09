@@ -327,6 +327,10 @@ def create_upload_preset(**options):
     return call_api("post", uri, params, **options)
 
 
+def create_folder(path, **options):
+    return call_api("post", ["folders", path], {}, **options)
+
+
 def root_folders(**options):
     return call_api("get", ["folders"], {}, **options)
 
