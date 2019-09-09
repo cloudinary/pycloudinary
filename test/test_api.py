@@ -638,6 +638,28 @@ class ApiTest(unittest.TestCase):
         self.assertEqual("DELETE", get_method(mocker))
         self.assertTrue(get_uri(args).endswith('/folders/' + UNIQUE_TEST_FOLDER))
 
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_root_folders_allows_next_cursor_and_max_results_parameter(self, mocker):
+        """ should allow next_cursor parameter """
+        mocker.return_value = MOCK_RESPONSE
+        api.root_folders(next_cursor="foo", max_results=10)
+        args, kwargs = mocker.call_args
+        self.assertTrue("next_cursor" in get_params(args))
+        """ should allow max_results parameter """
+        self.assertTrue("max_results" in get_params(args))
+
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_subfolders_allows_next_cursor_and_max_results_parameter(self, mocker):
+        """ should allow next_cursor parameter """
+        mocker.return_value = MOCK_RESPONSE
+        api.subfolders(API_TEST_ID, next_cursor="foo", max_results=10)
+        args, kwargs = mocker.call_args
+        self.assertTrue("next_cursor" in get_params(args))
+        """ should allow max_results parameter """
+        self.assertTrue("max_results" in get_params(args))
+
     def test_CloudinaryImage_len(self):
         """Tests the __len__ function on CloudinaryImage"""
         metadata = {

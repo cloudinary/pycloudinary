@@ -328,11 +328,11 @@ def create_upload_preset(**options):
 
 
 def root_folders(**options):
-    return call_api("get", ["folders"], {}, **options)
+    return call_api("get", ["folders"], only(options, "next_cursor", "max_results"), **options)
 
 
 def subfolders(of_folder_path, **options):
-    return call_api("get", ["folders", of_folder_path], {}, **options)
+    return call_api("get", ["folders", of_folder_path], only(options, "next_cursor", "max_results"), **options)
 
 
 def delete_folder(path, **options):
