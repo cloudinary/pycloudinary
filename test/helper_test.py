@@ -98,6 +98,15 @@ def http_response_mock(body="", headers=None, status=200):
     return HTTPResponse(body, HTTPHeaderDict(headers), status=status)
 
 
+def provisioning_response_mock(body='{"foo":"bar"}', headers={"foo": "bar"}, status=200):
+    if headers is None:
+        headers = {}
+
+    if not six.PY2:
+        body = body.encode("UTF-8")
+
+    return HTTPResponse(body, HTTPHeaderDict(headers), status=status)
+
 def api_response_mock():
     return http_response_mock('{"foo":"bar"}', {"x-featureratelimit-limit": '0',
                                                 "x-featureratelimit-reset": 'Sat, 01 Apr 2017 22:00:00 GMT',
