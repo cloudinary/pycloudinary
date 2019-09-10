@@ -1268,3 +1268,42 @@ def compute_hex_hash(s):
     :return: HEX string
     """
     return hashlib.sha1(to_bytes(s)).hexdigest()
+
+
+def verify_api_response_signature(public_id, version, signature):
+    """
+    Validates API response signature against Cloudinary configuration.
+
+    :param public_id: Public ID of resource
+    :param version: Version of resource
+    :param signature: Response signature
+
+    :return: Boolean result of the validation
+    """
+    parameters_to_sign = {'public_id': public_id,
+                          'version': version}
+    signed_parameters = api_sign_request(parameters_to_sign, cloudinary.config().api_secret)
+
+    return signature == signed_parameters
+
+
+def verify_notification_signature(body, timestamp, signature, valid_for=7200):
+    """
+    Validates notification signature against Cloudinary configuration
+
+    :param body: Request body str
+    :param timestamp: Request timestamp
+    :param signature: Notification signature
+    :param valid_for: For how long the signature is valid, in seconds
+
+    :return: Boolean result of the validation
+    """
+    current_timestamp = time.time()
+    is_signature_expired = timestamp <= current_timestamp - valid_for
+
+    if is_signature_expired:
+        return False
+
+    payload_hash = compute_hex_hash('{}{}{}'.format(body, timestamp, cloudinary.config().api_secret))
+
+    return signature == payload_hash

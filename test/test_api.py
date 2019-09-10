@@ -1,6 +1,5 @@
 import time
 import unittest
-import json
 from collections import OrderedDict
 
 import six
@@ -36,11 +35,6 @@ API_TEST_PRESET = "api_test_upload_preset"
 PREFIX = "test_folder_{}".format(SUFFIX)
 MAPPING_TEST_ID = "api_test_upload_mapping_{}".format(SUFFIX)
 RESTORE_TEST_ID = "api_test_restore_{}".format(SUFFIX)
-
-PUBLIC_ID1 = "b8sjhoslj8cq8ovoa0ma"
-PUBLIC_ID2 = "z5sjhoskl2cq8ovoa0mv"
-VERSION1 = "1555337587"
-VERSION2 = "1555337588"
 
 disable_warnings()
 
@@ -733,61 +727,6 @@ class ApiTest(unittest.TestCase):
 
         self.assertIn("access_control", params)
         self.assertEqual(exp_acl, params["access_control"])
-
-    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
-    def test_verify_api_response_signature(self):
-        response_parameters = {
-            'public_id': PUBLIC_ID1,
-            'version': VERSION1
-        }
-
-        version_signature = utils.api_sign_request(response_parameters, cloudinary.config().api_secret)
-        self.assertTrue(api.verify_api_response_signature(PUBLIC_ID1, VERSION1, version_signature),
-                        "The response signature is valid for the same parameters")
-
-        response_parameters['version'] = VERSION2
-        version_signature = utils.api_sign_request(response_parameters, cloudinary.config().api_secret)
-        self.assertFalse(api.verify_api_response_signature(PUBLIC_ID1, VERSION1, version_signature),
-                         "The response signature is invalid for the wrong version")
-
-        response_parameters['version'] = VERSION1
-        response_parameters['public_id'] = PUBLIC_ID2
-        version_signature = utils.api_sign_request(response_parameters, cloudinary.config().api_secret)
-        self.assertFalse(api.verify_api_response_signature(PUBLIC_ID1, VERSION1, version_signature),
-                         "The response signature is invalid for the wrong version")
-
-    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
-    def test_verify_notification_signature(self):
-        response_parameters = {
-            'public_id': PUBLIC_ID1,
-            'version': VERSION1,
-            'width': 1000,
-            'height': 800
-        }
-
-        response_json = json.dumps(response_parameters)
-        current_timestamp = time.time()
-        valid_response_timestamp = current_timestamp - 5000
-
-        payload = "{}{}{}".format(response_json, valid_response_timestamp, cloudinary.config().api_secret)
-        response_signature = utils.compute_hex_hash(payload)
-
-        test_message_part = "The notification signature is"
-
-        self.assertTrue(api.verify_notification_signature(response_json, valid_response_timestamp, response_signature),
-                        "{} valid for matching and not expired signature".format(test_message_part))
-
-        self.assertFalse(api.verify_notification_signature(response_json, valid_response_timestamp, response_signature,
-                                                           4000),
-                         "{} invalid for matching but expired signature".format(test_message_part))
-
-        self.assertFalse(api.verify_notification_signature(response_json, valid_response_timestamp,
-                                                           response_signature + 'chars'),
-                         "{} invalid for non matching and not expired signature".format(test_message_part))
-
-        self.assertFalse(api.verify_notification_signature(response_json,valid_response_timestamp,
-                                                           response_signature + 'chars', 4000),
-                         "{} invalid for non matching and expired signature".format(test_message_part))
 
 
 if __name__ == '__main__':
