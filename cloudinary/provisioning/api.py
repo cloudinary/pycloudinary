@@ -8,7 +8,7 @@ import urllib3
 from six import string_types
 from urllib3.exceptions import HTTPError
 
-from cloudinary import provisioning
+import cloudinary.provisioning
 import certifi
 import cloudinary
 from cloudinary import utils
@@ -39,16 +39,16 @@ def call_api(method, uri, params, **options):
 def _call_api(method, uri, params=None, body=None, headers=None, **options):
     prefix = options.pop("upload_prefix",
                          cloudinary.config().upload_prefix) or "https://api.cloudinary.com"
-    account_id = options.pop("account_id", provisioning.config().account_id)
+    account_id = options.pop("account_id", cloudinary.provisioning.config().account_id)
     if not account_id:
         raise Exception("Must supply account_id")
-    api_key = options.pop("api_key", provisioning.config().api_key)
+    api_key = options.pop("api_key", cloudinary.provisioning.config().api_key)
     if not api_key:
         raise Exception("Must supply api_key")
-    api_secret = options.pop("api_secret", provisioning.config().api_secret)
+    api_secret = options.pop("api_secret", cloudinary.provisioning.config().api_secret)
     if not api_secret:
         raise Exception("Must supply api_secret")
-    api_url = "/".join([prefix, "v1_1", PROVISIONING, ACCOUNT, provisioning.config().account_id] + uri)
+    api_url = "/".join([prefix, "v1_1", PROVISIONING, ACCOUNT, cloudinary.provisioning.config().account_id] + uri)
 
     processed_params = None
     if isinstance(params, dict):

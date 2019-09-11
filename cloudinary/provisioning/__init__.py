@@ -4,3 +4,5 @@ from .config import ProvisioningConfig, config
 from .sub_accounts import *
 from .user_groups import *
 from .users import *
+
+__name__ = "provisioning"

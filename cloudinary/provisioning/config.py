@@ -7,7 +7,7 @@ import re
 import numbers
 from math import ceil
 from six import python_2_unicode_compatible, string_types
-from cloudinary import import_django_settings
+from cloudinary.__init__ import import_django_settings
 from cloudinary.http_client import HttpClient
 from cloudinary.compat import urlparse, parse_qs
 
