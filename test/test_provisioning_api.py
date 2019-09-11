@@ -26,8 +26,8 @@ class AccountApiTest(unittest.TestCase):
     def setUpClass(cls):
         cloudinary.account.account_config(**dict(
             account_id=ACCOUNT_ID,
-            api_key=API_KEY,
-            api_secret=API_SECRET
+            provisioning_api_key=API_KEY,
+            provisioning_api_secret=API_SECRET
         ))
 
     @classmethod
