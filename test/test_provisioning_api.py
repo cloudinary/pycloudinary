@@ -45,7 +45,6 @@ class ProvisioningApiTest(unittest.TestCase):
         self.assertIn("ids", params)
         self.assertIn("enabled", params)
 
-
     @patch('urllib3.request.RequestMethods.request')
     def test_create_sub_account(self, mocker):
         """ should allow cloud_name, base_sub_account_id, description """
@@ -58,7 +57,6 @@ class ProvisioningApiTest(unittest.TestCase):
         self.assertIn("cloud_name", params)
         self.assertIn("base_sub_account_id", params)
         self.assertIn("description", params)
-
 
     @patch('urllib3.request.RequestMethods.request')
     def test_update_sub_account(self, mocker):
@@ -74,7 +72,6 @@ class ProvisioningApiTest(unittest.TestCase):
         self.assertIn("description", params)
         self.assertIn("enabled", params)
 
-
     @patch('urllib3.request.RequestMethods.request')
     def test_update_user_group(self, mocker):
         """ should pass name in params """
@@ -84,7 +81,6 @@ class ProvisioningApiTest(unittest.TestCase):
 
         params = get_params(mocker.call_args[0])
         self.assertIn("name", params)
-
 
     @patch('urllib3.request.RequestMethods.request')
     def test_users(self, mocker):
@@ -99,7 +95,6 @@ class ProvisioningApiTest(unittest.TestCase):
         self.assertIn("pending", params)
         self.assertIn("prefix", params)
 
-
     @patch('urllib3.request.RequestMethods.request')
     def test_create_user(self, mocker):
         """ should pass function arguments in url params """
@@ -112,7 +107,6 @@ class ProvisioningApiTest(unittest.TestCase):
         self.assertIn("email", params)
         self.assertIn("role", params)
         self.assertIn("sub_account_ids", params)
-
 
     @patch('urllib3.request.RequestMethods.request')
     def test_update_user(self, mocker):
@@ -129,6 +123,7 @@ class ProvisioningApiTest(unittest.TestCase):
         self.assertIn("role", params)
         self.assertIn("sub_account_ids", params)
         self.assertIn("enabled", params)
+
 
 if __name__ == '__main__':
     unittest.main()
