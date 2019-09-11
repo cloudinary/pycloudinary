@@ -4,6 +4,7 @@ from mock import patch
 from urllib3 import disable_warnings
 
 import cloudinary.account
+from cloudinary.account import Role
 from cloudinary import account as p
 from test.helper_test import get_params, provisioning_response_mock
 
