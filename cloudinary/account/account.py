@@ -1,30 +1,24 @@
-# Copyright Cloudinary
-
-import email.utils
 import json
 import socket
 
+import certifi
+import cloudinary.account
 import urllib3
-from six import string_types
 from urllib3.exceptions import HTTPError
 
-import cloudinary.provisioning
-import certifi
 import cloudinary
-from cloudinary import utils
-from cloudinary.api import EXCEPTION_CODES, only, Error, NotFound, NotAllowed, AlreadyExists, RateLimited, \
-    BadRequest, GeneralError, AuthorizationRequired
-
+from cloudinary.api import EXCEPTION_CODES, GeneralError
 
 logger = cloudinary.logger
 
 _http = urllib3.PoolManager(
-        cert_reqs='CERT_REQUIRED',
-        ca_certs=certifi.where()
-        )
+    cert_reqs='CERT_REQUIRED',
+    ca_certs=certifi.where()
+)
 
 PROVISIONING = "provisioning"
 ACCOUNT = "accounts"
+
 
 class Response(dict):
     def __init__(self, result, response, **kwargs):
@@ -39,16 +33,17 @@ def call_api(method, uri, params, **options):
 def _call_api(method, uri, params=None, body=None, headers=None, **options):
     prefix = options.pop("upload_prefix",
                          cloudinary.config().upload_prefix) or "https://api.cloudinary.com"
-    account_id = options.pop("account_id", cloudinary.provisioning.config().account_id)
+    account_id = options.pop("account_id", cloudinary.account.account_config().account_id)
     if not account_id:
         raise Exception("Must supply account_id")
-    api_key = options.pop("api_key", cloudinary.provisioning.config().api_key)
+    api_key = options.pop("api_key", cloudinary.account.account_config().provisioning_api_key)
     if not api_key:
         raise Exception("Must supply api_key")
-    api_secret = options.pop("api_secret", cloudinary.provisioning.config().api_secret)
+    api_secret = options.pop("api_secret", cloudinary.account.account_config().provisioning_api_secret)
     if not api_secret:
         raise Exception("Must supply api_secret")
-    api_url = "/".join([prefix, "v1_1", PROVISIONING, ACCOUNT, cloudinary.provisioning.config().account_id] + uri)
+    api_url = "/".join(
+        [prefix, "v1_1", PROVISIONING, ACCOUNT, cloudinary.account.account_config().account_id] + uri)
 
     processed_params = None
     if isinstance(params, dict):
@@ -92,4 +87,3 @@ def _call_api(method, uri, params=None, body=None, headers=None, **options):
         raise exception_class("Error {0} - {1}".format(response.status, result["error"]["message"]))
 
     return Response(result, response)
-
