@@ -1046,7 +1046,8 @@ IF_OPERATORS = {
     "*": 'mul',
     "/": 'div',
     "+": 'add',
-    "-": 'sub'
+    "-": 'sub',
+    "^": 'pow'
 }
 
 PREDEFINED_VARS = {
@@ -1064,7 +1065,7 @@ PREDEFINED_VARS = {
     "width": "w"
 }
 
-replaceRE = "((\\|\\||>=|<=|&&|!=|>|=|<|/|-|\\+|\\*)(?=[ _])|" + '|'.join(PREDEFINED_VARS.keys()) + ")"
+replaceRE = "((\\|\\||>=|<=|&&|!=|>|=|<|/|-|\\+|\\*|\^)(?=[ _])|" + '|'.join(PREDEFINED_VARS.keys()) + ")"
 
 
 def translate_if(match):
