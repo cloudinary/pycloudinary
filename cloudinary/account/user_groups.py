@@ -56,7 +56,7 @@ def user_group(user_group_id, **options):
     return call_api("get", uri, {}, **options)
 
 
-def add_user_to_user_group(user_group_id, user_id, **options):
+def add_user_to_group(user_group_id, user_id, **options):
     """
     Add a user to a user group
     :param user_group_id: ID of the user group to add the user to
@@ -68,7 +68,7 @@ def add_user_to_user_group(user_group_id, user_id, **options):
     return call_api("post", uri, {}, **options)
 
 
-def remove_user_from_user_group(user_group_id, user_id, **options):
+def remove_user_from_group(user_group_id, user_id, **options):
     """
     Remove a user from a user group
     :param user_group_id: ID of the user group to remove the user from
@@ -80,7 +80,7 @@ def remove_user_from_user_group(user_group_id, user_id, **options):
     return call_api("delete", uri, {}, **options)
 
 
-def users_in_user_group(user_group_id, **options):
+def user_group_users(user_group_id, **options):
     """
     Get all users in a user group
     :param user_group_id: ID of user group to get list of users
