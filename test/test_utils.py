@@ -928,6 +928,13 @@ class TestUtils(unittest.TestCase):
         self.assertEqual({}, options)
         self.assertEqual(all_operators, transformation)
 
+    def test_pow_operator(self):
+        transformation = {"width": "initial_width ^ 2"}
+        normalized = cloudinary.utils.generate_transformation_string(**transformation)[0]
+        expected = "w_iw_pow_2"
+
+        self.assertEqual(normalized, expected)
+
     def test_merge(self):
         a = {"foo": "foo", "bar": "foo"}
         b = {"foo": "bar"}
