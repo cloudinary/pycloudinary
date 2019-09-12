@@ -1174,6 +1174,14 @@ class TestUtils(unittest.TestCase):
         for message, value, expected in test_data:
             self.assertEqual(expected, build_eager(value), message)
 
+    def test_normalize_expression(self):
+        transformation = {"transformation": [{"$width": 10}, {"width": "$width + 10 + width"},]}
+        normalized = cloudinary.utils.generate_transformation_string(**transformation)[0]
+        expected = "$width_10/w_$width_add_10_add_w"
+
+        self.assertEqual(normalized, expected)
+
+
 
 if __name__ == '__main__':
     unittest.main()
