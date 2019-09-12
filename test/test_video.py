@@ -134,28 +134,6 @@ class VideoTest(unittest.TestCase):
                          "<source src=\"" + expected_mp4_url + ".mp4\" type=\"video/mp4\">" +
                          "</video>")
 
-    def test_video_tag_with_if_statement_and_duration(self):
-        """ test video tag with if statements and duration or initial duration """
-        du_expected_url = VIDEO_UPLOAD_PATH + "if_du_gt_50/ac_acc,q_50/if_end/movie"
-        idu_expected_url = VIDEO_UPLOAD_PATH + "if_idu_gt_300/ac_acc,q_50/if_end/movie"
-
-        du_transformation = [{"if": "duration > 50"}, {'quality': 50, 'audio_codec': 'acc'}, {"if": "end"}]
-        idu_transformation = [{"if": "initial_duration > 300"}, {'quality': 50, 'audio_codec': 'acc'}, {"if": "end"}]
-
-        self.assertEqual(self.video.video(transformation=du_transformation),
-                         '<video poster="{expected_url}.jpg">'
-                         '<source src="{expected_url}.webm" type="video/webm">'
-                         '<source src="{expected_url}.mp4" type="video/mp4">'
-                         '<source src="{expected_url}.ogv" type="video/ogg">'
-                         '</video>'.format(expected_url=du_expected_url))
-
-        self.assertEqual(self.video.video(transformation=idu_transformation),
-                         '<video poster="{expected_url}.jpg">'
-                         '<source src="{expected_url}.webm" type="video/webm">'
-                         '<source src="{expected_url}.mp4" type="video/mp4">'
-                         '<source src="{expected_url}.ogv" type="video/ogg">'
-                         '</video>'.format(expected_url=idu_expected_url))
-
     def test_video_tag_with_poster(self):
         expected_url = VIDEO_UPLOAD_PATH + "movie"
 

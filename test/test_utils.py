@@ -947,6 +947,16 @@ class TestUtils(unittest.TestCase):
         transformation, options = cloudinary.utils.generate_transformation_string(**options)
         self.assertEqual('if_fc_gt_2,$z_5,$foo_$z_mul_2,c_scale,w_$foo_mul_200', transformation)
 
+    def test_duration_condition(self):
+        du_options = {"if": "duration > 30", "crop": "scale", "width": "100"}
+        idu_options = {"if": "initial_duration > 30", "crop": "scale", "width": "100"}
+
+        transformation, options = cloudinary.utils.generate_transformation_string(**du_options)
+        self.assertEqual("if_du_gt_30,c_scale,w_100", transformation)
+
+        transformation, options = cloudinary.utils.generate_transformation_string(**idu_options)
+        self.assertEqual("if_idu_gt_30,c_scale,w_100", transformation)
+
     def test_dollar_key_should_define_a_variable(self):
         options = {"transformation": [{"$foo": 10}, {"if": "face_count > 2"},
                                       {"crop": "scale", "width": "$foo * 200 / face_count"}, {"if": "end"}]}
@@ -1173,16 +1183,6 @@ class TestUtils(unittest.TestCase):
 
         for message, value, expected in test_data:
             self.assertEqual(expected, build_eager(value), message)
-
-    def test_duration_condition(self):
-        du_options = {"if": "duration > 50", "crop": "scale", "width": "200"}
-        idu_options = {"if": "initial_duration > 300", "crop": "scale", "width": "200"}
-
-        transformation, options = cloudinary.utils.generate_transformation_string(**du_options)
-        self.assertEqual("if_du_gt_50,c_scale,w_200", transformation)
-
-        transformation, options = cloudinary.utils.generate_transformation_string(**idu_options)
-        self.assertEqual("if_idu_gt_300,c_scale,w_200", transformation)
 
 
 if __name__ == '__main__':
