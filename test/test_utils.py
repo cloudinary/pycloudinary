@@ -929,7 +929,7 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(all_operators, transformation)
 
     def test_pow_operator(self):
-        transformation = {"width":"initial_width ^ 2"}
+        transformation = {"width": "initial_width ^ 2"}
         normalized = cloudinary.utils.generate_transformation_string(**transformation)[0]
         expected = "w_iw_pow_2"
 
