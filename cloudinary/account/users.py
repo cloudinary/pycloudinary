@@ -12,7 +12,7 @@ def users(**options):
     return call_api("get", uri, _only(options, "user_ids", "sub_account_id", "pending", "prefix"), **options)
 
 
-def create_user(name, email, role, sub_account_ids, **options):
+def create_user(name, email, role, sub_account_ids=None, **options):
     """
     Create a user
     :param name: Name of the user
