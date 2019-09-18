@@ -74,11 +74,11 @@ class ApiTest(unittest.TestCase):
             'cert_reqs': 'CERT_NONE',
         }
 
-        conf = cloudinary.config(proxy_host=None, proxy_port=None)
+        conf = cloudinary.config(api_proxy=None)
         http = utils.get_http_connector(conf, cert_kwargs)
         self.assertIsInstance(http, PoolManager)
 
-        conf = cloudinary.config(proxy_host='www.google.com', proxy_port=3128)
+        conf = cloudinary.config(api_proxy='http://www.example.com:3128')
         http = utils.get_http_connector(conf, cert_kwargs)
         cloudinary.reset_config()
 

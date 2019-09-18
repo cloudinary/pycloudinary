@@ -110,10 +110,10 @@ class Config(object):
             cloudinary_url = os.environ.get("CLOUDINARY_URL")
             self._parse_cloudinary_url(cloudinary_url)
 
-        self.update(
-            proxy_host=os.environ.get("CLOUDINARY_PROXY_HOST", None),
-            proxy_port=os.environ.get("CLOUDINARY_PROXY_PORT", None),
-        )
+        if os.environ.get("CLOUDINARY_API_PROXY"):
+            self.update(
+                api_proxy=os.environ["CLOUDINARY_API_PROXY"],
+            )
 
     def _parse_cloudinary_url(self, cloudinary_url):
         uri = urlparse(cloudinary_url.replace("cloudinary://", "http://"))

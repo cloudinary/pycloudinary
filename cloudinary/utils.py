@@ -1269,7 +1269,7 @@ def get_http_connector(conf, options):
 
     :return: ProxyManager if proxy variables are set, otherwise PoolManager object
     """
-    if conf.proxy_host and conf.proxy_port:
-        return ProxyManager('http://{}:{}'.format(conf.proxy_host, conf.proxy_port), **options)
+    if conf.api_proxy:
+        return ProxyManager(conf.api_proxy, **options)
     else:
         return PoolManager(**options)
