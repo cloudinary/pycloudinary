@@ -3,9 +3,7 @@ import unittest
 from mock import patch
 from urllib3 import disable_warnings
 
-import cloudinary.account
-from cloudinary.account import Role
-from cloudinary import account as p
+import cloudinary.provisioning.account
 from test.helper_test import get_params, provisioning_response_mock
 
 MOCK_RESPONSE = provisioning_response_mock()
@@ -19,13 +17,17 @@ API_SECRET = "123415-s1234gdfs-341fd-aga-asdfasdgfasd"
 SUB_ACCOUNT_NAME = "test_subaccount"
 SUB_ACCOUNT_ID = "123415-s1234gdfs-341fd-aga-asdfasdgfasd"
 
+NAME = "TestName"
+EMAIL = "test@email.com"
 USER_ID = "123415-s1234gdfs-341fd-aga-asdfasdgfasd"
+
+CLOUD_NAME = "cloud2019"
 
 
 class AccountApiTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cloudinary.account.account_config(**dict(
+        cloudinary.provisioning.account.account_config(**dict(
             account_id=ACCOUNT_ID,
             provisioning_api_key=API_KEY,
             provisioning_api_secret=API_SECRET
@@ -40,7 +42,7 @@ class AccountApiTest(unittest.TestCase):
         """ should allow ids, enabled, prefix """
         mocker.return_value = MOCK_RESPONSE
 
-        p.sub_accounts(ids=1, enabled=True)
+        cloudinary.provisioning.account.sub_accounts(ids=1, enabled=True)
 
         params = get_params(mocker.call_args[0])
         self.assertIn("ids", params)
@@ -51,8 +53,10 @@ class AccountApiTest(unittest.TestCase):
         """ should allow cloud_name, base_sub_account_id, description """
         mocker.return_value = MOCK_RESPONSE
 
-        p.create_sub_account(SUB_ACCOUNT_NAME, cloud_name="notmycloud", base_sub_account_id=ACCOUNT_ID,
-                             description="sdk test")
+        cloudinary.provisioning.account.create_sub_account(SUB_ACCOUNT_NAME,
+                                                           cloud_name=CLOUD_NAME,
+                                                           base_sub_account_id=ACCOUNT_ID,
+                                                           description="sdk test")
 
         params = get_params(mocker.call_args[0])
         self.assertIn("cloud_name", params)
@@ -64,8 +68,9 @@ class AccountApiTest(unittest.TestCase):
         """ should allow cloud_name, base_sub_account_id, description, enabled """
         mocker.return_value = MOCK_RESPONSE
 
-        p.update_sub_account(SUB_ACCOUNT_NAME, cloud_name="notmycloud", base_sub_account_id=ACCOUNT_ID,
-                             description="sdk test", enabled=True)
+        cloudinary.provisioning.account.update_sub_account(SUB_ACCOUNT_NAME, cloud_name=CLOUD_NAME,
+                                                           base_sub_account_id=ACCOUNT_ID,
+                                                           description="sdk test", enabled=True)
 
         params = get_params(mocker.call_args[0])
         self.assertIn("cloud_name", params)
@@ -78,7 +83,7 @@ class AccountApiTest(unittest.TestCase):
         """ should pass name in params """
         mocker.return_value = MOCK_RESPONSE
 
-        p.create_sub_account(SUB_ACCOUNT_NAME)
+        cloudinary.provisioning.account.create_sub_account(SUB_ACCOUNT_NAME)
 
         params = get_params(mocker.call_args[0])
         self.assertIn("name", params)
@@ -88,7 +93,7 @@ class AccountApiTest(unittest.TestCase):
         """ should allow user_ids, sub_account_id, pending, prefix """
         mocker.return_value = MOCK_RESPONSE
 
-        p.users(user_ids=1, sub_account_id=SUB_ACCOUNT_ID, pending=True, prefix="foobar")
+        cloudinary.provisioning.account.users(user_ids=1, sub_account_id=SUB_ACCOUNT_ID, pending=True, prefix="foobar")
 
         params = get_params(mocker.call_args[0])
         self.assertIn("user_ids", params)
@@ -101,7 +106,8 @@ class AccountApiTest(unittest.TestCase):
         """ should pass function arguments in url params """
         mocker.return_value = MOCK_RESPONSE
 
-        p.create_user("Brian", "brian@cloudinary.com", cloudinary.account.Role.ADMIN, SUB_ACCOUNT_ID)
+        cloudinary.provisioning.account.create_user(NAME, EMAIL, cloudinary.provisioning.account.Role.ADMIN,
+                                                    SUB_ACCOUNT_ID)
 
         params = get_params(mocker.call_args[0])
         self.assertIn("name", params)
@@ -114,10 +120,12 @@ class AccountApiTest(unittest.TestCase):
         """ should pass function arguments in url params """
         mocker.return_value = MOCK_RESPONSE
 
-        p.update_user(USER_ID,
-                      name="Brian", email="brian@cloudinary.com", role=cloudinary.account.Role.MASTER_ADMIN,
-                      sub_account_ids=SUB_ACCOUNT_ID,
-                      enabled=True)
+        cloudinary.provisioning.account.update_user(USER_ID,
+                                                    name=NAME,
+                                                    email=EMAIL,
+                                                    role=cloudinary.provisioning.account.Role.MASTER_ADMIN,
+                                                    sub_account_ids=SUB_ACCOUNT_ID,
+                                                    enabled=True)
 
         params = get_params(mocker.call_args[0])
         self.assertIn("name", params)

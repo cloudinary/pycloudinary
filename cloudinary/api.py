@@ -448,7 +448,7 @@ def _call_api(method, uri, params=None, body=None, headers=None, **options):
             if isinstance(value, list) or isinstance(value, tuple):
                 value_list = {"{}[{}]".format(key, i): i_value for i, i_value in enumerate(value)}
                 processed_params.update(value_list)
-            elif value is not None:
+            elif value:
                 processed_params[key] = value
 
     # Add authentication

@@ -6,15 +6,16 @@ from cloudinary.__init__ import import_django_settings
 from cloudinary.compat import urlparse, parse_qs
 from cloudinary.http_client import HttpClient
 
+ACCOUNT_URL = os.environ.get("CLOUDINARY_ACCOUNT_URL")
+
 
 class AccountConfig(object):
     def __init__(self):
         django_settings = import_django_settings()
         if django_settings:
             self.update(**django_settings)
-        elif os.environ.get("CLOUDINARY_ACCOUNT_URL"):
-            account_url = os.environ.get("CLOUDINARY_ACCOUNT_URL")
-            self._parse_cloudinary_account_url(account_url)
+        elif ACCOUNT_URL:
+            self._parse_cloudinary_account_url(ACCOUNT_URL)
 
     def _parse_cloudinary_account_url(self, account_url):
         uri = urlparse(account_url.replace("account://", "http://"))
@@ -28,8 +29,6 @@ class AccountConfig(object):
             provisioning_api_key=uri.username,
             provisioning_api_secret=uri.password,
         )
-        if uri.path != '':
-            self.update(secure_distribution=uri.path[1:])
 
     def __getattr__(self, i):
         if i in self.__dict__:
