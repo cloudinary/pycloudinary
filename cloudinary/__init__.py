@@ -5,8 +5,9 @@ import os
 import re
 import logging
 import numbers
+import certifi
 from math import ceil
-from six import python_2_unicode_compatible, string_types
+from six import python_2_unicode_compatible
 
 logger = logging.getLogger("Cloudinary")
 ch = logging.StreamHandler()
@@ -15,13 +16,17 @@ ch.setFormatter(formatter)
 logger.addHandler(ch)
 
 from cloudinary import utils
-from cloudinary.api import GeneralError
+from cloudinary.exceptions import GeneralError
 from cloudinary.cache import responsive_breakpoints_cache
 from cloudinary.http_client import HttpClient
 from cloudinary.compat import urlparse, parse_qs
-from cloudinary.search import Search
 
 from platform import python_version
+
+CERT_KWARGS = {
+    'cert_reqs': 'CERT_REQUIRED',
+    'ca_certs': certifi.where(),
+}
 
 CF_SHARED_CDN = "d3jpl91pxevbkh.cloudfront.net"
 OLD_AKAMAI_SHARED_CDN = "cloudinary-a.akamaihd.net"
@@ -99,7 +104,8 @@ class Config(object):
                 api_key=os.environ.get("CLOUDINARY_API_KEY"),
                 api_secret=os.environ.get("CLOUDINARY_API_SECRET"),
                 secure_distribution=os.environ.get("CLOUDINARY_SECURE_DISTRIBUTION"),
-                private_cdn=os.environ.get("CLOUDINARY_PRIVATE_CDN") == 'true'
+                private_cdn=os.environ.get("CLOUDINARY_PRIVATE_CDN") == 'true',
+                api_proxy=os.environ["CLOUDINARY_API_PROXY"],
             )
         elif os.environ.get("CLOUDINARY_URL"):
             cloudinary_url = os.environ.get("CLOUDINARY_URL")

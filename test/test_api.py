@@ -4,7 +4,7 @@ from collections import OrderedDict
 
 import six
 from mock import patch
-from urllib3 import disable_warnings
+from urllib3 import disable_warnings, ProxyManager, PoolManager
 
 import cloudinary
 from cloudinary import api, uploader, utils
@@ -68,6 +68,22 @@ class ApiTest(unittest.TestCase):
 
         with ignore_exception(suppress_traceback_classes=(api.NotFound,)):
             api.delete_upload_mapping(MAPPING_TEST_ID)
+
+    def test_http_connector(self):
+        """ should create proper http connector in case api_proxy is set  """
+        cert_kwargs = {
+            'cert_reqs': 'CERT_NONE',
+        }
+
+        conf = cloudinary.config(api_proxy=None)
+        http = utils.get_http_connector(conf, cert_kwargs)
+        self.assertIsInstance(http, PoolManager)
+
+        conf = cloudinary.config(api_proxy='http://www.example.com:3128')
+        http = utils.get_http_connector(conf, cert_kwargs)
+        cloudinary.reset_config()
+
+        self.assertIsInstance(http, ProxyManager)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test01_resource_types(self):

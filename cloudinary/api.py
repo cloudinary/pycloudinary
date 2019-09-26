@@ -8,43 +8,20 @@ import urllib3
 from six import string_types
 from urllib3.exceptions import HTTPError
 
-import certifi
 import cloudinary
 from cloudinary import utils
+from cloudinary.exceptions import (
+    Error,
+    BadRequest,
+    AuthorizationRequired,
+    NotAllowed,
+    NotFound,
+    AlreadyExists,
+    RateLimited,
+    GeneralError
+)
 
 logger = cloudinary.logger
-
-
-class Error(Exception):
-    pass
-
-
-class NotFound(Error):
-    pass
-
-
-class NotAllowed(Error):
-    pass
-
-
-class AlreadyExists(Error):
-    pass
-
-
-class RateLimited(Error):
-    pass
-
-
-class BadRequest(Error):
-    pass
-
-
-class GeneralError(Error):
-    pass
-
-
-class AuthorizationRequired(Error):
-    pass
 
 
 EXCEPTION_CODES = {
@@ -67,10 +44,7 @@ class Response(dict):
         self.rate_limit_remaining = int(response.headers["x-featureratelimit-remaining"])
 
 
-_http = urllib3.PoolManager(
-        cert_reqs='CERT_REQUIRED',
-        ca_certs=certifi.where()
-        )
+_http = utils.get_http_connector(cloudinary.config(), cloudinary.CERT_KWARGS)
 
 
 def ping(**options):

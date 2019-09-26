@@ -15,6 +15,7 @@ from collections import OrderedDict
 from datetime import datetime, date
 from fractions import Fraction
 from numbers import Number
+from urllib3 import ProxyManager, PoolManager
 
 import six.moves.urllib.parse
 from six import iteritems
@@ -1261,3 +1262,18 @@ def check_property_enabled(f):
         return f(*args, **kwargs)
     
     return wrapper
+
+
+def get_http_connector(conf, options):
+    """
+    Used to create http connector, depends on api_proxy configuration parameter
+
+    :param conf: configuration object
+    :param options: additional options
+
+    :return: ProxyManager if api_proxy is set, otherwise PoolManager object
+    """
+    if conf.api_proxy:
+        return ProxyManager(conf.api_proxy, **options)
+    else:
+        return PoolManager(**options)
