@@ -69,7 +69,7 @@ class ApiTest(unittest.TestCase):
             api.delete_upload_mapping(MAPPING_TEST_ID)
 
     def test_http_connector(self):
-        """ should create proper http connector in case proxy variables set  """
+        """ should create proper http connector in case api_proxy is set  """
         cert_kwargs = {
             'cert_reqs': 'CERT_NONE',
         }

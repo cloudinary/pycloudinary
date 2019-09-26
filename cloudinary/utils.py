@@ -1262,12 +1262,12 @@ def check_property_enabled(f):
 
 def get_http_connector(conf, options):
     """
-    Used to create http connector, depends of environment variables of proxy
+    Used to create http connector, depends on api_proxy configuration parameter
 
-    :param conf: configuration object with variables
+    :param conf: configuration object
     :param options: additional options
 
-    :return: ProxyManager if proxy variables are set, otherwise PoolManager object
+    :return: ProxyManager if api_proxy is set, otherwise PoolManager object
     """
     if conf.api_proxy:
         return ProxyManager(conf.api_proxy, **options)
