@@ -105,7 +105,7 @@ class Config(object):
                 api_secret=os.environ.get("CLOUDINARY_API_SECRET"),
                 secure_distribution=os.environ.get("CLOUDINARY_SECURE_DISTRIBUTION"),
                 private_cdn=os.environ.get("CLOUDINARY_PRIVATE_CDN") == 'true',
-                api_proxy=os.environ["CLOUDINARY_API_PROXY"],
+                api_proxy=os.environ.get("CLOUDINARY_API_PROXY"),
             )
         elif os.environ.get("CLOUDINARY_URL"):
             cloudinary_url = os.environ.get("CLOUDINARY_URL")
