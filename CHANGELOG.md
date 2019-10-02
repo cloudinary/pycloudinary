@@ -1,4 +1,9 @@
 
+1.18.1 / 2019-10-02
+===================
+
+  * Fix `CLOUDINARY_API_PROXY` environment variable consumption
+
 1.18.0 / 2019-10-02
 ===================
 

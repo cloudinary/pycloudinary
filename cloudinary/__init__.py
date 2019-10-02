@@ -34,7 +34,7 @@ AKAMAI_SHARED_CDN = "res.cloudinary.com"
 SHARED_CDN = AKAMAI_SHARED_CDN
 CL_BLANK = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
 
-VERSION = "1.18.0"
+VERSION = "1.18.1"
 
 USER_AGENT = "CloudinaryPython/{} (Python {})".format(VERSION, python_version())
 """ :const: USER_AGENT """
