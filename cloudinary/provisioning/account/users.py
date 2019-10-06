@@ -18,10 +18,11 @@ class Role(object):
 
 
 def users(**options):
+    # type: (**any) -> ProvisioningAPIResponse
     """
     List all users
     :param options: Generic advanced options map, see online documentation.
-    :return: List of users associated with the account
+    :return:        List of users associated with the account
     """
     uri = [USERS_SUB_PATH]
     return _call_provisioning_api("get", uri,
@@ -29,14 +30,15 @@ def users(**options):
 
 
 def create_user(name, email, role, sub_account_ids=None, **options):
+    # type: (str, str, str, list[str], **any) -> ProvisioningAPIResponse
     """
     Create a user
-    :param name: Name of the user
-    :param email: Email of the user
-    :param role: Role of the user - use cloudinary.account.Role.<ROLE>
+    :param name:            Username
+    :param email:           User's email
+    :param role:            User's role
     :param sub_account_ids: Optional. Sub accounts to associate with the user
-    :param options: Generic advanced options map, see online documentation.
-    :return: Details of created user
+    :param options:         Generic advanced options map, see online documentation.
+    :return:                Details of created user
     """
     uri = [USERS_SUB_PATH]
     return _call_provisioning_api("post", uri,
@@ -45,32 +47,41 @@ def create_user(name, email, role, sub_account_ids=None, **options):
 
 
 def delete_user(user_id, **options):
+    # type: (str, **any) -> ProvisioningAPIResponse
     """
     Delete a user
-    :param user_id: ID of user to delete
+    :param user_id: The id of user to delete
     :param options: Generic advanced options map, see online documentation.
-    :return: Result message
+    :return:        Result message
     """
     uri = [USERS_SUB_PATH, user_id]
     return _call_provisioning_api("delete", uri, {}, **options)
 
 
 def user(user_id, **options):
+    # type: (str, **any) -> ProvisioningAPIResponse
     """
     Get information of a user
-    :param user_id: ID of the user
+    :param user_id: The id of the user
     :param options: Generic advanced options map, see online documentation.
-    :return: A user
+    :return:        A user
     """
     uri = [USERS_SUB_PATH, user_id]
     return _call_provisioning_api("get", uri, {}, **options)
 
 
 def update_user(user_id, **options):
+    # type: (str, **any) -> ProvisioningAPIResponse
     """
     Update a user
-    :param user_id: ID of the user to update
+    :param user_id: The id of the user to update
     :param options: Generic advanced options map, see online documentation.
+        :keyword name (str):            Username.
+        :keyword email (str):           User's email.
+        :keyword role (str):            User's role.
+        :keyword sub_account_ids (str):
+            Sub-accounts for which the user should have access.
+            * If not provided or empty, user should have access to all accounts.
     :return: The updated user
     """
     uri = [USERS_SUB_PATH, user_id]
