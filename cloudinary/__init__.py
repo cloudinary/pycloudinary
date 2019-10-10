@@ -20,6 +20,7 @@ from cloudinary.exceptions import GeneralError
 from cloudinary.cache import responsive_breakpoints_cache
 from cloudinary.http_client import HttpClient
 from cloudinary.compat import urlparse, parse_qs
+from cloudinary.search import Search
 
 from platform import python_version
 
