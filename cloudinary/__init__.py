@@ -20,7 +20,6 @@ from cloudinary.exceptions import GeneralError
 from cloudinary.cache import responsive_breakpoints_cache
 from cloudinary.http_client import HttpClient
 from cloudinary.compat import urlparse, parse_qs
-from cloudinary.search import Search
 
 from platform import python_version
 
@@ -173,6 +172,9 @@ def reset_config():
 
 
 _http_client = HttpClient()
+
+# FIXME: circular import issue
+from cloudinary.search import Search
 
 
 @python_2_unicode_compatible
