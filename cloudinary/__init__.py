@@ -173,6 +173,9 @@ def reset_config():
 
 _http_client = HttpClient()
 
+# FIXME: circular import issue
+from cloudinary.search import Search
+
 
 @python_2_unicode_compatible
 class CloudinaryResource(object):
