@@ -1182,7 +1182,5 @@ class TestUtils(unittest.TestCase):
             self.assertEqual(expected, build_eager(value), message)
 
 
-
-
 if __name__ == '__main__':
     unittest.main()
