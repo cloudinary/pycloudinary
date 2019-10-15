@@ -935,6 +935,13 @@ class TestUtils(unittest.TestCase):
 
         self.assertEqual(normalized, expected)
 
+    def test_normalize_expression_with_predefined_variables(self):
+        transformation = {"transformation": [{"$width": 10}, {"width": "$width + 10 + width"},]}
+        normalized = cloudinary.utils.generate_transformation_string(**transformation)[0]
+        expected = "$width_10/w_$width_add_10_add_w"
+
+        self.assertEqual(normalized, expected)
+
     def test_merge(self):
         a = {"foo": "foo", "bar": "foo"}
         b = {"foo": "bar"}
