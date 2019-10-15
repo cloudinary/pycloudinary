@@ -15,6 +15,7 @@ from collections import OrderedDict
 from datetime import datetime, date
 from fractions import Fraction
 from numbers import Number
+from urllib3 import ProxyManager, PoolManager
 
 import six.moves.urllib.parse
 from six import iteritems
@@ -99,6 +100,7 @@ __SIMPLE_UPLOAD_PARAMS = [
     "return_delete_token",
     "auto_tagging",
     "async",
+    "cinemagraph_analysis",
 ]
 
 __SERIALIZED_UPLOAD_PARAMS = [
@@ -1046,7 +1048,8 @@ IF_OPERATORS = {
     "*": 'mul',
     "/": 'div',
     "+": 'add',
-    "-": 'sub'
+    "-": 'sub',
+    "^": 'pow'
 }
 
 PREDEFINED_VARS = {
@@ -1061,10 +1064,12 @@ PREDEFINED_VARS = {
     "page_x": "px",
     "page_y": "py",
     "tags": "tags",
-    "width": "w"
+    "width": "w",
+    "duration": "du",
+    "initial_duration": "idu",
 }
 
-replaceRE = "((\\|\\||>=|<=|&&|!=|>|=|<|/|-|\\+|\\*)(?=[ _])|(?<!\$)(" + '|'.join(PREDEFINED_VARS.keys()) + "))"
+replaceRE = "((\\|\\||>=|<=|&&|!=|>|=|<|/|-|\\+|\\*|\^)(?=[ _])|(?<!\$)(" + '|'.join(PREDEFINED_VARS.keys()) + "))"
 
 
 def translate_if(match):
@@ -1257,3 +1262,18 @@ def check_property_enabled(f):
         return f(*args, **kwargs)
     
     return wrapper
+
+
+def get_http_connector(conf, options):
+    """
+    Used to create http connector, depends on api_proxy configuration parameter
+
+    :param conf: configuration object
+    :param options: additional options
+
+    :return: ProxyManager if api_proxy is set, otherwise PoolManager object
+    """
+    if conf.api_proxy:
+        return ProxyManager(conf.api_proxy, **options)
+    else:
+        return PoolManager(**options)

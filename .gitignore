@@ -102,3 +102,4 @@ cloudinary/static/
 log/
 output.html
 .idea
+.vscode

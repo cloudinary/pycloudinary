@@ -11,7 +11,7 @@ from urllib3 import disable_warnings
 from urllib3.util import parse_url
 
 import cloudinary
-from cloudinary import api, uploader, utils
+from cloudinary import api, uploader, utils, exceptions
 from cloudinary.cache import responsive_breakpoints_cache
 from cloudinary.cache.adapter.key_value_cache_adapter import KeyValueCacheAdapter
 from test.helper_test import uploader_response_mock, SUFFIX, TEST_IMAGE, get_params, TEST_ICON, TEST_DOC, \
@@ -270,8 +270,8 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         uploader.rename(result["public_id"], result["public_id"]+"2")
         self.assertIsNotNone(api.resource(result["public_id"]+"2"))
         result2 = uploader.upload(TEST_ICON, tags=[UNIQUE_TAG])
-        self.assertRaises(api.Error, uploader.rename,
-                          result2["public_id"], result["public_id"]+"2")
+        self.assertRaises(exceptions.Error, uploader.rename,
+                          result2["public_id"], result["public_id"] +"2")
         uploader.rename(result2["public_id"], result["public_id"]+"2", overwrite=True)
         self.assertEqual(api.resource(result["public_id"]+"2")["format"], "ico")
 
@@ -372,7 +372,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_allowed_formats_with_illegal_format(self):
         """should prevent non whitelisted formats from being uploaded if allowed_formats is specified"""
-        self.assertRaises(api.Error, uploader.upload, TEST_IMAGE, allowed_formats=['jpg'])
+        self.assertRaises(exceptions.Error, uploader.upload, TEST_IMAGE, allowed_formats=['jpg'])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_allowed_formats_with_format(self):
@@ -438,20 +438,20 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_raw_conversion(self):
         """ should support requesting raw_convert """
-        with six.assertRaisesRegex(self, api.Error, 'Raw convert is invalid'):
+        with six.assertRaisesRegex(self, exceptions.Error, 'Raw convert is invalid'):
             uploader.upload(TEST_DOC, public_id=TEST_DOCX_ID, raw_convert="illegal",
                             resource_type="raw", tags=[UNIQUE_TAG])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_categorization(self):
         """ should support requesting categorization """
-        with six.assertRaisesRegex(self, api.Error, 'is not valid'):
+        with six.assertRaisesRegex(self, exceptions.Error, 'is not valid'):
             uploader.upload(TEST_IMAGE, categorization="illegal", tags=[UNIQUE_TAG])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_detection(self):
         """ should support requesting detection """
-        with six.assertRaisesRegex(self, api.Error, 'Detection is invalid'):
+        with six.assertRaisesRegex(self, exceptions.Error, 'Detection is invalid'):
             uploader.upload(TEST_IMAGE, detection="illegal", tags=[UNIQUE_TAG])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -534,12 +534,12 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_background_removal(self):
         """ should support requesting background_removal """
-        with six.assertRaisesRegex(self, api.Error, 'is invalid'):
+        with six.assertRaisesRegex(self, exceptions.Error, 'is invalid'):
             uploader.upload(TEST_IMAGE, background_removal="illegal", tags=[UNIQUE_TAG])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_timeout(self):
-        with six.assertRaisesRegex(self, cloudinary.api.Error, 'timed out'):
+        with six.assertRaisesRegex(self, exceptions.Error, 'timed out'):
             uploader.upload(TEST_IMAGE, timeout=0.001, tags=[UNIQUE_TAG])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -623,6 +623,20 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
             with self.assertRaises(ValueError):
                 uploader.upload(TEST_IMAGE, access_control=invalid_value)
 
+    @patch('urllib3.request.RequestMethods.request')
+    def test_cinemagraph_analysis(self, request_mock):
+        """ should support cinemagraph analysis in upload and explicit"""
+        request_mock.return_value = MOCK_RESPONSE
+
+        uploader.upload(TEST_IMAGE, cinemagraph_analysis=True)
+
+        params = request_mock.call_args[0][2]
+        self.assertIn("cinemagraph_analysis", params)
+
+        uploader.explicit(TEST_IMAGE, cinemagraph_analysis=True)
+
+        params = request_mock.call_args[0][2]
+        self.assertIn("cinemagraph_analysis", params)
 
 if __name__ == '__main__':
     unittest.main()

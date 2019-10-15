@@ -1,4 +1,31 @@
 
+1.18.2 / 2019-10-10
+===================
+
+  * Restore `Search` in `cloudinary` module
+
+1.18.1 / 2019-10-02
+===================
+
+  * Fix `CLOUDINARY_API_PROXY` environment variable consumption
+
+1.18.0 / 2019-10-02
+===================
+
+New functionality and features
+------------------------------
+
+  * Add API proxy support
+  * Add `duration` and `initial_duration` predefined variables support
+  * Add support for `pow` operator
+  * Add `next_cursor` and `max_results` for `root_folders` and `subfolders` API functions
+  * Add `cinemagraph_analysis` as a parameter for `upload`, `explicit`, and `resource` methods
+  * Add `create_folder` function to the Admin API
+  
+Other Changes
+-------------
+  * Add .vscode to gitignore
+
 1.17.0 / 2019-07-31
 ===================
 New functionality and features

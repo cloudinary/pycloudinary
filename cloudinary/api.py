@@ -8,43 +8,20 @@ import urllib3
 from six import string_types
 from urllib3.exceptions import HTTPError
 
-import certifi
 import cloudinary
 from cloudinary import utils
+from cloudinary.exceptions import (
+    Error,
+    BadRequest,
+    AuthorizationRequired,
+    NotAllowed,
+    NotFound,
+    AlreadyExists,
+    RateLimited,
+    GeneralError
+)
 
 logger = cloudinary.logger
-
-
-class Error(Exception):
-    pass
-
-
-class NotFound(Error):
-    pass
-
-
-class NotAllowed(Error):
-    pass
-
-
-class AlreadyExists(Error):
-    pass
-
-
-class RateLimited(Error):
-    pass
-
-
-class BadRequest(Error):
-    pass
-
-
-class GeneralError(Error):
-    pass
-
-
-class AuthorizationRequired(Error):
-    pass
 
 
 EXCEPTION_CODES = {
@@ -67,10 +44,7 @@ class Response(dict):
         self.rate_limit_remaining = int(response.headers["x-featureratelimit-remaining"])
 
 
-_http = urllib3.PoolManager(
-        cert_reqs='CERT_REQUIRED',
-        ca_certs=certifi.where()
-        )
+_http = utils.get_http_connector(cloudinary.config(), cloudinary.CERT_KWARGS)
 
 
 def ping(**options):
@@ -124,7 +98,7 @@ def resource(public_id, **options):
     resource_type = options.pop("resource_type", "image")
     upload_type = options.pop("type", "upload")
     uri = ["resources", resource_type, upload_type, public_id]
-    params = only(options, "exif", "faces", "colors", "image_metadata",
+    params = only(options, "exif", "faces", "colors", "image_metadata", "cinemagraph_analysis",
                   "pages", "phash", "coordinates", "max_results", "quality_analysis", "derived_next_cursor")
     return call_api("get", uri, params, **options)
 
@@ -327,12 +301,16 @@ def create_upload_preset(**options):
     return call_api("post", uri, params, **options)
 
 
+def create_folder(path, **options):
+    return call_api("post", ["folders", path], {}, **options)
+
+
 def root_folders(**options):
-    return call_api("get", ["folders"], {}, **options)
+    return call_api("get", ["folders"], only(options, "next_cursor", "max_results"), **options)
 
 
 def subfolders(of_folder_path, **options):
-    return call_api("get", ["folders", of_folder_path], {}, **options)
+    return call_api("get", ["folders", of_folder_path], only(options, "next_cursor", "max_results"), **options)
 
 
 def delete_folder(path, **options):
