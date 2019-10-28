@@ -5,12 +5,12 @@ import socket
 
 import certifi
 from six import string_types
-from urllib3 import PoolManager
+from urllib3 import PoolManager, ProxyManager
 from urllib3.exceptions import HTTPError
 
 import cloudinary
 from cloudinary import utils
-from cloudinary.api import Error
+from cloudinary.exceptions import Error
 from cloudinary.cache.responsive_breakpoints_cache import instance as responsive_breakpoints_cache_instance
 
 try:
@@ -29,10 +29,7 @@ if is_appengine_sandbox():
     _http = AppEngineManager()
 else:
     # PoolManager uses a socket-level API behind the scenes
-    _http = PoolManager(
-        cert_reqs='CERT_REQUIRED',
-        ca_certs=certifi.where()
-    )
+    _http = utils.get_http_connector(cloudinary.config(), cloudinary.CERT_KWARGS)
 
 upload_options = [
     "filename",
@@ -112,7 +109,7 @@ def upload_large_part(file, **options):
 
     if 'resource_type' not in options:
         options['resource_type'] = "raw"
-    
+
     return call_cacheable_api("upload", params, file=file, **options)
 
 
@@ -392,7 +389,7 @@ def call_api(action, params, http_headers=None, return_error=False, unsigned=Fal
             if response.status not in [200, 400, 401, 403, 404, 500]:
                 code = response.status
             if return_error:
-                    result["error"]["http_code"] = code
+                result["error"]["http_code"] = code
             else:
                 raise Error(result["error"]["message"])
 

@@ -28,8 +28,7 @@ from cloudinary.utils import (
     build_eager,
     compute_hex_hash,
     verify_notification_signature,
-    verify_api_response_signature,
-    api_sign_request
+    verify_api_response_signature
 )
 from test.helper_test import TEST_IMAGE, REMOTE_TEST_IMAGE
 from test.test_api import (
@@ -53,10 +52,7 @@ IMAGE_VERSION_STR = "v" + IMAGE_VERSION
 DEFAULT_VERSION_STR = 'v1'
 TEST_FOLDER = 'folder/test'
 
-PUBLIC_ID1 = "b8sjhoslj8cq8ovoa0ma"
-PUBLIC_ID2 = "z5sjhoskl2cq8ovoa0mv"
-VERSION1 = "1555337587"
-VERSION2 = "1555337588"
+MOCKED_NOW = 1549533574
 
 
 class TestUtils(unittest.TestCase):
@@ -953,6 +949,20 @@ class TestUtils(unittest.TestCase):
         self.assertEqual({}, options)
         self.assertEqual(all_operators, transformation)
 
+    def test_pow_operator(self):
+        transformation = {"width": "initial_width ^ 2"}
+        normalized = cloudinary.utils.generate_transformation_string(**transformation)[0]
+        expected = "w_iw_pow_2"
+
+        self.assertEqual(normalized, expected)
+
+    def test_normalize_expression_with_predefined_variables(self):
+        transformation = {"transformation": [{"$width": 10}, {"width": "$width + 10 + width"},]}
+        normalized = cloudinary.utils.generate_transformation_string(**transformation)[0]
+        expected = "$width_10/w_$width_add_10_add_w"
+
+        self.assertEqual(normalized, expected)
+
     def test_merge(self):
         a = {"foo": "foo", "bar": "foo"}
         b = {"foo": "bar"}
@@ -971,6 +981,16 @@ class TestUtils(unittest.TestCase):
         }
         transformation, options = cloudinary.utils.generate_transformation_string(**options)
         self.assertEqual('if_fc_gt_2,$z_5,$foo_$z_mul_2,c_scale,w_$foo_mul_200', transformation)
+
+    def test_duration_condition(self):
+        du_options = {"if": "duration > 30", "crop": "scale", "width": "100"}
+        idu_options = {"if": "initial_duration > 30", "crop": "scale", "width": "100"}
+
+        transformation, options = cloudinary.utils.generate_transformation_string(**du_options)
+        self.assertEqual("if_du_gt_30,c_scale,w_100", transformation)
+
+        transformation, options = cloudinary.utils.generate_transformation_string(**idu_options)
+        self.assertEqual("if_idu_gt_30,c_scale,w_100", transformation)
 
     def test_dollar_key_should_define_a_variable(self):
         options = {"transformation": [{"$foo": 10}, {"if": "face_count > 2"},
@@ -1211,60 +1231,55 @@ class TestUtils(unittest.TestCase):
         self.assertNotEqual(compute_hex_hash(original_value), compute_hex_hash("some string"),
                             "Unequal inputs hashes should not match")
 
-    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_verify_api_response_signature(self):
-        response_parameters = {
-            'public_id': PUBLIC_ID1,
-            'version': VERSION1
-        }
+        public_id = 'tests/logo.png'
+        test_version = 1
+        api_response_signature = '08d3107a5b2ad82e7d82c0b972218fbf20b5b1e0'
 
-        version_signature = api_sign_request(response_parameters, cloudinary.config().api_secret)
-        self.assertTrue(verify_api_response_signature(PUBLIC_ID1, VERSION1, version_signature),
+        cloudinary.config(api_secret='X7qLTrsES31MzxxkxPPA-pAGGfU')
+
+        self.assertTrue(verify_api_response_signature(public_id, test_version, api_response_signature),
                         "The response signature is valid for the same parameters")
 
-        response_parameters['version'] = VERSION2
-        version_signature = api_sign_request(response_parameters, cloudinary.config().api_secret)
-        self.assertFalse(verify_api_response_signature(PUBLIC_ID1, VERSION1, version_signature),
+        self.assertFalse(verify_api_response_signature(public_id, test_version + 1, api_response_signature),
                          "The response signature is invalid for the wrong version")
 
-        response_parameters['version'] = VERSION1
-        response_parameters['public_id'] = PUBLIC_ID2
-        version_signature = api_sign_request(response_parameters, cloudinary.config().api_secret)
-        self.assertFalse(verify_api_response_signature(PUBLIC_ID1, VERSION1, version_signature),
-                         "The response signature is invalid for the wrong version")
+        cloudinary.config(api_secret='b')
 
-    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_verify_notification_signature(self):
-        response_parameters = {
-            'public_id': PUBLIC_ID1,
-            'version': VERSION1,
-            'width': 500,
-            'height': 500
-        }
+        valid_for = 60
+        signature = 'dfe82de1d9083fe0b7ea68070649f9a15b8874da'
+        body = '{"notification_type":"eager","eager":[{"transformation":"sp_full_hd/mp4","bytes":1055,' \
+               '"url":"http://res.cloudinary.com/demo/video/upload/sp_full_hd/v1533125278/dog.mp4",' \
+               '"secure_url":"https://res.cloudinary.com/demo/video/upload/sp_full_hd/v1533125278/dog.mp4"}],' \
+               '"public_id":"dog","batch_id":"9b11fa058c61fa577f4ec516bf6ee756ac2aefef095af99aef1302142cc1694a"}'
 
-        response_json = json.dumps(response_parameters)
-        current_timestamp = time.time()
-        valid_response_timestamp = current_timestamp - 5000
+        cloudinary.config(api_secret='X7qLTrsES31MzxxkxPPA-pAGGfU')
+        with patch('time.time', return_value=MOCKED_NOW):
 
-        payload = "{}{}{}".format(response_json, valid_response_timestamp, cloudinary.config().api_secret)
-        response_signature = compute_hex_hash(payload)
+            valid_response_timestamp = time.time() - valid_for
 
-        test_message_part = "The notification signature is"
+            test_message_part = "The notification signature is"
 
-        self.assertTrue(verify_notification_signature(response_json, valid_response_timestamp, response_signature),
-                        "{} valid for matching and not expired signature".format(test_message_part))
+            self.assertTrue(verify_notification_signature(body, valid_response_timestamp,
+                                                          signature,
+                                                          valid_for),
+                            "{} valid for matching and not expired signature".format(test_message_part))
 
-        self.assertFalse(verify_notification_signature(response_json, valid_response_timestamp, response_signature,
-                                                       4000),
-                         "{} invalid for matching but expired signature".format(test_message_part))
+            self.assertFalse(verify_notification_signature(body, valid_response_timestamp,
+                                                           signature,
+                                                           valid_for - 1),
+                             "{} invalid for matching but expired signature".format(test_message_part))
 
-        self.assertFalse(verify_notification_signature(response_json, valid_response_timestamp,
-                                                       response_signature + 'chars'),
-                         "{} invalid for non matching and not expired signature".format(test_message_part))
+            self.assertFalse(verify_notification_signature(body, valid_response_timestamp,
+                                                           signature + 'chars'),
+                             "{} invalid for non matching and not expired signature".format(test_message_part))
 
-        self.assertFalse(verify_notification_signature(response_json,valid_response_timestamp,
-                                                       response_signature + 'chars', 4000),
-                         "{} invalid for non matching and expired signature".format(test_message_part))
+            self.assertFalse(verify_notification_signature(body, valid_response_timestamp,
+                                                           signature + 'chars',
+                                                           valid_for - 1),
+                             "{} invalid for non matching and expired signature".format(test_message_part))
+        cloudinary.config(api_secret='b')
 
 
 if __name__ == '__main__':
