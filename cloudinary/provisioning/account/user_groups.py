@@ -5,110 +5,140 @@ USER_GROUPS_SUB_PATH = "user_groups"
 
 
 def user_groups(**options):
-    # type: (**any) -> ProvisioningAPIResponse
     """
     List all user groups
-    :param options: Generic advanced options map, see online documentation
-    :return:        List of user groups
+
+    :param options:         Generic advanced options dict, see online documentation
+    :type options:          dict, optional
+    :return:                List of user groups
+    :rtype:                 ProvisioningAPIRespose
     """
     uri = [USER_GROUPS_SUB_PATH]
     return _call_provisioning_api("get", uri, {}, **options)
 
 
 def create_user_group(name, **options):
-    # type: (str, **any) -> ProvisioningAPIResponse
     """
     Create a new user group
-    :param name:    Name of the user group
-    :param options: Generic advanced options map, see online documentation
-    :return:        The newly created group
+
+    :param name:            Name of the user group
+    :type name:             str
+    :param options:         Generic advanced options dict, see online documentation
+    :type options:          dict, optional
+    :return:                The newly created group
+    :rtype:                 ProvisioningAPIResponse
     """
     uri = [USER_GROUPS_SUB_PATH]
     return _call_provisioning_api("post", uri, dict(name=name), **options)
 
 
-def update_user_group(user_group_id, **options):
-    # type: (str, **any) -> ProvisioningAPIResponse
+def update_user_group(user_group_id, name, **options):
     """
     Update a user group
+
     :param user_group_id:       The id of the user group to update
-    :param options:             Generic advanced options map, see online documentation
-        :keyword name (str):    Name of the user group
-    :return: The updated group
+    :type user_group_id:        str
+    :param name:                Name of the user group
+    :type name:                 str, optional
+    :param options:             Generic advanced options dict, see online documentation
+    :type options:              dict, optional
+    :return:                    The updated group
+    :rtype:                     ProvisioningAPIResponse
     """
     uri = [USER_GROUPS_SUB_PATH, user_group_id]
-    return _call_provisioning_api("put", uri, _only(options, "name"), **options)
+    return _call_provisioning_api("put", uri, dict(name=name), **options)
 
 
 def delete_user_group(user_group_id, **options):
-    # type: (str, **any) -> ProvisioningAPIResponse
     """
     Delete a user group
-    :param user_group_id:   The id of the user group to delete
-    :param options:         Generic advanced options map, see online documentation
-    :return:                The result message
+
+    :param user_group_id:       The id of the user group to delete
+    :type user_group_id:        str
+    :param options:             Generic advanced options dict, see online documentation
+    :type options:              dict, optional
+    :return:                    The result message
+    :rtype:                     ProvisioningAPIResponse
     """
     uri = [USER_GROUPS_SUB_PATH, user_group_id]
     return _call_provisioning_api("delete", uri, {}, **options)
 
 
 def user_group(user_group_id, **options):
-    # type: (str, **any) -> ProvisioningAPIResponse
     """
     Get information of a user group
-    :param user_group_id:   The id of the user group
-    :param options:         Generic advanced options map, see online documentation
-    :return:                Details of the group
+
+    :param user_group_id:       The id of the user group
+    :type user_group_id:        str
+    :param options:             Generic advanced options dict, see online documentation
+    :type options:              dict, optional
+    :return:                    Details of the group
+    :rtype:                     ProvisioningAPIResponse
     """
     uri = [USER_GROUPS_SUB_PATH, user_group_id]
     return _call_provisioning_api("get", uri, {}, **options)
 
 
 def add_user_to_group(user_group_id, user_id, **options):
-    # type: (str, str, **any) -> ProvisioningAPIResponse
     """
     Add a user to a user group
-    :param user_group_id:   The id of the user group to add the user to
-    :param user_id:         The user id to add
-    :param options:         Generic advanced options map, see online documentation
-    :return:                List of users in the group
+
+    :param user_group_id:       The id of the user group to add the user to
+    :type user_group_id:        str
+    :param user_id:             The user id to add
+    :type user_id:              str
+    :param options:             Generic advanced options dict, see online documentation
+    :type options:              dict, optional
+    :return:                    List of users in the group
+    :rtype:                     ProvisioningAPIResponse
     """
     uri = [USER_GROUPS_SUB_PATH, user_group_id, "users", user_id]
     return _call_provisioning_api("post", uri, {}, **options)
 
 
 def remove_user_from_group(user_group_id, user_id, **options):
-    # type: (str, str, **any) -> ProvisioningAPIResponse
     """
     Remove a user from a user group
-    :param user_group_id:   The id of the user group to remove the user from
-    :param user_id:         The id of the user to remove
-    :param options:         Generic advanced options map, see online documentation
-    :return:                List of users in the group
+
+    :param user_group_id:       The id of the user group to remove the user from
+    :type user_group_id:        str
+    :param user_id:             The id of the user to remove
+    :type user_id:              str
+    :param options:             Generic advanced options dict, see online documentation
+    :type options:              dict, optional
+    :return:                    List of users in the group
+    :rtype:                     ProvisioningAPIResponse
     """
     uri = [USER_GROUPS_SUB_PATH, user_group_id, "users", user_id]
     return _call_provisioning_api("delete", uri, {}, **options)
 
 
 def user_group_users(user_group_id, **options):
-    # type: (str, **any) -> ProvisioningAPIResponse
     """
     Get all users in a user group
-    :param user_group_id:   The id of user group to get list of users
-    :param options:         Generic advanced options map, see online documentation
-    :return:                List of users in the group
+
+    :param user_group_id:       The id of user group to get list of users
+    :type user_group_id:        str
+    :param options:             Generic advanced options dict, see online documentation
+    :type options:              dict, optional
+    :return:                    List of users in the group
+    :rtype:                     ProvisioningAPIResponse
     """
     uri = [USER_GROUPS_SUB_PATH, user_group_id, "users"]
     return _call_provisioning_api("get", uri, {}, **options)
 
 
 def user_in_user_groups(user_id, **options):
-    # type: (str, **any) -> ProvisioningAPIResponse
     """
     Get all user groups a user belongs to
-    :param user_id:     The id of user
-    :param options:     Generic advanced options map, see online documentation
-    :return:            List of groups user is in
+
+    :param user_id:             The id of user
+    :param user_id:             str
+    :param options:             Generic advanced options dict, see online documentation
+    :type options:              dict, optional
+    :return:                    List of groups user is in
+    :rtype:                     ProvisioningAPIResponse
+
     """
     uri = [USER_GROUPS_SUB_PATH, user_id]
     return _call_provisioning_api("get", uri, {}, **options)

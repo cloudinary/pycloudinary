@@ -50,32 +50,31 @@ class AccountApiTest(unittest.TestCase):
 
     @patch('urllib3.request.RequestMethods.request')
     def test_create_sub_account(self, mocker):
-        """ should allow cloud_name, base_sub_account_id, description """
+        """ should allow cloud_name, base_account """
         mocker.return_value = MOCK_RESPONSE
 
         cloudinary.provisioning.account.create_sub_account(SUB_ACCOUNT_NAME,
                                                            cloud_name=CLOUD_NAME,
-                                                           base_sub_account_id=ACCOUNT_ID,
+                                                           base_account=ACCOUNT_ID,
                                                            description="sdk test")
 
         params = get_params(mocker.call_args[0])
         self.assertIn("cloud_name", params)
-        self.assertIn("base_sub_account_id", params)
-        self.assertIn("description", params)
+        self.assertIn("base_account", params)
 
     @patch('urllib3.request.RequestMethods.request')
     def test_update_sub_account(self, mocker):
-        """ should allow cloud_name, base_sub_account_id, description, enabled """
+        """ should allow cloud_name, base_account, enabled """
         mocker.return_value = MOCK_RESPONSE
 
-        cloudinary.provisioning.account.update_sub_account(SUB_ACCOUNT_NAME, cloud_name=CLOUD_NAME,
-                                                           base_sub_account_id=ACCOUNT_ID,
-                                                           description="sdk test", enabled=True)
+        cloudinary.provisioning.account.update_sub_account(SUB_ACCOUNT_NAME,
+                                                           cloud_name=CLOUD_NAME,
+                                                           base_account=ACCOUNT_ID,
+                                                           enabled=True)
 
         params = get_params(mocker.call_args[0])
         self.assertIn("cloud_name", params)
-        self.assertIn("base_sub_account_id", params)
-        self.assertIn("description", params)
+        self.assertIn("base_account", params)
         self.assertIn("enabled", params)
 
     @patch('urllib3.request.RequestMethods.request')

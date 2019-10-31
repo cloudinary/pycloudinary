@@ -1,81 +1,118 @@
-from cloudinary.api import only
 from .account import _call_provisioning_api
 
 SUB_ACCOUNTS_SUB_PATH = "sub_accounts"
 
 
-def sub_accounts(**options):
-    # type: (**any) -> ProvisioningAPIResponse
+def sub_accounts(enabled=True, ids=None, prefix=None, **options):
     """
     List all sub accounts
-    :param options: Generic advanced options map, see online documentation
-        :keyword enabled (bool):    Optional. Whether to fetch enabled or disabled accounts. Default is all.
-        :keyword ids (list):        Optional. List of sub-account IDs. Up to 100. When provided, other filters are ignored.
-        :keyword prefix (str):      Optional. Search by prefix of the sub-account name. Case-insensitive.
-    :return: A list of sub accounts
+
+    :param enabled:     Whether to fetch enabled or disabled accounts. Default is all.
+    :type enabled:      bool, optional
+    :param ids:         List of sub-account IDs. Up to 100. When provided, other filters are ignored.
+    :type ids:          list, optional
+    :param prefix:      Search by prefix of the sub-account name. Case-insensitive.
+    :type prefix:       str, optional
+    :param options:     Generic advanced options dict, see online documentation
+    :type options:      dict, optional
+    :return:            A list of sub accounts
+    :rtype:             ProvisioningAPIResponse
     """
     uri = [SUB_ACCOUNTS_SUB_PATH]
-    return _call_provisioning_api("get", uri, params=only(options, "ids", "enabled", "prefix"), **options)
+    return _call_provisioning_api("get", uri, params=dict(ids=ids, enabled=enabled, prefix=prefix), **options)
 
 
-def create_sub_account(name, **options):
-    # type: (str, **any) -> ProvisioningAPIResponse
+def create_sub_account(name, cloud_name=None, custom_attributes=None, enabled=True,
+                       base_account=None, **options):
     """
     Create a new sub account
-    :param name: Name of the new sub accounnt
-    :param options: Generic advanced options map, see online documentation
-        :keyword cloud_name (str):          Optional, unique (case insensitive)
-        :keyword custom_attributes (dict):  Advanced custom attributes for the sub-account.
-        :keyword enabled (bool):            Optional. Whether to create the account as enabled (default is enabled).
-        :keyword base_account (str):        Optional. ID of sub-account from which to copy settings
-    :return: The created sub account
+
+    :param name:                Name of the new sub accounnt
+    :type name:                 str
+    :param cloud_name:          Unique (case insensitive)
+    :type cloud_name:           str, optional
+    :param custom_attributes:   Advanced custom attributes for the sub-account.
+    :type custom_attributes:    dict, optional
+    :param enabled:             Whether to create the account as enabled (default is enabled).
+    :type enabled:              bool, optional
+    :param base_account:        ID of sub-account from which to copy settings
+    :type base_account:         str, optional
+    :param options:             Generic advanced options dict, see online documentation
+    :type options:              dict, optional
+    :return:                    The created sub account
+    :rtype:                     ProvisioningAPIResponse
     """
     uri = [SUB_ACCOUNTS_SUB_PATH]
     return _call_provisioning_api("post", uri,
                                   params=dict(
                                       name=name,
-                                      **only(options, "cloud_name", "base_sub_account_id", "description")
+                                      cloud_name=cloud_name,
+                                      custom_attributes=custom_attributes,
+                                      enabled=enabled,
+                                      base_account=base_account,
                                   ),
                                   **options)
 
 
 def delete_sub_account(sub_account_id, **options):
-    # type: (str, **any) -> ProvisioningAPIResponse
     """
     Delete a sub account
-    :param sub_account_id:  The id of the sub account
-    :param options:         Generic advanced options map, see online documentation 
-    :return:                Result message
+
+    :param sub_account_id:      The id of the sub account
+    :type sub_account_id:       str
+    :param options:             Generic advanced options dict, see online documentation
+    :type options:              dict, optional
+    :return:                    Result message
+    :rtype:                     ProvisioningAPIResponse
     """
     uri = [SUB_ACCOUNTS_SUB_PATH, sub_account_id]
     return _call_provisioning_api("delete", uri, {}, **options)
 
 
 def sub_account(sub_account_id, **options):
-    # type: (str, **any) -> ProvisioningAPIResponse
     """
     Get information of a sub account
-    :param sub_account_id:  The id of the sub account
-    :param options:         Generic advanced options map, see online documentation
-    :return:                A sub account
+
+    :param sub_account_id:      The id of the sub account
+    :type sub_account_id:       str
+    :param options:             Generic advanced options dict, see online documentation
+    :type options:              dict, optional
+    :return:                    A sub account
+    :rtype:                     ProvisioningAPIResponse
     """
     uri = [SUB_ACCOUNTS_SUB_PATH, sub_account_id]
     return _call_provisioning_api("get", uri, {}, **options)
 
 
-def update_sub_account(sub_account_id, **options):
-    # type: (str, **any) -> ProvisioningAPIResponse
+def update_sub_account(sub_account_id, cloud_name=None, custom_attributes=None,
+                       enabled=None, base_account=None,
+                       **options):
     """
     Update a sub account
-    :param sub_account_id: The id of the sub account
-    :param options: Generic advanced options map, see online documentation
-        :keyword cloud_name (str):          Optional, unique (case insensitive)
-        :keyword custom_attributes (dict):  Advanced custom attributes for the sub-account
-        :keyword enabled (bool):            Optional. Whether to create the account as enabled (default is enabled).
-        :keyword base_account (str):        Optional. ID of sub-account from which to copy settings
-    :return: Updated sub account
+
+    :param sub_account_id:      The id of the sub account
+    :type sub_account_id:       str
+    :param cloud_name:          Unique cloud name
+    :type cloud_name:           str, optional
+    :param custom_attributes:   Advanced custom attributes for the sub-account
+    :type custom_attributes:    dict, optional
+    :param description:         Description of the sub-account
+    :type description:          str, optional
+    :param enabled:             Whether to create the account as enabled (default is enabled).
+    :type enabled:              bool, optional
+    :param base_account:        ID of sub-account from which to copy settings
+    :type base_account:         str, optional
+    :param options:             Generic advanced options dict, see online documentation
+    :type options:              dict, optional
+    :return:                    Updated sub account
+    :rtype:                     ProvisioningAPIResponse
     """
     uri = [SUB_ACCOUNTS_SUB_PATH, sub_account_id]
     return _call_provisioning_api("put", uri,
-                                  params=only(options, "cloud_name", "description", "base_sub_account_id", "enabled"),
+                                  params=dict(
+                                      cloud_name=cloud_name,
+                                      custom_attributes=custom_attributes,
+                                      enabled=enabled,
+                                      base_account=base_account
+                                  ),
                                   **options)

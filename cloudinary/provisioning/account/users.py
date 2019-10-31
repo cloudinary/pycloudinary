@@ -17,28 +17,50 @@ class Role(object):
     MEDIA_LIBRARY_USER = "media_library_user"
 
 
-def users(**options):
-    # type: (**any) -> ProvisioningAPIResponse
+def users(user_ids=None, sub_account_id=None, pending=None, prefix=None, **options):
     """
     List all users
-    :param options: Generic advanced options map, see online documentation.
-    :return:        List of users associated with the account
+
+    :param user_ids:        The ids of the users to fetch
+    :type user_ids:         list, optional
+    :param sub_account_id:  The id of a sub account
+    :type sub_account_id:   str, optional
+    :param pending:         Whether the user is pending
+    :type pending:          bool, optional
+    :param prefix:          User prefix
+    :type prefix:           str, optional
+    :param options:         Generic advanced options dict, see online documentation.
+    :type options:          dict, optional
+    :return:                List of users associated with the account
+    :rtype:                 ProvisioningAPIResponse
     """
+
     uri = [USERS_SUB_PATH]
     return _call_provisioning_api("get", uri,
-                                  params=only(options, "user_ids", "sub_account_id", "pending", "prefix"), **options)
+                                  params=dict(
+                                      user_ids=user_ids,
+                                      sub_account_id=sub_account_id,
+                                      pending=pending,
+                                      prefix=prefix
+                                  ), **options)
 
 
 def create_user(name, email, role, sub_account_ids=None, **options):
-    # type: (str, str, str, list[str], **any) -> ProvisioningAPIResponse
     """
     Create a user
-    :param name:            Username
-    :param email:           User's email
-    :param role:            User's role
-    :param sub_account_ids: Optional. Sub accounts to associate with the user
-    :param options:         Generic advanced options map, see online documentation.
-    :return:                Details of created user
+
+    :param name:                Username
+    :type name:                 str
+    :param email:               User's email
+    :type email:                str
+    :param role:                User's role
+    :type role:                 str
+    :param sub_account_ids:     Optional. Sub accounts to associate with the user
+    :type sub_account_ids:      list, optional
+    :param options:             Generic advanced options dict, see online documentation.
+    :type options:              dict, optional
+    :return:                    Details of created user
+    :rtype:                     ProvisioningAPIResponse
     """
     uri = [USERS_SUB_PATH]
     return _call_provisioning_api("post", uri,
@@ -47,44 +69,66 @@ def create_user(name, email, role, sub_account_ids=None, **options):
 
 
 def delete_user(user_id, **options):
-    # type: (str, **any) -> ProvisioningAPIResponse
     """
     Delete a user
-    :param user_id: The id of user to delete
-    :param options: Generic advanced options map, see online documentation.
-    :return:        Result message
+
+    :param user_id:             The id of user to delete
+    :type user_id:              The id of user to delete
+    :param options:             Generic advanced options dict, see online documentation.
+    :type options:              dict, optional
+    :return:                    Result message
+    :rtype:                     ProvisioningAPIResponse
     """
     uri = [USERS_SUB_PATH, user_id]
     return _call_provisioning_api("delete", uri, {}, **options)
 
 
 def user(user_id, **options):
-    # type: (str, **any) -> ProvisioningAPIResponse
     """
     Get information of a user
-    :param user_id: The id of the user
-    :param options: Generic advanced options map, see online documentation.
-    :return:        A user
+
+    :param user_id:             The id of the user
+    :type user_id:              str
+    :param options:             Generic advanced options dict, see online documentation.
+    :type options:              dict, optional
+    :return:                    A user
+    :rtype:                     ProvisioningAPIResponse
+
     """
     uri = [USERS_SUB_PATH, user_id]
     return _call_provisioning_api("get", uri, {}, **options)
 
 
-def update_user(user_id, **options):
-    # type: (str, **any) -> ProvisioningAPIResponse
+def update_user(user_id, name=None, email=None, role=None, sub_account_ids=None, enabled=True, **options):
     """
     Update a user
-    :param user_id: The id of the user to update
-    :param options: Generic advanced options map, see online documentation.
-        :keyword name (str):            Username.
-        :keyword email (str):           User's email.
-        :keyword role (str):            User's role.
-        :keyword sub_account_ids (str):
-            Sub-accounts for which the user should have access.
-            * If not provided or empty, user should have access to all accounts.
-    :return: The updated user
+
+    :param user_id:             The id of the user to update
+    :type user_id:              str
+    :param name:                Username
+    :type name:                 str, optional
+    :param email:               User's email
+    :type email:                str, optional
+    :param role:                User's role
+    :type role:                 Role, optional
+    :param sub_account_ids:     Sub-accounts for which the user should have access
+                                * If not provided or empty, the user should have access to all accounts
+    :type sub_account_ids:      list, optional
+    :param enabled:             Whether the account is enabled
+    :type enabled:              bool, optional
+    :param options:             Generic advanced options dict, see online documentation.
+    :type options:              dict, optional
+    :return:                    The updated user
+    :rtype:                     ProvisioningAPIResponse
     """
     uri = [USERS_SUB_PATH, user_id]
     return _call_provisioning_api("put", uri,
-                                  params=only(options, "name", "email", "role", "sub_account_ids", "enabled"),
+                                  params=dict(
+                                      user=user,
+                                      name=name,
+                                      email=email,
+                                      role=role,
+                                      sub_account_ids=sub_account_ids,
+                                      enabled=enabled
+                                  ),
                                   **options)
