@@ -55,6 +55,7 @@ class VideoTest(unittest.TestCase):
             'audio_codec': 'acc',
             'start_offset': 3
         }
+
         expected_url = VIDEO_UPLOAD_PATH + "ac_acc,so_3,vc_h264/movie"
         self.assertEqual(
             self.video.video(**options),
@@ -116,6 +117,7 @@ class VideoTest(unittest.TestCase):
         expected_url = VIDEO_UPLOAD_PATH + "q_50/w_100/movie"
         expected_ogv_url = VIDEO_UPLOAD_PATH + "q_50/q_70,w_100/movie"
         expected_mp4_url = VIDEO_UPLOAD_PATH + "q_50/q_30,w_100/movie"
+
         self.assertEqual(self.video.video(width=100, transformation={'quality': 50},
                                           source_transformation={'ogv': {'quality': 70}, 'mp4': {'quality': 30}}),
                          "<video poster=\"" + expected_url + ".jpg\" width=\"100\">" +

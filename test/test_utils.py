@@ -928,6 +928,20 @@ class TestUtils(unittest.TestCase):
         self.assertEqual({}, options)
         self.assertEqual(all_operators, transformation)
 
+    def test_pow_operator(self):
+        transformation = {"width": "initial_width ^ 2"}
+        normalized = cloudinary.utils.generate_transformation_string(**transformation)[0]
+        expected = "w_iw_pow_2"
+
+        self.assertEqual(normalized, expected)
+
+    def test_normalize_expression_with_predefined_variables(self):
+        transformation = {"transformation": [{"$width": 10}, {"width": "$width + 10 + width"},]}
+        normalized = cloudinary.utils.generate_transformation_string(**transformation)[0]
+        expected = "$width_10/w_$width_add_10_add_w"
+
+        self.assertEqual(normalized, expected)
+
     def test_merge(self):
         a = {"foo": "foo", "bar": "foo"}
         b = {"foo": "bar"}
@@ -946,6 +960,16 @@ class TestUtils(unittest.TestCase):
         }
         transformation, options = cloudinary.utils.generate_transformation_string(**options)
         self.assertEqual('if_fc_gt_2,$z_5,$foo_$z_mul_2,c_scale,w_$foo_mul_200', transformation)
+
+    def test_duration_condition(self):
+        du_options = {"if": "duration > 30", "crop": "scale", "width": "100"}
+        idu_options = {"if": "initial_duration > 30", "crop": "scale", "width": "100"}
+
+        transformation, options = cloudinary.utils.generate_transformation_string(**du_options)
+        self.assertEqual("if_du_gt_30,c_scale,w_100", transformation)
+
+        transformation, options = cloudinary.utils.generate_transformation_string(**idu_options)
+        self.assertEqual("if_idu_gt_30,c_scale,w_100", transformation)
 
     def test_dollar_key_should_define_a_variable(self):
         options = {"transformation": [{"$foo": 10}, {"if": "face_count > 2"},
