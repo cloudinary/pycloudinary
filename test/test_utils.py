@@ -28,8 +28,9 @@ from cloudinary.utils import (
     build_eager,
     compute_hex_hash,
     verify_notification_signature,
-    verify_api_response_signature
+    verify_api_response_signature,
 )
+from cloudinary.compat import to_bytes
 from test.helper_test import TEST_IMAGE, REMOTE_TEST_IMAGE
 from test.test_api import (
     API_TEST_TRANS_SCALE100,
@@ -53,7 +54,7 @@ DEFAULT_VERSION_STR = 'v1'
 TEST_FOLDER = 'folder/test'
 
 MOCKED_NOW = 1549533574
-
+API_SECRET = 'X7qLTrsES31MzxxkxPPA-pAGGfU'
 
 class TestUtils(unittest.TestCase):
     crop_transformation = {'crop': 'crop', 'width': 100}
@@ -1226,25 +1227,36 @@ class TestUtils(unittest.TestCase):
         original_value = str(uuid.uuid4())
 
         self.assertEqual(compute_hex_hash(original_value), compute_hex_hash(original_value),
-                         "Equal inputs should be hashed the same way")
+                         "Equal STR inputs should be hashed the same way")
 
         self.assertNotEqual(compute_hex_hash(original_value), compute_hex_hash("some string"),
                             "Unequal inputs hashes should not match")
+
+        if six.PY3:
+            with self.assertRaises(Exception) as e:
+                compute_hex_hash(None)
+            self.assertEqual(str(e.exception), "'NoneType' object has no attribute 'encode'")
+
+            with self.assertRaises(Exception) as e:
+                compute_hex_hash(1)
+            self.assertEqual(str(e.exception), "'int' object has no attribute 'encode'")
 
     def test_verify_api_response_signature(self):
         public_id = 'tests/logo.png'
         test_version = 1
         api_response_signature = '08d3107a5b2ad82e7d82c0b972218fbf20b5b1e0'
 
-        cloudinary.config(api_secret='X7qLTrsES31MzxxkxPPA-pAGGfU')
+        with patch('cloudinary.config', return_value=cloudinary.config(api_secret=API_SECRET)):
+            self.assertTrue(verify_api_response_signature(public_id, test_version, api_response_signature),
+                            "The response signature is valid for the same parameters")
 
-        self.assertTrue(verify_api_response_signature(public_id, test_version, api_response_signature),
-                        "The response signature is valid for the same parameters")
+            self.assertFalse(verify_api_response_signature(public_id, test_version + 1, api_response_signature),
+                             "The response signature is invalid for the wrong version")
 
-        self.assertFalse(verify_api_response_signature(public_id, test_version + 1, api_response_signature),
-                         "The response signature is invalid for the wrong version")
-
-        cloudinary.config(api_secret='b')
+        with patch('cloudinary.config', return_value=cloudinary.config(api_secret=None)):
+            with self.assertRaises(Exception) as e:
+                verify_api_response_signature(public_id, test_version, api_response_signature)
+            self.assertEqual(str(e.exception), 'Api secret key is empty')
 
     def test_verify_notification_signature(self):
         valid_for = 60
@@ -1254,32 +1266,34 @@ class TestUtils(unittest.TestCase):
                '"secure_url":"https://res.cloudinary.com/demo/video/upload/sp_full_hd/v1533125278/dog.mp4"}],' \
                '"public_id":"dog","batch_id":"9b11fa058c61fa577f4ec516bf6ee756ac2aefef095af99aef1302142cc1694a"}'
 
-        cloudinary.config(api_secret='X7qLTrsES31MzxxkxPPA-pAGGfU')
         with patch('time.time', return_value=MOCKED_NOW):
-
             valid_response_timestamp = time.time() - valid_for
-
             test_message_part = "The notification signature is"
 
-            self.assertTrue(verify_notification_signature(body, valid_response_timestamp,
-                                                          signature,
-                                                          valid_for),
-                            "{} valid for matching and not expired signature".format(test_message_part))
+            with patch('cloudinary.config', return_value=cloudinary.config(api_secret=API_SECRET)):
+                self.assertTrue(verify_notification_signature(body, valid_response_timestamp,
+                                                              signature,
+                                                              valid_for),
+                                "{} valid for matching and not expired signature".format(test_message_part))
 
-            self.assertFalse(verify_notification_signature(body, valid_response_timestamp,
-                                                           signature,
-                                                           valid_for - 1),
-                             "{} invalid for matching but expired signature".format(test_message_part))
+                self.assertFalse(verify_notification_signature(body, valid_response_timestamp,
+                                                               signature,
+                                                               valid_for - 1),
+                                 "{} invalid for matching but expired signature".format(test_message_part))
 
-            self.assertFalse(verify_notification_signature(body, valid_response_timestamp,
-                                                           signature + 'chars'),
-                             "{} invalid for non matching and not expired signature".format(test_message_part))
+                self.assertFalse(verify_notification_signature(body, valid_response_timestamp,
+                                                               signature + 'chars'),
+                                 "{} invalid for non matching and not expired signature".format(test_message_part))
 
-            self.assertFalse(verify_notification_signature(body, valid_response_timestamp,
-                                                           signature + 'chars',
-                                                           valid_for - 1),
-                             "{} invalid for non matching and expired signature".format(test_message_part))
-        cloudinary.config(api_secret='b')
+                self.assertFalse(verify_notification_signature(body, valid_response_timestamp,
+                                                               signature + 'chars',
+                                                               valid_for - 1),
+                                 "{} invalid for non matching and expired signature".format(test_message_part))
+
+            with patch('cloudinary.config', return_value=cloudinary.config(api_secret=None)):
+                with self.assertRaises(Exception) as e:
+                    verify_notification_signature(body, valid_response_timestamp, signature, valid_for)
+                self.assertEqual(str(e.exception), 'Api secret key is empty')
 
 
 if __name__ == '__main__':
