@@ -51,8 +51,10 @@ setup(name='cloudinary',
       test_suite="test",
       install_requires=[
           "six",
-          "mock",
           "urllib3",
           "certifi"
+      ],
+      tests_require=[
+          "mock"
       ],
       )
