@@ -1,29 +1,20 @@
 import json
 import socket
 
-import certifi
 import urllib3
 from urllib3.exceptions import HTTPError
 
 import cloudinary
+from cloudinary import utils
 import cloudinary.provisioning.account
-from cloudinary.api import EXCEPTION_CODES, GeneralError
+from cloudinary.exceptions import GeneralError, EXCEPTION_CODES
 
 logger = cloudinary.logger
 
-_http = urllib3.PoolManager(
-    cert_reqs="CERT_REQUIRED",
-    ca_certs=certifi.where()
-)
+_http = utils.get_http_connector(cloudinary.config(), cloudinary.CERT_KWARGS)
 
 PROVISIONING_SUB_PATH = "provisioning"
 ACCOUNT_SUB_PATH = "accounts"
-
-
-class ProvisioningAPIResponse(dict):
-    def __init__(self, result, **kwargs):
-        super(ProvisioningAPIResponse, self).__init__(**kwargs)
-        self.update(result)
 
 
 def _call_provisioning_api(method, uri, params=None, body=None, headers=None, **options):
@@ -83,4 +74,4 @@ def _call_provisioning_api(method, uri, params=None, body=None, headers=None, **
         exception_class = exception_class
         raise exception_class("Error {0} - {1}".format(response.status, result["error"]["message"]))
 
-    return ProvisioningAPIResponse(result)
+    return result

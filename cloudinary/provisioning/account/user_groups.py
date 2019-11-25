@@ -26,7 +26,7 @@ def create_user_group(name, **options):
     :param options:         Generic advanced options dict, see online documentation
     :type options:          dict, optional
     :return:                The newly created group
-    :rtype:                 ProvisioningAPIResponse
+    :rtype:                 dict
     """
     uri = [USER_GROUPS_SUB_PATH]
     return _call_provisioning_api("post", uri, dict(name=name), **options)
@@ -43,7 +43,7 @@ def update_user_group(user_group_id, name, **options):
     :param options:             Generic advanced options dict, see online documentation
     :type options:              dict, optional
     :return:                    The updated group
-    :rtype:                     ProvisioningAPIResponse
+    :rtype:                     dict
     """
     uri = [USER_GROUPS_SUB_PATH, user_group_id]
     return _call_provisioning_api("put", uri, dict(name=name), **options)
@@ -58,7 +58,7 @@ def delete_user_group(user_group_id, **options):
     :param options:             Generic advanced options dict, see online documentation
     :type options:              dict, optional
     :return:                    The result message
-    :rtype:                     ProvisioningAPIResponse
+    :rtype:                     dict
     """
     uri = [USER_GROUPS_SUB_PATH, user_group_id]
     return _call_provisioning_api("delete", uri, {}, **options)
@@ -73,7 +73,7 @@ def user_group(user_group_id, **options):
     :param options:             Generic advanced options dict, see online documentation
     :type options:              dict, optional
     :return:                    Details of the group
-    :rtype:                     ProvisioningAPIResponse
+    :rtype:                     dict
     """
     uri = [USER_GROUPS_SUB_PATH, user_group_id]
     return _call_provisioning_api("get", uri, {}, **options)
@@ -90,7 +90,7 @@ def add_user_to_group(user_group_id, user_id, **options):
     :param options:             Generic advanced options dict, see online documentation
     :type options:              dict, optional
     :return:                    List of users in the group
-    :rtype:                     ProvisioningAPIResponse
+    :rtype:                     dict
     """
     uri = [USER_GROUPS_SUB_PATH, user_group_id, "users", user_id]
     return _call_provisioning_api("post", uri, {}, **options)
@@ -107,7 +107,7 @@ def remove_user_from_group(user_group_id, user_id, **options):
     :param options:             Generic advanced options dict, see online documentation
     :type options:              dict, optional
     :return:                    List of users in the group
-    :rtype:                     ProvisioningAPIResponse
+    :rtype:                     dict
     """
     uri = [USER_GROUPS_SUB_PATH, user_group_id, "users", user_id]
     return _call_provisioning_api("delete", uri, {}, **options)
@@ -122,7 +122,7 @@ def user_group_users(user_group_id, **options):
     :param options:             Generic advanced options dict, see online documentation
     :type options:              dict, optional
     :return:                    List of users in the group
-    :rtype:                     ProvisioningAPIResponse
+    :rtype:                     dict
     """
     uri = [USER_GROUPS_SUB_PATH, user_group_id, "users"]
     return _call_provisioning_api("get", uri, {}, **options)
@@ -137,7 +137,7 @@ def user_in_user_groups(user_id, **options):
     :param options:             Generic advanced options dict, see online documentation
     :type options:              dict, optional
     :return:                    List of groups user is in
-    :rtype:                     ProvisioningAPIResponse
+    :rtype:                     dict
 
     """
     uri = [USER_GROUPS_SUB_PATH, user_id]

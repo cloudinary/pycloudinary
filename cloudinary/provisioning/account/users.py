@@ -32,7 +32,7 @@ def users(user_ids=None, sub_account_id=None, pending=None, prefix=None, **optio
     :param options:         Generic advanced options dict, see online documentation.
     :type options:          dict, optional
     :return:                List of users associated with the account
-    :rtype:                 ProvisioningAPIResponse
+    :rtype:                 dict
     """
 
     uri = [USERS_SUB_PATH]
@@ -60,7 +60,7 @@ def create_user(name, email, role, sub_account_ids=None, **options):
     :param options:             Generic advanced options dict, see online documentation.
     :type options:              dict, optional
     :return:                    Details of created user
-    :rtype:                     ProvisioningAPIResponse
+    :rtype:                     dict
     """
     uri = [USERS_SUB_PATH]
     return _call_provisioning_api("post", uri,
@@ -77,7 +77,7 @@ def delete_user(user_id, **options):
     :param options:             Generic advanced options dict, see online documentation.
     :type options:              dict, optional
     :return:                    Result message
-    :rtype:                     ProvisioningAPIResponse
+    :rtype:                     dict
     """
     uri = [USERS_SUB_PATH, user_id]
     return _call_provisioning_api("delete", uri, {}, **options)
@@ -92,7 +92,7 @@ def user(user_id, **options):
     :param options:             Generic advanced options dict, see online documentation.
     :type options:              dict, optional
     :return:                    A user
-    :rtype:                     ProvisioningAPIResponse
+    :rtype:                     dict
 
     """
     uri = [USERS_SUB_PATH, user_id]
@@ -119,7 +119,7 @@ def update_user(user_id, name=None, email=None, role=None, sub_account_ids=None,
     :param options:             Generic advanced options dict, see online documentation.
     :type options:              dict, optional
     :return:                    The updated user
-    :rtype:                     ProvisioningAPIResponse
+    :rtype:                     dict
     """
     uri = [USERS_SUB_PATH, user_id]
     return _call_provisioning_api("put", uri,

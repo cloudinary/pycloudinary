@@ -16,7 +16,7 @@ def sub_accounts(enabled=True, ids=None, prefix=None, **options):
     :param options:     Generic advanced options dict, see online documentation
     :type options:      dict, optional
     :return:            A list of sub accounts
-    :rtype:             ProvisioningAPIResponse
+    :rtype:             dict
     """
     uri = [SUB_ACCOUNTS_SUB_PATH]
     return _call_provisioning_api("get", uri, params=dict(ids=ids, enabled=enabled, prefix=prefix), **options)
@@ -29,9 +29,10 @@ def create_sub_account(name, cloud_name=None, custom_attributes=None, enabled=Tr
 
     :param name:                Name of the new sub accounnt
     :type name:                 str
-    :param cloud_name:          Unique (case insensitive)
+    :param cloud_name:          A case-insensitive cloud name comprised of alphanumeric and underscore characters.
+                                * Generates an error if the cloud name is not unique across all Cloudinary accounts.
     :type cloud_name:           str, optional
-    :param custom_attributes:   Advanced custom attributes for the sub-account.
+    :param custom_attributes:   Any custom attributes you want to associate with the sub-account
     :type custom_attributes:    dict, optional
     :param enabled:             Whether to create the account as enabled (default is enabled).
     :type enabled:              bool, optional
@@ -40,7 +41,7 @@ def create_sub_account(name, cloud_name=None, custom_attributes=None, enabled=Tr
     :param options:             Generic advanced options dict, see online documentation
     :type options:              dict, optional
     :return:                    The created sub account
-    :rtype:                     ProvisioningAPIResponse
+    :rtype:                     dict
     """
     uri = [SUB_ACCOUNTS_SUB_PATH]
     return _call_provisioning_api("post", uri,
@@ -63,7 +64,7 @@ def delete_sub_account(sub_account_id, **options):
     :param options:             Generic advanced options dict, see online documentation
     :type options:              dict, optional
     :return:                    Result message
-    :rtype:                     ProvisioningAPIResponse
+    :rtype:                     dict
     """
     uri = [SUB_ACCOUNTS_SUB_PATH, sub_account_id]
     return _call_provisioning_api("delete", uri, {}, **options)
@@ -78,7 +79,7 @@ def sub_account(sub_account_id, **options):
     :param options:             Generic advanced options dict, see online documentation
     :type options:              dict, optional
     :return:                    A sub account
-    :rtype:                     ProvisioningAPIResponse
+    :rtype:                     dict
     """
     uri = [SUB_ACCOUNTS_SUB_PATH, sub_account_id]
     return _call_provisioning_api("get", uri, {}, **options)
@@ -94,10 +95,8 @@ def update_sub_account(sub_account_id, cloud_name=None, custom_attributes=None,
     :type sub_account_id:       str
     :param cloud_name:          Unique cloud name
     :type cloud_name:           str, optional
-    :param custom_attributes:   Advanced custom attributes for the sub-account
+    :param custom_attributes:   Any custom attributes you want to associate with the sub-account.
     :type custom_attributes:    dict, optional
-    :param description:         Description of the sub-account
-    :type description:          str, optional
     :param enabled:             Whether to create the account as enabled (default is enabled).
     :type enabled:              bool, optional
     :param base_account:        ID of sub-account from which to copy settings
@@ -105,7 +104,7 @@ def update_sub_account(sub_account_id, cloud_name=None, custom_attributes=None,
     :param options:             Generic advanced options dict, see online documentation
     :type options:              dict, optional
     :return:                    Updated sub account
-    :rtype:                     ProvisioningAPIResponse
+    :rtype:                     dict
     """
     uri = [SUB_ACCOUNTS_SUB_PATH, sub_account_id]
     return _call_provisioning_api("put", uri,
