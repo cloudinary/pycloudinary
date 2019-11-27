@@ -240,6 +240,21 @@ def remove_all_context(public_ids, **options):
     return call_context_api(None, "remove_all", public_ids, **options)
 
 
+def update_metadata(public_ids, metadata, resource_type="image", type="upload"):
+    return call_metadata_api(metadata, None, public_ids=public_ids, resource_type=resource_type, type=type)
+
+
+def call_metadata_api(metadata, command, public_ids=None, **options):
+    params = {
+        "timestamp": utils.now(),
+        "metadata": utils.encode_context(metadata),
+        "public_ids": utils.build_array(public_ids),
+        # "command": command,
+        "type": options.get("type")
+    }
+    return call_api("metadata", params, **options)
+
+
 def call_tags_api(tag, command, public_ids=None, **options):
     params = {
         "timestamp": utils.now(),

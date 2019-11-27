@@ -115,7 +115,8 @@ __SERIALIZED_UPLOAD_PARAMS = [
     "context",
     "auto_tagging",
     "responsive_breakpoints",
-    "access_control"
+    "access_control",
+    "metadata"
 ]
 
 upload_params = __SIMPLE_UPLOAD_PARAMS + __SERIALIZED_UPLOAD_PARAMS
@@ -209,7 +210,10 @@ def encode_context(context):
     """
 
     if not isinstance(context, dict):
-        return context
+        try:
+            context = json.loads(context)
+        except:
+            return context
 
     return "|".join(("{}={}".format(k, v.replace("=", "\\=").replace("|", "\\|"))) for k, v in iteritems(context))
 
@@ -922,6 +926,7 @@ def build_upload_params(**options):
         "face_coordinates": encode_double_array(options.get("face_coordinates")),
         "custom_coordinates": encode_double_array(options.get("custom_coordinates")),
         "context": encode_context(options.get("context")),
+        "metadata": encode_context(options.get("metadata")),
         "auto_tagging": options.get("auto_tagging") and str(options.get("auto_tagging")),
         "responsive_breakpoints": generate_responsive_breakpoints_string(options.get("responsive_breakpoints")),
         "access_control": options.get("access_control") and json_encode(
