@@ -11,7 +11,6 @@ from urllib3.exceptions import HTTPError
 import cloudinary
 from cloudinary import utils
 from cloudinary.exceptions import (
-    Error,
     BadRequest,
     AuthorizationRequired,
     NotAllowed,
@@ -22,7 +21,6 @@ from cloudinary.exceptions import (
 )
 
 logger = cloudinary.logger
-
 
 EXCEPTION_CODES = {
     400: BadRequest,
@@ -392,6 +390,63 @@ def update_streaming_profile(name, **options):
     uri = ["streaming_profiles", name]
     params = __prepare_streaming_profile_params(**options)
     return call_api('PUT', uri, params, **options)
+
+
+def metadata_fields(**options):
+    uri = ["metadata_fields"]
+    return call_api('GET', uri, None, **options)
+
+
+def metadata_field(external_id, **options):
+    uri = ["metadata_fields", external_id]
+    return call_api('GET', uri, None, **options)
+
+
+def create_metadata_field(label, type, external_id=None, mandatory=False, datasource=None, default_value=None,
+                          validation=None, **options):
+    uri = ["metadata_fields"]
+    params = dict(
+        label=label,
+        type=type,
+        external_id=external_id,
+        default_value=default_value,
+        mandatory=mandatory,
+        datasource=datasource,
+        validation=validation
+    )
+    return call_json_api('POST', uri, jsonBody=params, **options)
+
+
+def update_metadata_field(external_id, type=None, label=None, mandatory=None, datasource=None, default_value=None,
+                          validation=None, **options):
+    uri = ["metadata_fields", external_id]
+    params = dict(
+        label=label,
+        type=type,
+        default_value=default_value,
+        mandatory=mandatory,
+        datasource=datasource,
+        validation=validation
+    )
+    return call_json_api('PUT', uri, jsonBody=params, **options)
+
+
+def delete_metadata_field(external_id, **options):
+    uri = ["metadata_fields", external_id]
+    return call_api('DELETE', uri, params=None, **options)
+
+
+def update_metadata_field_datasource(external_id, values, **options):
+    uri = ["metadata_fields", external_id, 'datasource']
+    return call_json_api('PUT', uri, jsonBody=dict(values=values), **options)
+
+
+def delete_metadata_field_datasource_entry(external_id, external_ids, **options):
+    return
+
+
+def restore_metadata_field_datasource_entry(external_id, external_ids, **options):
+    return
 
 
 def call_json_api(method, uri, jsonBody, **options):
