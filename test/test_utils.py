@@ -1232,15 +1232,6 @@ class TestUtils(unittest.TestCase):
         self.assertNotEqual(compute_hex_hash(original_value), compute_hex_hash("some string"),
                             "Unequal inputs hashes should not match")
 
-        if six.PY3:
-            with self.assertRaises(Exception) as e:
-                compute_hex_hash(None)
-            self.assertEqual(str(e.exception), "'NoneType' object has no attribute 'encode'")
-
-            with self.assertRaises(Exception) as e:
-                compute_hex_hash(1)
-            self.assertEqual(str(e.exception), "'int' object has no attribute 'encode'")
-
     def test_verify_api_response_signature(self):
         public_id = 'tests/logo.png'
         test_version = 1
@@ -1289,6 +1280,9 @@ class TestUtils(unittest.TestCase):
                                                                signature + 'chars',
                                                                valid_for - 1),
                                  "{} invalid for non matching and expired signature".format(test_message_part))
+                with self.assertRaises(Exception) as e:
+                    verify_notification_signature(1, valid_response_timestamp, signature, valid_for)
+                self.assertEqual(str(e.exception), 'Body should be type of string')
 
             with patch('cloudinary.config', return_value=cloudinary.config(api_secret=None)):
                 with self.assertRaises(Exception) as e:

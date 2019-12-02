@@ -1311,6 +1311,9 @@ def verify_notification_signature(body, timestamp, signature, valid_for=7200):
     if timestamp < time.time() - valid_for:
         return False
 
+    if not isinstance(body, str):
+        raise ValueError('Body should be type of string')
+
     return signature == compute_hex_hash('{}{}{}'.format(body, timestamp, cloudinary.config().api_secret))
 
 
