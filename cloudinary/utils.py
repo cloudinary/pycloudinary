@@ -121,6 +121,17 @@ __SERIALIZED_UPLOAD_PARAMS = [
 upload_params = __SIMPLE_UPLOAD_PARAMS + __SERIALIZED_UPLOAD_PARAMS
 
 
+def compute_hex_hash(s):
+    """
+    Compute hash and convert the result to HEX string
+
+    :param s: string to process
+
+    :return: HEX string
+    """
+    return hashlib.sha1(to_bytes(s)).hexdigest()
+
+
 def build_array(arg):
     if isinstance(arg, list):
         return arg
@@ -498,7 +509,7 @@ def sign_request(params, options):
 def api_sign_request(params_to_sign, api_secret):
     params = [(k + "=" + (",".join(v) if isinstance(v, list) else str(v))) for k, v in params_to_sign.items() if v]
     to_sign = "&".join(sorted(params))
-    return hashlib.sha1(to_bytes(to_sign + api_secret)).hexdigest()
+    return compute_hex_hash(to_sign + api_secret)
 
 
 def breakpoint_settings_mapper(breakpoint_settings):
@@ -1262,6 +1273,48 @@ def check_property_enabled(f):
         return f(*args, **kwargs)
     
     return wrapper
+
+
+def verify_api_response_signature(public_id, version, signature):
+    """
+    Verifies the authenticity of an API response signature
+
+    :param public_id: The public id of the asset as returned in the API response
+    :param version: The version of the asset as returned in the API response
+    :param signature: Actual signature. Can be retrieved from the X-Cld-Signature header
+
+    :return: Boolean result of the validation
+    """
+    if not cloudinary.config().api_secret:
+        raise Exception('Api secret key is empty')
+
+    parameters_to_sign = {'public_id': public_id,
+                          'version': version}
+
+    return signature == api_sign_request(parameters_to_sign, cloudinary.config().api_secret)
+
+
+def verify_notification_signature(body, timestamp, signature, valid_for=7200):
+    """
+    Verifies the authenticity of a notification signature
+
+    :param body: Json of the request's body
+    :param timestamp: Unix timestamp. Can be retrieved from the X-Cld-Timestamp header
+    :param signature: Actual signature. Can be retrieved from the X-Cld-Signature header
+    :param valid_for: The desired time in seconds for considering the request valid
+
+    :return: Boolean result of the validation
+    """
+    if not cloudinary.config().api_secret:
+        raise Exception('Api secret key is empty')
+
+    if timestamp < time.time() - valid_for:
+        return False
+
+    if not isinstance(body, str):
+        raise ValueError('Body should be type of string')
+
+    return signature == compute_hex_hash('{}{}{}'.format(body, timestamp, cloudinary.config().api_secret))
 
 
 def get_http_connector(conf, options):

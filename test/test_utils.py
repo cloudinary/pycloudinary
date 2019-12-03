@@ -3,6 +3,9 @@ import io
 import re
 import tempfile
 import unittest
+import uuid
+import json
+import time
 from collections import OrderedDict
 from datetime import datetime, date
 from fractions import Fraction
@@ -13,11 +16,28 @@ from mock import patch
 
 import cloudinary.utils
 from cloudinary import CL_BLANK
-from cloudinary.utils import build_list_of_dicts, json_encode, encode_unicode_url, base64url_encode, \
-    patch_fetch_format, cloudinary_scaled_url, chain_transformations, generate_transformation_string, build_eager
+from cloudinary.utils import (
+    build_list_of_dicts,
+    json_encode,
+    encode_unicode_url,
+    base64url_encode,
+    patch_fetch_format,
+    cloudinary_scaled_url,
+    chain_transformations,
+    generate_transformation_string,
+    build_eager,
+    compute_hex_hash,
+    verify_notification_signature,
+    verify_api_response_signature,
+)
+from cloudinary.compat import to_bytes
 from test.helper_test import TEST_IMAGE, REMOTE_TEST_IMAGE
-from test.test_api import API_TEST_TRANS_SCALE100, API_TEST_TRANS_SCALE100_STR, API_TEST_TRANS_SEPIA_STR, \
+from test.test_api import (
+    API_TEST_TRANS_SCALE100,
+    API_TEST_TRANS_SCALE100_STR,
+    API_TEST_TRANS_SEPIA_STR,
     API_TEST_TRANS_SEPIA
+)
 
 DEFAULT_ROOT_PATH = 'http://res.cloudinary.com/test123/'
 
@@ -33,6 +53,8 @@ IMAGE_VERSION_STR = "v" + IMAGE_VERSION
 DEFAULT_VERSION_STR = 'v1'
 TEST_FOLDER = 'folder/test'
 
+MOCKED_NOW = 1549533574
+API_SECRET = 'X7qLTrsES31MzxxkxPPA-pAGGfU'
 
 class TestUtils(unittest.TestCase):
     crop_transformation = {'crop': 'crop', 'width': 100}
@@ -1197,6 +1219,75 @@ class TestUtils(unittest.TestCase):
 
         for message, value, expected in test_data:
             self.assertEqual(expected, build_eager(value), message)
+
+    def test_compute_hash(self):
+        self.assertEqual("4de279c82056603e91aab3930a593b8b887d9e48",
+                         compute_hex_hash("https://cloudinary.com/images/old_logo.png"))
+
+        original_value = str(uuid.uuid4())
+
+        self.assertEqual(compute_hex_hash(original_value), compute_hex_hash(original_value),
+                         "Equal STR inputs should be hashed the same way")
+
+        self.assertNotEqual(compute_hex_hash(original_value), compute_hex_hash("some string"),
+                            "Unequal inputs hashes should not match")
+
+    def test_verify_api_response_signature(self):
+        public_id = 'tests/logo.png'
+        test_version = 1
+        api_response_signature = '08d3107a5b2ad82e7d82c0b972218fbf20b5b1e0'
+
+        with patch('cloudinary.config', return_value=cloudinary.config(api_secret=API_SECRET)):
+            self.assertTrue(verify_api_response_signature(public_id, test_version, api_response_signature),
+                            "The response signature is valid for the same parameters")
+
+            self.assertFalse(verify_api_response_signature(public_id, test_version + 1, api_response_signature),
+                             "The response signature is invalid for the wrong version")
+
+        with patch('cloudinary.config', return_value=cloudinary.config(api_secret=None)):
+            with self.assertRaises(Exception) as e:
+                verify_api_response_signature(public_id, test_version, api_response_signature)
+            self.assertEqual(str(e.exception), 'Api secret key is empty')
+
+    def test_verify_notification_signature(self):
+        valid_for = 60
+        signature = 'dfe82de1d9083fe0b7ea68070649f9a15b8874da'
+        body = '{"notification_type":"eager","eager":[{"transformation":"sp_full_hd/mp4","bytes":1055,' \
+               '"url":"http://res.cloudinary.com/demo/video/upload/sp_full_hd/v1533125278/dog.mp4",' \
+               '"secure_url":"https://res.cloudinary.com/demo/video/upload/sp_full_hd/v1533125278/dog.mp4"}],' \
+               '"public_id":"dog","batch_id":"9b11fa058c61fa577f4ec516bf6ee756ac2aefef095af99aef1302142cc1694a"}'
+
+        with patch('time.time', return_value=MOCKED_NOW):
+            valid_response_timestamp = time.time() - valid_for
+            test_message_part = "The notification signature is"
+
+            with patch('cloudinary.config', return_value=cloudinary.config(api_secret=API_SECRET)):
+                self.assertTrue(verify_notification_signature(body, valid_response_timestamp,
+                                                              signature,
+                                                              valid_for),
+                                "{} valid for matching and not expired signature".format(test_message_part))
+
+                self.assertFalse(verify_notification_signature(body, valid_response_timestamp,
+                                                               signature,
+                                                               valid_for - 1),
+                                 "{} invalid for matching but expired signature".format(test_message_part))
+
+                self.assertFalse(verify_notification_signature(body, valid_response_timestamp,
+                                                               signature + 'chars'),
+                                 "{} invalid for non matching and not expired signature".format(test_message_part))
+
+                self.assertFalse(verify_notification_signature(body, valid_response_timestamp,
+                                                               signature + 'chars',
+                                                               valid_for - 1),
+                                 "{} invalid for non matching and expired signature".format(test_message_part))
+                with self.assertRaises(Exception) as e:
+                    verify_notification_signature(1, valid_response_timestamp, signature, valid_for)
+                self.assertEqual(str(e.exception), 'Body should be type of string')
+
+            with patch('cloudinary.config', return_value=cloudinary.config(api_secret=None)):
+                with self.assertRaises(Exception) as e:
+                    verify_notification_signature(body, valid_response_timestamp, signature, valid_for)
+                self.assertEqual(str(e.exception), 'Api secret key is empty')
 
 
 if __name__ == '__main__':
