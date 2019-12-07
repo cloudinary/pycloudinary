@@ -86,10 +86,11 @@ class CloudinaryField(models.Field):
             format=m.group('format')
         )
 
-    def from_db_value(self, value, expression, connection, context):
-        if value is None:
-            return value
-        return self.parse_cloudinary_resource(value)
+    def from_db_value(self, value, expression, connection, *args, **kwargs):
+        # TODO: when dropping support for versions prior to 2.0, you may return
+        #   the signature to from_db_value(value, expression, connection)
+        if value is not None:
+            return self.parse_cloudinary_resource(value)
 
     def to_python(self, value):
         if isinstance(value, CloudinaryResource):
