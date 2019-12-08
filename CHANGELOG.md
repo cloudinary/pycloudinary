@@ -1,4 +1,19 @@
 
+1.19.1 / 2019-12-08
+===================
+
+New functionality and features
+------------------------------
+
+  * Add `Python 3.8` support
+  * Add `Django 3.0` support
+  * Add `verify_api_response_signature ` and `verify_notification_signature` util functions
+  
+Other Changes
+-------------
+
+  * Fix `normalize_expression` to ignore predefined variables
+
 1.18.2 / 2019-10-10
 ===================
 
