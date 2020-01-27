@@ -3,15 +3,13 @@ import json
 import os
 import socket
 
-import certifi
 from six import string_types
-from urllib3 import PoolManager, ProxyManager
 from urllib3.exceptions import HTTPError
 
 import cloudinary
 from cloudinary import utils
-from cloudinary.exceptions import Error
 from cloudinary.cache.responsive_breakpoints_cache import instance as responsive_breakpoints_cache_instance
+from cloudinary.exceptions import Error
 
 try:
     from urllib3.contrib.appengine import AppEngineManager, is_appengine_sandbox
@@ -240,19 +238,26 @@ def remove_all_context(public_ids, **options):
     return call_context_api(None, "remove_all", public_ids, **options)
 
 
-def update_metadata(public_ids, metadata, resource_type="image", type="upload"):
-    return call_metadata_api(metadata, None, public_ids=public_ids, resource_type=resource_type, type=type)
+def update_metadata(public_ids, metadata, **options):
+    """
 
-
-def call_metadata_api(metadata, command, public_ids=None, **options):
+    :param public_ids:  The public IDs of the resources to update
+    :type public_ids:   list
+    :param metadata:    The metadata to update, where external IDs are the keys
+    :param options:     dict
+    :return:            List of resources updated
+    :rtype:             list
+    """
+    for key, value in metadata.items():
+        if isinstance(value, list):
+            metadata[key] = json.dumps(value)
     params = {
         "timestamp": utils.now(),
         "metadata": utils.encode_context(metadata),
         "public_ids": utils.build_array(public_ids),
-        # "command": command,
         "type": options.get("type")
     }
-    return call_api("metadata", params, **options)
+    return call_api("metadata", params=params)
 
 
 def call_tags_api(tag, command, public_ids=None, **options):
