@@ -1,13 +1,14 @@
 # -*- coding: latin-1 -*-
-from contextlib import contextmanager
 import os
 import random
 import re
 import sys
 import time
+import traceback
+from contextlib import contextmanager
 from datetime import timedelta, tzinfo
 from functools import wraps
-import traceback
+from json import loads
 
 import six
 from urllib3 import HTTPResponse
@@ -61,6 +62,10 @@ def get_uri(args):
 
 def get_params(args):
     return args[2] or {}
+
+
+def get_body(args):
+    return loads(args[1]['body']) or {}
 
 
 def get_param(mocker, name):
@@ -133,6 +138,7 @@ def retry_assertion(num_tries=3, delay=3):
     :param num_tries: Number of tries to perform
     :param delay: Delay in seconds between retries
     """
+
     def retry_decorator(func):
         @wraps(func)
         def retry_func(*args, **kwargs):

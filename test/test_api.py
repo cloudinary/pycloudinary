@@ -8,9 +8,9 @@ from urllib3 import disable_warnings, ProxyManager, PoolManager
 
 import cloudinary
 from cloudinary import api, uploader, utils
-from test.helper_test import SUFFIX, TEST_IMAGE, get_uri, get_params, get_list_param, get_param, TEST_DOC, get_method, \
-    UNIQUE_TAG, api_response_mock, ignore_exception, cleanup_test_resources_by_tag, cleanup_test_transformation, \
-    cleanup_test_resources, UNIQUE_TEST_FOLDER
+from test.helper_test import SUFFIX, TEST_IMAGE, get_uri, get_params, get_body, get_list_param, get_param, TEST_DOC, \
+    get_method, UNIQUE_TAG, api_response_mock, ignore_exception, cleanup_test_resources_by_tag, \
+    cleanup_test_transformation, cleanup_test_resources, UNIQUE_TEST_FOLDER
 
 MOCK_RESPONSE = api_response_mock()
 
@@ -32,6 +32,17 @@ API_TEST_TRANS_SCALE100_STR = "c_scale,l_{},w_100".format(API_TEST_TRANS_OVERLAY
 API_TEST_TRANS_SEPIA = {"crop": "lfill", "width": 400, "effect": "sepia"}
 API_TEST_TRANS_SEPIA_STR = "c_lfill,e_sepia,w_400"
 API_TEST_PRESET = "api_test_upload_preset"
+
+API_TEST_EXTERNAL_ID = "SAMPLE_EXTERNAL_ID"
+API_TEST_EXTERNAL_ID_1 = "SAMPLE_EXTERNAL_ID_1"
+API_TEST_EXTERNAL_ID_2 = "SAMPLE_EXTERNAL_ID_2"
+API_TEST_STRUCTURED_METADATA_INTEGER_FIELD = dict(label="SKU", type="integer", external_id=API_TEST_EXTERNAL_ID,
+                                                  default_value=0)
+API_TEST_STRUCTURED_METADATA_DATASOURCE = dict(
+    values=[dict(value="red", external_id="color1"), dict(value="blue", external_id="color2")])
+API_TEST_STRUCTURED_METADATA_SET_FIELD = dict(label="colors", type="set", external_id="colors",
+                                              datasource=API_TEST_STRUCTURED_METADATA_DATASOURCE)
+
 PREFIX = "test_folder_{}".format(SUFFIX)
 MAPPING_TEST_ID = "api_test_upload_mapping_{}".format(SUFFIX)
 RESTORE_TEST_ID = "api_test_restore_{}".format(SUFFIX)
@@ -202,7 +213,7 @@ class ApiTest(unittest.TestCase):
         api.resource(API_TEST_ID, derived_next_cursor=NEXT_CURSOR)
         args, kwargs = mocker.call_args
         self.assertTrue("derived_next_cursor" in get_params(args))
-    
+
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test08_delete_derived(self, mocker):
@@ -673,11 +684,11 @@ class ApiTest(unittest.TestCase):
     def test_root_folders_allows_next_cursor_and_max_results_parameter(self, mocker):
         """ should allow next_cursor and max_results parameters """
         mocker.return_value = MOCK_RESPONSE
-        
+
         api.root_folders(next_cursor=NEXT_CURSOR, max_results=10)
-        
+
         args, kwargs = mocker.call_args
-        
+
         self.assertTrue("next_cursor" in get_params(args))
         self.assertTrue("max_results" in get_params(args))
 
@@ -686,11 +697,11 @@ class ApiTest(unittest.TestCase):
     def test_subfolders_allows_next_cursor_and_max_results_parameter(self, mocker):
         """ should allow next_cursor and max_results parameters """
         mocker.return_value = MOCK_RESPONSE
-        
+
         api.subfolders(API_TEST_ID, next_cursor=NEXT_CURSOR, max_results=10)
-        
+
         args, kwargs = mocker.call_args
-        
+
         self.assertTrue("next_cursor" in get_params(args))
         self.assertTrue("max_results" in get_params(args))
 
@@ -794,6 +805,107 @@ class ApiTest(unittest.TestCase):
         params = get_params(mocker.call_args[0])
 
         self.assertIn("cinemagraph_analysis", params)
+
+    @patch('urllib3.request.RequestMethods.request')
+    def test_metadata_fields(self, mocker):
+        """ should allow listing metadata_fields """
+        mocker.return_value = MOCK_RESPONSE
+        api.metadata_fields()
+        args, kwargs = mocker.call_args
+        self.assertTrue(get_uri(args).endswith('/metadata_fields'))
+
+    @patch('urllib3.request.RequestMethods.request')
+    def test_metadata_field(self, mocker):
+        """ should allow getting a single metadata field """
+        mocker.return_value = MOCK_RESPONSE
+        api.metadata_field(API_TEST_EXTERNAL_ID)
+        args, kwargs = mocker.call_args
+        self.assertTrue(get_uri(args).endswith('/metadata_fields/{}'.format(API_TEST_EXTERNAL_ID)))
+
+    @patch('urllib3.request.RequestMethods.request')
+    def test_create_metadata_field(self, mocker):
+        """ should allow the user to create a metadata field """
+        mocker.return_value = MOCK_RESPONSE
+
+        api.create_metadata_field(**API_TEST_STRUCTURED_METADATA_INTEGER_FIELD)
+
+        body = get_body(mocker.call_args)
+
+        self.assertIn("label", body)
+        self.assertIn("type", body)
+        self.assertIn("default_value", body)
+        self.assertIn("external_id", body)
+
+    @patch('urllib3.request.RequestMethods.request')
+    def test_update_metadata_field(self, mocker):
+        """ should allow the user to update a metadata field """
+        mocker.return_value = MOCK_RESPONSE
+
+        api.update_metadata_field(API_TEST_EXTERNAL_ID, default_value=0)
+
+        body = get_body(mocker.call_args)
+
+        self.assertIn("default_value", body)
+
+    @patch('urllib3.request.RequestMethods.request')
+    def test_delete_metadata_field(self, mocker):
+        """ should allow the user to delete a metadata field """
+        mocker.return_value = MOCK_RESPONSE
+
+        api.delete_metadata_field(API_TEST_EXTERNAL_ID)
+
+        args, kwargs = mocker.call_args
+
+        self.assertTrue(get_uri(args).endswith('/metadata_fields/{}'.format(API_TEST_EXTERNAL_ID)))
+
+    @patch('urllib3.request.RequestMethods.request')
+    def test_update_metadata_field_datasource(self, mocker):
+        """ should allow the user to update a metadata field datasource """
+        mocker.return_value = MOCK_RESPONSE
+
+        api.update_metadata_field_datasource(API_TEST_EXTERNAL_ID,
+                                             values=API_TEST_STRUCTURED_METADATA_DATASOURCE['values'])
+
+        args, kwargs = mocker.call_args
+
+        self.assertTrue(get_uri(args).endswith('/metadata_fields/{}/datasource'.format(API_TEST_EXTERNAL_ID)))
+
+        body = get_body(mocker.call_args)
+
+        self.assertIn("values", body)
+
+    @patch('urllib3.request.RequestMethods.request')
+    def test_delete_metadata_field_datasource_entry(self, mocker):
+        """ should allow the user to delete a metadata field datasource entry by external IDs """
+        mocker.return_value = MOCK_RESPONSE
+
+        api.delete_metadata_field_datasource_entry(API_TEST_EXTERNAL_ID,
+                                                   external_ids=[API_TEST_EXTERNAL_ID_1, API_TEST_EXTERNAL_ID_2])
+
+        args, kwargs = mocker.call_args
+
+        self.assertTrue(get_uri(args).endswith('/metadata_fields/{}/datasource'.format(API_TEST_EXTERNAL_ID)))
+
+        body = get_body(mocker.call_args)
+
+        self.assertIn("external_ids", body)
+
+    @patch('urllib3.request.RequestMethods.request')
+    def test_restore_metadata_field_datasource_entry(self, mocker):
+        """ should allow the user to restore a metadata field datasource entry by external IDs """
+        mocker.return_value = MOCK_RESPONSE
+
+        api.restore_metadata_field_datasource_entry(API_TEST_EXTERNAL_ID,
+                                                    external_ids=[API_TEST_EXTERNAL_ID_1, API_TEST_EXTERNAL_ID_2])
+
+        args, kwargs = mocker.call_args
+
+        self.assertTrue(get_uri(args).endswith('/metadata_fields/{}/datasource_restore'.format(API_TEST_EXTERNAL_ID)))
+
+        body = get_body(mocker.call_args)
+
+        self.assertIn("external_ids", body)
+
 
 if __name__ == '__main__':
     unittest.main()
