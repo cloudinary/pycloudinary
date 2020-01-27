@@ -33,6 +33,8 @@ TEST_TRANS_SCALE2_STR = "c_scale,l_{},w_2.0".format(TEST_TRANS_OVERLAY_STR)
 TEST_TRANS_SCALE2_PNG = dict(crop="scale", width="2.0", format="png", overlay=TEST_TRANS_OVERLAY_STR)
 TEST_TRANS_SCALE2_PNG_STR = "c_scale,l_{},w_2.0/png".format(TEST_TRANS_OVERLAY_STR)
 
+TEST_STRUCTURED_METADATA = dict(sku=1, color="blue")
+
 UNIQUE_TAG = "up_test_uploader_{}".format(SUFFIX)
 UNIQUE_ID = UNIQUE_TAG
 TEST_DOCX_ID = "test_docx_{}".format(SUFFIX)
@@ -625,7 +627,9 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
 
     @patch('urllib3.request.RequestMethods.request')
     def test_cinemagraph_analysis(self, request_mock):
+
         """ should support cinemagraph analysis in upload and explicit"""
+
         request_mock.return_value = MOCK_RESPONSE
 
         uploader.upload(TEST_IMAGE, cinemagraph_analysis=True)
@@ -637,6 +641,32 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
 
         params = request_mock.call_args[0][2]
         self.assertIn("cinemagraph_analysis", params)
+
+    @patch('urllib3.request.RequestMethods.request')
+    def test_metadata_upload_option(self, request_mock):
+        """ should support metadata argument in upload and explicit """
+        request_mock.return_value = MOCK_RESPONSE
+
+        uploader.upload(TEST_IMAGE, metadata=TEST_STRUCTURED_METADATA)
+
+        params = request_mock.call_args[0][2]
+        self.assertIn("metadata", params)
+
+        uploader.upload(TEST_IMAGE, metadata=TEST_STRUCTURED_METADATA)
+
+        params = request_mock.call_args[0][2]
+        self.assertIn("metadata", params)
+
+    @patch('urllib3.request.RequestMethods.request')
+    def test_update_metadata(self, request_mock):
+        """ should pass metadata as to update_metadata """
+        request_mock.return_value = MOCK_RESPONSE
+
+        uploader.update_metadata([TEST_IMAGE], TEST_STRUCTURED_METADATA)
+
+        params = request_mock.call_args[0][2]
+        self.assertIn("metadata", params)
+
 
 if __name__ == '__main__':
     unittest.main()
