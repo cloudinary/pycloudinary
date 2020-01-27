@@ -204,6 +204,17 @@ def encode_context(context):
         except:
             return context
 
+    if PY3:
+        items = context.items()
+    else:
+        items = context.iteritems()
+
+    for key, value in items:
+        if isinstance(value, list):
+            context[key] = json.dumps(value).replace("\"", "\\\"")
+        elif isinstance(value, int):
+            context[key] = str(value)
+
     return "|".join(("{}={}".format(k, v.replace("=", "\\=").replace("|", "\\|"))) for k, v in iteritems(context))
 
 
