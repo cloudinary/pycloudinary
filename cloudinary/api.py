@@ -442,11 +442,13 @@ def update_metadata_field_datasource(external_id, values, **options):
 
 
 def delete_metadata_field_datasource_entry(external_id, external_ids, **options):
-    return
+    uri = ["metadata_fields", external_id, 'datasource']
+    return call_json_api('DELETE', uri, jsonBody=dict(external_ids=external_ids), **options)
 
 
 def restore_metadata_field_datasource_entry(external_id, external_ids, **options):
-    return
+    uri = ["metadata_fields", external_id, 'datasource_restore']
+    return call_json_api('POST', uri, jsonBody=dict(external_ids=external_ids), **options)
 
 
 def call_json_api(method, uri, jsonBody, **options):
