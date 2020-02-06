@@ -57,6 +57,6 @@ setup(name='cloudinary',
           "certifi"
       ],
       tests_require=[
-          "mock" + "<4" if version_info <= (3, 5) else ""
+          "mock" + ("<4" if version_info <= (3, 5) else "")
       ],
       )
