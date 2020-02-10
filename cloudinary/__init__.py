@@ -33,6 +33,7 @@ OLD_AKAMAI_SHARED_CDN = "cloudinary-a.akamaihd.net"
 AKAMAI_SHARED_CDN = "res.cloudinary.com"
 SHARED_CDN = AKAMAI_SHARED_CDN
 CL_BLANK = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+URI_SCHEME = "cloudinary"
 
 VERSION = "1.19.1"
 
@@ -112,7 +113,10 @@ class Config(object):
             self._parse_cloudinary_url(cloudinary_url)
 
     def _parse_cloudinary_url(self, cloudinary_url):
-        uri = urlparse(cloudinary_url.replace("cloudinary://", "http://"))
+        uri = urlparse(cloudinary_url)
+        if not self._is_url_scheme_valid(uri):
+            raise ValueError("Invalid CLOUDINARY_URL scheme. Expecting to start with 'cloudinary://'")
+
         for k, v in parse_qs(uri.query).items():
             if self._is_nested_key(k):
                 self._put_nested_key(k, v)
@@ -155,6 +159,19 @@ class Config(object):
         if isinstance(value, list):
             value = value[0]
         outer[last_key] = value
+
+    @staticmethod
+    def _is_url_scheme_valid(url):
+        """
+        Helper function. Validates url scheme
+
+        :param url: A named tuple containing URL components
+
+        :return: bool True on success or False on failure
+        """
+        if not url.scheme or url.scheme.lower() != URI_SCHEME:
+            return False
+        return True
 
 
 _config = Config()
