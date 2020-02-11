@@ -101,6 +101,7 @@ __SIMPLE_UPLOAD_PARAMS = [
     "auto_tagging",
     "async",
     "cinemagraph_analysis",
+    "metadata"
 ]
 
 __SERIALIZED_UPLOAD_PARAMS = [
