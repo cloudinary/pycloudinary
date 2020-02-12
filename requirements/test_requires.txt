@@ -1,1 +1,2 @@
-mock
+mock<4.0.0; python_version<"3.0"
+mock; python_version>"3.0"
