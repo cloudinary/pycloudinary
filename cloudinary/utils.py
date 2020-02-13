@@ -115,7 +115,8 @@ __SERIALIZED_UPLOAD_PARAMS = [
     "context",
     "auto_tagging",
     "responsive_breakpoints",
-    "access_control"
+    "access_control",
+    "metadata",
 ]
 
 upload_params = __SIMPLE_UPLOAD_PARAMS + __SERIALIZED_UPLOAD_PARAMS
@@ -914,6 +915,7 @@ def build_upload_params(**options):
 
     serialized_params = {
         "timestamp": now(),
+        "metadata": encode_context(options.get("metadata")),
         "transformation": generate_transformation_string(**options)[0],
         "headers": build_custom_headers(options.get("headers")),
         "eager": build_eager(options.get("eager")),
@@ -1271,7 +1273,7 @@ def check_property_enabled(f):
         if not args[0].enabled:
             return None
         return f(*args, **kwargs)
-    
+
     return wrapper
 
 

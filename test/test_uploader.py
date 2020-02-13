@@ -16,7 +16,7 @@ from cloudinary.cache import responsive_breakpoints_cache
 from cloudinary.cache.adapter.key_value_cache_adapter import KeyValueCacheAdapter
 from test.helper_test import uploader_response_mock, SUFFIX, TEST_IMAGE, get_params, TEST_ICON, TEST_DOC, \
     REMOTE_TEST_IMAGE, UTC, populate_large_file, TEST_UNICODE_IMAGE, get_uri, get_method, get_param, \
-    cleanup_test_resources_by_tag, cleanup_test_transformation, cleanup_test_resources
+    cleanup_test_resources_by_tag, cleanup_test_transformation, cleanup_test_resources, ignore_exception
 from test.cache.storage.dummy_cache_storage import DummyCacheStorage
 
 MOCK_RESPONSE = uploader_response_mock()
@@ -45,6 +45,12 @@ LARGE_FILE_SIZE = 5880138
 LARGE_CHUNK_SIZE = 5243000
 LARGE_FILE_WIDTH = 1400
 LARGE_FILE_HEIGHT = 1400
+
+METADATA_FIELD_UNIQUE_EXTERNAL_ID = 'metadata_field_external_id_{}'.format(UNIQUE_ID)
+METADATA_FIELD_VALUE = 'metadata_field_value_{}'.format(UNIQUE_ID)
+METADATA_FIELDS = {
+    METADATA_FIELD_UNIQUE_EXTERNAL_ID: METADATA_FIELD_VALUE,
+}
 
 disable_warnings()
 
@@ -80,6 +86,13 @@ class UploaderTest(unittest.TestCase):
     def setUp(self):
         cloudinary.reset_config()
 
+        with ignore_exception(suppress_traceback_classes=(exceptions.BadRequest,)):
+            api.add_metadata_field({
+                "external_id": METADATA_FIELD_UNIQUE_EXTERNAL_ID,
+                "label": METADATA_FIELD_UNIQUE_EXTERNAL_ID,
+                "type": "string",
+            })
+
     @classmethod
     def tearDownClass(cls):
         cleanup_test_resources_by_tag([
@@ -98,9 +111,12 @@ class UploaderTest(unittest.TestCase):
             ([TEST_TRANS_SCALE2_STR, TEST_TRANS_SCALE2_PNG_STR],),
         ])
 
+        with ignore_exception(suppress_traceback_classes=(exceptions.BadRequest,)):
+            api.delete_metadata_field(METADATA_FIELD_UNIQUE_EXTERNAL_ID)
+
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload(self):
-        """should successfully upload file """
+        """Should successfully upload file """
         result = uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG])
         self.assertEqual(result["width"], TEST_IMAGE_WIDTH)
         self.assertEqual(result["height"], TEST_IMAGE_HEIGHT)
@@ -109,9 +125,14 @@ class UploaderTest(unittest.TestCase):
             cloudinary.config().api_secret)
         self.assertEqual(result["signature"], expected_signature)
 
+        # Test upload with metadata
+        result = uploader.upload(TEST_IMAGE, metadata=METADATA_FIELDS, tags=[UNIQUE_TAG])
+        self.assertIn(METADATA_FIELD_UNIQUE_EXTERNAL_ID, result['metadata'])
+        self.assertEqual(result['metadata'].get(METADATA_FIELD_UNIQUE_EXTERNAL_ID), METADATA_FIELD_VALUE)
+
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_unicode_filename(self):
-        """should successfully upload file with unicode characters"""
+        """Should successfully upload file with unicode characters"""
         expected_name = os.path.splitext(os.path.basename(TEST_UNICODE_IMAGE))[0]
 
         result = uploader.upload(TEST_UNICODE_IMAGE, tags=[UNIQUE_TAG], use_filename=True, unique_filename=False)
@@ -124,7 +145,7 @@ class UploaderTest(unittest.TestCase):
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_file_io_without_filename(self):
-        """should successfully upload FileIO file """
+        """Should successfully upload FileIO file """
         with io.BytesIO() as temp_file, open(TEST_IMAGE, 'rb') as input_file:
             temp_file.write(input_file.read())
             temp_file.seek(0)
@@ -137,7 +158,7 @@ class UploaderTest(unittest.TestCase):
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_custom_filename(self):
-        """should successfully use custom filename regardless actual file path"""
+        """Should successfully use custom filename regardless actual file path"""
 
         custom_filename = UNIQUE_ID + "_" + os.path.basename(TEST_IMAGE)
 
@@ -153,11 +174,10 @@ class UploaderTest(unittest.TestCase):
 
         self.assertEqual(os.path.splitext(custom_filename)[0], result["original_filename"])
 
-
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_async(self, mocker):
-        """should pass async value """
+        """Should pass async value """
         mocker.return_value = MOCK_RESPONSE
         async_option = {"async": True}
         uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG], **async_option)
@@ -167,7 +187,7 @@ class UploaderTest(unittest.TestCase):
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_ocr(self, mocker):
-        """should pass ocr value """
+        """Should pass ocr value """
         mocker.return_value = MOCK_RESPONSE
         uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG], ocr='adv_ocr')
         args, kargs = mocker.call_args
@@ -175,7 +195,7 @@ class UploaderTest(unittest.TestCase):
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_quality_analysis(self):
-        """ should return quality analysis information """
+        """Should return quality analysis information """
         result = uploader.upload(
             TEST_IMAGE,
             tags=[UNIQUE_TAG],
@@ -198,7 +218,7 @@ class UploaderTest(unittest.TestCase):
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_quality_override(self, mocker):
-        """should pass quality_override """
+        """Should pass quality_override """
         mocker.return_value = MOCK_RESPONSE
         test_values = ['auto:advanced', 'auto:best', '80:420', 'none']
         for quality in test_values:
@@ -212,7 +232,7 @@ class UploaderTest(unittest.TestCase):
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_url(self):
-        """should successfully upload file by url """
+        """Should successfully upload file by url """
         result = uploader.upload(REMOTE_TEST_IMAGE, tags=[UNIQUE_TAG])
         self.assertEqual(result["width"], TEST_IMAGE_WIDTH)
         self.assertEqual(result["height"], TEST_IMAGE_HEIGHT)
@@ -223,7 +243,7 @@ class UploaderTest(unittest.TestCase):
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_unicode_url(self):
-        """should successfully upload file by unicode url """
+        """Should successfully upload file by unicode url """
         unicode_image_url = u"{}".format(REMOTE_TEST_IMAGE)
         result = uploader.upload(unicode_image_url, tags=[UNIQUE_TAG])
         self.assertEqual(result["width"], TEST_IMAGE_WIDTH)
@@ -235,7 +255,7 @@ class UploaderTest(unittest.TestCase):
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_data_uri(self):
-        """should successfully upload file by data url """
+        """Should successfully upload file by data url """
         result = uploader.upload(
             u"""\
 data:image/png;base64,iVBORw0KGgoAA
@@ -265,20 +285,20 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_rename(self):
-        """should successfully rename a file"""
+        """Should successfully rename a file"""
         result = uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG])
-        uploader.rename(result["public_id"], result["public_id"]+"2")
-        self.assertIsNotNone(api.resource(result["public_id"]+"2"))
+        uploader.rename(result["public_id"], result["public_id"] + "2")
+        self.assertIsNotNone(api.resource(result["public_id"] + "2"))
         result2 = uploader.upload(TEST_ICON, tags=[UNIQUE_TAG])
         self.assertRaises(exceptions.Error, uploader.rename,
-                          result2["public_id"], result["public_id"] +"2")
-        uploader.rename(result2["public_id"], result["public_id"]+"2", overwrite=True)
-        self.assertEqual(api.resource(result["public_id"]+"2")["format"], "ico")
+                          result2["public_id"], result["public_id"] + "2")
+        uploader.rename(result2["public_id"], result["public_id"] + "2", overwrite=True)
+        self.assertEqual(api.resource(result["public_id"] + "2")["format"], "ico")
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_rename_parameters(self, mocker):
-        """should support to_type, invalidate, and overwrite """
+        """Should support to_type, invalidate, and overwrite """
         mocker.return_value = MOCK_RESPONSE
         uploader.rename(TEST_IMAGE, TEST_IMAGE + "2", to_type='raw', invalidate=True, overwrite=False)
         args, kargs = mocker.call_args
@@ -286,10 +306,9 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         self.assertTrue(get_params(args)['invalidate'])
         self.assertTrue(get_params(args)['overwrite'])
 
-
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_use_filename(self):
-        """should successfully take use file name of uploaded file in public id if specified use_filename """
+        """Should successfully take use file name of uploaded file in public id if specified use_filename """
         result = uploader.upload(TEST_IMAGE, use_filename=True, tags=[UNIQUE_TAG])
         six.assertRegex(self, result["public_id"], 'logo_[a-z0-9]{6}')
         result = uploader.upload(TEST_IMAGE, use_filename=True, unique_filename=False, tags=[UNIQUE_TAG])
@@ -297,12 +316,18 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_explicit(self):
-        """should support explicit """
+        """Should support explicit """
         result = uploader.explicit("cloudinary", type="twitter_name", eager=[TEST_TRANS_SCALE2_PNG], tags=[UNIQUE_TAG])
         params = dict(TEST_TRANS_SCALE2_PNG, type="twitter_name", version=result["version"])
         url = utils.cloudinary_url("cloudinary", **params)[0]
         actual = result["eager"][0]["url"]
         self.assertEqual(parse_url(actual).path, parse_url(url).path)
+
+        # Test explicit with metadata
+        resource = uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG])
+        result_metadata = uploader.explicit(resource['public_id'], type="upload", metadata=METADATA_FIELDS, tags=[UNIQUE_TAG])
+        self.assertIn(METADATA_FIELD_UNIQUE_EXTERNAL_ID, result_metadata['metadata'])
+        self.assertEqual(result_metadata['metadata'].get(METADATA_FIELD_UNIQUE_EXTERNAL_ID), METADATA_FIELD_VALUE)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_explicit_responsive_breakpoints_cache(self):
@@ -318,26 +343,68 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         self.assertEqual(self.rbp_values, cache_value)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_update_metadata(self):
+        metadata = {METADATA_FIELD_UNIQUE_EXTERNAL_ID: "test"}
+        test_image = uploader.upload(TEST_IMAGE, metadata=metadata, tags=[UNIQUE_TAG])
+        public_ids = [test_image['public_id']]
+
+        result = uploader.update_metadata(METADATA_FIELDS, public_ids)
+
+        self.assertEqual(result, {
+            "public_ids": public_ids,
+        })
+
+    def test_upload_with_metadata(self):
+        """Upload should support `metadata` parameter"""
+        result = uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG], metadata=METADATA_FIELDS)
+        self.assertEqual(METADATA_FIELD_VALUE, result['metadata'][METADATA_FIELD_UNIQUE_EXTERNAL_ID])
+
+    def test_explicit_with_metadata(self):
+        """Explicit should support `metadata` parameter"""
+        resource = uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG])
+        result = uploader.explicit(resource['public_id'], type="upload", metadata=METADATA_FIELDS)
+        self.assertEqual(METADATA_FIELD_VALUE, result['metadata'][METADATA_FIELD_UNIQUE_EXTERNAL_ID])
+
+    def test_uploader_update_metadata(self):
+        """Should edit metadata of an existing resource"""
+        resource = uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG])
+        result = uploader.update_metadata(METADATA_FIELDS, resource['public_id'])
+        self.assertEqual(len(result['public_ids']), 1)
+        self.assertIn(resource['public_id'], result['public_ids'])
+
+    def test_uploader_update_metadata_on_multiple_resources(self):
+        """Should edit metadata of multiple existing resources"""
+        resource1 = uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG])
+        resource2 = uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG])
+        result = uploader.update_metadata(METADATA_FIELDS, [
+            resource1['public_id'],
+            resource2['public_id']
+        ])
+        self.assertEqual(len(result['public_ids']), 2)
+        self.assertIn(resource1['public_id'], result['public_ids'])
+        self.assertIn(resource2['public_id'], result['public_ids'])
+
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_eager(self):
-        """should support eager """
+        """Should support eager """
         uploader.upload(TEST_IMAGE, eager=[TEST_TRANS_SCALE2], tags=[UNIQUE_TAG])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_header(self):
-        """should support headers """
+        """Should support headers """
         uploader.upload(TEST_IMAGE, headers=["Link: 1"], tags=[UNIQUE_TAG])
         uploader.upload(TEST_IMAGE, headers={"Link": "1"}, tags=[UNIQUE_TAG])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_text(self):
-        """should successfully generate text image """
+        """Should successfully generate text image """
         result = uploader.text("hello world", public_id=TEXT_ID)
         self.assertGreater(result["width"], 1)
         self.assertGreater(result["height"], 1)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_tags(self):
-        """should successfully upload file """
+        """Should successfully upload file """
         result = uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG])
         result2 = uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG])
         uploader.add_tag("tag1", [result["public_id"], result2["public_id"]])
@@ -352,7 +419,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_remove_all_tags(self):
-        """should successfully remove all tags"""
+        """Should successfully remove all tags"""
         result = uploader.upload(TEST_IMAGE, public_id=TEST_ID1)
         result2 = uploader.upload(TEST_IMAGE, public_id=TEST_ID2)
         uploader.add_tag("tag1", [result["public_id"], result2["public_id"]])
@@ -365,24 +432,24 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_allowed_formats(self):
-        """ should allow whitelisted formats if allowed_formats """
+        """Should allow whitelisted formats if allowed_formats """
         result = uploader.upload(TEST_IMAGE, allowed_formats=['png'], tags=[UNIQUE_TAG])
         self.assertEqual(result["format"], "png")
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_allowed_formats_with_illegal_format(self):
-        """should prevent non whitelisted formats from being uploaded if allowed_formats is specified"""
+        """Should prevent non whitelisted formats from being uploaded if allowed_formats is specified"""
         self.assertRaises(exceptions.Error, uploader.upload, TEST_IMAGE, allowed_formats=['jpg'])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_allowed_formats_with_format(self):
-        """should allow non whitelisted formats if type is specified and convert to that type"""
+        """Should allow non whitelisted formats if type is specified and convert to that type"""
         result = uploader.upload(TEST_IMAGE, allowed_formats=['jpg'], format='jpg', tags=[UNIQUE_TAG])
         self.assertEqual("jpg", result["format"])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_face_coordinates(self):
-        """should allow sending face coordinates"""
+        """Should allow sending face coordinates"""
         coordinates = [[120, 30, 109, 150], [121, 31, 110, 151]]
         result_coordinates = [[120, 30, 109, 51], [121, 31, 110, 51]]
         result = uploader.upload(TEST_IMAGE, face_coordinates=coordinates,
@@ -399,7 +466,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_context(self):
-        """should allow sending context"""
+        """Should allow sending context"""
         context = {"caption": "some caption", "alt": "alternative|alt=a"}
         result = uploader.upload(TEST_IMAGE, context=context, tags=[UNIQUE_TAG])
         info = api.resource(result["public_id"], context=True)
@@ -407,7 +474,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_add_context(self):
-        """should allow adding context"""
+        """Should allow adding context"""
         context = {"caption": "some caption", "alt": "alternative|alt=a"}
         result = uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG])
         info = api.resource(result["public_id"], context=True)
@@ -418,7 +485,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_remove_all_context(self):
-        """should allow removing all context"""
+        """Should allow removing all context"""
         context = {"caption": "some caption", "alt": "alternative|alt=a"}
         result = uploader.upload(TEST_IMAGE, context=context, tags=[UNIQUE_TAG])
         info = api.resource(result["public_id"], context=True)
@@ -429,7 +496,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_manual_moderation(self):
-        """ should support setting manual moderation status """
+        """Should support setting manual moderation status """
         resource = uploader.upload(TEST_IMAGE, moderation="manual", tags=[UNIQUE_TAG])
 
         self.assertEqual(resource["moderation"][0]["status"], "pending")
@@ -437,26 +504,26 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_raw_conversion(self):
-        """ should support requesting raw_convert """
+        """Should support requesting raw_convert """
         with six.assertRaisesRegex(self, exceptions.Error, 'Raw convert is invalid'):
             uploader.upload(TEST_DOC, public_id=TEST_DOCX_ID, raw_convert="illegal",
                             resource_type="raw", tags=[UNIQUE_TAG])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_categorization(self):
-        """ should support requesting categorization """
+        """Should support requesting categorization """
         with six.assertRaisesRegex(self, exceptions.Error, 'is not valid'):
             uploader.upload(TEST_IMAGE, categorization="illegal", tags=[UNIQUE_TAG])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_detection(self):
-        """ should support requesting detection """
+        """Should support requesting detection """
         with six.assertRaisesRegex(self, exceptions.Error, 'Detection is invalid'):
             uploader.upload(TEST_IMAGE, detection="illegal", tags=[UNIQUE_TAG])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_large(self):
-        """ should support uploading large files """
+        """Should support uploading large files """
         filename = UNIQUE_ID + "_cld_upload_large"
         with tempfile.NamedTemporaryFile(prefix=filename, suffix='.bmp') as temp_file:
             populate_large_file(temp_file, LARGE_FILE_SIZE)
@@ -518,7 +585,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_preset(self, mocker):
-        """ should support unsigned uploading using presets """
+        """Should support unsigned uploading using presets """
         mocker.return_value = MOCK_RESPONSE
 
         uploader.unsigned_upload(TEST_IMAGE, API_TEST_PRESET)
@@ -533,7 +600,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_background_removal(self):
-        """ should support requesting background_removal """
+        """Should support requesting background_removal """
         with six.assertRaisesRegex(self, exceptions.Error, 'is invalid'):
             uploader.upload(TEST_IMAGE, background_removal="illegal", tags=[UNIQUE_TAG])
 
@@ -625,7 +692,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
 
     @patch('urllib3.request.RequestMethods.request')
     def test_cinemagraph_analysis(self, request_mock):
-        """ should support cinemagraph analysis in upload and explicit"""
+        """Should support cinemagraph analysis in upload and explicit"""
         request_mock.return_value = MOCK_RESPONSE
 
         uploader.upload(TEST_IMAGE, cinemagraph_analysis=True)
@@ -637,6 +704,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
 
         params = request_mock.call_args[0][2]
         self.assertIn("cinemagraph_analysis", params)
+
 
 if __name__ == '__main__':
     unittest.main()

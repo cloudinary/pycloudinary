@@ -136,6 +136,33 @@ def rename(from_public_id, to_public_id, **options):
     return call_api("rename", params, **options)
 
 
+def update_metadata(metadata, public_ids, **options):
+    """
+    Populates metadata fields with the given values. Existing values will be overwritten.
+
+    Any metadata-value pairs given are merged with any existing metadata-value pairs
+    (an empty value for an existing metadata field clears the value)
+
+    :param metadata: A list of custom metadata fields (by external_id) and the values to assign to each
+                     of them.
+    :param public_ids: An array of Public IDs of assets uploaded to Cloudinary.
+    :param options: Options such as
+            *resource_type* (the type of file. Default: image. Valid values: image, raw, or video) and
+            *type* (The storage type. Default: upload. Valid values: upload, private, or authenticated.)
+
+    :return: A list of public IDs that were updated
+    :rtype: mixed
+    """
+    params = {
+        "timestamp": utils.now(),
+        "metadata": utils.encode_context(metadata),
+        "public_ids": utils.build_array(public_ids),
+        "type": options.get("type")
+    }
+
+    return call_api("metadata", params, **options)
+
+
 def explicit(public_id, **options):
     params = utils.build_upload_params(**options)
     params["public_id"] = public_id

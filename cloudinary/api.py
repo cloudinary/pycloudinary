@@ -11,7 +11,6 @@ from urllib3.exceptions import HTTPError
 import cloudinary
 from cloudinary import utils
 from cloudinary.exceptions import (
-    Error,
     BadRequest,
     AuthorizationRequired,
     NotAllowed,
@@ -22,7 +21,6 @@ from cloudinary.exceptions import (
 )
 
 logger = cloudinary.logger
-
 
 EXCEPTION_CODES = {
     400: BadRequest,
@@ -169,8 +167,7 @@ def delete_derived_resources(derived_resource_ids, **options):
 def delete_derived_by_transformation(public_ids, transformations,
                                      resource_type='image', type='upload', invalidate=None,
                                      **options):
-    """
-    Delete derived resources of public ids, identified by transformations
+    """Delete derived resources of public ids, identified by transformations
 
     :param public_ids: the base resources
     :type public_ids: list of str
@@ -314,15 +311,14 @@ def subfolders(of_folder_path, **options):
 
 
 def delete_folder(path, **options):
-    """
-    Deletes folder
+    """Deletes folder
 
     Deleted folder must be empty, but can have descendant empty sub folders
 
     :param path: The folder to delete
     :param options: Additional options
 
-    :return: Response
+    :rtype: Response
     """
     return call_api("delete", ["folders", path], {}, **options)
 
@@ -403,6 +399,21 @@ def call_json_api(method, uri, jsonBody, **options):
 
 def call_api(method, uri, params, **options):
     return _call_api(method, uri, params=params, **options)
+
+
+def call_metadata_api(method, uri, params, **options):
+    """Private function that assists with performing an API call to the
+    metadata_fields part of the Admin API
+
+    :param method: The HTTP method. Valid methods: get, post, put, delete
+    :param uri: REST endpoint of the API (without 'metadata_fields')
+    :param params: Query/body parameters passed to the method
+    :param options: Additional options
+
+    :rtype: Response
+    """
+    uri = ["metadata_fields"] + (uri or [])
+    return call_json_api(method, uri, params, **options)
 
 
 def _call_api(method, uri, params=None, body=None, headers=None, **options):
@@ -488,3 +499,155 @@ def __delete_resource_params(options, **params):
              **only(options, "keep_original", "next_cursor", "invalidate"))
     p.update(params)
     return p
+
+
+def list_metadata_fields(**options):
+    """Returns a list of all metadata field definitions
+
+    See: `Get metadata fields API reference <https://cloudinary.com/documentation/admin_api#get_metadata_fields>`_
+
+    :param options: Additional options
+
+    :rtype: Response
+    """
+    return call_metadata_api("get", [], {}, **options)
+
+
+def metadata_field_by_field_id(field_external_id, **options):
+    """Gets a metadata field by external id
+
+    See: `Get metadata field by external ID API reference
+    <https://cloudinary.com/documentation/admin_api#get_a_metadata_field_by_external_id>`_
+
+    :param field_external_id: The ID of the metadata field to retrieve
+    :param options: Additional options
+
+    :rtype: Response
+    """
+    uri = [field_external_id]
+    return call_metadata_api("get", uri, {}, **options)
+
+
+def add_metadata_field(field, **options):
+    """Creates a new metadata field definition
+
+    See: `Create metadata field API reference <https://cloudinary.com/documentation/admin_api#create_a_metadata_field>`_
+
+    :param field: The field to add
+    :param options: Additional options
+
+    :rtype: Response
+    """
+    params = only(field, "type", "external_id", "label", "mandatory",
+                  "default_value", "validation", "datasource")
+    return call_metadata_api("post", [], params, **options)
+
+
+def update_metadata_field(field_external_id, field, **options):
+    """Updates a metadata field by external id
+
+    Updates a metadata field definition (partially, no need to pass the entire
+    object) passed as JSON data.
+
+    See `Generic structure of a metadata field
+    <https://cloudinary.com/documentation/admin_api#generic_structure_of_a_metadata_field>`_ for details.
+
+    :param field_external_id: The id of the metadata field to update
+    :param field: The field definition
+    :param options: Additional options
+
+    :rtype: Response
+    """
+    uri = [field_external_id]
+    params = only(field, "label", "mandatory", "default_value", "validation")
+    return call_metadata_api("put", uri, params, **options)
+
+
+def delete_metadata_field(field_external_id, **options):
+    """Deletes a metadata field definition.
+    The field should no longer be considered a valid candidate for all other endpoints
+
+    See: `Delete metadata field API reference
+    <https://cloudinary.com/documentation/admin_api#delete_a_metadata_field_by_external_id>`_
+
+    :param field_external_id: The external id of the field to delete
+    :param options: Additional options
+
+    :return: An array with a "message" key. "ok" value indicates a successful deletion.
+    :rtype: Response
+    """
+    uri = [field_external_id]
+    return call_metadata_api("delete", uri, {}, **options)
+
+
+def delete_datasource_entries(field_external_id, entries_external_id, **options):
+    """Deletes entries in a metadata field datasource
+
+    Deletes (blocks) the datasource entries for a specified metadata field
+    definition. Sets the state of the entries to inactive. This is a soft delete,
+    the entries still exist under the hood and can be activated again with the
+    restore datasource entries method.
+
+    See: `Delete entries in a metadata field datasource API reference
+    <https://cloudinary.com/documentation/admin_api#delete_entries_in_a_metadata_field_datasource>`_
+
+    :param field_external_id: The id of the field to update
+    :param  entries_external_id: The ids of all the entries to delete from the
+                                 datasource
+    :param options: Additional options
+
+    :rtype: Response
+    """
+    uri = [field_external_id, "datasource"]
+    params = {"external_ids": entries_external_id}
+    return call_metadata_api("delete", uri, params, **options)
+
+
+def update_metadata_field_datasource(field_external_id, entries_external_id, **options):
+    """Updates a metadata field datasource
+
+    Updates the datasource of a supported field type (currently only enum and set),
+    passed as JSON data. The update is partial: datasource entries with an
+    existing external_id will be updated and entries with new external_id's (or
+    without external_id's) will be appended.
+
+    See: `Update a metadata field datasource API reference
+    <https://cloudinary.com/documentation/admin_api#update_a_metadata_field_datasource>`_
+
+    :param field_external_id: The external id of the field to update
+    :param entries_external_id:
+    :param options: Additional options
+
+    :rtype: Response
+    """
+    values = []
+    for item in entries_external_id:
+        external = only(item, "external_id", "value")
+        if external:
+            values.append(external)
+
+    uri = [field_external_id, "datasource"]
+    params = {"values": values}
+    return call_metadata_api("put", uri, params, **options)
+
+
+def restore_metadata_field_datasource(field_external_id, entries_external_ids, **options):
+    """Restores entries in a metadata field datasource
+
+    Restores (unblocks) any previously deleted datasource entries for a specified
+    metadata field definition.
+    Sets the state of the entries to active.
+
+    See: `Restore entries in a metadata field datasource API reference
+    <https://cloudinary.com/documentation/admin_api#restore_entries_in_a_metadata_field_datasource>`_
+
+    :param field_external_id: The ID of the metadata field
+    :param entries_external_ids: An array of IDs of datasource entries to restore
+                                 (unblock)
+    :param options: Additional options
+
+    :rtype: Response
+    """
+    uri = [field_external_id, 'datasource_restore']
+    params = {"external_ids": entries_external_ids}
+    return call_metadata_api("post", uri, params, **options)
