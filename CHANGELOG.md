@@ -1,4 +1,18 @@
 
+1.20.0 / 2020-02-13
+===================
+
+New functionality and features
+------------------------------
+
+  * Add structured metadata support
+
+Other Changes
+-------------
+
+  * Verify protocol in CLOUDINARY_URL
+  * Move `mock` library to `tests_require`
+
 1.19.1 / 2019-12-08
 ===================
 
