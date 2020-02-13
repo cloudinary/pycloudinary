@@ -1,3 +1,5 @@
+from sys import version_info
+
 from setuptools import find_packages, setup
 
 version = "1.19.1"
@@ -51,8 +53,10 @@ setup(name='cloudinary',
       test_suite="test",
       install_requires=[
           "six",
-          "mock",
           "urllib3",
           "certifi"
+      ],
+      tests_require=[
+          "mock" + ("<4" if version_info < (3, 6) else "")
       ],
       )
