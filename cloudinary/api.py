@@ -548,11 +548,9 @@ def update_metadata_field(field_external_id, field, **options):
 
     Updates a metadata field definition (partially, no need to pass the entire
     object) passed as JSON data.
+
     See `Generic structure of a metadata field
     <https://cloudinary.com/documentation/admin_api#generic_structure_of_a_metadata_field>`_ for details.
-
-    See: `Generic structure of a metadata field} for details
-    <https://cloudinary.com/documentation/admin_api#generic_structure_of_a_metadata_field>`_
 
     :param field_external_id: The id of the metadata field to update
     :param field: The field definition
@@ -590,7 +588,8 @@ def delete_datasource_entries(field_external_id, entries_external_id, **options)
     the entries still exist under the hood and can be activated again with the
     restore datasource entries method.
 
-    See: `Delete entries in a metadata field datasource API reference <https://cloudinary.com/documentation/admin_api#delete_entries_in_a_metadata_field_datasource>`_
+    See: `Delete entries in a metadata field datasource API reference
+    <https://cloudinary.com/documentation/admin_api#delete_entries_in_a_metadata_field_datasource>`_
 
     :param field_external_id: The id of the field to update
     :param  entries_external_id: The ids of all the entries to delete from the
@@ -612,7 +611,8 @@ def update_metadata_field_datasource(field_external_id, entries_external_id, **o
     existing external_id will be updated and entries with new external_id's (or
     without external_id's) will be appended.
 
-    See: `Update a metadata field datasource API reference <https://cloudinary.com/documentation/admin_api#update_a_metadata_field_datasource>`_
+    See: `Update a metadata field datasource API reference
+    <https://cloudinary.com/documentation/admin_api#update_a_metadata_field_datasource>`_
 
     :param field_external_id: The external id of the field to update
     :param entries_external_id:

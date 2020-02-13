@@ -127,7 +127,8 @@ class MetadataTest(unittest.TestCase):
     def assert_metadata_field(self, metadata_field, field_type=None, values=None):
         """Asserts that a given object fits the generic structure of a metadata field
 
-        See: `Generic structure of a metadata field in API reference <https://cloudinary.com/documentation/admin_api#generic_structure_of_a_metadata_field>`_
+        See: `Generic structure of a metadata field in API reference
+        <https://cloudinary.com/documentation/admin_api#generic_structure_of_a_metadata_field>`_
 
         :param metadata_field: The object to test
         :param field_type: The type of metadata field we expect
@@ -157,7 +158,7 @@ class MetadataTest(unittest.TestCase):
     def assert_metadata_field_datasource(self, datasource):
         """Asserts that a given object fits the generic structure of a metadata field datasource
 
-        See: `https://cloudinary.com/documentation/admin_api#datasource_values <Datasource values in Admin API>`_
+        See: `Datasource values in Admin API <https://cloudinary.com/documentation/admin_api#datasource_values>`_
 
         :param datasource:
         """
