@@ -1,0 +1,72 @@
+import json
+
+import urllib3
+
+import cloudinary
+from cloudinary.api_client.execute_request import execute_request
+from cloudinary.utils import process_params, get_http_connector
+
+
+logger = cloudinary.logger
+_http = get_http_connector(cloudinary.config(), cloudinary.CERT_KWARGS)
+
+
+def call_metadata_api(method, uri, params, **options):
+    """Private function that assists with performing an API call to the
+    metadata_fields part of the Admin API
+    :param method: The HTTP method. Valid methods: get, post, put, delete
+    :param uri: REST endpoint of the API (without 'metadata_fields')
+    :param params: Query/body parameters passed to the method
+    :param options: Additional options
+    :rtype: Response
+    """
+    uri = ["metadata_fields"] + (uri or [])
+    return call_json_api(method, uri, params, **options)
+
+
+def call_json_api(method, uri, jsonBody, **options):
+    logger.debug(jsonBody)
+    data = json.dumps(jsonBody).encode('utf-8')
+    return _call_api(method, uri, body=data,
+                     headers={'Content-Type': 'application/json'}, **options)
+
+
+def call_api(method, uri, params, **options):
+    return _call_api(method, uri, params=params, **options)
+
+
+def _call_api(method, uri, params=None, body=None, headers=None, **options):
+    prefix = options.pop("upload_prefix",
+                         cloudinary.config().upload_prefix) or "https://api.cloudinary.com"
+    cloud_name = options.pop("cloud_name", cloudinary.config().cloud_name)
+    if not cloud_name:
+        raise Exception("Must supply cloud_name")
+    api_key = options.pop("api_key", cloudinary.config().api_key)
+    if not api_key:
+        raise Exception("Must supply api_key")
+    api_secret = options.pop("api_secret", cloudinary.config().api_secret)
+    if not cloud_name:
+        raise Exception("Must supply api_secret")
+    api_url = "/".join([prefix, cloudinary.API_VERSION, cloud_name] + uri)
+
+    processed_params = process_params(params)
+
+    # Add authentication
+    req_headers = urllib3.make_headers(
+        basic_auth="{0}:{1}".format(api_key, api_secret),
+        user_agent=cloudinary.get_user_agent()
+    )
+    if headers is not None:
+        req_headers.update(headers)
+    kw = {}
+    if 'timeout' in options:
+        kw['timeout'] = options['timeout']
+    if body is not None:
+        kw['body'] = body
+
+    return execute_request(http_connector=_http,
+                           method=method,
+                           params=processed_params,
+                           req_headers=req_headers,
+                           api_url=api_url,
+                           **kw)

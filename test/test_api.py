@@ -11,6 +11,7 @@ from cloudinary import api, uploader, utils
 from test.helper_test import SUFFIX, TEST_IMAGE, get_uri, get_params, get_list_param, get_param, TEST_DOC, get_method, \
     UNIQUE_TAG, api_response_mock, ignore_exception, cleanup_test_resources_by_tag, cleanup_test_transformation, \
     cleanup_test_resources, UNIQUE_TEST_FOLDER
+from cloudinary.exceptions import BadRequest, NotFound
 
 MOCK_RESPONSE = api_response_mock()
 
@@ -66,7 +67,7 @@ class ApiTest(unittest.TestCase):
             (UNIQUE_API_TAG, {'resource_type': 'raw'}),
         ])
 
-        with ignore_exception(suppress_traceback_classes=(api.NotFound,)):
+        with ignore_exception(suppress_traceback_classes=(NotFound,)):
             api.delete_upload_mapping(MAPPING_TEST_ID)
 
     def test_http_connector(self):
@@ -450,7 +451,7 @@ class ApiTest(unittest.TestCase):
         api.create_transformation(API_TEST_TRANS2, {"crop": "scale", "width": 103})
         api.transformation(API_TEST_TRANS2)
         api.delete_transformation(API_TEST_TRANS2)
-        self.assertRaises(api.NotFound, api.transformation, API_TEST_TRANS2)
+        self.assertRaises(NotFound, api.transformation, API_TEST_TRANS2)
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -506,19 +507,19 @@ class ApiTest(unittest.TestCase):
     def test22_raw_conversion(self):
         """ should support requesting raw_convert """
         resource = uploader.upload(TEST_DOC, resource_type="raw", tags=[UNIQUE_API_TAG])
-        with six.assertRaisesRegex(self, api.BadRequest, 'Illegal value'):
+        with six.assertRaisesRegex(self, BadRequest, 'Illegal value'):
             api.update(resource["public_id"], raw_convert="illegal", resource_type="raw")
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test23_categorization(self):
         """ should support requesting categorization """
-        with six.assertRaisesRegex(self, api.BadRequest, 'Illegal value'):
+        with six.assertRaisesRegex(self, BadRequest, 'Illegal value'):
             api.update(API_TEST_ID, categorization="illegal")
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test24_detection(self):
         """ should support requesting detection """
-        with six.assertRaisesRegex(self, api.BadRequest, 'Illegal value'):
+        with six.assertRaisesRegex(self, BadRequest, 'Illegal value'):
             api.update(API_TEST_ID, detection="illegal")
 
     @patch('urllib3.request.RequestMethods.request')
@@ -622,7 +623,7 @@ class ApiTest(unittest.TestCase):
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test32_background_removal(self):
         """ should support requesting background_removal """
-        with six.assertRaisesRegex(self, api.BadRequest, 'Illegal value'):
+        with six.assertRaisesRegex(self, BadRequest, 'Illegal value'):
             api.update(API_TEST_ID, background_removal="illegal")
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -641,7 +642,7 @@ class ApiTest(unittest.TestCase):
         result = api.subfolders("{}1".format(PREFIX))
         self.assertEqual(result["folders"][0]["path"], "{}1/test_subfolder1".format(PREFIX))
         self.assertEqual(result["folders"][1]["path"], "{}1/test_subfolder2".format(PREFIX))
-        with six.assertRaisesRegex(self, api.NotFound):
+        with six.assertRaisesRegex(self, NotFound):
             api.subfolders(PREFIX)
 
     @patch('urllib3.request.RequestMethods.request')

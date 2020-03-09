@@ -14,6 +14,7 @@ from urllib3 import HTTPResponse
 from urllib3._collections import HTTPHeaderDict
 
 from cloudinary import utils, logger, api
+from cloudinary.exceptions import NotFound
 
 SUFFIX = os.environ.get('TRAVIS_JOB_ID') or random.randint(10000, 99999)
 
@@ -180,5 +181,5 @@ def cleanup_test_transformation(params):
     for transformations_with_options in params:
         options = transformations_with_options[1] if len(transformations_with_options) > 1 else {}
         for transformation in transformations_with_options[0]:
-            with ignore_exception(suppress_traceback_classes=(api.NotFound,)):
+            with ignore_exception(suppress_traceback_classes=(NotFound,)):
                 api.delete_transformation(transformation, **options)

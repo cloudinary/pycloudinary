@@ -189,7 +189,7 @@ def encode_double_array(array):
     if len(array) > 0 and isinstance(array[0], list):
         return "|".join([",".join([str(i) for i in build_array(inner)]) for inner in array])
     else:
-        return ",".join([str(i) for i in array])
+        return encode_array([str(i) for i in array])
 
 
 def encode_dict(arg):
@@ -486,6 +486,19 @@ def process_radius(param):
         return ':'.join(normalize_expression(t) for t in param)
 
     return str(param)
+
+
+def process_params(params):
+    processed_params = None
+    if isinstance(params, dict):
+        processed_params = {}
+        for key, value in params.items():
+            if isinstance(value, list) or isinstance(value, tuple):
+                value_list = {"{}[{}]".format(key, i): i_value for i, i_value in enumerate(value)}
+                processed_params.update(value_list)
+            elif value:
+                processed_params[key] = value
+    return processed_params
 
 
 def cleanup_params(params):
@@ -919,8 +932,8 @@ def build_upload_params(**options):
         "transformation": generate_transformation_string(**options)[0],
         "headers": build_custom_headers(options.get("headers")),
         "eager": build_eager(options.get("eager")),
-        "tags": options.get("tags") and ",".join(build_array(options["tags"])),
-        "allowed_formats": options.get("allowed_formats") and ",".join(build_array(options["allowed_formats"])),
+        "tags": options.get("tags") and encode_array(build_array(options["tags"])),
+        "allowed_formats": options.get("allowed_formats") and encode_array(build_array(options["allowed_formats"])),
         "face_coordinates": encode_double_array(options.get("face_coordinates")),
         "custom_coordinates": encode_double_array(options.get("custom_coordinates")),
         "context": encode_context(options.get("context")),
@@ -1273,7 +1286,7 @@ def check_property_enabled(f):
         if not args[0].enabled:
             return None
         return f(*args, **kwargs)
-
+    
     return wrapper
 
 
@@ -1332,3 +1345,9 @@ def get_http_connector(conf, options):
         return ProxyManager(conf.api_proxy, **options)
     else:
         return PoolManager(**options)
+
+
+def encode_array(obj):
+    if isinstance(obj, list):
+        return ",".join(obj)
+    return obj

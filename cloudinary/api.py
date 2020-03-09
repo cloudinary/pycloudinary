@@ -10,39 +10,7 @@ from urllib3.exceptions import HTTPError
 
 import cloudinary
 from cloudinary import utils
-from cloudinary.exceptions import (
-    BadRequest,
-    AuthorizationRequired,
-    NotAllowed,
-    NotFound,
-    AlreadyExists,
-    RateLimited,
-    GeneralError
-)
-
-logger = cloudinary.logger
-
-EXCEPTION_CODES = {
-    400: BadRequest,
-    401: AuthorizationRequired,
-    403: NotAllowed,
-    404: NotFound,
-    409: AlreadyExists,
-    420: RateLimited,
-    500: GeneralError
-}
-
-
-class Response(dict):
-    def __init__(self, result, response, **kwargs):
-        super(Response, self).__init__(**kwargs)
-        self.update(result)
-        self.rate_limit_allowed = int(response.headers["x-featureratelimit-limit"])
-        self.rate_limit_reset_at = email.utils.parsedate(response.headers["x-featureratelimit-reset"])
-        self.rate_limit_remaining = int(response.headers["x-featureratelimit-remaining"])
-
-
-_http = utils.get_http_connector(cloudinary.config(), cloudinary.CERT_KWARGS)
+from cloudinary.api_client.call_api import call_api, call_metadata_api
 
 
 def ping(**options):
@@ -388,90 +356,6 @@ def update_streaming_profile(name, **options):
     uri = ["streaming_profiles", name]
     params = __prepare_streaming_profile_params(**options)
     return call_api('PUT', uri, params, **options)
-
-
-def call_json_api(method, uri, jsonBody, **options):
-    logger.debug(jsonBody)
-    data = json.dumps(jsonBody).encode('utf-8')
-    return _call_api(method, uri, body=data,
-                     headers={'Content-Type': 'application/json'}, **options)
-
-
-def call_api(method, uri, params, **options):
-    return _call_api(method, uri, params=params, **options)
-
-
-def call_metadata_api(method, uri, params, **options):
-    """Private function that assists with performing an API call to the
-    metadata_fields part of the Admin API
-
-    :param method: The HTTP method. Valid methods: get, post, put, delete
-    :param uri: REST endpoint of the API (without 'metadata_fields')
-    :param params: Query/body parameters passed to the method
-    :param options: Additional options
-
-    :rtype: Response
-    """
-    uri = ["metadata_fields"] + (uri or [])
-    return call_json_api(method, uri, params, **options)
-
-
-def _call_api(method, uri, params=None, body=None, headers=None, **options):
-    prefix = options.pop("upload_prefix",
-                         cloudinary.config().upload_prefix) or "https://api.cloudinary.com"
-    cloud_name = options.pop("cloud_name", cloudinary.config().cloud_name)
-    if not cloud_name:
-        raise Exception("Must supply cloud_name")
-    api_key = options.pop("api_key", cloudinary.config().api_key)
-    if not api_key:
-        raise Exception("Must supply api_key")
-    api_secret = options.pop("api_secret", cloudinary.config().api_secret)
-    if not cloud_name:
-        raise Exception("Must supply api_secret")
-    api_url = "/".join([prefix, "v1_1", cloud_name] + uri)
-
-    processed_params = None
-    if isinstance(params, dict):
-        processed_params = {}
-        for key, value in params.items():
-            if isinstance(value, list) or isinstance(value, tuple):
-                value_list = {"{}[{}]".format(key, i): i_value for i, i_value in enumerate(value)}
-                processed_params.update(value_list)
-            elif value:
-                processed_params[key] = value
-
-    # Add authentication
-    req_headers = urllib3.make_headers(
-        basic_auth="{0}:{1}".format(api_key, api_secret),
-        user_agent=cloudinary.get_user_agent()
-    )
-    if headers is not None:
-        req_headers.update(headers)
-    kw = {}
-    if 'timeout' in options:
-        kw['timeout'] = options['timeout']
-    if body is not None:
-        kw['body'] = body
-    try:
-        response = _http.request(method.upper(), api_url, processed_params, req_headers, **kw)
-        body = response.data
-    except HTTPError as e:
-        raise GeneralError("Unexpected error {0}", e.message)
-    except socket.error as e:
-        raise GeneralError("Socket Error: %s" % (str(e)))
-
-    try:
-        result = json.loads(body.decode('utf-8'))
-    except Exception as e:
-        # Error is parsing json
-        raise GeneralError("Error parsing server response (%d) - %s. Got - %s" % (response.status, body, e))
-
-    if "error" in result:
-        exception_class = EXCEPTION_CODES.get(response.status) or Exception
-        exception_class = exception_class
-        raise exception_class("Error {0} - {1}".format(response.status, result["error"]["message"]))
-
-    return Response(result, response)
 
 
 def only(source, *keys):
