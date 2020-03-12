@@ -10,7 +10,20 @@ from urllib3.exceptions import HTTPError
 
 import cloudinary
 from cloudinary import utils
-from cloudinary.api_client.call_api import call_api, call_metadata_api
+from cloudinary.api_client.call_api import (
+    call_api,
+    call_metadata_api,
+    call_json_api
+)
+from cloudinary.exceptions import (
+    BadRequest,
+    AuthorizationRequired,
+    NotAllowed,
+    NotFound,
+    AlreadyExists,
+    RateLimited,
+    GeneralError
+)
 
 
 def ping(**options):

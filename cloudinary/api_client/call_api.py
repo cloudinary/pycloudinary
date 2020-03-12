@@ -4,7 +4,7 @@ import urllib3
 
 import cloudinary
 from cloudinary.api_client.execute_request import execute_request
-from cloudinary.utils import process_params, get_http_connector
+from cloudinary.utils import get_http_connector
 
 
 logger = cloudinary.logger
@@ -45,11 +45,9 @@ def _call_api(method, uri, params=None, body=None, headers=None, **options):
     if not api_key:
         raise Exception("Must supply api_key")
     api_secret = options.pop("api_secret", cloudinary.config().api_secret)
-    if not cloud_name:
+    if not api_secret:
         raise Exception("Must supply api_secret")
     api_url = "/".join([prefix, cloudinary.API_VERSION, cloud_name] + uri)
-
-    processed_params = process_params(params)
 
     # Add authentication
     req_headers = urllib3.make_headers(
@@ -66,7 +64,7 @@ def _call_api(method, uri, params=None, body=None, headers=None, **options):
 
     return execute_request(http_connector=_http,
                            method=method,
-                           params=processed_params,
+                           params=params,
                            req_headers=req_headers,
                            api_url=api_url,
                            **kw)

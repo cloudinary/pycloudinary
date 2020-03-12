@@ -1,5 +1,5 @@
-from cloudinary.api_client.call_account_api import call_account_api
-from cloudinary.utils import encode_array
+from cloudinary.api_client.call_account_api import _call_account_api
+from cloudinary.utils import encode_list
 
 
 SUB_ACCOUNTS_SUB_PATH = "sub_accounts"
@@ -37,7 +37,7 @@ def sub_accounts(enabled=None, ids=None, prefix=None, **options):
     """
     uri = [SUB_ACCOUNTS_SUB_PATH]
     params = {"ids": ids, "enabled": enabled, "prefix": prefix}
-    return call_account_api("GET", uri, params=params, **options)
+    return _call_account_api("GET", uri, params=params, **options)
 
 
 def create_sub_account(name, cloud_name=None, custom_attributes=None, enabled=None,
@@ -66,7 +66,7 @@ def create_sub_account(name, cloud_name=None, custom_attributes=None, enabled=No
               "custom_attributes": custom_attributes,
               "enabled": enabled,
               "base_account": base_account}
-    return call_account_api("POST", uri, params=params, **options)
+    return _call_account_api("POST", uri, params=params, **options)
 
 
 def delete_sub_account(sub_account_id, **options):
@@ -80,7 +80,7 @@ def delete_sub_account(sub_account_id, **options):
     :rtype:                     dict
     """
     uri = [SUB_ACCOUNTS_SUB_PATH, sub_account_id]
-    return call_account_api("delete", uri, {}, **options)
+    return _call_account_api("delete", uri, {}, **options)
 
 
 def sub_account(sub_account_id, **options):
@@ -94,7 +94,7 @@ def sub_account(sub_account_id, **options):
     :rtype:                     dict
     """
     uri = [SUB_ACCOUNTS_SUB_PATH, sub_account_id]
-    return call_account_api("get", uri, {}, **options)
+    return _call_account_api("get", uri, {}, **options)
 
 
 def update_sub_account(sub_account_id, name=None, cloud_name=None, custom_attributes=None,
@@ -125,7 +125,7 @@ def update_sub_account(sub_account_id, name=None, cloud_name=None, custom_attrib
               "custom_attributes": custom_attributes,
               "enabled": enabled,
               "base_account": base_account}
-    return call_account_api("put", uri, params=params, **options)
+    return _call_account_api("put", uri, params=params, **options)
 
 
 def users(user_ids=None, sub_account_id=None, pending=None, prefix=None, **options):
@@ -145,12 +145,12 @@ def users(user_ids=None, sub_account_id=None, pending=None, prefix=None, **optio
     :rtype:                 dict
     """
     uri = [USERS_SUB_PATH]
-    user_ids = encode_array(user_ids)
+    user_ids = encode_list(user_ids)
     params = {"ids": user_ids,
               "sub_account_id": sub_account_id,
               "pending": pending,
               "prefix": prefix}
-    return call_account_api("get", uri, params=params, **options)
+    return _call_account_api("get", uri, params=params, **options)
 
 
 def create_user(name, email, role, sub_account_ids=None, **options):
@@ -174,7 +174,7 @@ def create_user(name, email, role, sub_account_ids=None, **options):
               "email": email,
               "role": role,
               "sub_account_ids": sub_account_ids}
-    return call_account_api("post", uri, params=params, **options)
+    return _call_account_api("post", uri, params=params, **options)
 
 
 def delete_user(user_id, **options):
@@ -188,7 +188,7 @@ def delete_user(user_id, **options):
     :rtype:                     dict
     """
     uri = [USERS_SUB_PATH, user_id]
-    return call_account_api("delete", uri, {}, **options)
+    return _call_account_api("delete", uri, {}, **options)
 
 
 def user(user_id, **options):
@@ -202,7 +202,7 @@ def user(user_id, **options):
     :rtype:                     dict
     """
     uri = [USERS_SUB_PATH, user_id]
-    return call_account_api("get", uri, {}, **options)
+    return _call_account_api("get", uri, {}, **options)
 
 
 def update_user(user_id, name=None, email=None, role=None, sub_account_ids=None, **options):
@@ -229,7 +229,7 @@ def update_user(user_id, name=None, email=None, role=None, sub_account_ids=None,
               "email": email,
               "role": role,
               "sub_account_ids": sub_account_ids}
-    return call_account_api("put", uri, params=params, **options)
+    return _call_account_api("put", uri, params=params, **options)
 
 
 def user_groups(**options):
@@ -241,7 +241,7 @@ def user_groups(**options):
     :rtype:                 ProvisioningAPIRespose
     """
     uri = [USER_GROUPS_SUB_PATH]
-    return call_account_api("get", uri, {}, **options)
+    return _call_account_api("get", uri, {}, **options)
 
 
 def create_user_group(name, **options):
@@ -256,7 +256,7 @@ def create_user_group(name, **options):
     """
     uri = [USER_GROUPS_SUB_PATH]
     params = {"name": name}
-    return call_account_api("post", uri, params, **options)
+    return _call_account_api("post", uri, params, **options)
 
 
 def update_user_group(user_group_id, name, **options):
@@ -273,7 +273,7 @@ def update_user_group(user_group_id, name, **options):
     """
     uri = [USER_GROUPS_SUB_PATH, user_group_id]
     params = {"name": name}
-    return call_account_api("put", uri, params, **options)
+    return _call_account_api("put", uri, params, **options)
 
 
 def delete_user_group(user_group_id, **options):
@@ -287,7 +287,7 @@ def delete_user_group(user_group_id, **options):
     :rtype:                     dict
     """
     uri = [USER_GROUPS_SUB_PATH, user_group_id]
-    return call_account_api("delete", uri, {}, **options)
+    return _call_account_api("delete", uri, {}, **options)
 
 
 def user_group(user_group_id, **options):
@@ -301,7 +301,7 @@ def user_group(user_group_id, **options):
     :rtype:                     dict
     """
     uri = [USER_GROUPS_SUB_PATH, user_group_id]
-    return call_account_api("get", uri, {}, **options)
+    return _call_account_api("get", uri, {}, **options)
 
 
 def add_user_to_group(user_group_id, user_id, **options):
@@ -317,7 +317,7 @@ def add_user_to_group(user_group_id, user_id, **options):
     :rtype:                     dict
     """
     uri = [USER_GROUPS_SUB_PATH, user_group_id, "users", user_id]
-    return call_account_api("post", uri, {}, **options)
+    return _call_account_api("post", uri, {}, **options)
 
 
 def remove_user_from_group(user_group_id, user_id, **options):
@@ -333,7 +333,7 @@ def remove_user_from_group(user_group_id, user_id, **options):
     :rtype:                     dict
     """
     uri = [USER_GROUPS_SUB_PATH, user_group_id, "users", user_id]
-    return call_account_api("delete", uri, {}, **options)
+    return _call_account_api("delete", uri, {}, **options)
 
 
 def user_group_users(user_group_id, **options):
@@ -347,7 +347,7 @@ def user_group_users(user_group_id, **options):
     :rtype:                     dict
     """
     uri = [USER_GROUPS_SUB_PATH, user_group_id, "users"]
-    return call_account_api("get", uri, {}, **options)
+    return _call_account_api("get", uri, {}, **options)
 
 
 def user_in_user_groups(user_id, **options):
@@ -361,4 +361,4 @@ def user_in_user_groups(user_id, **options):
     :rtype:                     dict
     """
     uri = [USER_GROUPS_SUB_PATH, user_id]
-    return call_account_api("get", uri, {}, **options)
+    return _call_account_api("get", uri, {}, **options)

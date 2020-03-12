@@ -12,6 +12,7 @@ from cloudinary.exceptions import (
     RateLimited,
     GeneralError
 )
+from cloudinary.utils import process_params
 
 EXCEPTION_CODES = {
     400: BadRequest,
@@ -31,8 +32,9 @@ class Response(dict):
 
 
 def execute_request(http_connector, method, params, req_headers, api_url, **options):
+    processed_params = process_params(params)
     try:
-        response = http_connector.request(method.upper(), api_url, params, req_headers, **options)
+        response = http_connector.request(method.upper(), api_url, processed_params, req_headers, **options)
         body = response.data
     except HTTPError as e:
         raise GeneralError("Unexpected error {0}", e.message)

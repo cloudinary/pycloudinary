@@ -109,7 +109,7 @@ class AccountApiTest(unittest.TestCase):
     @unittest.skipUnless(cloudinary.provisioning.account_config().provisioning_api_secret,
                          "requires provisioning_api_key/provisioning_api_secret")
     def test_get_users(self):
-        res = cloudinary.provisioning.users(pending=True, user_ids=[self.user_id])
+        res = cloudinary.provisioning.users(user_ids=[self.user_id])
         self.assertEqual(len(res["users"]), 1)
 
     @unittest.skipUnless(cloudinary.provisioning.account_config().provisioning_api_secret,

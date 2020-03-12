@@ -6,7 +6,9 @@ import cloudinary
 class TestConfig(TestCase):
     def test_parse_cloudinary_url(self):
         config = cloudinary.Config()
-        config._parse_cloudinary_url('cloudinary://key:secret@test123?foo[bar]=value')
+        parsed_url = config._parse_cloudinary_url('cloudinary://key:secret@test123?foo[bar]=value')
+        config._setup_from_parsed_url(parsed_url)
+        print(config.__dict__,'---dict from config')
         foo = config.__dict__.get('foo')
         self.assertIsNotNone(foo)
         self.assertEqual(foo.get('bar'), 'value')
@@ -14,7 +16,8 @@ class TestConfig(TestCase):
     def test_cloudinary_url_valid_scheme(self):
         config = cloudinary.Config()
         cloudinary_url = 'cloudinary://123456789012345:ALKJdjklLJAjhkKJ45hBK92baj3@test'
-        config._parse_cloudinary_url(cloudinary_url)
+        parsed_url = config._parse_cloudinary_url(cloudinary_url)
+        config._setup_from_parsed_url(parsed_url)
 
     def test_cloudinary_url_invalid_scheme(self):
         config = cloudinary.Config()
@@ -26,4 +29,5 @@ class TestConfig(TestCase):
         ]
         for cloudinary_url in cloudinary_urls:
             with self.assertRaises(ValueError):
-                config._parse_cloudinary_url(cloudinary_url)
+                parsed_url = config._parse_cloudinary_url(cloudinary_url)
+                config._setup_from_parsed_url(parsed_url)

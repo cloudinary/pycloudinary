@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+import abc
 from copy import deepcopy
 import os
 import re
@@ -7,7 +8,7 @@ import logging
 import numbers
 import certifi
 from math import ceil
-from six import python_2_unicode_compatible
+from six import python_2_unicode_compatible, add_metaclass
 
 logger = logging.getLogger("Cloudinary")
 ch = logging.StreamHandler()
@@ -95,52 +96,10 @@ def import_django_settings():
         return None
 
 
-class Config(object):
-    def __init__(self):
-        django_settings = import_django_settings()
-        if django_settings:
-            self.update(**django_settings)
-        elif os.environ.get("CLOUDINARY_CLOUD_NAME"):
-            self.update(
-                cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME"),
-                api_key=os.environ.get("CLOUDINARY_API_KEY"),
-                api_secret=os.environ.get("CLOUDINARY_API_SECRET"),
-                secure_distribution=os.environ.get("CLOUDINARY_SECURE_DISTRIBUTION"),
-                private_cdn=os.environ.get("CLOUDINARY_PRIVATE_CDN") == 'true',
-                api_proxy=os.environ.get("CLOUDINARY_API_PROXY"),
-            )
-        elif os.environ.get("CLOUDINARY_URL"):
-            cloudinary_url = os.environ.get("CLOUDINARY_URL")
-            self._parse_cloudinary_url(cloudinary_url)
-
-    def _parse_cloudinary_url(self, cloudinary_url):
-        uri = urlparse(cloudinary_url)
-        if not self._is_url_scheme_valid(uri):
-            raise ValueError("Invalid CLOUDINARY_URL scheme. Expecting to start with 'cloudinary://'")
-
-        for k, v in parse_qs(uri.query).items():
-            if self._is_nested_key(k):
-                self._put_nested_key(k, v)
-            else:
-                self.__dict__[k] = v[0]
-        self.update(
-            cloud_name=uri.hostname,
-            api_key=uri.username,
-            api_secret=uri.password,
-            private_cdn=uri.path != ''
-        )
-        if uri.path != '':
-            self.update(secure_distribution=uri.path[1:])
-
+@add_metaclass(abc.ABCMeta)
+class BaseConfig(object):
     def __getattr__(self, i):
-        if i in self.__dict__:
-            return self.__dict__[i]
-        else:
-            return None
-
-    def update(self, **keywords):
-        for k, v in keywords.items():
-            self.__dict__[k] = v
+        return self.__dict__.get(i)
 
     def _is_nested_key(self, key):
         return re.match(r'\w+\[\w+\]', key)
@@ -173,6 +132,65 @@ class Config(object):
         if not url.scheme or url.scheme.lower() != URI_SCHEME:
             return False
         return True
+
+    @staticmethod
+    def _parse_cloudinary_url(cloudinary_url):
+        return urlparse(cloudinary_url)
+
+    @abc.abstractmethod
+    def _config_from_parsed_url(self, parsed_url):
+        """Extract additional config from the parsed URL."""
+        raise NotImplementedError()
+
+    def _setup_from_parsed_url(self, parsed_url):
+        config = self._config_from_parsed_url(parsed_url)
+        self.update(**config)
+
+        for k, v in parse_qs(parsed_url.query).items():
+            if self._is_nested_key(k):
+                self._put_nested_key(k, v)
+            else:
+                self.__dict__[k] = v[0]
+
+    def update(self, **keywords):
+        for k, v in keywords.items():
+            self.__dict__[k] = v
+
+
+class Config(BaseConfig):
+    def __init__(self):
+        django_settings = import_django_settings()
+        if django_settings:
+            self.update(**django_settings)
+        elif os.environ.get("CLOUDINARY_CLOUD_NAME"):
+            self.update(
+                cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME"),
+                api_key=os.environ.get("CLOUDINARY_API_KEY"),
+                api_secret=os.environ.get("CLOUDINARY_API_SECRET"),
+                secure_distribution=os.environ.get("CLOUDINARY_SECURE_DISTRIBUTION"),
+                private_cdn=os.environ.get("CLOUDINARY_PRIVATE_CDN") == 'true',
+                api_proxy=os.environ.get("CLOUDINARY_API_PROXY"),
+            )
+        elif os.environ.get("CLOUDINARY_URL"):
+            cloudinary_url = os.environ.get("CLOUDINARY_URL")
+            parsed_url = self._parse_cloudinary_url(cloudinary_url)
+            self._setup_from_parsed_url(parsed_url)
+
+    def _config_from_parsed_url(self, parsed_url):
+        if not self._is_url_scheme_valid(parsed_url):
+            raise ValueError("Invalid CLOUDINARY_URL scheme. Expecting to start with 'cloudinary://'")
+
+        is_private_cdn = parsed_url.path != ""
+        result = {
+            "cloud_name": parsed_url.hostname,
+            "api_key": parsed_url.username,
+            "api_secret": parsed_url.password,
+            "private_cdn": is_private_cdn,
+        }
+        if is_private_cdn:
+            result.update({"secure_distribution": parsed_url.path[1:]})
+
+        return result
 
 
 _config = Config()
@@ -378,7 +396,7 @@ class CloudinaryResource(object):
         max_images = srcset_data.get("max_images", 20)
         transformation = srcset_data.get("transformation")
 
-        kbytes_step = int(ceil(float(bytes_step)/1024))
+        kbytes_step = int(ceil(float(bytes_step) / 1024))
 
         breakpoints_width_param = "auto:breakpoints_{min_width}_{max_width}_{kbytes_step}_{max_images}:json".format(
             min_width=min_width, max_width=max_width, kbytes_step=kbytes_step, max_images=max_images)
@@ -624,7 +642,7 @@ class CloudinaryResource(object):
 
         return utils.cloudinary_url(poster_options['public_id'], **poster_options)[0]
 
-    def _populate_video_source_tags(self, source,  options):
+    def _populate_video_source_tags(self, source, options):
         """
         Helper function for video tag, populates source tags from provided options.
 
@@ -751,7 +769,7 @@ class CloudinaryResource(object):
         srcset_data = srcset_data.copy()
         srcset_data.update(options.pop("srcset", dict()))
 
-        responsive_attrs  = self._generate_image_responsive_attributes(attrs, srcset_data, **options)
+        responsive_attrs = self._generate_image_responsive_attributes(attrs, srcset_data, **options)
 
         attrs.update(responsive_attrs)
 
