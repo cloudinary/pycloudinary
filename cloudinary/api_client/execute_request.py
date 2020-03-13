@@ -1,8 +1,10 @@
 import json
 import socket
 
+import urllib3
 from urllib3.exceptions import HTTPError
 
+import cloudinary
 from cloudinary.exceptions import (
     BadRequest,
     AuthorizationRequired,
@@ -31,10 +33,26 @@ class Response(dict):
         self.update(result)
 
 
-def execute_request(http_connector, method, params, req_headers, api_url, **options):
+def execute_request(http_connector, method, params, headers, auth, api_url, **options):
+    # authentication
+    key = auth.get("key")
+    secret = auth.get("secret")
+    req_headers = urllib3.make_headers(
+        basic_auth="{0}:{1}".format(key, secret),
+        user_agent=cloudinary.get_user_agent()
+    )
+    if headers is not None:
+        req_headers.update(headers)
+
+    kw = {}
+    if "timeout" in options:
+        kw["timeout"] = options["timeout"]
+    if "body" in options:
+        kw["body"] = options["body"]
+
     processed_params = process_params(params)
     try:
-        response = http_connector.request(method.upper(), api_url, processed_params, req_headers, **options)
+        response = http_connector.request(method.upper(), api_url, processed_params, req_headers, **kw)
         body = response.data
     except HTTPError as e:
         raise GeneralError("Unexpected error {0}", e.message)

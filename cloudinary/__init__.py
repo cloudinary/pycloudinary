@@ -101,7 +101,8 @@ class BaseConfig(object):
     def __getattr__(self, i):
         return self.__dict__.get(i)
 
-    def _is_nested_key(self, key):
+    @staticmethod
+    def _is_nested_key(key):
         return re.match(r'\w+\[\w+\]', key)
 
     def _put_nested_key(self, key, value):
@@ -143,8 +144,8 @@ class BaseConfig(object):
         raise NotImplementedError()
 
     def _setup_from_parsed_url(self, parsed_url):
-        config = self._config_from_parsed_url(parsed_url)
-        self.update(**config)
+        config_from_parsed_url = self._config_from_parsed_url(parsed_url)
+        self.update(**config_from_parsed_url)
 
         for k, v in parse_qs(parsed_url.query).items():
             if self._is_nested_key(k):

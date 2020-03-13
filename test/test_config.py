@@ -8,7 +8,6 @@ class TestConfig(TestCase):
         config = cloudinary.Config()
         parsed_url = config._parse_cloudinary_url('cloudinary://key:secret@test123?foo[bar]=value')
         config._setup_from_parsed_url(parsed_url)
-        print(config.__dict__,'---dict from config')
         foo = config.__dict__.get('foo')
         self.assertIsNotNone(foo)
         self.assertEqual(foo.get('bar'), 'value')

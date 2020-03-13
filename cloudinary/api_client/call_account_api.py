@@ -1,5 +1,3 @@
-import urllib3
-
 import cloudinary
 from cloudinary.api_client.execute_request import execute_request
 from cloudinary.provisioning.account_config import account_config
@@ -26,21 +24,12 @@ def _call_account_api(method, uri, params=None, headers=None, **options):
         raise Exception("Must supply provisioning_api_secret")
     provisioning_api_url = "/".join(
         [prefix, cloudinary.API_VERSION, PROVISIONING_SUB_PATH, ACCOUNT_SUB_PATH, account_id] + uri)
-
-    # Add authentication
-    req_headers = urllib3.make_headers(
-        basic_auth="{0}:{1}".format(provisioning_api_key, provisioning_api_secret),
-        user_agent=cloudinary.get_user_agent()
-    )
-    if headers is not None:
-        req_headers.update(headers)
-    kw = {}
-    if 'timeout' in options:
-        kw['timeout'] = options['timeout']
+    auth = {"key": provisioning_api_key, "secret": provisioning_api_secret}
 
     return execute_request(http_connector=_http,
                            method=method,
                            params=params,
-                           req_headers=req_headers,
+                           headers=headers,
+                           auth=auth,
                            api_url=provisioning_api_url,
-                           **kw)
+                           **options)

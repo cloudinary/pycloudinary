@@ -1,7 +1,5 @@
 import json
 
-import urllib3
-
 import cloudinary
 from cloudinary.api_client.execute_request import execute_request
 from cloudinary.utils import get_http_connector
@@ -48,23 +46,15 @@ def _call_api(method, uri, params=None, body=None, headers=None, **options):
     if not api_secret:
         raise Exception("Must supply api_secret")
     api_url = "/".join([prefix, cloudinary.API_VERSION, cloud_name] + uri)
+    auth = {"key": api_key, "secret": api_secret}
 
-    # Add authentication
-    req_headers = urllib3.make_headers(
-        basic_auth="{0}:{1}".format(api_key, api_secret),
-        user_agent=cloudinary.get_user_agent()
-    )
-    if headers is not None:
-        req_headers.update(headers)
-    kw = {}
-    if 'timeout' in options:
-        kw['timeout'] = options['timeout']
     if body is not None:
-        kw['body'] = body
+        options["body"] = body
 
     return execute_request(http_connector=_http,
                            method=method,
                            params=params,
-                           req_headers=req_headers,
+                           headers=headers,
+                           auth=auth,
                            api_url=api_url,
-                           **kw)
+                           **options)
