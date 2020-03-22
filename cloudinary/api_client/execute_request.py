@@ -1,3 +1,4 @@
+import email.utils
 import json
 import socket
 
@@ -14,7 +15,7 @@ from cloudinary.exceptions import (
     RateLimited,
     GeneralError
 )
-from cloudinary.utils import process_params
+from cloudinary.utils import process_params, safe_cast
 
 EXCEPTION_CODES = {
     400: BadRequest,
@@ -31,6 +32,10 @@ class Response(dict):
     def __init__(self, result, response, **kwargs):
         super(Response, self).__init__(**kwargs)
         self.update(result)
+
+        self.rate_limit_allowed = safe_cast(response.headers.get("x-featureratelimit-limit"), int)
+        self.rate_limit_reset_at = safe_cast(response.headers.get("x-featureratelimit-reset"), email.utils.parsedate)
+        self.rate_limit_remaining = safe_cast(response.headers.get("x-featureratelimit-remaining"), int)
 
 
 def execute_request(http_connector, method, params, headers, auth, api_url, **options):

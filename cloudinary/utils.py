@@ -1351,3 +1351,20 @@ def encode_list(obj):
     if isinstance(obj, list):
         return ",".join(obj)
     return obj
+
+
+def safe_cast(val, casting_fn, default=None):
+    """
+    Attempts to cast a value to another using a given casting function
+    Will return a default value if casting fails (configurable, defaults to None)
+
+    :param val: The value to cast
+    :param casting_fn: The casting function that will receive the value to cast
+    :param default: The return value if casting fails
+
+    :return: Result of casting the value or the value of the default parameter
+    """
+    try:
+        return casting_fn(val)
+    except (ValueError, TypeError):
+        return default

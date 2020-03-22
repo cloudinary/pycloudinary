@@ -87,6 +87,14 @@ class ApiTest(unittest.TestCase):
         self.assertIsInstance(http, ProxyManager)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_rate_limits(self):
+        """ should include details of the account's rate limits"""
+        result = api.ping()
+        self.assertIsInstance(result.rate_limit_allowed, int)
+        self.assertIsInstance(result.rate_limit_reset_at, tuple)
+        self.assertIsInstance(result.rate_limit_remaining, int)
+
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test01_resource_types(self):
         """ should allow listing resource_types """
         self.assertIn("image", api.resource_types()["resource_types"])
