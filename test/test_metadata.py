@@ -9,6 +9,7 @@ from urllib3 import disable_warnings
 
 import cloudinary
 from cloudinary import api
+from cloudinary.exceptions import BadRequest, NotFound
 from test.helper_test import (
     UNIQUE_TEST_ID, get_uri, get_params, get_method, api_response_mock, ignore_exception
 )
@@ -121,7 +122,7 @@ class MetadataTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         for external_id in METADATA_FIELDS:
-            with ignore_exception(suppress_traceback_classes=(api.NotFound,)):
+            with ignore_exception(suppress_traceback_classes=(NotFound,)):
                 api.delete_metadata_field(external_id)
 
     def assert_metadata_field(self, metadata_field, field_type=None, values=None):
@@ -351,7 +352,7 @@ class MetadataTest(unittest.TestCase):
         """
         api.delete_metadata_field(EXTERNAL_ID_DELETE_2)
 
-        with self.assertRaises(api.BadRequest):
+        with self.assertRaises(BadRequest):
             api.add_metadata_field({
                 "external_id": EXTERNAL_ID_DELETE_2,
                 "label": EXTERNAL_ID_DELETE_2,
@@ -410,7 +411,7 @@ class MetadataTest(unittest.TestCase):
         })
 
         # Test entering a metadata field with date validation and an invalid default value
-        with self.assertRaises(api.BadRequest):
+        with self.assertRaises(BadRequest):
             api.add_metadata_field({
                 "external_id": EXTERNAL_ID_DATE_VALIDATION_2,
                 "label": EXTERNAL_ID_DATE_VALIDATION_2,
@@ -444,7 +445,7 @@ class MetadataTest(unittest.TestCase):
         })
 
         # Test entering a metadata field with integer validation and a valid default value
-        with self.assertRaises(api.BadRequest):
+        with self.assertRaises(BadRequest):
             api.add_metadata_field({
                 "external_id": EXTERNAL_ID_INT_VALIDATION_2,
                 "label": EXTERNAL_ID_INT_VALIDATION_2,
