@@ -73,6 +73,32 @@ def resources_by_ids(public_ids, **options):
     return call_api("get", uri, params, **options)
 
 
+def resources_by_context(key, value=None, **options):
+    """Retrieves resources (assets) with a specified context key.
+    This method does not return deleted assets even if they have been backed up.
+
+    See: `Get resources by context API reference
+    <https://cloudinary.com/documentation/admin_api#get_resources_by_context>`_
+
+    :param key:         Only assets with this context key are returned
+    :type key:          str
+    :param value:       Only assets with this value for the context key are returned
+    :type value:        str, optional
+    :param options:     Additional options
+    :type options:      dict, optional
+    :return:            Resources (assets) with a specified context key
+    :rtype:             Response
+    """
+    resource_type = options.pop("resource_type", "image")
+    uri = ["resources", resource_type, "context"]
+    params = only(options, "next_cursor", "max_results", "tags",
+                "context", "moderations", "direction")
+    params["key"] = key
+    if value is not None:
+        params["value"] = value
+    return call_api("get", uri, params, **options)
+
+
 def resource(public_id, **options):
     resource_type = options.pop("resource_type", "image")
     upload_type = options.pop("type", "upload")
