@@ -63,7 +63,8 @@ __URL_KEYS = [
     'type',
     'url_suffix',
     'use_root_path',
-    'version'
+    'version',
+    'long_url_signature',
 ]
 
 __SIMPLE_UPLOAD_PARAMS = [
@@ -680,6 +681,7 @@ def cloudinary_url(source, **options):
     url_suffix = options.pop("url_suffix", None)
     use_root_path = options.pop("use_root_path", cloudinary.config().use_root_path)
     auth_token = options.pop("auth_token", None)
+    long_url_signature = options.pop("long_url_signature", cloudinary.config().long_url_signature)
     if auth_token is not False:
         auth_token = merge(cloudinary.config().auth_token, auth_token)
 
@@ -705,9 +707,10 @@ def cloudinary_url(source, **options):
     signature = None
     if sign_url and not auth_token:
         to_sign = "/".join(__compact([transformation, source_to_sign]))
+        hash_fn, chars_length = (hashlib.sha256, 32) if long_url_signature else (hashlib.sha1, 8)
         signature = "s--" + to_string(
             base64.urlsafe_b64encode(
-                hashlib.sha1(to_bytes(to_sign + api_secret)).digest())[0:8]) + "--"
+                hash_fn(to_bytes(to_sign + api_secret)).digest())[0:chars_length]) + "--"
 
     prefix = unsigned_download_url_prefix(
         source, cloud_name, private_cdn, cdn_subdomain, secure_cdn_subdomain,

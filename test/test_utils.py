@@ -1289,6 +1289,28 @@ class TestUtils(unittest.TestCase):
                     verify_notification_signature(body, valid_response_timestamp, signature, valid_for)
                 self.assertEqual(str(e.exception), 'Api secret key is empty')
 
+    def test_support_long_url_signature(self):
+        """should generate short signature by default and long signature if long_url_signature=True"""
+        image_name = "sample.jpg"
+        short_signature = "s--v2fTPYTu--"
+        long_signature = "s--2hbrSMPOjj5BJ4xV7SgFbRDevFaQNUFf--"
+
+        # should create a short signature by default
+        self.__test_cloudinary_url(public_id=image_name,
+                                   options={"sign_url": True},
+                                   expected_url=DEFAULT_UPLOAD_PATH + short_signature + "/" + image_name)
+
+        # should create a long signature when long_url_signature property set to True in the options
+        self.__test_cloudinary_url(public_id=image_name,
+                                   options={"long_url_signature": True, "sign_url": True},
+                                   expected_url=DEFAULT_UPLOAD_PATH + long_signature + "/" + image_name)
+
+        # should create a long signature when long_url_signature property set to True in Cloudinary config
+        cloudinary.config().long_url_signature = True
+        self.__test_cloudinary_url(public_id=image_name,
+                                   options={"sign_url": True},
+                                   expected_url=DEFAULT_UPLOAD_PATH + long_signature + "/" + image_name)
+
 
 if __name__ == '__main__':
     unittest.main()
