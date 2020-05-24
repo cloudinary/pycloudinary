@@ -23,9 +23,14 @@ API_TEST_ID2 = "api_test_{}2".format(SUFFIX)
 API_TEST_ID3 = "api_test_{}3".format(SUFFIX)
 API_TEST_ID4 = "api_test_{}4".format(SUFFIX)
 API_TEST_ID5 = "api_test_{}5".format(SUFFIX)
+API_TEST_ID6 = "api_test_{}6".format(SUFFIX)
+API_TEST_ID7 = "api_test_{}7".format(SUFFIX)
 API_TEST_TRANS = "api_test_transformation_{}".format(SUFFIX)
 API_TEST_TRANS2 = "api_test_transformation_{}2".format(SUFFIX)
 API_TEST_TRANS3 = "api_test_transformation_{}3".format(SUFFIX)
+API_TEST_CONTEXT_KEY = "api_test_context_key_{}".format(SUFFIX)
+API_TEST_CONTEXT_VALUE1 = "test"
+API_TEST_CONTEXT_VALUE2 = "alt-test"
 API_TEST_TRANS_OVERLAY = {"font_family": "arial", "font_size": 20, "text": SUFFIX}
 API_TEST_TRANS_OVERLAY_STR = "text:arial_20:{}".format(SUFFIX)
 API_TEST_TRANS_SCALE100 = {"crop": "scale", "width": 100, "overlay": API_TEST_TRANS_OVERLAY_STR}
@@ -169,6 +174,20 @@ class ApiTest(unittest.TestCase):
         self.assertIn(API_TEST_ID2, get_list_param(mocker, 'public_ids'))
         self.assertEqual(get_param(mocker, 'context'), True)
         self.assertEqual(get_param(mocker, 'tags'), True)
+
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_resources_by_context(self):
+        """ should allow listing resources by context"""
+        uploader.upload(TEST_IMAGE, public_id=API_TEST_ID6, tags=[UNIQUE_API_TAG],
+                        context="{}={}".format(API_TEST_CONTEXT_KEY, API_TEST_CONTEXT_VALUE1))
+        uploader.upload(TEST_IMAGE, public_id=API_TEST_ID7, tags=[UNIQUE_API_TAG],
+                        context="{}={}".format(API_TEST_CONTEXT_KEY, API_TEST_CONTEXT_VALUE2))
+
+        result = api.resources_by_context(API_TEST_CONTEXT_KEY)
+        self.assertEqual(len(result["resources"]), 2)
+
+        result = api.resources_by_context(API_TEST_CONTEXT_KEY, API_TEST_CONTEXT_VALUE1)
+        self.assertEqual(len(result["resources"]), 1)
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
