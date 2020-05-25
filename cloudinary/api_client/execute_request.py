@@ -15,7 +15,7 @@ from cloudinary.exceptions import (
     RateLimited,
     GeneralError
 )
-from cloudinary.utils import process_params, safe_cast
+from cloudinary.utils import process_params, safe_cast, smart_escape, unquote
 
 EXCEPTION_CODES = {
     400: BadRequest,
@@ -56,6 +56,9 @@ def execute_request(http_connector, method, params, headers, auth, api_url, **op
         kw["body"] = options["body"]
 
     processed_params = process_params(params)
+
+    api_url = smart_escape(unquote(api_url))
+
     try:
         response = http_connector.request(method.upper(), api_url, processed_params, req_headers, **kw)
         body = response.data

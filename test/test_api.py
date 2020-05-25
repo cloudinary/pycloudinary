@@ -823,5 +823,17 @@ class ApiTest(unittest.TestCase):
 
         self.assertIn("cinemagraph_analysis", params)
 
+    @patch('urllib3.request.RequestMethods.request')
+    def test_api_url_escapes_special_characters(self, mocker):
+        """ should escape special characters in api url """
+        mocker.return_value = MOCK_RESPONSE
+
+        api.create_folder("a b+c%20d-e??f(g)h")
+
+        args, kwargs = mocker.call_args
+
+        self.assertTrue(get_uri(args).endswith('a%20b%2Bc%20d-e%3F%3Ff%28g%29h'))
+
+
 if __name__ == '__main__':
     unittest.main()
