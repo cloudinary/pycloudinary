@@ -3,11 +3,13 @@ from __future__ import absolute_import
 import os
 
 from cloudinary import BaseConfig, import_django_settings
-from cloudinary.compat import urlparse
+
+ACCOUNT_URI_SCHEME = "account"
 
 
 class AccountConfig(BaseConfig):
     def __init__(self):
+        self._uri_scheme = ACCOUNT_URI_SCHEME
         django_settings = import_django_settings()
         if django_settings:
             self.update(**django_settings)
@@ -16,11 +18,10 @@ class AccountConfig(BaseConfig):
             parsed_url = self._parse_cloudinary_url(account_url)
             self._setup_from_parsed_url(parsed_url)
 
-    @staticmethod
-    def _parse_cloudinary_url(cloudinary_url):
-        return urlparse(cloudinary_url.replace("account://", "http://"))
-
     def _config_from_parsed_url(self, parsed_url):
+        if not self._is_url_scheme_valid(parsed_url):
+            raise ValueError("Invalid CLOUDINARY_ACCOUNT_URL scheme. URL should begin with 'account://'")
+
         return {
             "account_id": parsed_url.hostname,
             "provisioning_api_key": parsed_url.username,

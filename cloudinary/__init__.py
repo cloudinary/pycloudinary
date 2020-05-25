@@ -121,8 +121,7 @@ class BaseConfig(object):
             value = value[0]
         outer[last_key] = value
 
-    @staticmethod
-    def _is_url_scheme_valid(url):
+    def _is_url_scheme_valid(self, url):
         """
         Helper function. Validates url scheme
 
@@ -130,9 +129,7 @@ class BaseConfig(object):
 
         :return: bool True on success or False on failure
         """
-        if not url.scheme or url.scheme.lower() != URI_SCHEME:
-            return False
-        return True
+        return url.scheme.lower() == self._uri_scheme
 
     @staticmethod
     def _parse_cloudinary_url(cloudinary_url):
@@ -160,6 +157,7 @@ class BaseConfig(object):
 
 class Config(BaseConfig):
     def __init__(self):
+        self._uri_scheme = URI_SCHEME
         django_settings = import_django_settings()
         if django_settings:
             self.update(**django_settings)
