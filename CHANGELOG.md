@@ -1,4 +1,23 @@
 
+1.21.0 / 2020-06-04
+===================
+
+New functionality and features
+------------------------------
+
+  * Add Account Provisioning - User Management API
+  * Add support for 32 char SHA-256 URL signature
+  * Add `resources_by_context` Admin API
+  
+  
+Other Changes
+-------------
+
+  * Fix `Empty file` error in Django file upload
+  * Escape special characters in Admin API URL
+  * Verify protocol in `CLOUDINARY_URL` and `CLOUDINARY_ACCOUNT_URL`
+  * Update issue templates
+
 1.20.0 / 2020-02-13
 ===================
 
