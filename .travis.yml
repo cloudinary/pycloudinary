@@ -45,5 +45,9 @@ matrix:
     env: TOXENV=py38-django30
 install:
 - pip install tox
+
+before_script: >
+  export CLOUDINARY_URL=$(bash tools/get_test_cloud.sh);
+  echo cloud_name: "$(echo $CLOUDINARY_URL | cut -d'@' -f2)"
 script:
 - tox -e $TOXENV
