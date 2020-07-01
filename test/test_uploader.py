@@ -16,7 +16,7 @@ from cloudinary.cache import responsive_breakpoints_cache
 from cloudinary.cache.adapter.key_value_cache_adapter import KeyValueCacheAdapter
 from test.helper_test import uploader_response_mock, SUFFIX, TEST_IMAGE, get_params, TEST_ICON, TEST_DOC, \
     REMOTE_TEST_IMAGE, UTC, populate_large_file, TEST_UNICODE_IMAGE, get_uri, get_method, get_param, \
-    cleanup_test_resources_by_tag, cleanup_test_transformation, cleanup_test_resources, ignore_exception
+    cleanup_test_resources_by_tag, cleanup_test_transformation, cleanup_test_resources, ignore_exception, EVAL_STR
 from test.cache.storage.dummy_cache_storage import DummyCacheStorage
 
 MOCK_RESPONSE = uploader_response_mock()
@@ -704,6 +704,23 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
 
         params = request_mock.call_args[0][2]
         self.assertIn("cinemagraph_analysis", params)
+
+    @patch('urllib3.request.RequestMethods.request')
+    def test_eval_upload_parameter(self, request_mock):
+        """Should support eval in upload and explicit"""
+        request_mock.return_value = MOCK_RESPONSE
+
+        uploader.upload(TEST_IMAGE, eval=EVAL_STR)
+
+        params = get_params(request_mock.call_args[0])
+        self.assertIn("eval", params)
+        self.assertEqual(EVAL_STR, params["eval"])
+
+        uploader.explicit(TEST_IMAGE, eval=EVAL_STR)
+
+        params = get_params(request_mock.call_args[0])
+        self.assertIn("eval", params)
+        self.assertEqual(EVAL_STR, params["eval"])
 
 
 if __name__ == '__main__':
