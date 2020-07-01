@@ -103,6 +103,7 @@ __SIMPLE_UPLOAD_PARAMS = [
     "auto_tagging",
     "async",
     "cinemagraph_analysis",
+    "accessibility_analysis",
 ]
 
 __SERIALIZED_UPLOAD_PARAMS = [

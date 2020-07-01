@@ -706,6 +706,21 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         self.assertIn("cinemagraph_analysis", params)
 
     @patch('urllib3.request.RequestMethods.request')
+    def test_accessibility_analysis(self, request_mock):
+        """Should support accessibility analysis in upload and explicit"""
+        request_mock.return_value = MOCK_RESPONSE
+
+        uploader.upload(TEST_IMAGE, accessibility_analysis=True)
+
+        params = get_params(request_mock.call_args[0])
+        self.assertIn("accessibility_analysis", params)
+
+        uploader.explicit(TEST_IMAGE, accessibility_analysis=True)
+
+        params = get_params(request_mock.call_args[0])
+        self.assertIn("accessibility_analysis", params)
+
+    @patch('urllib3.request.RequestMethods.request')
     def test_eval_upload_parameter(self, request_mock):
         """Should support eval in upload and explicit"""
         request_mock.return_value = MOCK_RESPONSE

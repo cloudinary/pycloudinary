@@ -828,6 +828,17 @@ class ApiTest(unittest.TestCase):
         self.assertIn("cinemagraph_analysis", params)
 
     @patch('urllib3.request.RequestMethods.request')
+    def test_accessibility_analysis_resource(self, mocker):
+        """ should allow the user to pass accessibility_analysis in the resource function """
+        mocker.return_value = MOCK_RESPONSE
+
+        api.resource(API_TEST_ID, accessibility_analysis=True)
+
+        params = get_params(mocker.call_args[0])
+
+        self.assertIn("accessibility_analysis", params)
+
+    @patch('urllib3.request.RequestMethods.request')
     def test_api_url_escapes_special_characters(self, mocker):
         """ should escape special characters in api url """
         mocker.return_value = MOCK_RESPONSE
