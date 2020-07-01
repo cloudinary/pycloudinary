@@ -84,6 +84,7 @@ __SIMPLE_UPLOAD_PARAMS = [
     "notification_url",
     "eager_notification_url",
     "eager_async",
+    "eval",
     "proxy",
     "folder",
     "overwrite",

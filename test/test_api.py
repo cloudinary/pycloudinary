@@ -10,7 +10,7 @@ import cloudinary
 from cloudinary import api, uploader, utils
 from test.helper_test import SUFFIX, TEST_IMAGE, get_uri, get_params, get_list_param, get_param, TEST_DOC, get_method, \
     UNIQUE_TAG, api_response_mock, ignore_exception, cleanup_test_resources_by_tag, cleanup_test_transformation, \
-    cleanup_test_resources, UNIQUE_TEST_FOLDER
+    cleanup_test_resources, UNIQUE_TEST_FOLDER, EVAL_STR
 from cloudinary.exceptions import BadRequest, NotFound
 
 MOCK_RESPONSE = api_response_mock()
@@ -587,7 +587,8 @@ class ApiTest(unittest.TestCase):
         """ should allow creating upload_presets """
         mocker.return_value = MOCK_RESPONSE
 
-        api.create_upload_preset(name=API_TEST_PRESET, folder="folder", live=True)
+        api.create_upload_preset(name=API_TEST_PRESET, folder="folder", live=True,
+                                 eval=EVAL_STR)
 
         args, kargs = mocker.call_args
 
@@ -596,6 +597,7 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(get_param(mocker, "name"), API_TEST_PRESET)
         self.assertEqual(get_param(mocker, "folder"), "folder")
         self.assertTrue(get_param(mocker, "live"))
+        self.assertEqual(EVAL_STR, get_param(mocker, "eval"))
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -638,7 +640,8 @@ class ApiTest(unittest.TestCase):
     def test31_update_upload_presets(self, mocker):
         """ should allow getting a single upload_preset """
         mocker.return_value = MOCK_RESPONSE
-        api.update_upload_preset(API_TEST_PRESET, colors=True, unsigned=True, disallow_public_id=True, live=True)
+        api.update_upload_preset(API_TEST_PRESET, colors=True, unsigned=True, disallow_public_id=True, live=True,
+                                 eval=EVAL_STR)
         args, kargs = mocker.call_args
         self.assertEqual(args[0], 'PUT')
         self.assertTrue(get_uri(args).endswith('/upload_presets/{}'.format(API_TEST_PRESET)))
@@ -646,6 +649,7 @@ class ApiTest(unittest.TestCase):
         self.assertTrue(get_params(args)['unsigned'])
         self.assertTrue(get_params(args)['disallow_public_id'])
         self.assertTrue(get_params(args)['live'])
+        self.assertEqual(EVAL_STR, get_param(mocker, "eval"))
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test32_background_removal(self):

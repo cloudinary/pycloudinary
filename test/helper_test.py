@@ -34,6 +34,9 @@ UNIQUE_TEST_FOLDER = UNIQUE_TAG + "_folder"
 
 ZERO = timedelta(0)
 
+EVAL_STR='if (resource_info["width"] < 450) { upload_options["tags"] = "a,b" }; ' \
+         'upload_options["context"] = "width=" + resource_info["width"]'
+
 
 class UTC(tzinfo):
     """UTC"""
