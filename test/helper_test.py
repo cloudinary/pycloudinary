@@ -69,7 +69,7 @@ def get_params(args):
 
 
 def get_json_body(mocker):
-    return json.loads(mocker.call_args[1]["body"] or {})
+    return json.loads(mocker.call_args[1]["body"].decode('utf-8') or {})
 
 
 def get_param(mocker, name):
