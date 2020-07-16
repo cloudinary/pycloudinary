@@ -1,4 +1,5 @@
 # -*- coding: latin-1 -*-
+import json
 from contextlib import contextmanager
 import os
 import random
@@ -65,6 +66,10 @@ def get_uri(args):
 
 def get_params(args):
     return args[2] or {}
+
+
+def get_json_body(mocker):
+    return json.loads(mocker.call_args[1]["body"] or {})
 
 
 def get_param(mocker, name):

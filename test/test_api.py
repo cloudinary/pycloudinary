@@ -10,7 +10,7 @@ import cloudinary
 from cloudinary import api, uploader, utils
 from test.helper_test import SUFFIX, TEST_IMAGE, get_uri, get_params, get_list_param, get_param, TEST_DOC, get_method, \
     UNIQUE_TAG, api_response_mock, ignore_exception, cleanup_test_resources_by_tag, cleanup_test_transformation, \
-    cleanup_test_resources, UNIQUE_TEST_FOLDER, EVAL_STR
+    cleanup_test_resources, UNIQUE_TEST_FOLDER, EVAL_STR, get_json_body
 from cloudinary.exceptions import BadRequest, NotFound
 
 MOCK_RESPONSE = api_response_mock()
@@ -230,7 +230,20 @@ class ApiTest(unittest.TestCase):
         api.resource(API_TEST_ID, derived_next_cursor=NEXT_CURSOR)
         args, kwargs = mocker.call_args
         self.assertTrue("derived_next_cursor" in get_params(args))
-    
+
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test07c_resource_allows_versions(self, mocker):
+        """ should allow versions parameter """
+        mocker.return_value = MOCK_RESPONSE
+
+        api.resource(API_TEST_ID, versions=True)
+
+        params = get_params(mocker.call_args[0])
+
+        self.assertIn("versions", params)
+        self.assertTrue(params["versions"])
+
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test08_delete_derived(self, mocker):
@@ -756,6 +769,21 @@ class ApiTest(unittest.TestCase):
         resource = api.resource(RESTORE_TEST_ID)
         self.assertNotEqual(resource, None)
         self.assertEqual(resource["bytes"], 3381)
+
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_restore_versions(self, mocker):
+        mocker.return_value = MOCK_RESPONSE
+
+        public_ids = ["pub1", "pub2"]
+        versions = ["ver1", "ver2"]
+
+        api.restore(public_ids, versions=versions)
+
+        json_body = get_json_body(mocker)
+
+        self.assertListEqual(public_ids, json_body["public_ids"])
+        self.assertListEqual(versions, json_body["versions"])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_mapping(self):

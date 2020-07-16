@@ -111,6 +111,14 @@ class ArchiveTest(unittest.TestCase):
         self.assertTrue(get_uri(args).endswith('/auto/generate_archive'))
         self.assertEqual(test_ids, get_list_param(mocker, 'fully_qualified_public_ids'))
 
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_download_backedup_asset(self):
+        download_backedup_asset_url = utils.download_backedup_asset('b71b23d9c89a81a254b88a91a9dad8cd',
+                                                                    '0e493356d8a40b856c4863c026891a4e')
+
+        self.assertIn("asset_id", download_backedup_asset_url)
+        self.assertIn("version_id", download_backedup_asset_url)
+
 
 if __name__ == '__main__':
     unittest.main()
