@@ -105,7 +105,7 @@ def resource(public_id, **options):
     uri = ["resources", resource_type, upload_type, public_id]
     params = only(options, "exif", "faces", "colors", "image_metadata", "cinemagraph_analysis",
                   "pages", "phash", "coordinates", "max_results", "quality_analysis", "derived_next_cursor",
-                  "accessibility_analysis")
+                  "accessibility_analysis", "versions")
     return call_api("get", uri, params, **options)
 
 
@@ -335,8 +335,8 @@ def restore(public_ids, **options):
     resource_type = options.pop("resource_type", "image")
     upload_type = options.pop("type", "upload")
     uri = ["resources", resource_type, upload_type, "restore"]
-    params = dict(public_ids=public_ids)
-    return call_api("post", uri, params, **options)
+    params = dict(public_ids=public_ids, **only(options, "versions"))
+    return call_json_api("post", uri, params, **options)
 
 
 def upload_mappings(**options):

@@ -15,10 +15,10 @@ from collections import OrderedDict
 from datetime import datetime, date
 from fractions import Fraction
 from numbers import Number
-from urllib3 import ProxyManager, PoolManager
 
 import six.moves.urllib.parse
 from six import iteritems
+from urllib3 import ProxyManager, PoolManager
 
 import cloudinary
 from cloudinary import auth_token
@@ -726,15 +726,23 @@ def cloudinary_url(source, **options):
     return source, options
 
 
-def cloudinary_api_url(action='upload', **options):
-    cloudinary_prefix = options.get("upload_prefix", cloudinary.config().upload_prefix)\
+def base_api_url(path, **options):
+    cloudinary_prefix = options.get("upload_prefix", cloudinary.config().upload_prefix) \
                         or "https://api.cloudinary.com"
     cloud_name = options.get("cloud_name", cloudinary.config().cloud_name)
+
     if not cloud_name:
         raise ValueError("Must supply cloud_name")
+
+    path = build_array(path)
+
+    return encode_unicode_url("/".join([cloudinary_prefix, cloudinary.API_VERSION, cloud_name] + path))
+
+
+def cloudinary_api_url(action='upload', **options):
     resource_type = options.get("resource_type", "image")
 
-    return encode_unicode_url("/".join([cloudinary_prefix, "v1_1", cloud_name, resource_type, action]))
+    return base_api_url([resource_type, action], **options)
 
 
 def cloudinary_scaled_url(source, width, transformation, options):
@@ -846,6 +854,31 @@ def download_zip_url(**options):
     new_options = options.copy()
     new_options.update(target_format="zip")
     return download_archive_url(**new_options)
+
+
+def download_backedup_asset(asset_id, version_id, **options):
+    """
+    The returned url allows downloading the backedup asset based on the the asset ID and the version ID.
+
+    Parameters asset_id and version_id are returned with api.resource(<PUBLIC_ID1>, versions=True) API call.
+
+    :param  asset_id:   The asset ID of the asset.
+    :type   asset_id:   str
+    :param  version_id: The version ID of the asset.
+    :type   version_id: str
+    :param  options:    Additional options.
+    :type   options:    dict, optional
+    :return:The signed URL for downloading backup version of the asset.
+    :rtype: str
+    """
+    params = {
+        "timestamp": options.get("timestamp", now()),
+        "asset_id": asset_id,
+        "version_id": version_id
+    }
+    cloudinary_params = sign_request(params, options)
+
+    return base_api_url("download_backup", **options) + "?" + urlencode(bracketize_seq(cloudinary_params), True)
 
 
 def generate_auth_token(**options):

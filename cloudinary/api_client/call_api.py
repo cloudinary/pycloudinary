@@ -22,11 +22,9 @@ def call_metadata_api(method, uri, params, **options):
     return call_json_api(method, uri, params, **options)
 
 
-def call_json_api(method, uri, jsonBody, **options):
-    logger.debug(jsonBody)
-    data = json.dumps(jsonBody).encode('utf-8')
-    return _call_api(method, uri, body=data,
-                     headers={'Content-Type': 'application/json'}, **options)
+def call_json_api(method, uri, json_body, **options):
+    data = json.dumps(json_body).encode('utf-8')
+    return _call_api(method, uri, body=data, headers={'Content-Type': 'application/json'}, **options)
 
 
 def call_api(method, uri, params, **options):
