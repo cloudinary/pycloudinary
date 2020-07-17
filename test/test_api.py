@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 import time
 import unittest
 from collections import OrderedDict
@@ -74,6 +75,27 @@ class ApiTest(unittest.TestCase):
 
         with ignore_exception(suppress_traceback_classes=(NotFound,)):
             api.delete_upload_mapping(MAPPING_TEST_ID)
+
+    def assert_usage_result(self, usage_api_response):
+        """Asserts that a given object fits the generic structure of the usage API response
+
+        See: `Sample response of usage API <https://cloudinary.com/documentation/admin_api#sample_response-37>`_
+
+        :param usage_api_response:  The response from usage API
+        """
+        keys = ["plan",
+                "last_updated",
+                "transformations",
+                "objects",
+                "bandwidth",
+                "storage",
+                "requests",
+                "resources",
+                "derived_resources",
+                "media_limits"]
+
+        for key in keys:
+            self.assertIn(key, usage_api_response)
 
     def test_http_connector(self):
         """ should create proper http connector in case api_proxy is set  """
@@ -494,7 +516,25 @@ class ApiTest(unittest.TestCase):
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test18_usage(self):
         """ should support usage API """
-        self.assertIn("last_updated", api.usage())
+        self.assert_usage_result(api.usage())
+
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test18a_usage_by_date(self):
+        """ Should return usage values for a specific date """
+        yesterday = datetime.now() - timedelta(1)
+
+        result_1 = api.usage(date=yesterday)
+        self.assert_usage_result(result_1)
+
+        result_2 = api.usage(date=utils.encode_date_to_usage_api_format(yesterday))
+        self.assert_usage_result(result_2)
+
+        # Verify that the structure of the response is of a single day
+        self.assertNotIn("limit", result_1["bandwidth"])
+        self.assertNotIn("used_percent", result_1["bandwidth"])
+
+        self.assertNotIn("limit", result_2["bandwidth"])
+        self.assertNotIn("used_percent", result_2["bandwidth"])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     @unittest.skip("Skip delete all derived resources by default")
