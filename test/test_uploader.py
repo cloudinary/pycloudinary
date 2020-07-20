@@ -14,6 +14,7 @@ import cloudinary
 from cloudinary import api, uploader, utils, exceptions
 from cloudinary.cache import responsive_breakpoints_cache
 from cloudinary.cache.adapter.key_value_cache_adapter import KeyValueCacheAdapter
+from cloudinary.compat import urlparse, parse_qs
 from test.cache.storage.dummy_cache_storage import DummyCacheStorage
 from test.helper_test import uploader_response_mock, SUFFIX, TEST_IMAGE, get_params, TEST_ICON, TEST_DOC, \
     REMOTE_TEST_IMAGE, UTC, populate_large_file, TEST_UNICODE_IMAGE, get_uri, get_method, get_param, \
@@ -207,8 +208,7 @@ class UploaderTest(unittest.TestCase):
         mocker.return_value = MOCK_RESPONSE
         async_option = {"async": True}
         uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG], **async_option)
-        params = mocker.call_args[0][2]
-        self.assertTrue(params['async'])
+        self.assertTrue(get_param(mocker, 'async'))
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -249,12 +249,12 @@ class UploaderTest(unittest.TestCase):
         test_values = ['auto:advanced', 'auto:best', '80:420', 'none']
         for quality in test_values:
             uploader.upload(TEST_IMAGE, tags=UNIQUE_TAG, quality_override=quality)
-            params = mocker.call_args[0][2]
-            self.assertEqual(params['quality_override'], quality)
+            quality_override = get_param(mocker, 'quality_override')
+            self.assertEqual(quality_override, quality)
         # verify explicit works too
         uploader.explicit(TEST_IMAGE, quality_override='auto:best')
-        params = mocker.call_args[0][2]
-        self.assertEqual(params['quality_override'], 'auto:best')
+        quality_override = get_param(mocker, 'quality_override')
+        self.assertEqual(quality_override, 'auto:best')
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_url(self):
@@ -723,12 +723,12 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
 
         uploader.upload(TEST_IMAGE, cinemagraph_analysis=True)
 
-        params = request_mock.call_args[0][2]
+        params = get_params(request_mock.call_args[0])
         self.assertIn("cinemagraph_analysis", params)
 
         uploader.explicit(TEST_IMAGE, cinemagraph_analysis=True)
 
-        params = request_mock.call_args[0][2]
+        params = get_params(request_mock.call_args[0])
         self.assertIn("cinemagraph_analysis", params)
 
     @patch('urllib3.request.RequestMethods.request')
@@ -753,6 +753,107 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         self.assertEqual(str(result['context']['custom']['width']), str(TEST_IMAGE_WIDTH))
         self.assertIsInstance(result['quality_analysis'], dict)
         self.assertIsInstance(result['quality_analysis']['focus'], float)
+
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_generate_sprite(self):
+        """Should generate a sprite from all images associated with a tag or from the image urls"""
+        sprite_test_tag = "sprite_test_tag{}".format(SUFFIX)
+        images_quantity_in_sprite = 2
+
+        upload_result_1 = uploader.upload(TEST_IMAGE, tags=[sprite_test_tag, UNIQUE_TAG],
+                                          public_id="sprite_test_tag_1{}".format(SUFFIX))
+        upload_result_2 = uploader.upload(TEST_IMAGE, tags=[sprite_test_tag, UNIQUE_TAG],
+                                          public_id="sprite_test_tag_2{}".format(SUFFIX))
+
+        result = uploader.generate_sprite(tag=sprite_test_tag, tags=[UNIQUE_TAG])
+        self.assertEqual(len(result["image_infos"]), images_quantity_in_sprite)
+
+        urls = [upload_result_1.get('url'), upload_result_2.get('url')]
+        result = uploader.generate_sprite(urls=urls, tags=[UNIQUE_TAG])
+        self.assertEqual(len(result["image_infos"]), images_quantity_in_sprite)
+
+        result = uploader.generate_sprite(sprite_test_tag, transformation={"raw_transformation": "w_100"})
+        self.assertIn("w_100", result["css_url"])
+
+        result = uploader.generate_sprite(sprite_test_tag, format="jpg", width=100)
+        uploader.destroy(result.get("public_id"))
+        self.assertIn("f_jpg,w_100", result["css_url"])
+
+    def test_download_sprite(self):
+        """Should generate signed download url for sprite"""
+        sprite_test_tag = "sprite_tag"
+        url_1 = "https://res.cloudinary.com/demo/image/upload/sample"
+        url_2 = "https://res.cloudinary.com/demo/image/upload/car"
+
+        url_from_tag = uploader.download_generated_sprite(tag=sprite_test_tag)
+        url_from_urls = uploader.download_generated_sprite(urls=[url_1, url_2])
+
+        self.assertTrue(url_from_tag.startswith(
+            "https://api.cloudinary.com/v1_1/" + cloudinary.config().cloud_name + "/image/sprite"))
+        self.assertTrue(url_from_urls.startswith(
+            "https://api.cloudinary.com/v1_1/" + cloudinary.config().cloud_name + "/image/sprite"))
+
+        parameters = parse_qs(urlparse(url_from_tag).query)
+        self.assertEqual(sprite_test_tag, parameters["tag"][0])
+        self.assertEqual("download", parameters["mode"][0])
+        self.assertTrue(parameters["timestamp"])
+        self.assertTrue(parameters["signature"])
+
+        parameters = parse_qs(urlparse(url_from_urls).query)
+        self.assertIn(url_1, parameters["urls[]"])
+        self.assertIn(url_2, parameters["urls[]"])
+        self.assertEqual("download", parameters["mode"][0])
+        self.assertTrue(parameters["timestamp"])
+        self.assertTrue(parameters["signature"])
+
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_multi(self):
+        """Should generate a GIF, video or a PDF from all images associated with a tag or from the image urls"""
+        multi_test_tag = "multi_test_tag{}".format(SUFFIX)
+        upload_result_1 = uploader.upload(TEST_IMAGE, tags=[multi_test_tag, UNIQUE_TAG])
+        upload_result_2 = uploader.upload(TEST_IMAGE, tags=[multi_test_tag, UNIQUE_TAG])
+
+        # Generate multi from urls
+        urls = [upload_result_1.get('url'), upload_result_2.get('url')]
+        result = uploader.multi(urls=urls, crop="crop", width="0.5")
+        self.assertTrue(result.get("url").endswith(".gif"))
+        self.assertIn("w_0.5", result.get("url"))
+
+        # Generate multi from tag
+        result = uploader.multi(tag=multi_test_tag, transformation={"raw_transformation": "c_crop,w_0.5"})
+        pdf_result = uploader.multi(tag=multi_test_tag, width=111, format="pdf")
+
+        self.assertTrue(result.get("url").endswith(".gif"))
+        self.assertIn("w_0.5", result.get("url"))
+        self.assertTrue(pdf_result.get("url").endswith(".pdf"))
+        self.assertIn("w_111", pdf_result.get("url"))
+
+    def test_download_multi(self):
+        """Should generate signed download url for multi"""
+        multi_test_tag = "multi_test_tag"
+        url_1 = "https://res.cloudinary.com/demo/image/upload/sample"
+        url_2 = "https://res.cloudinary.com/demo/image/upload/car"
+
+        url_from_tag = uploader.download_multi(tag=multi_test_tag)
+        url_from_urls = uploader.download_multi(urls=[url_1, url_2])
+
+        self.assertTrue(url_from_tag.startswith(
+            "https://api.cloudinary.com/v1_1/" + cloudinary.config().cloud_name + "/image/multi"))
+        self.assertTrue(url_from_urls.startswith(
+            "https://api.cloudinary.com/v1_1/" + cloudinary.config().cloud_name + "/image/multi"))
+
+        parameters = parse_qs(urlparse(url_from_tag).query)
+        self.assertEqual(multi_test_tag, parameters["tag"][0])
+        self.assertEqual("download", parameters["mode"][0])
+        self.assertTrue(parameters["timestamp"])
+        self.assertTrue(parameters["signature"])
+
+        parameters = parse_qs(urlparse(url_from_urls).query)
+        self.assertIn(url_1, parameters["urls[]"])
+        self.assertIn(url_2, parameters["urls[]"])
+        self.assertEqual("download", parameters["mode"][0])
+        self.assertTrue(parameters["timestamp"])
+        self.assertTrue(parameters["signature"])
 
 
 if __name__ == '__main__':

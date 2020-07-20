@@ -1037,6 +1037,28 @@ def build_upload_params(**options):
     return params
 
 
+def build_multi_and_sprite_params(**options):
+    """
+    Build params for multi, download_multi, generate_sprite, and download_generated_sprite methods
+    """
+    tag = options.get("tag")
+    urls = options.get("urls")
+    if tag and urls:
+        raise ValueError("'tag' and 'urls' parameters are mutually exclusive")
+    if not tag and not urls:
+        raise ValueError("Either 'tag' or 'urls' parameter has to be set")
+    params = {
+        "mode": options.get("mode"),
+        "timestamp": now(),
+        "async": options.get("async"),
+        "notification_url": options.get("notification_url"),
+        "tag": tag,
+        "urls": urls,
+        "transformation": generate_transformation_string(fetch_format=options.get("format"), **options)[0]
+    }
+    return params
+
+
 def __process_text_options(layer, layer_parameter):
     font_family = layer.get("font_family")
     font_size = layer.get("font_size")

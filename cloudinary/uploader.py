@@ -180,28 +180,91 @@ def create_zip(**options):
     return create_archive(target_format="zip", **options)
 
 
-def generate_sprite(tag, **options):
-    params = {
-        "timestamp": utils.now(),
-        "tag": tag,
-        "async": options.get("async"),
-        "notification_url": options.get("notification_url"),
-        "transformation": utils.generate_transformation_string(
-            fetch_format=options.get("format"), **options)[0]
-    }
+def generate_sprite(tag=None, urls=None, **options):
+    """
+    Generates sprites by merging multiple images into a single large image.
+
+    See: `Sprite method API reference
+    <https://cloudinary.com/documentation/image_upload_api_reference#sprite_method>`_
+
+    :param tag:     The sprite is created from all images with this tag. If not set - `urls` parameter is required
+    :type tag:      str
+    :param urls:    List of URLs to create a sprite from. Can only be used if `tag` is not set
+    :type urls:     list
+    :param options: Additional options
+    :type options:  dict, optional
+    :return:        Dictionary with meta information URLs of generated sprite resources
+    :rtype:         dict
+    """
+    params = utils.build_multi_and_sprite_params(tag=tag, urls=urls, **options)
     return call_api("sprite", params, **options)
 
 
-def multi(tag, **options):
-    params = {
-        "timestamp": utils.now(),
-        "tag": tag,
-        "format": options.get("format"),
-        "async": options.get("async"),
-        "notification_url": options.get("notification_url"),
-        "transformation": utils.generate_transformation_string(**options)[0]
-    }
+def download_generated_sprite(tag=None, urls=None, **options):
+    """
+    Returns signed URL for the sprite endpoint with `mode=download`
+
+    :param tag:     The sprite is created from all images with this tag. If not set - `urls` parameter is required
+    :type tag:      str
+    :param urls:    List of URLs to create a sprite from. Can only be used if `tag` is not set
+    :type urls:     list
+    :param options: Additional options
+    :type options:  dict, optional
+    :return:        The signed URL to download sprite
+    :rtype:         str
+    """
+    params = options.copy()
+    params.update(mode="download")
+
+    params = utils.build_multi_and_sprite_params(tag=tag, urls=urls, **params)
+    cloudinary_params = utils.sign_request(params, options)
+
+    return utils.cloudinary_api_url("sprite", **options) + "?" + \
+        utils.urlencode(utils.bracketize_seq(cloudinary_params), True)
+
+
+def multi(tag=None, urls=None, **options):
+    """
+    Creates either a single animated image, video or a PDF.
+
+    See: `Upload method API reference
+    <https://cloudinary.com/documentation/image_upload_api_reference#multi_method>`_
+
+    :param tag:     The animated image, video or PDF is created from all images with this tag.
+                    If not set - `urls` parameter is required
+    :type tag:      str
+    :param urls:    List of URLs to create an animated image, video or PDF from. Can only be used if `tag` is not set
+    :type urls:     list
+    :param options: Additional options
+    :type options:  dict, optional
+    :return:        Dictionary with meta information URLs of the generated file
+    :rtype:         dict
+    """
+    params = utils.build_multi_and_sprite_params(tag=tag, urls=urls, **options)
     return call_api("multi", params, **options)
+
+
+def download_multi(tag=None, urls=None, **options):
+    """
+    Returns signed URL for the multi endpoint with `mode=download`
+
+    :param tag:     The sprite is created from all images with this tag. If not set - `urls` parameter is required
+    :type tag:      str
+    :param urls:    List of URLs to create a sprite from. Can only be used if `tag` is not set
+    :type urls:     list
+    :param options: Additional options
+    :type options:  dict, optional
+    :return:        The signed URL to download multi
+    :rtype:         str
+    """
+    params = options.copy()
+    params.update(mode="download")
+
+    params = utils.build_multi_and_sprite_params(tag=tag, urls=urls, **params)
+    cloudinary_params = utils.sign_request(params, options)
+
+    return utils.cloudinary_api_url("multi", **options) + "?" + \
+        utils.urlencode(utils.bracketize_seq(cloudinary_params), True)
 
 
 def explode(public_id, **options):
@@ -356,13 +419,13 @@ def call_api(action, params, http_headers=None, return_error=False, unsigned=Fal
         else:
             params = utils.sign_request(params, options)
 
-        param_list = OrderedDict()
+        param_list = []
         for k, v in params.items():
             if isinstance(v, list):
-                for i in range(len(v)):
-                    param_list["{0}[{1}]".format(k, i)] = v[i]
+                for i in v:
+                    param_list.append(("{0}[]".format(k), i))
             elif v:
-                param_list[k] = v
+                param_list.append((k, v))
 
         api_url = utils.cloudinary_api_url(action, **options)
         if file:
@@ -389,7 +452,7 @@ def call_api(action, params, http_headers=None, return_error=False, unsigned=Fal
                 name = filename or "file"
                 data = file
 
-            param_list["file"] = (name, data) if name else data
+            param_list.append(("file", (name, data) if name else data))
 
         headers = {"User-Agent": cloudinary.get_user_agent()}
         headers.update(http_headers)

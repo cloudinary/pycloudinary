@@ -66,7 +66,29 @@ def get_uri(args):
 
 
 def get_params(args):
-    return args[2] or {}
+    """
+    Extracts query parameters from mocked urllib3.request `fields` param.
+    Supports both list and dict values of `fields`. Returns params as dictionary.
+    Supports two list params formats:
+      - {"urls[0]": "http://host1", "urls[1]": "http://host2"}
+      - [("urls[]", "http://host1"), ("urls[]", "http://host2")]
+    In both cases the result would be {"urls": ["http://host1", "http://host2"]}
+    """
+    if not args or not args[2]:
+        return {}
+    params = {}
+    reg = re.compile(r'^(.*)\[\d*]$')
+    fields = args[2].items() if isinstance(args[2], dict) else args[2]
+    for k, v in fields:
+        match = reg.match(k)
+        if match:
+            name = match.group(1)
+            if name not in params:
+                params[name] = []
+            params[name].append(v)
+        else:
+            params[k] = v
+    return params
 
 
 def get_json_body(mocker):
@@ -92,10 +114,7 @@ def get_list_param(mocker, name):
     :param name: the name of the parameter
     :return: a list of values
     """
-    args, kargs = mocker.call_args
-    params = get_params(args)
-    reg = re.compile(r'{}\[\d*\]'.format(name))
-    return [params[key] for key in params.keys() if reg.match(key)]
+    return get_param(mocker, name)
 
 
 def http_response_mock(body="", headers=None, status=200):
