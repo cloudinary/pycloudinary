@@ -176,6 +176,27 @@ def create_archive(**options):
     return call_api("generate_archive", params, **options)
 
 
+def download_folder(folder_path, **options):
+    """
+    Creates and returns a URL that when invoked creates an archive of a folder.
+    :param folder_path: The full path from the root that is used to generate download url.
+    :type folder_path:  str
+    :param options:     Additional options.
+    :type options:      dict, optional
+    :return:            Signed URL to download the folder.
+    :rtype:             str
+    """
+    params = options.copy()
+    params.update(mode="download")
+    params.update(prefixes=folder_path)
+    resource_type = options.get("resource_type", "all")
+    params.update(resource_type=resource_type)
+    cloudinary_params = utils.sign_request(params, options)
+
+    return utils.cloudinary_api_url("generate_archive", **options) + "?" + \
+        utils.urlencode(utils.bracketize_seq(cloudinary_params), True)
+
+
 def create_zip(**options):
     return create_archive(target_format="zip", **options)
 
