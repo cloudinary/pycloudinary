@@ -65,6 +65,7 @@ __URL_KEYS = [
     'use_root_path',
     'version',
     'long_url_signature',
+    'signature_algorithm',
 ]
 
 __SIMPLE_UPLOAD_PARAMS = [
@@ -125,15 +126,20 @@ __SERIALIZED_UPLOAD_PARAMS = [
 upload_params = __SIMPLE_UPLOAD_PARAMS + __SERIALIZED_UPLOAD_PARAMS
 
 
-def compute_hex_hash(s):
+def compute_hex_hash(s, algorithm=cloudinary.SIGNATURE_SHA1):
     """
-    Compute hash and convert the result to HEX string
+    Computes string hash using specified algorithm and return HEX string representation of hash.
 
-    :param s: string to process
+    :param s:         String to compute hash for
+    :param algorithm: The name of algorithm to use for computing hash
 
-    :return: HEX string
+    :return: HEX string of computed hash value
     """
-    return hashlib.sha1(to_bytes(s)).hexdigest()
+    try:
+        hash_fn = cloudinary.SIGNATURE_ALGORITHMS[algorithm]
+    except KeyError:
+        raise ValueError('Unsupported hash algorithm: {}'.format(algorithm))
+    return hash_fn(to_bytes(s)).hexdigest()
 
 
 def build_array(arg):
@@ -547,18 +553,19 @@ def sign_request(params, options):
     api_secret = options.get("api_secret", cloudinary.config().api_secret)
     if not api_secret:
         raise ValueError("Must supply api_secret")
+    signature_algorithm = options.get("signature_algorithm", cloudinary.config().signature_algorithm)
 
     params = cleanup_params(params)
-    params["signature"] = api_sign_request(params, api_secret)
+    params["signature"] = api_sign_request(params, api_secret, signature_algorithm)
     params["api_key"] = api_key
 
     return params
 
 
-def api_sign_request(params_to_sign, api_secret):
+def api_sign_request(params_to_sign, api_secret, algorithm=cloudinary.SIGNATURE_SHA1):
     params = [(k + "=" + (",".join(v) if isinstance(v, list) else str(v))) for k, v in params_to_sign.items() if v]
     to_sign = "&".join(sorted(params))
-    return compute_hex_hash(to_sign + api_secret)
+    return compute_hex_hash(to_sign + api_secret, algorithm)
 
 
 def breakpoint_settings_mapper(breakpoint_settings):
@@ -716,6 +723,7 @@ def cloudinary_url(source, **options):
     use_root_path = options.pop("use_root_path", cloudinary.config().use_root_path)
     auth_token = options.pop("auth_token", None)
     long_url_signature = options.pop("long_url_signature", cloudinary.config().long_url_signature)
+    signature_algorithm = options.pop("signature_algorithm", cloudinary.config().signature_algorithm)
     if auth_token is not False:
         auth_token = merge(cloudinary.config().auth_token, auth_token)
 
@@ -741,7 +749,15 @@ def cloudinary_url(source, **options):
     signature = None
     if sign_url and not auth_token:
         to_sign = "/".join(__compact([transformation, source_to_sign]))
-        hash_fn, chars_length = (hashlib.sha256, 32) if long_url_signature else (hashlib.sha1, 8)
+        if long_url_signature:
+            # Long signature forces SHA256
+            signature_algorithm = cloudinary.SIGNATURE_SHA256
+            chars_length = cloudinary.LONG_URL_SIGNATURE_LENGTH
+        else:
+            chars_length = cloudinary.SHORT_URL_SIGNATURE_LENGTH
+        if signature_algorithm not in cloudinary.SIGNATURE_ALGORITHMS:
+            raise ValueError("Unsupported signature algorithm '{}'".format(signature_algorithm))
+        hash_fn = cloudinary.SIGNATURE_ALGORITHMS[signature_algorithm]
         signature = "s--" + to_string(
             base64.urlsafe_b64encode(
                 hash_fn(to_bytes(to_sign + api_secret)).digest())[0:chars_length]) + "--"
@@ -1376,13 +1392,15 @@ def check_property_enabled(f):
     return wrapper
 
 
-def verify_api_response_signature(public_id, version, signature):
+def verify_api_response_signature(public_id, version, signature, algorithm=None):
     """
     Verifies the authenticity of an API response signature
 
     :param public_id: The public id of the asset as returned in the API response
-    :param version: The version of the asset as returned in the API response
+    :param version:   The version of the asset as returned in the API response
     :param signature: Actual signature. Can be retrieved from the X-Cld-Signature header
+    :param algorithm: Name of hashing algorithm to use for calculation of HMACs.
+                      By default uses `cloudinary.config().signature_algorithm`
 
     :return: Boolean result of the validation
     """
@@ -1392,10 +1410,14 @@ def verify_api_response_signature(public_id, version, signature):
     parameters_to_sign = {'public_id': public_id,
                           'version': version}
 
-    return signature == api_sign_request(parameters_to_sign, cloudinary.config().api_secret)
+    return signature == api_sign_request(
+        parameters_to_sign,
+        cloudinary.config().api_secret,
+        algorithm or cloudinary.config().signature_algorithm
+    )
 
 
-def verify_notification_signature(body, timestamp, signature, valid_for=7200):
+def verify_notification_signature(body, timestamp, signature, valid_for=7200, algorithm=None):
     """
     Verifies the authenticity of a notification signature
 
@@ -1403,6 +1425,8 @@ def verify_notification_signature(body, timestamp, signature, valid_for=7200):
     :param timestamp: Unix timestamp. Can be retrieved from the X-Cld-Timestamp header
     :param signature: Actual signature. Can be retrieved from the X-Cld-Signature header
     :param valid_for: The desired time in seconds for considering the request valid
+    :param algorithm: Name of hashing algorithm to use for calculation of HMACs.
+                      By default uses `cloudinary.config().signature_algorithm`
 
     :return: Boolean result of the validation
     """
@@ -1415,7 +1439,9 @@ def verify_notification_signature(body, timestamp, signature, valid_for=7200):
     if not isinstance(body, str):
         raise ValueError('Body should be type of string')
 
-    return signature == compute_hex_hash('{}{}{}'.format(body, timestamp, cloudinary.config().api_secret))
+    return signature == compute_hex_hash(
+        '{}{}{}'.format(body, timestamp, cloudinary.config().api_secret),
+        algorithm or cloudinary.config().signature_algorithm)
 
 
 def get_http_connector(conf, options):

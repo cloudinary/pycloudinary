@@ -17,6 +17,7 @@ from mock import patch
 import cloudinary.utils
 from cloudinary import CL_BLANK
 from cloudinary.utils import (
+    api_sign_request,
     build_list_of_dicts,
     json_encode,
     encode_unicode_url,
@@ -637,6 +638,16 @@ class TestUtils(unittest.TestCase):
             public_id="http://google.com/path/to/image.png",
             options={"version": 1234, "type": "fetch", "sign_url": True},
             expected_url=DEFAULT_ROOT_PATH + "image/fetch/s--hH_YcbiS--/v1234/http://google.com/path/to/image.png")
+
+    def test_signed_url_sha256(self):
+        sha256_config = cloudinary.Config()
+        sha256_config.update(**vars(cloudinary.config()))
+        sha256_config.update(signature_algorithm=cloudinary.SIGNATURE_SHA256)
+        with patch('cloudinary.config', return_value=sha256_config):
+            self.__test_cloudinary_url(
+                public_id="sample.jpg",
+                options={"sign_url": True},
+                expected_url=DEFAULT_UPLOAD_PATH + "s--2hbrSMPO--/sample.jpg")
 
     def test_disallow_url_suffix_in_non_upload_types(self):
         with self.assertRaises(ValueError):
@@ -1259,6 +1270,19 @@ class TestUtils(unittest.TestCase):
                 verify_api_response_signature(public_id, test_version, api_response_signature)
             self.assertEqual(str(e.exception), 'Api secret key is empty')
 
+    def test_verify_api_response_signature_sha256(self):
+        public_id = 'tests/logo.png'
+        test_version = 1
+        api_response_signature = 'cc69ae4ed73303fbf4a55f2ae5fc7e34ad3a5c387724bfcde447a2957cacdfea'
+
+        with patch('cloudinary.config', return_value=cloudinary.config(api_secret=API_SECRET)):
+            self.assertTrue(verify_api_response_signature(
+                public_id,
+                test_version,
+                api_response_signature,
+                cloudinary.SIGNATURE_SHA256
+            ))
+
     def test_verify_notification_signature(self):
         valid_for = 60
         signature = 'dfe82de1d9083fe0b7ea68070649f9a15b8874da'
@@ -1299,6 +1323,16 @@ class TestUtils(unittest.TestCase):
                     verify_notification_signature(body, valid_response_timestamp, signature, valid_for)
                 self.assertEqual(str(e.exception), 'Api secret key is empty')
 
+    def test_verify_notification_signature_sha256(self):
+        with patch('time.time', return_value=MOCKED_NOW):
+            with patch('cloudinary.config', return_value=cloudinary.config(api_secret="someApiSecret")):
+                self.assertTrue(verify_notification_signature(
+                    "{}",
+                    0,
+                    "d5497e1a206ad0ba29ad09a7c0c5f22e939682d15009c15ab3199f62fefbd14b",
+                    valid_for=time.time(),
+                    algorithm=cloudinary.SIGNATURE_SHA256))
+
     def test_support_long_url_signature(self):
         """should generate short signature by default and long signature if long_url_signature=True"""
         image_name = "sample.jpg"
@@ -1320,6 +1354,18 @@ class TestUtils(unittest.TestCase):
         self.__test_cloudinary_url(public_id=image_name,
                                    options={"sign_url": True},
                                    expected_url=DEFAULT_UPLOAD_PATH + long_signature + "/" + image_name)
+
+    def test_api_sign_request_sha1(self):
+        params = dict(cloud_name="dn6ot3ged", timestamp=1568810420, username="user@cloudinary.com")
+        signature = api_sign_request(params, "hdcixPpR2iKERPwqvH6sHdK9cyac")
+        expected = "14c00ba6d0dfdedbc86b316847d95b9e6cd46d94"
+        self.assertEqual(expected, signature)
+
+    def test_api_sign_request_sha256(self):
+        params = dict(cloud_name="dn6ot3ged", timestamp=1568810420, username="user@cloudinary.com")
+        signature = api_sign_request(params, "hdcixPpR2iKERPwqvH6sHdK9cyac", cloudinary.SIGNATURE_SHA256)
+        expected = "45ddaa4fa01f0c2826f32f669d2e4514faf275fe6df053f1a150e7beae58a3bd"
+        self.assertEqual(expected, signature)
 
 
 if __name__ == '__main__':

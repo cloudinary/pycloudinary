@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 import abc
 from copy import deepcopy
+import hashlib
 import os
 import re
 import logging
@@ -15,6 +16,15 @@ ch = logging.StreamHandler()
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 ch.setFormatter(formatter)
 logger.addHandler(ch)
+
+SIGNATURE_SHA1 = "sha1"
+SIGNATURE_SHA256 = "sha256"
+SIGNATURE_ALGORITHMS = {
+    SIGNATURE_SHA1: hashlib.sha1,
+    SIGNATURE_SHA256: hashlib.sha256,
+}
+SHORT_URL_SIGNATURE_LENGTH = 8
+LONG_URL_SIGNATURE_LENGTH = 32
 
 from cloudinary import utils
 from cloudinary.exceptions import GeneralError
@@ -174,6 +184,8 @@ class Config(BaseConfig):
             cloudinary_url = os.environ.get("CLOUDINARY_URL")
             parsed_url = self._parse_cloudinary_url(cloudinary_url)
             self._setup_from_parsed_url(parsed_url)
+        if not self.signature_algorithm:
+            self.signature_algorithm = SIGNATURE_SHA1
 
     def _config_from_parsed_url(self, parsed_url):
         if not self._is_url_scheme_valid(parsed_url):
@@ -275,7 +287,8 @@ class CloudinaryResource(object):
         return self.get_prep_value() + '#' + self.get_expected_signature()
 
     def get_expected_signature(self):
-        return utils.api_sign_request({"public_id": self.public_id, "version": self.version}, config().api_secret)
+        return utils.api_sign_request({"public_id": self.public_id, "version": self.version}, config().api_secret,
+                                      config().signature_algorithm)
 
     @property
     def url(self):
