@@ -1,4 +1,20 @@
 
+1.22.0 / 2020-07-23
+===================
+
+New functionality and features
+------------------------------
+
+  * Add `download_backedup_asset` helper method
+  * Add support for `accessibility_analysis` parameter
+  * Add support for `eval` upload parameter
+  
+Other Changes
+-------------
+
+  * Detect data URLs with suffix in mime type
+  * Integrate with sub-account test service
+
 1.21.1 / 2020-06-11
 ===================
 
