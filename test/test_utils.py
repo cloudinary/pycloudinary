@@ -1009,6 +1009,13 @@ class TestUtils(unittest.TestCase):
         transformation, options = cloudinary.utils.generate_transformation_string(**options)
         self.assertEqual('$first_2,$second_1,$z_5,$foo_$z_mul_2', transformation)
 
+    def test_should_use_context_value_as_user_variables(self):
+        options = {"variables": [["$xpos", "ctx:!x_pos!_to_f"], ["$ypos", "ctx:!y_pos!_to_f"]],
+                   "crop": "crop", "x": "$xpos * w", "y": "$ypos * h"}
+        transformation, options = cloudinary.utils.generate_transformation_string(**options)
+        self.assertIn('$xpos_ctx:!x_pos!_to_f,$ypos_ctx:!y_pos!_to_f,c_crop,x_$xpos_mul_w,y_$ypos_mul_h',
+                      transformation)
+
     def test_should_support_text_values(self):
         public_id = "sample"
         options = {"effect": "$efname:100", "$efname": "!blur!"}
