@@ -1133,7 +1133,7 @@ PREDEFINED_VARS = {
     "initial_duration": "idu",
 }
 
-replaceRE = "((\\|\\||>=|<=|&&|!=|>|=|<|/|-|\\+|\\*|\^)(?=[ _])|(?<!\$)(" + '|'.join(PREDEFINED_VARS.keys()) + "))"
+replaceRE = "((\\|\\||>=|<=|&&|!=|>|=|<|/|-|\\+|\\*|\\^)(?=[ _])|(?<!\\$)(" + '|'.join(PREDEFINED_VARS.keys()) + "))"
 
 
 def translate_if(match):
