@@ -1,5 +1,6 @@
 # Copyright Cloudinary
 
+import datetime
 import email.utils
 import json
 import socket
@@ -31,7 +32,26 @@ def ping(**options):
 
 
 def usage(**options):
-    return call_api("get", ["usage"], {}, **options)
+    """Get account usage details.
+
+    Get a report on the status of your Cloudinary account usage details, including storage, credits, bandwidth,
+    requests, number of resources, and add-on usage. Note that numbers are updated periodically.
+
+    See: `Get account usage details
+    <https://cloudinary.com/documentation/admin_api#get_account_usage_details>`_
+
+    :param options:     Additional options
+    :type options:      dict, optional
+    :return:            Detailed usage information
+    :rtype:             Response
+    """
+    date = options.pop("date", None)
+    uri = ["usage"]
+    if date:
+        if isinstance(date, datetime.date):
+            date = utils.encode_date_to_usage_api_format(date)
+        uri.append(date)
+    return call_api("get", uri, {}, **options)
 
 
 def resource_types(**options):

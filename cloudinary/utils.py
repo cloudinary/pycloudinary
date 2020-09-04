@@ -229,6 +229,17 @@ def json_encode(value):
     return json.dumps(value, default=__json_serializer, separators=(',', ':'))
 
 
+def encode_date_to_usage_api_format(date_obj):
+    """
+    Encodes date object to `dd-mm-yyyy` format string
+
+    :param date_obj: datetime.date object to encode
+
+    :return: Encoded date as a string
+    """
+    return date_obj.strftime('%d-%m-%Y')
+
+
 def patch_fetch_format(options):
     """
     When upload type is fetch, remove the format options.
