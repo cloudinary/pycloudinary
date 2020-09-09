@@ -867,6 +867,23 @@ def download_zip_url(**options):
     return download_archive_url(**new_options)
 
 
+def download_folder(folder_path, **options):
+    """
+    Creates and returns a URL that when invoked creates an archive of a folder.
+    :param folder_path: The full path from the root that is used to generate download url.
+    :type folder_path:  str
+    :param options:     Additional options.
+    :type options:      dict, optional
+    :return:            Signed URL to download the folder.
+    :rtype:             str
+    """
+    new_options = options.copy()
+    new_options.update(prefixes=folder_path)
+    resource_type = options.get("resource_type", "all")
+    new_options.update(resource_type=resource_type)
+    return download_archive_url(**new_options)
+
+
 def download_backedup_asset(asset_id, version_id, **options):
     """
     The returned url allows downloading the backedup asset based on the the asset ID and the version ID.

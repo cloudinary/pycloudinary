@@ -1,7 +1,6 @@
 import io
 import os
 import tempfile
-import time
 import unittest
 from collections import OrderedDict
 from datetime import datetime
@@ -737,32 +736,6 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         params = get_params(request_mock.call_args[0])
         self.assertIn("eval", params)
         self.assertEqual(EVAL_STR, params["eval"])
-
-
-    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
-    def test_download_folder(self):
-        """Should generate and return a url for downloading a folder"""
-        # Should return url with resource_type image
-        download_folder_url = uploader.download_folder(folder_path="samples/", resource_type="image")
-        self.assertIn("image", download_folder_url)
-
-        # Should return valid url
-        download_folder_url = uploader.download_folder(folder_path="folder/")
-        self.assertTrue(download_folder_url)
-        self.assertIn("generate_archive", download_folder_url)
-
-        # Should flatten folder
-        download_folder_url = uploader.download_folder(folder_path="folder/", flatten_folders=True)
-        self.assertIn("flatten_folders", download_folder_url)
-
-        # Should expire_at folder
-        expiration_time = int(time.time() + 60)
-        download_folder_url = uploader.download_folder(folder_path="folder/", expires_at=expiration_time)
-        self.assertIn("expires_at", download_folder_url)
-
-        # Should use original file_name of folder
-        download_folder_url = uploader.download_folder(folder_path="folder/", use_original_filename=True)
-        self.assertIn("use_original_filename", download_folder_url)
 
 
 if __name__ == '__main__':
