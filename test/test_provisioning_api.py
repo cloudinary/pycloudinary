@@ -1,11 +1,13 @@
+import random
 import unittest
 from datetime import datetime
 
+import six
 from urllib3 import disable_warnings
 
 import cloudinary.provisioning.account
 from cloudinary.provisioning import account_config, reset_config
-from cloudinary.exceptions import AuthorizationRequired
+from cloudinary.exceptions import AuthorizationRequired, NotFound
 
 disable_warnings()
 
@@ -18,8 +20,10 @@ class AccountApiTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         now = datetime.now().strftime("%m-%d-%Y")
-        user_name = "SDK TEST " + now
-        user_email = "sdk-test" + now + "@cloudinary.com"
+        cls.user_name_1 = "SDK TEST " + now
+        cls.user_name_2 = "SDK TEST 2 " + now
+        user_email_1 = "sdk-test" + now + "@cloudinary.com"
+        user_email_2 = "sdk-test2" + now + "@cloudinary.com"
         user_role = "billing"
 
         reset_config()
@@ -27,11 +31,14 @@ class AccountApiTest(unittest.TestCase):
         if not config.account_id or not config.provisioning_api_key or not config.provisioning_api_secret:
             return
 
-        res = cloudinary.provisioning.create_sub_account("justname" + now, enabled=True)
-        cls.cloud_id = res["id"]
+        create_sub_account_res = cloudinary.provisioning.create_sub_account("justname" + now, enabled=True)
+        cls.cloud_id = create_sub_account_res["id"]
 
-        create_user = cloudinary.provisioning.create_user(user_name, user_email, user_role)
-        cls.user_id = create_user["id"]
+        create_user_1 = cloudinary.provisioning.create_user(cls.user_name_1, user_email_1, user_role)
+        cls.user_id_1 = create_user_1["id"]
+
+        create_user_2 = cloudinary.provisioning.create_user(cls.user_name_2, user_email_2, user_role)
+        cls.user_id_2 = create_user_2["id"]
 
         create_user_group = cloudinary.provisioning.create_user_group("test-group-" + now)
         cls.group_id = create_user_group["id"]
@@ -44,8 +51,11 @@ class AccountApiTest(unittest.TestCase):
         delete_sub_account = cloudinary.provisioning.delete_sub_account(cls.cloud_id)
         assert delete_sub_account["message"] == "ok"
 
-        delete_user = cloudinary.provisioning.delete_user(cls.user_id)
-        assert delete_user["message"] == "ok"
+        delete_user_1 = cloudinary.provisioning.delete_user(cls.user_id_1)
+        assert delete_user_1["message"] == "ok"
+
+        delete_user_2 = cloudinary.provisioning.delete_user(cls.user_id_2)
+        assert delete_user_2["message"] == "ok"
 
         delete_user_group = cloudinary.provisioning.delete_user_group(cls.group_id)
         assert delete_user_group['ok']
@@ -93,24 +103,63 @@ class AccountApiTest(unittest.TestCase):
         new_email_address = "updated" + now + "@cloudinary.com"
         new_name = "updated"
 
-        res = cloudinary.provisioning.update_user(self.user_id, new_name, new_email_address)
+        res = cloudinary.provisioning.update_user(self.user_id_1, new_name, new_email_address)
         self.assertEqual(new_name, res["name"])
         self.assertEqual(new_email_address, res["email"])
 
-        res = cloudinary.provisioning.user(self.user_id)
-        self.assertEqual(self.user_id, res["id"])
+        res = cloudinary.provisioning.user(self.user_id_1)
+        self.assertEqual(self.user_id_1, res["id"])
         self.assertEqual(new_email_address, res["email"])
 
         res = cloudinary.provisioning.users()
         user_by_id = [user for user in res["users"]
-                      if user["id"] == self.user_id]
+                      if user["id"] == self.user_id_1]
         self.assertEqual(len(user_by_id), 1)
 
     @unittest.skipUnless(cloudinary.provisioning.account_config().provisioning_api_secret,
                          "requires provisioning_api_key/provisioning_api_secret")
     def test_get_users(self):
-        res = cloudinary.provisioning.users(user_ids=[self.user_id])
+        res = cloudinary.provisioning.users(user_ids=[self.user_id_1])
         self.assertEqual(len(res["users"]), 1)
+
+    @unittest.skipUnless(cloudinary.provisioning.account_config().provisioning_api_secret,
+                         "requires provisioning_api_key/provisioning_api_secret")
+    def test_get_pending_users(self):
+        res = cloudinary.provisioning.users(user_ids=[self.user_id_1], pending=True)
+        self.assertEqual(len(res["users"]), 1)
+
+    @unittest.skipUnless(cloudinary.provisioning.account_config().provisioning_api_secret,
+                         "requires provisioning_api_key/provisioning_api_secret")
+    def test_get_non_pending_users(self):
+        res = cloudinary.provisioning.users(user_ids=[self.user_id_1], pending=False)
+        self.assertEqual(len(res["users"]), 0)
+
+    @unittest.skipUnless(cloudinary.provisioning.account_config().provisioning_api_secret,
+                         "requires provisioning_api_key/provisioning_api_secret")
+    def test_get_pending_and_non_pending_users(self):
+        res = cloudinary.provisioning.users(user_ids=[self.user_id_1], pending=None)
+        self.assertEqual(len(res["users"]), 1)
+
+    @unittest.skipUnless(cloudinary.provisioning.account_config().provisioning_api_secret,
+                         "requires provisioning_api_key/provisioning_api_secret")
+    def test_get_users_by_prefix(self):
+        res_1 = cloudinary.provisioning.users(pending=True, prefix=self.user_name_2[:-1])
+        res_2 = cloudinary.provisioning.users(pending=True, prefix=self.user_name_2+'zzz')
+        self.assertEqual(len(res_1["users"]), 1)
+        self.assertEqual(len(res_2["users"]), 0)
+
+    @unittest.skipUnless(cloudinary.provisioning.account_config().provisioning_api_secret,
+                         "requires provisioning_api_key/provisioning_api_secret")
+    def test_get_users_by_sub_account_id(self):
+        res = cloudinary.provisioning.users(pending=True, user_ids=[self.user_id_2], sub_account_id=self.cloud_id)
+        self.assertEqual(len(res["users"]), 1)
+
+    @unittest.skipUnless(cloudinary.provisioning.account_config().provisioning_api_secret,
+                         "requires provisioning_api_key/provisioning_api_secret")
+    def test_get_users_by_nonexistent_sub_account_id(self):
+        random_id = random.randint(100000, 999999)
+        with six.assertRaisesRegex(self, NotFound, "Cannot find sub account with id {}".format(random_id)):
+            cloudinary.provisioning.users(pending=True, sub_account_id=random_id)
 
     @unittest.skipUnless(cloudinary.provisioning.account_config().provisioning_api_secret,
                          "requires provisioning_api_key/provisioning_api_secret")
@@ -126,14 +175,14 @@ class AccountApiTest(unittest.TestCase):
     @unittest.skipUnless(cloudinary.provisioning.account_config().provisioning_api_secret,
                          "requires provisioning_api_key/provisioning_api_secret")
     def test_add_remove_user_from_group(self):
-        res = cloudinary.provisioning.add_user_to_group(self.group_id, self.user_id)
+        res = cloudinary.provisioning.add_user_to_group(self.group_id, self.user_id_1)
         self.assertEqual(len(res["users"]), 1)
 
         group_users_data = cloudinary.provisioning.user_group_users(self.group_id)
         self.assertEqual(len(group_users_data["users"]), 1)
 
         remove_users_from_group_resp = cloudinary.provisioning.remove_user_from_group(self.group_id,
-                                                                                      self.user_id)
+                                                                                      self.user_id_1)
         self.assertEqual(len(remove_users_from_group_resp["users"]), 0)
 
     @unittest.skipUnless(cloudinary.provisioning.account_config().provisioning_api_secret,
