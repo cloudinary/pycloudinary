@@ -76,7 +76,7 @@ def get_param(mocker, name):
     """
     Return the value of the parameter
     :param mocker: the mocked object
-    :param name: the name of the paramer
+    :param name: the name of the parameter
     :return: the value of the parameter if present or None
     """
     args, kargs = mocker.call_args
