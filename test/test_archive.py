@@ -89,6 +89,31 @@ class ArchiveTest(unittest.TestCase):
         upload_prefix = cloudinary.config().upload_prefix or "https://api.cloudinary.com"
         six.assertRegex(self, result, r'^{0}/v1_1/demo/.*$'.format(upload_prefix))
 
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_download_folder(self):
+        """Should generate and return a url for downloading a folder"""
+        # Should return url with resource_type image
+        download_folder_url = utils.download_folder(folder_path="samples/", resource_type="image")
+        self.assertIn("image", download_folder_url)
+
+        # Should return valid url
+        download_folder_url = utils.download_folder(folder_path="folder/")
+        self.assertTrue(download_folder_url)
+        self.assertIn("generate_archive", download_folder_url)
+
+        # Should flatten folder
+        download_folder_url = utils.download_folder(folder_path="folder/", flatten_folders=True)
+        self.assertIn("flatten_folders", download_folder_url)
+
+        # Should expire_at folder
+        expiration_time = int(time.time() + 60)
+        download_folder_url = utils.download_folder(folder_path="folder/", expires_at=expiration_time)
+        self.assertIn("expires_at", download_folder_url)
+
+        # Should use original file_name of folder
+        download_folder_url = utils.download_folder(folder_path="folder/", use_original_filename=True)
+        self.assertIn("use_original_filename", download_folder_url)
+
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_create_archive_multiple_resource_types(self, mocker):
