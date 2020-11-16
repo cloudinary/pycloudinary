@@ -1,4 +1,22 @@
 
+1.23.0 / 2020-11-16
+===================
+
+New functionality and features
+------------------------------
+
+  * Add support for `date` in `usage` Admin API
+  * Add `download_folder` helper method
+  
+Other Changes
+-------------
+
+  * Fix typo in docstring for `get_param`
+  * Add test for context metadata as user variables
+  * Fix Django deprecation warning
+  * Fix detection integration test
+  * Add pull request template
+
 1.22.0 / 2020-07-23
 ===================
 
