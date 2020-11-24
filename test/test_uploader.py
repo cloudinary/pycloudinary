@@ -720,22 +720,13 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         params = get_params(request_mock.call_args[0])
         self.assertIn("accessibility_analysis", params)
 
-    @patch('urllib3.request.RequestMethods.request')
-    def test_eval_upload_parameter(self, request_mock):
-        """Should support eval in upload and explicit"""
-        request_mock.return_value = MOCK_RESPONSE
-
-        uploader.upload(TEST_IMAGE, eval=EVAL_STR)
-
-        params = get_params(request_mock.call_args[0])
-        self.assertIn("eval", params)
-        self.assertEqual(EVAL_STR, params["eval"])
-
-        uploader.explicit(TEST_IMAGE, eval=EVAL_STR)
-
-        params = get_params(request_mock.call_args[0])
-        self.assertIn("eval", params)
-        self.assertEqual(EVAL_STR, params["eval"])
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_eval_upload_parameter(self):
+        """Should support eval in upload"""
+        result = uploader.upload(TEST_IMAGE, eval=EVAL_STR, tags=[UNIQUE_TAG])
+        self.assertEqual(str(result['context']['custom']['width']), str(TEST_IMAGE_WIDTH))
+        self.assertIsInstance(result['quality_analysis'], dict)
+        self.assertIsInstance(result['quality_analysis']['focus'], float)
 
 
 if __name__ == '__main__':
