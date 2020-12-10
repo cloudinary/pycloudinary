@@ -8,7 +8,7 @@ from six import text_type
 from urllib3 import disable_warnings
 
 import cloudinary
-from cloudinary import api
+from cloudinary import api, uploader
 from cloudinary.exceptions import BadRequest, NotFound
 from test.helper_test import (
     UNIQUE_TEST_ID, get_uri, get_params, get_method, api_response_mock, ignore_exception
@@ -23,6 +23,7 @@ EXTERNAL_ID_ENUM_2 = "metadata_external_id_enum_2_{}".format(UNIQUE_TEST_ID)
 EXTERNAL_ID_SET = "metadata_external_id_set_{}".format(UNIQUE_TEST_ID)
 EXTERNAL_ID_SET_2 = "metadata_external_id_set_2_{}".format(UNIQUE_TEST_ID)
 EXTERNAL_ID_SET_3 = "metadata_external_id_set_3_{}".format(UNIQUE_TEST_ID)
+EXTERNAL_ID_SET_4 = "metadata_external_id_set_4_{}".format(UNIQUE_TEST_ID)
 EXTERNAL_ID_DELETE_2 = "metadata_deletion_2_{}".format(UNIQUE_TEST_ID)
 EXTERNAL_ID_DATE_VALIDATION = "metadata_date_validation_{}".format(UNIQUE_TEST_ID)
 EXTERNAL_ID_DATE_VALIDATION_2 = "metadata_date_validation_2_{}".format(UNIQUE_TEST_ID)
@@ -36,6 +37,7 @@ METADATA_FIELDS = [
     EXTERNAL_ID_SET,
     EXTERNAL_ID_SET_2,
     EXTERNAL_ID_SET_3,
+    EXTERNAL_ID_SET_4,
     EXTERNAL_ID_DELETE_2,
     EXTERNAL_ID_DATE_VALIDATION,
     EXTERNAL_ID_DATE_VALIDATION_2,
@@ -472,6 +474,28 @@ class MetadataTest(unittest.TestCase):
 
         self.assert_metadata_field_datasource(result)
         self.assertEqual(len(result["values"]), 3)
+
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test16_update_list_metadata_field(self):
+        """Should update an metadata field that is an array"""
+        metadata = {
+            "datasource": {
+                "values": [
+                    {
+                        "external_id": "1",
+                        "value": "Email",
+                        "state": "active"
+                    }
+                ],
+            },
+            "external_id": EXTERNAL_ID_SET_4,
+            "label": EXTERNAL_ID_SET_4,
+            "type": "set",
+        }
+
+        api.add_metadata_field(metadata)
+        result = uploader.update_metadata({EXTERNAL_ID_SET_4: (1,)}, ['sample'])
+        self.assertEqual(result["public_ids"][0], 'sample')
 
 
 if __name__ == "__main__":

@@ -17,7 +17,7 @@ from fractions import Fraction
 from numbers import Number
 
 import six.moves.urllib.parse
-from six import iteritems
+from six import iteritems, string_types
 from urllib3 import ProxyManager, PoolManager
 
 import cloudinary
@@ -206,16 +206,47 @@ def encode_dict(arg):
         return arg
 
 
-def encode_context(context):
+def escape_metadata_value(value):
     """
-       :param context: dict of context to be encoded
-       :return: a joined string of all keys and values properly escaped and separated by a pipe character
+    Escape = and | with two backslashes \\
+
+    :param value: Value to escape
+    :type value: int or str
+
+    :return: Escaped value
+    :rtype: str
     """
 
+    return str(value).replace("=", "\\=").replace("|", "\\|")
+
+
+def encode_context(context):
+    """
+    Encode metadata fields based on incoming value.
+
+    If array, escape as color_id=[\"green\",\"red\"]
+    If string/number, escape as in_stock_id=50
+    Join resulting values with a pipe: in_stock_id=50|color_id=[\"green\",\"red\"]
+    = and | are escaped by default (this can't be turned off)
+
+    :param context: dict of context to be encoded
+
+    :return: a joined string of all keys and values properly escaped and separated by a pipe character
+    """
     if not isinstance(context, dict):
         return context
 
-    return "|".join(("{}={}".format(k, v.replace("=", "\\=").replace("|", "\\|"))) for k, v in iteritems(context))
+    entries = []
+    for k, v in iteritems(context):
+        if isinstance(v, string_types):
+            entries.append("{}={}".format(k, escape_metadata_value(v)))
+        elif isinstance(v,  (list, tuple)):
+            values = ','.join(['"{}"'.format(escape_metadata_value(inner_v)) for inner_v in v])
+            entries.append("{}=[{}]".format(k, values))
+        else:
+            entries.append(str(v))
+
+    return '|'.join(entries)
 
 
 def json_encode(value):
