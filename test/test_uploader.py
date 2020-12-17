@@ -14,10 +14,10 @@ import cloudinary
 from cloudinary import api, uploader, utils, exceptions
 from cloudinary.cache import responsive_breakpoints_cache
 from cloudinary.cache.adapter.key_value_cache_adapter import KeyValueCacheAdapter
+from test.cache.storage.dummy_cache_storage import DummyCacheStorage
 from test.helper_test import uploader_response_mock, SUFFIX, TEST_IMAGE, get_params, TEST_ICON, TEST_DOC, \
     REMOTE_TEST_IMAGE, UTC, populate_large_file, TEST_UNICODE_IMAGE, get_uri, get_method, get_param, \
-    cleanup_test_resources_by_tag, cleanup_test_transformation, cleanup_test_resources, ignore_exception, EVAL_STR
-from test.cache.storage.dummy_cache_storage import DummyCacheStorage
+    cleanup_test_resources_by_tag, cleanup_test_transformation, cleanup_test_resources, EVAL_STR
 
 MOCK_RESPONSE = uploader_response_mock()
 
@@ -48,8 +48,25 @@ LARGE_FILE_HEIGHT = 1400
 
 METADATA_FIELD_UNIQUE_EXTERNAL_ID = 'metadata_field_external_id_{}'.format(UNIQUE_ID)
 METADATA_FIELD_VALUE = 'metadata_field_value_{}'.format(UNIQUE_ID)
+
+DATASOURCE_ENTRY_1 = "metadata_datasource_entry_external_id_1_{}".format(UNIQUE_ID)
+DATASOURCE_ENTRY_2 = "metadata_datasource_entry_external_id_2_{}".format(UNIQUE_ID)
+
+METADATA_FIELD_EXTERNAL_ID_SET = "metadata_upload_external_id_set_{}".format(UNIQUE_ID)
+METADATA_FIELD_SET_DATASOURCE_MULTIPLE = [
+    {
+        "value": "v1",
+        "external_id": DATASOURCE_ENTRY_1,
+    },
+    {
+        "value": "v2",
+        "external_id": DATASOURCE_ENTRY_2,
+    }
+]
+
 METADATA_FIELDS = {
     METADATA_FIELD_UNIQUE_EXTERNAL_ID: METADATA_FIELD_VALUE,
+    METADATA_FIELD_EXTERNAL_ID_SET: [DATASOURCE_ENTRY_1, DATASOURCE_ENTRY_2]
 }
 
 disable_warnings()
@@ -83,15 +100,24 @@ class UploaderTest(unittest.TestCase):
         "type": "upload"
     }
 
+    @classmethod
+    def setUpClass(cls):
+        api.add_metadata_field({
+            "external_id": METADATA_FIELD_UNIQUE_EXTERNAL_ID,
+            "label": METADATA_FIELD_UNIQUE_EXTERNAL_ID,
+            "type": "string",
+        })
+        api.add_metadata_field({
+            "external_id": METADATA_FIELD_EXTERNAL_ID_SET,
+            "label": METADATA_FIELD_EXTERNAL_ID_SET,
+            "type": "set",
+            "datasource": {
+                "values": METADATA_FIELD_SET_DATASOURCE_MULTIPLE,
+            },
+        })
+
     def setUp(self):
         cloudinary.reset_config()
-
-        with ignore_exception(suppress_traceback_classes=(exceptions.BadRequest,)):
-            api.add_metadata_field({
-                "external_id": METADATA_FIELD_UNIQUE_EXTERNAL_ID,
-                "label": METADATA_FIELD_UNIQUE_EXTERNAL_ID,
-                "type": "string",
-            })
 
     @classmethod
     def tearDownClass(cls):
@@ -111,8 +137,8 @@ class UploaderTest(unittest.TestCase):
             ([TEST_TRANS_SCALE2_STR, TEST_TRANS_SCALE2_PNG_STR],),
         ])
 
-        with ignore_exception(suppress_traceback_classes=(exceptions.BadRequest,)):
-            api.delete_metadata_field(METADATA_FIELD_UNIQUE_EXTERNAL_ID)
+        api.delete_metadata_field(METADATA_FIELD_UNIQUE_EXTERNAL_ID)
+        api.delete_metadata_field(METADATA_FIELD_EXTERNAL_ID_SET)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload(self):

@@ -17,7 +17,7 @@ from fractions import Fraction
 from numbers import Number
 
 import six.moves.urllib.parse
-from six import iteritems
+from six import iteritems, string_types
 from urllib3 import ProxyManager, PoolManager
 
 import cloudinary
@@ -206,16 +206,37 @@ def encode_dict(arg):
         return arg
 
 
-def encode_context(context):
+def normalize_context_value(value):
     """
-       :param context: dict of context to be encoded
-       :return: a joined string of all keys and values properly escaped and separated by a pipe character
+    Escape "=" and "|" delimiter characters and json encode lists
+
+    :param value: Value to escape
+    :type value: int or str or list or tuple
+
+    :return: The normalized value
+    :rtype: str
     """
 
+    if isinstance(value, (list, tuple)):
+        value = json_encode(value)
+
+    return str(value).replace("=", "\\=").replace("|", "\\|")
+
+
+def encode_context(context):
+    """
+    Encode metadata fields based on incoming value.
+
+    List and tuple values are encoded to json strings.
+
+    :param context: dict of context to be encoded
+
+    :return: a joined string of all keys and values properly escaped and separated by a pipe character
+    """
     if not isinstance(context, dict):
         return context
 
-    return "|".join(("{}={}".format(k, v.replace("=", "\\=").replace("|", "\\|"))) for k, v in iteritems(context))
+    return "|".join(("{}={}".format(k, normalize_context_value(v))) for k, v in iteritems(context))
 
 
 def json_encode(value):

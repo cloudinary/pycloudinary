@@ -1,7 +1,7 @@
-from datetime import datetime, timedelta
 import json
 import time
 import unittest
+from datetime import datetime, timedelta
 
 from mock import patch
 from six import text_type
