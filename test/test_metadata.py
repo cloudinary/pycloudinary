@@ -475,28 +475,6 @@ class MetadataTest(unittest.TestCase):
         self.assert_metadata_field_datasource(result)
         self.assertEqual(len(result["values"]), 3)
 
-    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
-    def test16_update_list_metadata_field(self):
-        """Should update an metadata field that is an array"""
-        metadata = {
-            "datasource": {
-                "values": [
-                    {
-                        "external_id": "1",
-                        "value": "Email",
-                        "state": "active"
-                    }
-                ],
-            },
-            "external_id": EXTERNAL_ID_SET_4,
-            "label": EXTERNAL_ID_SET_4,
-            "type": "set",
-        }
-
-        api.add_metadata_field(metadata)
-        result = uploader.update_metadata({EXTERNAL_ID_SET_4: (1,)}, ['sample'])
-        self.assertEqual(result["public_ids"][0], 'sample')
-
 
 if __name__ == "__main__":
     unittest.main()

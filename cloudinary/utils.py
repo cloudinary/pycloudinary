@@ -206,16 +206,19 @@ def encode_dict(arg):
         return arg
 
 
-def escape_metadata_value(value):
+def normalize_context_value(value):
     """
-    Escape = and | with two backslashes \\
+    Escape "=" and "|" delimiter characters and json encode lists
 
     :param value: Value to escape
-    :type value: int or str
+    :type value: int or str or list or tuple
 
-    :return: Escaped value
+    :return: The normalized value
     :rtype: str
     """
+
+    if isinstance(value, (list, tuple)):
+        value = json_encode(value)
 
     return str(value).replace("=", "\\=").replace("|", "\\|")
 
@@ -224,10 +227,7 @@ def encode_context(context):
     """
     Encode metadata fields based on incoming value.
 
-    If array, escape as color_id=[\"green\",\"red\"]
-    If string/number, escape as in_stock_id=50
-    Join resulting values with a pipe: in_stock_id=50|color_id=[\"green\",\"red\"]
-    = and | are escaped by default (this can't be turned off)
+    List and tuple values are encoded to json strings.
 
     :param context: dict of context to be encoded
 
@@ -236,17 +236,7 @@ def encode_context(context):
     if not isinstance(context, dict):
         return context
 
-    entries = []
-    for k, v in iteritems(context):
-        if isinstance(v, string_types):
-            entries.append("{}={}".format(k, escape_metadata_value(v)))
-        elif isinstance(v,  (list, tuple)):
-            values = ','.join(['"{}"'.format(escape_metadata_value(inner_v)) for inner_v in v])
-            entries.append("{}=[{}]".format(k, values))
-        else:
-            entries.append(str(v))
-
-    return '|'.join(entries)
+    return "|".join(("{}={}".format(k, normalize_context_value(v))) for k, v in iteritems(context))
 
 
 def json_encode(value):

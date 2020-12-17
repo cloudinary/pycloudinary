@@ -1042,6 +1042,8 @@ class TestUtils(unittest.TestCase):
     def test_encode_context(self):
         self.assertEqual("", cloudinary.utils.encode_context({}))
         self.assertEqual("a=b", cloudinary.utils.encode_context({"a": "b"}))
+        # list values are encoded to a json string
+        self.assertEqual('a=["b","c"]', cloudinary.utils.encode_context({"a": ["b", "c"]}))
         # using OrderedDict for tests consistency
         self.assertEqual("a=b|c=d", cloudinary.utils.encode_context(OrderedDict((("a", "b"), ("c", "d")))))
         # test that special characters are unchanged
