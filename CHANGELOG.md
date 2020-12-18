@@ -1,4 +1,18 @@
 
+1.24.0 / 2020-12-18
+===================
+
+New functionality and features
+------------------------------
+
+  * Add support for list values in metadata
+  * Add `Python 3.9` support
+
+Other Changes
+-------------
+
+  * Improve add-on tests
+
 1.23.0 / 2020-11-16
 ===================
 
