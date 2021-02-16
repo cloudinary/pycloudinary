@@ -642,7 +642,7 @@ class TestUtils(unittest.TestCase):
     def test_signed_url_sha256(self):
         sha256_config = cloudinary.Config()
         sha256_config.update(**vars(cloudinary.config()))
-        sha256_config.update(signature_algorithm=cloudinary.SIGNATURE_SHA256)
+        sha256_config.update(signature_algorithm=cloudinary.utils.SIGNATURE_SHA256)
         with patch('cloudinary.config', return_value=sha256_config):
             self.__test_cloudinary_url(
                 public_id="sample.jpg",
@@ -1280,7 +1280,7 @@ class TestUtils(unittest.TestCase):
                 public_id,
                 test_version,
                 api_response_signature,
-                cloudinary.SIGNATURE_SHA256
+                cloudinary.utils.SIGNATURE_SHA256
             ))
 
     def test_verify_notification_signature(self):
@@ -1331,7 +1331,7 @@ class TestUtils(unittest.TestCase):
                     0,
                     "d5497e1a206ad0ba29ad09a7c0c5f22e939682d15009c15ab3199f62fefbd14b",
                     valid_for=time.time(),
-                    algorithm=cloudinary.SIGNATURE_SHA256))
+                    algorithm=cloudinary.utils.SIGNATURE_SHA256))
 
     def test_support_long_url_signature(self):
         """should generate short signature by default and long signature if long_url_signature=True"""
@@ -1363,7 +1363,7 @@ class TestUtils(unittest.TestCase):
 
     def test_api_sign_request_sha256(self):
         params = dict(cloud_name="dn6ot3ged", timestamp=1568810420, username="user@cloudinary.com")
-        signature = api_sign_request(params, "hdcixPpR2iKERPwqvH6sHdK9cyac", cloudinary.SIGNATURE_SHA256)
+        signature = api_sign_request(params, "hdcixPpR2iKERPwqvH6sHdK9cyac", cloudinary.utils.SIGNATURE_SHA256)
         expected = "45ddaa4fa01f0c2826f32f669d2e4514faf275fe6df053f1a150e7beae58a3bd"
         self.assertEqual(expected, signature)
 

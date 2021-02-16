@@ -17,15 +17,6 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 ch.setFormatter(formatter)
 logger.addHandler(ch)
 
-SIGNATURE_SHA1 = "sha1"
-SIGNATURE_SHA256 = "sha256"
-SIGNATURE_ALGORITHMS = {
-    SIGNATURE_SHA1: hashlib.sha1,
-    SIGNATURE_SHA256: hashlib.sha256,
-}
-SHORT_URL_SIGNATURE_LENGTH = 8
-LONG_URL_SIGNATURE_LENGTH = 32
-
 from cloudinary import utils
 from cloudinary.exceptions import GeneralError
 from cloudinary.cache import responsive_breakpoints_cache
@@ -185,7 +176,7 @@ class Config(BaseConfig):
             parsed_url = self._parse_cloudinary_url(cloudinary_url)
             self._setup_from_parsed_url(parsed_url)
         if not self.signature_algorithm:
-            self.signature_algorithm = SIGNATURE_SHA1
+            self.signature_algorithm = utils.SIGNATURE_SHA1
 
     def _config_from_parsed_url(self, parsed_url):
         if not self._is_url_scheme_valid(parsed_url):

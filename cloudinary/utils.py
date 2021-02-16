@@ -125,8 +125,19 @@ __SERIALIZED_UPLOAD_PARAMS = [
 
 upload_params = __SIMPLE_UPLOAD_PARAMS + __SERIALIZED_UPLOAD_PARAMS
 
+SHORT_URL_SIGNATURE_LENGTH = 8
+LONG_URL_SIGNATURE_LENGTH = 32
 
-def compute_hex_hash(s, algorithm=cloudinary.SIGNATURE_SHA1):
+SIGNATURE_SHA1 = "sha1"
+SIGNATURE_SHA256 = "sha256"
+
+signature_algorithms = {
+    SIGNATURE_SHA1: hashlib.sha1,
+    SIGNATURE_SHA256: hashlib.sha256,
+}
+
+
+def compute_hex_hash(s, algorithm=SIGNATURE_SHA1):
     """
     Computes string hash using specified algorithm and return HEX string representation of hash.
 
@@ -136,7 +147,7 @@ def compute_hex_hash(s, algorithm=cloudinary.SIGNATURE_SHA1):
     :return: HEX string of computed hash value
     """
     try:
-        hash_fn = cloudinary.SIGNATURE_ALGORITHMS[algorithm]
+        hash_fn = signature_algorithms[algorithm]
     except KeyError:
         raise ValueError('Unsupported hash algorithm: {}'.format(algorithm))
     return hash_fn(to_bytes(s)).hexdigest()
@@ -562,7 +573,7 @@ def sign_request(params, options):
     return params
 
 
-def api_sign_request(params_to_sign, api_secret, algorithm=cloudinary.SIGNATURE_SHA1):
+def api_sign_request(params_to_sign, api_secret, algorithm=SIGNATURE_SHA1):
     params = [(k + "=" + (",".join(v) if isinstance(v, list) else str(v))) for k, v in params_to_sign.items() if v]
     to_sign = "&".join(sorted(params))
     return compute_hex_hash(to_sign + api_secret, algorithm)
@@ -751,13 +762,13 @@ def cloudinary_url(source, **options):
         to_sign = "/".join(__compact([transformation, source_to_sign]))
         if long_url_signature:
             # Long signature forces SHA256
-            signature_algorithm = cloudinary.SIGNATURE_SHA256
-            chars_length = cloudinary.LONG_URL_SIGNATURE_LENGTH
+            signature_algorithm = SIGNATURE_SHA256
+            chars_length = LONG_URL_SIGNATURE_LENGTH
         else:
-            chars_length = cloudinary.SHORT_URL_SIGNATURE_LENGTH
-        if signature_algorithm not in cloudinary.SIGNATURE_ALGORITHMS:
+            chars_length = SHORT_URL_SIGNATURE_LENGTH
+        if signature_algorithm not in signature_algorithms:
             raise ValueError("Unsupported signature algorithm '{}'".format(signature_algorithm))
-        hash_fn = cloudinary.SIGNATURE_ALGORITHMS[signature_algorithm]
+        hash_fn = signature_algorithms[signature_algorithm]
         signature = "s--" + to_string(
             base64.urlsafe_b64encode(
                 hash_fn(to_bytes(to_sign + api_secret)).digest())[0:chars_length]) + "--"
