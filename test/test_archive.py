@@ -15,7 +15,7 @@ import urllib3
 from urllib3 import disable_warnings
 
 from test.helper_test import SUFFIX, TEST_IMAGE, api_response_mock, cleanup_test_resources_by_tag, UNIQUE_TEST_ID, \
-    get_uri, get_list_param
+    get_uri, get_list_param, get_params
 
 MOCK_RESPONSE = api_response_mock()
 
@@ -60,7 +60,7 @@ class ArchiveTest(unittest.TestCase):
             allow_missing=True,
             skip_transformation_name=True,
         )
-        params = mocker.call_args[0][2]
+        params = get_params(mocker.call_args[0])
         self.assertEqual(params['expires_at'], expires_at)
         self.assertTrue(params['allow_missing'])
         self.assertTrue(params['skip_transformation_name'])

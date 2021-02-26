@@ -410,9 +410,8 @@ class ApiTest(unittest.TestCase):
         """ should allow listing transformations with cursor """
         mocker.return_value = MOCK_RESPONSE
         api.transformation(API_TEST_TRANS_SCALE100, next_cursor=NEXT_CURSOR, max_results=10)
-        params = mocker.call_args[0][2]
-        self.assertEqual(params['next_cursor'], NEXT_CURSOR)
-        self.assertEqual(params['max_results'], 10)
+        self.assertEqual(get_param(mocker, 'next_cursor'), NEXT_CURSOR)
+        self.assertEqual(get_param(mocker, 'max_results'), 10)
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -420,7 +419,7 @@ class ApiTest(unittest.TestCase):
         """ should allow listing only named transformations"""
         mocker.return_value = MOCK_RESPONSE
         api.transformations(named=True)
-        params = mocker.call_args[0][2]
+        params = get_params(mocker.call_args[0])
         self.assertEqual(params['named'], True)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -580,8 +579,8 @@ class ApiTest(unittest.TestCase):
         """ should support notification_url param """
         mocker.return_value = MOCK_RESPONSE
         api.update("api_test", notification_url="http://example.com")
-        params = mocker.call_args[0][2]
-        self.assertEqual(params['notification_url'], "http://example.com")
+        notification_url = get_param(mocker, 'notification_url')
+        self.assertEqual(notification_url, "http://example.com")
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test22_raw_conversion(self):
@@ -620,8 +619,8 @@ class ApiTest(unittest.TestCase):
         test_values = ['auto:advanced', 'auto:best', '80:420', 'none']
         for quality in test_values:
             api.update("api_test", quality_override=quality)
-            params = mocker.call_args[0][2]
-            self.assertEqual(params['quality_override'], quality)
+            quality_override = get_param(mocker, 'quality_override')
+            self.assertEqual(quality_override, quality)
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
