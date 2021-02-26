@@ -796,15 +796,15 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         parameters = parse_qs(urlparse(url_from_tag).query)
         self.assertEqual(sprite_test_tag, parameters["tag"][0])
         self.assertEqual("download", parameters["mode"][0])
-        self.assertTrue(parameters["timestamp"])
-        self.assertTrue(parameters["signature"])
+        self.assertIn("timestamp", parameters)
+        self.assertIn("signature", parameters)
 
         parameters = parse_qs(urlparse(url_from_urls).query)
         self.assertIn(url_1, parameters["urls[]"])
         self.assertIn(url_2, parameters["urls[]"])
         self.assertEqual("download", parameters["mode"][0])
-        self.assertTrue(parameters["timestamp"])
-        self.assertTrue(parameters["signature"])
+        self.assertIn("timestamp", parameters)
+        self.assertIn("signature", parameters)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_multi(self):
@@ -845,15 +845,15 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         parameters = parse_qs(urlparse(url_from_tag).query)
         self.assertEqual(multi_test_tag, parameters["tag"][0])
         self.assertEqual("download", parameters["mode"][0])
-        self.assertTrue(parameters["timestamp"])
-        self.assertTrue(parameters["signature"])
+        self.assertIn("timestamp", parameters)
+        self.assertIn("signature", parameters)
 
         parameters = parse_qs(urlparse(url_from_urls).query)
         self.assertIn(url_1, parameters["urls[]"])
         self.assertIn(url_2, parameters["urls[]"])
         self.assertEqual("download", parameters["mode"][0])
-        self.assertTrue(parameters["timestamp"])
-        self.assertTrue(parameters["signature"])
+        self.assertIn("timestamp", parameters)
+        self.assertIn("signature", parameters)
 
 
 if __name__ == '__main__':

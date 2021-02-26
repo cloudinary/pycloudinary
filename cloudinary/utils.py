@@ -777,6 +777,13 @@ def cloudinary_api_url(action='upload', **options):
     return base_api_url([resource_type, action], **options)
 
 
+def cloudinary_api_download_url(action, params, **options):
+    params = params.copy()
+    params["mode"] = "download"
+    cloudinary_params = sign_request(params, options)
+    return cloudinary_api_url(action, **options) + "?" + urlencode(bracketize_seq(cloudinary_params), True)
+
+
 def cloudinary_scaled_url(source, width, transformation, options):
     """
     Generates a cloudinary url scaled to specified width.
@@ -875,11 +882,7 @@ def bracketize_seq(params):
 
 
 def download_archive_url(**options):
-    params = options.copy()
-    params.update(mode="download")
-    cloudinary_params = sign_request(archive_params(**params), options)
-    return cloudinary_api_url("generate_archive", **options) + "?" + \
-        urlencode(bracketize_seq(cloudinary_params), True)
+    return cloudinary_api_download_url(action="generate_archive", params=archive_params(**options), **options)
 
 
 def download_zip_url(**options):
@@ -1043,10 +1046,8 @@ def build_multi_and_sprite_params(**options):
     """
     tag = options.get("tag")
     urls = options.get("urls")
-    if tag and urls:
-        raise ValueError("'tag' and 'urls' parameters are mutually exclusive")
-    if not tag and not urls:
-        raise ValueError("Either 'tag' or 'urls' parameter has to be set")
+    if bool(tag) == bool(urls):
+        raise ValueError("Either 'tag' or 'urls' parameter has to be set but not both")
     params = {
         "mode": options.get("mode"),
         "timestamp": now(),

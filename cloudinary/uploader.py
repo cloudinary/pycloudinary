@@ -213,14 +213,8 @@ def download_generated_sprite(tag=None, urls=None, **options):
     :return:        The signed URL to download sprite
     :rtype:         str
     """
-    params = options.copy()
-    params.update(mode="download")
-
-    params = utils.build_multi_and_sprite_params(tag=tag, urls=urls, **params)
-    cloudinary_params = utils.sign_request(params, options)
-
-    return utils.cloudinary_api_url("sprite", **options) + "?" + \
-        utils.urlencode(utils.bracketize_seq(cloudinary_params), True)
+    params = utils.build_multi_and_sprite_params(tag=tag, urls=urls, **options)
+    return utils.cloudinary_api_download_url(action="sprite", params=params, **options)
 
 
 def multi(tag=None, urls=None, **options):
@@ -257,14 +251,8 @@ def download_multi(tag=None, urls=None, **options):
     :return:        The signed URL to download multi
     :rtype:         str
     """
-    params = options.copy()
-    params.update(mode="download")
-
-    params = utils.build_multi_and_sprite_params(tag=tag, urls=urls, **params)
-    cloudinary_params = utils.sign_request(params, options)
-
-    return utils.cloudinary_api_url("multi", **options) + "?" + \
-        utils.urlencode(utils.bracketize_seq(cloudinary_params), True)
+    params = utils.build_multi_and_sprite_params(tag=tag, urls=urls, **options)
+    return utils.cloudinary_api_download_url(action="multi", params=params, **options)
 
 
 def explode(public_id, **options):
