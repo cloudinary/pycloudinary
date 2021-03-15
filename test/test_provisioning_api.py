@@ -1,4 +1,3 @@
-import random
 import unittest
 from datetime import datetime
 
@@ -8,6 +7,8 @@ from urllib3 import disable_warnings
 import cloudinary.provisioning.account
 from cloudinary.provisioning import account_config, reset_config
 from cloudinary.exceptions import AuthorizationRequired, NotFound
+
+from test.helper_test import UNIQUE_SUB_ACCOUNT_ID
 
 disable_warnings()
 
@@ -157,9 +158,8 @@ class AccountApiTest(unittest.TestCase):
     @unittest.skipUnless(cloudinary.provisioning.account_config().provisioning_api_secret,
                          "requires provisioning_api_key/provisioning_api_secret")
     def test_get_users_by_nonexistent_sub_account_id(self):
-        random_id = random.randint(100000, 999999)
-        with six.assertRaisesRegex(self, NotFound, "Cannot find sub account with id {}".format(random_id)):
-            cloudinary.provisioning.users(pending=True, sub_account_id=random_id)
+        with six.assertRaisesRegex(self, NotFound, "Cannot find sub account with id {}".format(UNIQUE_SUB_ACCOUNT_ID)):
+            cloudinary.provisioning.users(pending=True, sub_account_id=UNIQUE_SUB_ACCOUNT_ID)
 
     @unittest.skipUnless(cloudinary.provisioning.account_config().provisioning_api_secret,
                          "requires provisioning_api_key/provisioning_api_secret")
