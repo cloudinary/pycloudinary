@@ -135,7 +135,9 @@ def users(user_ids=None, sub_account_id=None, pending=None, prefix=None, **optio
     :type user_ids:         list, optional
     :param sub_account_id:  The id of a sub account
     :type sub_account_id:   str, optional
-    :param pending:         Whether the user is pending
+    :param pending:         Limit results to pending users (True),
+                            users that are not pending (False),
+                            or all users (None, the default).
     :type pending:          bool, optional
     :param prefix:          User prefix
     :type prefix:           str, optional

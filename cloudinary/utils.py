@@ -548,7 +548,7 @@ def process_params(params):
             if isinstance(value, list) or isinstance(value, tuple):
                 value_list = {"{}[{}]".format(key, i): i_value for i, i_value in enumerate(value)}
                 processed_params.update(value_list)
-            elif value:
+            elif value is not None:
                 processed_params[key] = value
     return processed_params
 
