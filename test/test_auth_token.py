@@ -99,6 +99,16 @@ class AuthTokenTest(unittest.TestCase):
     def test_must_provide_expiration_or_duration(self):
         self.assertRaises(Exception, cloudinary.utils.generate_auth_token, acl="*", expiration=None, duration=None)
 
+    def test_must_provide_acl_or_url(self):
+        self.assertRaises(Exception, cloudinary.utils.generate_auth_token, start_time=1111111111, duration=300)
+
+        cloudinary.utils.generate_auth_token(start_time=1111111111, duration=300, acl="/*/t_foobar")
+        cloudinary.utils.generate_auth_token(
+            start_time=1111111111,
+            duration=300,
+            url="http://res.cloudinary.com/test123/image/upload/v1486020273/sample.jpg"
+        )
+
 
 if __name__ == '__main__':
     unittest.main()
