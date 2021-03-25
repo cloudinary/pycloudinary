@@ -65,7 +65,7 @@ def resources(**options):
     if upload_type:
         uri.append(upload_type)
     params = only(options, "next_cursor", "max_results", "prefix", "tags",
-                  "context", "moderations", "direction", "start_at")
+                  "context", "moderations", "direction", "start_at", "metadata")
     return call_api("get", uri, params, **options)
 
 
@@ -73,7 +73,7 @@ def resources_by_tag(tag, **options):
     resource_type = options.pop("resource_type", "image")
     uri = ["resources", resource_type, "tags", tag]
     params = only(options, "next_cursor", "max_results", "tags",
-                  "context", "moderations", "direction")
+                  "context", "moderations", "direction", "metadata")
     return call_api("get", uri, params, **options)
 
 
@@ -81,7 +81,7 @@ def resources_by_moderation(kind, status, **options):
     resource_type = options.pop("resource_type", "image")
     uri = ["resources", resource_type, "moderations", kind, status]
     params = only(options, "next_cursor", "max_results", "tags",
-                  "context", "moderations", "direction")
+                  "context", "moderations", "direction", "metadata")
     return call_api("get", uri, params, **options)
 
 
@@ -112,7 +112,7 @@ def resources_by_context(key, value=None, **options):
     resource_type = options.pop("resource_type", "image")
     uri = ["resources", resource_type, "context"]
     params = only(options, "next_cursor", "max_results", "tags",
-                "context", "moderations", "direction")
+                "context", "moderations", "direction", "metadata")
     params["key"] = key
     if value is not None:
         params["value"] = value
