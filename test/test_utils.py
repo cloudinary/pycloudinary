@@ -975,6 +975,28 @@ class TestUtils(unittest.TestCase):
 
         self.assertEqual(normalized, expected)
 
+    def test_transformation_with_complex_predefined_variables(self):
+        transformation = {
+            "transformation": [
+                {
+                    "variables": [
+                        ["$aheight", 300],
+                        ["$mywidth", "100"]
+                    ]
+                },
+                {
+                    "width": "3 + $mywidth * 3 + 4 / 2 * initialWidth * $mywidth",
+                    "height": "3 * initialHeight + $aheight"
+                }
+            ]
+        }
+
+        normalized = cloudinary.utils.generate_transformation_string(**transformation)[0]
+        expected = \
+            "$aheight_300,$mywidth_100/h_3_mul_ih_add_$aheight,w_3_add_$mywidth_mul_3_add_4_div_2_mul_iw_mul_$mywidth"
+
+        self.assertEqual(normalized, expected)
+
     def test_merge(self):
         a = {"foo": "foo", "bar": "foo"}
         b = {"foo": "bar"}

@@ -1217,22 +1217,38 @@ IF_OPERATORS = {
 
 PREDEFINED_VARS = {
     "aspect_ratio": "ar",
+    "aspectRatio": "ar",
     "current_page": "cp",
+    "currentPage": "cp",
     "face_count": "fc",
+    "faceCount": "fc",
     "height": "h",
     "initial_aspect_ratio": "iar",
+    "initialAspectRatio": "iar",
+    "trimmed_aspect_ratio": "tar",
+    "trimmedAspectRatio": "tar",
     "initial_height": "ih",
+    "initialHeight": "ih",
     "initial_width": "iw",
+    "initialWidth": "iw",
     "page_count": "pc",
+    "pageCount": "pc",
     "page_x": "px",
+    "pageX": "px",
     "page_y": "py",
+    "pageY": "py",
     "tags": "tags",
     "width": "w",
     "duration": "du",
     "initial_duration": "idu",
+    "initialDuration": "idu",
+    "illustration_score": "ils",
+    "illustrationScore": "ils",
+    "context": "ctx"
 }
 
-replaceRE = "((\\|\\||>=|<=|&&|!=|>|=|<|/|-|\\+|\\*|\\^)(?=[ _])|(?<!\\$)(" + '|'.join(PREDEFINED_VARS.keys()) + "))"
+replaceRE = "((\\|\\||>=|<=|&&|!=|>|=|<|/|-|\\+|\\*|\\^)(?=[ _])|(\\$_*[^_ ]+)|(?<!\\$)(" + \
+            '|'.join(PREDEFINED_VARS.keys()) + "))"
 
 
 def translate_if(match):
