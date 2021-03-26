@@ -1,3 +1,21 @@
+1.25.0 / 2021-03-26
+==================
+
+New functionality and features
+------------------------------
+
+  * Add support for `download_generated_sprite` and `download_multi` helpers
+  * Add support for `urls` in `multi` and `sprite` APIs
+  * Add support for `SHA-256` in auth signatures
+
+Other Changes
+-------------
+
+  * Fix `prepare.sh` script
+  * Fix `pending` parameter of the `users` method of Provisioning API
+  * Change test for `eval` upload parameter
+  * Extract add-on type constants to a separate file
+
 
 1.24.0 / 2020-12-18
 ===================
