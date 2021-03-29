@@ -16,6 +16,8 @@ from cloudinary.exceptions import BadRequest, NotFound
 
 MOCK_RESPONSE = api_response_mock()
 
+METADATA_EXTERNAL_ID = "metadata_external_id_{}".format(UNIQUE_TAG)
+METADATA_DEFAULT_VALUE = "metadata_default_value_{}".format(UNIQUE_TAG)
 UNIQUE_API_TAG = 'api_{}'.format(UNIQUE_TAG)
 API_TEST_TAG = "api_test_{}_tag".format(SUFFIX)
 API_TEST_PREFIX = "api_test_{}".format(SUFFIX)
@@ -54,6 +56,14 @@ class ApiTest(unittest.TestCase):
         if not cloudinary.config().api_secret:
             return
         print("Running tests for cloud: {}".format(cloudinary.config().cloud_name))
+
+        api.add_metadata_field({
+            "external_id": METADATA_EXTERNAL_ID,
+            "label": METADATA_EXTERNAL_ID,
+            "type": "string",
+            "default_value": METADATA_DEFAULT_VALUE
+        })
+
         for id in [API_TEST_ID, API_TEST_ID2]:
             uploader.upload(TEST_IMAGE,
                             public_id=id, tags=[API_TEST_TAG, ],
@@ -62,6 +72,8 @@ class ApiTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        api.delete_metadata_field(METADATA_EXTERNAL_ID)
+
         cleanup_test_resources([([API_TEST_ID, API_TEST_ID2, API_TEST_ID3, API_TEST_ID4, API_TEST_ID5],)])
 
         cleanup_test_transformation([
@@ -915,6 +927,64 @@ class ApiTest(unittest.TestCase):
         args, kwargs = mocker.call_args
 
         self.assertTrue(get_uri(args).endswith('a%20b%2Bc%20d-e%3F%3Ff%28g%29h'))
+
+    def test_structured_metadata_in_resources_api(self):
+        result = api.resources(prefix=API_TEST_ID, type="upload", metadata=True)
+
+        self.assertTrue(result["resources"])
+        for resource in result["resources"]:
+            self.assertIn("metadata", resource)
+
+        result = api.resources(prefix=API_TEST_ID, type="upload", metadata=False)
+
+        self.assertTrue(result["resources"])
+        for resource in result["resources"]:
+            self.assertNotIn("metadata", resource)
+
+    def test_structured_metadata_in_resources_by_tag_api(self):
+        result = api.resources_by_tag(API_TEST_TAG, metadata=True)
+
+        self.assertTrue(result["resources"])
+        for resource in result["resources"]:
+            self.assertIn("metadata", resource)
+
+        result = api.resources_by_tag(API_TEST_TAG, metadata=False)
+
+        self.assertTrue(result["resources"])
+        for resource in result["resources"]:
+            self.assertNotIn("metadata", resource)
+
+    def test_structured_metadata_in_resources_by_context_api(self):
+        uploader.upload(TEST_IMAGE,
+                        tags=[UNIQUE_API_TAG],
+                        context="{}={}".format(API_TEST_CONTEXT_KEY, API_TEST_CONTEXT_VALUE1))
+
+        result = api.resources_by_context(API_TEST_CONTEXT_KEY, API_TEST_CONTEXT_VALUE1, metadata=True)
+
+        self.assertTrue(result["resources"])
+        for resource in result["resources"]:
+            self.assertIn("metadata", resource)
+
+        result = api.resources_by_context(API_TEST_CONTEXT_KEY, API_TEST_CONTEXT_VALUE1, metadata=False)
+
+        self.assertTrue(result["resources"])
+        for resource in result["resources"]:
+            self.assertNotIn("metadata", resource)
+
+    def test_structured_metadata_in_resources_by_moderation_api(self):
+        uploader.upload(TEST_IMAGE, moderation="manual", tags=[UNIQUE_API_TAG])
+
+        result = api.resources_by_moderation("manual", "pending", metadata=True)
+
+        self.assertTrue(result["resources"])
+        for resource in result["resources"]:
+            self.assertIn("metadata", resource)
+
+        result = api.resources_by_moderation("manual", "pending", metadata=False)
+
+        self.assertTrue(result["resources"])
+        for resource in result["resources"]:
+            self.assertNotIn("metadata", resource)
 
 
 if __name__ == '__main__':
