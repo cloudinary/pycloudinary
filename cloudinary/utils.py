@@ -81,6 +81,7 @@ __SIMPLE_UPLOAD_PARAMS = [
     "use_filename",
     "unique_filename",
     "discard_original_filename",
+    "filename_override",
     "invalidate",
     "notification_url",
     "eager_notification_url",

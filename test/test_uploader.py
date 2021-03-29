@@ -201,6 +201,14 @@ class UploaderTest(unittest.TestCase):
 
         self.assertEqual(os.path.splitext(custom_filename)[0], result["original_filename"])
 
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_upload_filename_override(self):
+        """should successfully override original_filename"""
+
+        result = uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG], filename_override='overridden')
+
+        self.assertEqual('overridden', result["original_filename"])
+
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_async(self, mocker):
