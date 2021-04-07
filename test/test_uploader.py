@@ -202,6 +202,20 @@ class UploaderTest(unittest.TestCase):
         self.assertEqual(os.path.splitext(custom_filename)[0], result["original_filename"])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_upload_file_returns_stream_position(self):
+        """Should not mutate the BytesIO object after upload"""
+
+        with io.BytesIO() as temp_file, open(TEST_IMAGE, 'rb') as input_file:
+            temp_file.write(input_file.read())
+            temp_file.seek(0)
+
+            result = uploader.upload(temp_file, tags=[UNIQUE_TAG])
+        
+        empty_bytes_string = b''
+        file_data = temp_file.read()
+        self.assertNotEqual(file_data, empty_bytes_string)
+
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_filename_override(self):
         """should successfully override original_filename"""
 
