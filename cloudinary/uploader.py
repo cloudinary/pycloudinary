@@ -433,6 +433,7 @@ def call_api(action, params, http_headers=None, return_error=False, unsigned=Fal
                 # stream
                 data = file.read()
                 name = filename or (file.name if hasattr(file, 'name') and isinstance(file.name, str) else "stream")
+                file.seek(0)
             elif isinstance(file, tuple):
                 name, data = file
             else:
