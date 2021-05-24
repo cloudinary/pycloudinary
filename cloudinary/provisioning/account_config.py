@@ -10,13 +10,8 @@ ACCOUNT_URI_SCHEME = "account"
 class AccountConfig(BaseConfig):
     def __init__(self):
         self._uri_scheme = ACCOUNT_URI_SCHEME
-        django_settings = import_django_settings()
-        if django_settings:
-            self.update(**django_settings)
-        elif os.environ.get("CLOUDINARY_ACCOUNT_URL"):
-            account_url = os.environ.get("CLOUDINARY_ACCOUNT_URL")
-            parsed_url = self._parse_cloudinary_url(account_url)
-            self._setup_from_parsed_url(parsed_url)
+
+        super(AccountConfig, self).__init__()
 
     def _config_from_parsed_url(self, parsed_url):
         if not self._is_url_scheme_valid(parsed_url):
@@ -27,6 +22,10 @@ class AccountConfig(BaseConfig):
             "provisioning_api_key": parsed_url.username,
             "provisioning_api_secret": parsed_url.password,
         }
+
+    def _load_config_from_env(self):
+        if os.environ.get("CLOUDINARY_ACCOUNT_URL"):
+            self._load_from_url(os.environ.get("CLOUDINARY_ACCOUNT_URL"))
 
 
 def account_config(**keywords):
