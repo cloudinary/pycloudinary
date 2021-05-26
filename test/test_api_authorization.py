@@ -12,7 +12,7 @@ from test.test_config import OAUTH_TOKEN, CLOUD_NAME, API_KEY, API_SECRET
 from test.test_uploader import API_TEST_PRESET
 
 
-class ApiAuthenticationTest(unittest.TestCase):
+class ApiAuthorizationTest(unittest.TestCase):
     def setUp(self):
         self.config = cloudinary.config(cloud_name=CLOUD_NAME, api_key=API_KEY, api_secret=API_SECRET)
 
