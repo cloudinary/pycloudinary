@@ -99,6 +99,13 @@ def import_django_settings():
 
 @add_metaclass(abc.ABCMeta)
 class BaseConfig(object):
+    def __init__(self):
+        django_settings = import_django_settings()
+        if django_settings:
+            self.update(**django_settings)
+
+        self._load_config_from_env()
+
     def __getattr__(self, i):
         return self.__dict__.get(i)
 
@@ -151,6 +158,16 @@ class BaseConfig(object):
             else:
                 self.__dict__[k] = v[0]
 
+    def _load_from_url(self, url):
+        parsed_url = self._parse_cloudinary_url(url)
+
+        return self._setup_from_parsed_url(parsed_url)
+
+    @abc.abstractmethod
+    def _load_config_from_env(self):
+        """Load config from environment variables or URL."""
+        raise NotImplementedError()
+
     def update(self, **keywords):
         for k, v in keywords.items():
             self.__dict__[k] = v
@@ -159,22 +176,9 @@ class BaseConfig(object):
 class Config(BaseConfig):
     def __init__(self):
         self._uri_scheme = URI_SCHEME
-        django_settings = import_django_settings()
-        if django_settings:
-            self.update(**django_settings)
-        elif os.environ.get("CLOUDINARY_CLOUD_NAME"):
-            self.update(
-                cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME"),
-                api_key=os.environ.get("CLOUDINARY_API_KEY"),
-                api_secret=os.environ.get("CLOUDINARY_API_SECRET"),
-                secure_distribution=os.environ.get("CLOUDINARY_SECURE_DISTRIBUTION"),
-                private_cdn=os.environ.get("CLOUDINARY_PRIVATE_CDN") == 'true',
-                api_proxy=os.environ.get("CLOUDINARY_API_PROXY"),
-            )
-        elif os.environ.get("CLOUDINARY_URL"):
-            cloudinary_url = os.environ.get("CLOUDINARY_URL")
-            parsed_url = self._parse_cloudinary_url(cloudinary_url)
-            self._setup_from_parsed_url(parsed_url)
+
+        super(Config, self).__init__()
+
         if not self.signature_algorithm:
             self.signature_algorithm = utils.SIGNATURE_SHA1
 
@@ -193,6 +197,21 @@ class Config(BaseConfig):
             result.update({"secure_distribution": parsed_url.path[1:]})
 
         return result
+
+    def _load_config_from_env(self):
+        if os.environ.get("CLOUDINARY_CLOUD_NAME"):
+            config_keys = [key for key in os.environ.keys()
+                           if key.startswith("CLOUDINARY_") and key != "CLOUDINARY_URL"]
+
+            for full_key in config_keys:
+                conf_key = full_key[len("CLOUDINARY_"):].lower()
+                conf_val = os.environ[full_key]
+                if conf_val in ["true", "false"]:
+                    conf_val = conf_val == "true"
+
+                self.update(**{conf_key: conf_val})
+        elif os.environ.get("CLOUDINARY_URL"):
+            self._load_from_url(os.environ.get("CLOUDINARY_URL"))
 
 
 _config = Config()
