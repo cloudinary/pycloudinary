@@ -30,6 +30,18 @@ class ApiAuthorizationTest(unittest.TestCase):
         self.assertEqual("Bearer {}".format(OAUTH_TOKEN), headers["authorization"])
 
     @patch('urllib3.request.RequestMethods.request')
+    def test_oauth_token_as_an_option_admin_api(self, mocker):
+        mocker.return_value = MOCK_RESPONSE
+
+        api.ping(oauth_token=OAUTH_TOKEN)
+
+        args, _ = mocker.call_args
+        headers = get_headers(args)
+
+        self.assertTrue("authorization" in headers)
+        self.assertEqual("Bearer {}".format(OAUTH_TOKEN), headers["authorization"])
+
+    @patch('urllib3.request.RequestMethods.request')
     def test_key_and_secret_admin_api(self, mocker):
         self.config.oauth_token = None
         mocker.return_value = MOCK_RESPONSE
@@ -68,6 +80,17 @@ class ApiAuthorizationTest(unittest.TestCase):
 
         params = get_params(args)
         self.assertNotIn("signature", params)
+
+    @patch('urllib3.request.RequestMethods.request')
+    def test_oauth_token_as_an_option_upload_api(self, mocker):
+        mocker.return_value = MOCK_RESPONSE
+
+        uploader.upload(TEST_IMAGE, oauth_token=OAUTH_TOKEN)
+
+        headers = get_headers(mocker.call_args[0])
+
+        self.assertTrue("authorization" in headers)
+        self.assertEqual("Bearer {}".format(OAUTH_TOKEN), headers["authorization"])
 
     @patch('urllib3.request.RequestMethods.request')
     def test_key_and_secret_upload_api(self, mocker):
