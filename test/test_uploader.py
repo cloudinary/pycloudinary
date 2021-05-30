@@ -70,6 +70,9 @@ METADATA_FIELDS = {
     METADATA_FIELD_EXTERNAL_ID_SET: [DATASOURCE_ENTRY_1, DATASOURCE_ENTRY_2]
 }
 
+RENAME_RETURN_CONTEXT_KEY = "rename_return_context_key_{}".format(UNIQUE_ID)
+RENAME_RETURN_CONTEXT_VALUE = "rename_return_context_value_".format(UNIQUE_ID)
+
 disable_warnings()
 
 
@@ -328,6 +331,33 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
                           result2["public_id"], result["public_id"] + "2")
         uploader.rename(result2["public_id"], result["public_id"] + "2", overwrite=True)
         self.assertEqual(api.resource(result["public_id"] + "2")["format"], "ico")
+
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_rename_returns_context(self):
+        """Should successfully rename a file and return context when requested"""
+        context = {RENAME_RETURN_CONTEXT_KEY: RENAME_RETURN_CONTEXT_VALUE}
+        result = uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG], context=context)
+
+        new_name = result["public_id"] + "2"
+
+        result = uploader.rename(result["public_id"], new_name, context=True)
+        self.assertIn("context", result)
+
+        result = uploader.rename(new_name, new_name + "2")
+        self.assertNotIn("context", result)
+
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_rename_returns_metadata(self):
+        """Should successfully rename a file and return metadata when requested"""
+        result = uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG], metadata=METADATA_FIELDS)
+
+        new_name = result["public_id"] + "2"
+
+        result = uploader.rename(result["public_id"], new_name, metadata=True)
+        self.assertIn("metadata", result)
+
+        result = uploader.rename(new_name, new_name + "2")
+        self.assertNotIn("metadata", result)
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
