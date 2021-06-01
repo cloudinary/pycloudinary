@@ -1,9 +1,9 @@
 ---
 name: Feature request
-about: " Feature request for Cloudinary Python SDK"
+about: Feature request for Cloudinary Python SDK
 title: ''
 labels: ''
-assignees: const-cloudinary
+assignees: ''
 
 ---
 
