@@ -9,7 +9,6 @@ import traceback
 from contextlib import contextmanager
 from datetime import timedelta, tzinfo
 from functools import wraps
-from test.addon_types import ADDON_ALL
 
 import six
 from urllib3 import HTTPResponse
@@ -17,6 +16,7 @@ from urllib3._collections import HTTPHeaderDict
 
 from cloudinary import utils, logger, api
 from cloudinary.exceptions import NotFound
+from test.addon_types import ADDON_ALL
 
 SUFFIX = os.environ.get('TRAVIS_JOB_ID') or random.randint(10000, 99999)
 
@@ -64,6 +64,10 @@ def get_request_url(mocker):
 
 def get_uri(args):
     return args[1]
+
+
+def get_headers(args):
+    return args[3] if len(args) > 3 else tuple()
 
 
 def get_params(args):

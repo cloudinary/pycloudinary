@@ -37,14 +37,15 @@ def _call_api(method, uri, params=None, body=None, headers=None, **options):
     cloud_name = options.pop("cloud_name", cloudinary.config().cloud_name)
     if not cloud_name:
         raise Exception("Must supply cloud_name")
+
     api_key = options.pop("api_key", cloudinary.config().api_key)
-    if not api_key:
-        raise Exception("Must supply api_key")
     api_secret = options.pop("api_secret", cloudinary.config().api_secret)
-    if not api_secret:
-        raise Exception("Must supply api_secret")
+    oauth_token = options.pop("oauth_token", cloudinary.config().oauth_token)
+
+    _validate_authorization(api_key, api_secret, oauth_token)
+
     api_url = "/".join([prefix, cloudinary.API_VERSION, cloud_name] + uri)
-    auth = {"key": api_key, "secret": api_secret}
+    auth = {"key": api_key, "secret": api_secret, "oauth_token": oauth_token}
 
     if body is not None:
         options["body"] = body
@@ -56,3 +57,14 @@ def _call_api(method, uri, params=None, body=None, headers=None, **options):
                            auth=auth,
                            api_url=api_url,
                            **options)
+
+
+def _validate_authorization(api_key, api_secret, oauth_token):
+    if oauth_token:
+        return
+
+    if not api_key:
+        raise Exception("Must supply api_key")
+
+    if not api_secret:
+        raise Exception("Must supply api_secret")

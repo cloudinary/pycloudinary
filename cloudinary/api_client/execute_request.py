@@ -42,10 +42,15 @@ def execute_request(http_connector, method, params, headers, auth, api_url, **op
     # authentication
     key = auth.get("key")
     secret = auth.get("secret")
+    oauth_token = auth.get("oauth_token")
     req_headers = urllib3.make_headers(
-        basic_auth="{0}:{1}".format(key, secret),
         user_agent=cloudinary.get_user_agent()
     )
+    if oauth_token:
+        req_headers["authorization"] = "Bearer {}".format(oauth_token)
+    else:
+        req_headers.update(urllib3.make_headers(basic_auth="{0}:{1}".format(key, secret)))
+
     if headers is not None:
         req_headers.update(headers)
 

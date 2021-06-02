@@ -398,80 +398,80 @@ def call_cacheable_api(action, params, http_headers=None, return_error=False, un
 
 
 def call_api(action, params, http_headers=None, return_error=False, unsigned=False, file=None, timeout=None, **options):
-    if http_headers is None:
-        http_headers = {}
-    file_io = None
-    try:
-        if unsigned:
-            params = utils.cleanup_params(params)
-        else:
-            params = utils.sign_request(params, options)
+    params = utils.cleanup_params(params)
 
-        param_list = []
-        for k, v in params.items():
-            if isinstance(v, list):
-                for i in v:
-                    param_list.append(("{0}[]".format(k), i))
-            elif v:
-                param_list.append((k, v))
+    headers = {"User-Agent": cloudinary.get_user_agent()}
 
-        api_url = utils.cloudinary_api_url(action, **options)
-        if file:
-            filename = options.get("filename")  # Custom filename provided by user (relevant only for streams and files)
-
-            if isinstance(file, string_types):
-                if utils.is_remote_url(file):
-                    # URL
-                    name = None
-                    data = file
-                else:
-                    # file path
-                    name = filename or file
-                    with open(file, "rb") as opened:
-                        data = opened.read()
-            elif hasattr(file, 'read') and callable(file.read):
-                # stream
-                data = file.read()
-                name = filename or (file.name if hasattr(file, 'name') and isinstance(file.name, str) else "stream")
-            elif isinstance(file, tuple):
-                name, data = file
-            else:
-                # Not a string, not a stream
-                name = filename or "file"
-                data = file
-
-            param_list.append(("file", (name, data) if name else data))
-
-        headers = {"User-Agent": cloudinary.get_user_agent()}
+    if http_headers is not None:
         headers.update(http_headers)
 
-        kw = {}
-        if timeout is not None:
-            kw['timeout'] = timeout
+    oauth_token = options.get("oauth_token", cloudinary.config().oauth_token)
 
-        code = 200
-        try:
-            response = _http.request("POST", api_url, param_list, headers, **kw)
-        except HTTPError as e:
-            raise Error("Unexpected error - {0!r}".format(e))
-        except socket.error as e:
-            raise Error("Socket error: {0!r}".format(e))
+    if oauth_token:
+        headers["authorization"] = "Bearer {}".format(oauth_token)
+    elif not unsigned:
+        params = utils.sign_request(params, options)
 
-        try:
-            result = json.loads(response.data.decode('utf-8'))
-        except Exception as e:
-            # Error is parsing json
-            raise Error("Error parsing server response (%d) - %s. Got - %s" % (response.status, response.data, e))
+    param_list = []
+    for k, v in params.items():
+        if isinstance(v, list):
+            for i in v:
+                param_list.append(("{0}[]".format(k), i))
+        elif v:
+            param_list.append((k, v))
 
-        if "error" in result:
-            if response.status not in [200, 400, 401, 403, 404, 500]:
-                code = response.status
-            if return_error:
-                result["error"]["http_code"] = code
+    api_url = utils.cloudinary_api_url(action, **options)
+
+    if file:
+        filename = options.get("filename")  # Custom filename provided by user (relevant only for streams and files)
+
+        if isinstance(file, string_types):
+            if utils.is_remote_url(file):
+                # URL
+                name = None
+                data = file
             else:
-                raise Error(result["error"]["message"])
+                # file path
+                name = filename or file
+                with open(file, "rb") as opened:
+                    data = opened.read()
+        elif hasattr(file, 'read') and callable(file.read):
+            # stream
+            data = file.read()
+            name = filename or (file.name if hasattr(file, 'name') and isinstance(file.name, str) else "stream")
+        elif isinstance(file, tuple):
+            name, data = file
+        else:
+            # Not a string, not a stream
+            name = filename or "file"
+            data = file
 
-        return result
-    finally:
-        if file_io:
-            file_io.close()
+        param_list.append(("file", (name, data) if name else data))
+
+    kw = {}
+    if timeout is not None:
+        kw['timeout'] = timeout
+
+    code = 200
+    try:
+        response = _http.request("POST", api_url, param_list, headers, **kw)
+    except HTTPError as e:
+        raise Error("Unexpected error - {0!r}".format(e))
+    except socket.error as e:
+        raise Error("Socket error: {0!r}".format(e))
+
+    try:
+        result = json.loads(response.data.decode('utf-8'))
+    except Exception as e:
+        # Error is parsing json
+        raise Error("Error parsing server response (%d) - %s. Got - %s" % (response.status, response.data, e))
+
+    if "error" in result:
+        if response.status not in [200, 400, 401, 403, 404, 500]:
+            code = response.status
+        if return_error:
+            result["error"]["http_code"] = code
+        else:
+            raise Error(result["error"]["message"])
+
+    return result

@@ -7,6 +7,13 @@ import cloudinary
 from cloudinary.provisioning import account_config
 
 
+CLOUD_NAME = 'test123'
+API_KEY = 'key'
+API_SECRET = 'secret'
+OAUTH_TOKEN = 'NTQ0NjJkZmQ5OTM2NDE1ZTZjNGZmZj17'
+URL_WITH_OAUTH_TOKEN = 'cloudinary://{}?oauth_token={}'.format(CLOUD_NAME, OAUTH_TOKEN)
+
+
 MOCKED_SETTINGS = {
     'api_secret': 'secret_from_settings'
 }
@@ -121,3 +128,25 @@ class TestConfig(TestCase):
             self.assertEqual(config.cloud_name, "c")
             self.assertEqual(config.api_key, "key_from_env")
             self.assertEqual(config.api_secret, "secret_from_settings")
+
+    def test_config_from_url_without_key_and_secret_but_with_oauth_token(self):
+        config = cloudinary.config()
+        parsed_url = config._parse_cloudinary_url(URL_WITH_OAUTH_TOKEN)
+        config._setup_from_parsed_url(parsed_url)
+
+        self.assertEqual(config.cloud_name, CLOUD_NAME)
+        self.assertEqual(config.oauth_token, OAUTH_TOKEN)
+        self.assertIsNone(config.api_key)
+        self.assertIsNone(config.api_secret)
+
+    def test_config_from_url_with_key_and_secret_and_oauth_token(self):
+        config = cloudinary.config()
+        parsed_url = config._parse_cloudinary_url(
+            'cloudinary://{}:{}@test123?oauth_token={}'.format(API_KEY, API_SECRET, OAUTH_TOKEN)
+        )
+        config._setup_from_parsed_url(parsed_url)
+
+        self.assertEqual(config.cloud_name, CLOUD_NAME)
+        self.assertEqual(config.oauth_token, OAUTH_TOKEN)
+        self.assertEqual(config.api_key, API_KEY)
+        self.assertEqual(config.api_secret, API_SECRET)
