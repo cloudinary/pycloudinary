@@ -340,6 +340,34 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         self.assertTrue(get_params(args)['invalidate'])
         self.assertTrue(get_params(args)['overwrite'])
 
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_rename_supports_context(self, mocker):
+        """Should support context"""
+        mocker.return_value = MOCK_RESPONSE
+
+        uploader.rename(TEST_IMAGE, TEST_IMAGE + "2", context=True)
+        args, kargs = mocker.call_args
+        self.assertTrue(get_params(args)['context'])
+
+        uploader.rename(TEST_IMAGE, TEST_IMAGE + "2")
+        args, kargs = mocker.call_args
+        self.assertIsNone(get_params(args).get('context'))
+
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_rename_supports_metadata(self, mocker):
+        """Should support metadata"""
+        mocker.return_value = MOCK_RESPONSE
+
+        uploader.rename(TEST_IMAGE, TEST_IMAGE + "2", metadata=True)
+        args, kargs = mocker.call_args
+        self.assertTrue(get_params(args)['metadata'])
+
+        uploader.rename(TEST_IMAGE, TEST_IMAGE + "2")
+        args, kargs = mocker.call_args
+        self.assertIsNone(get_params(args).get('metadata'))
+
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_use_filename(self):
         """Should successfully take use file name of uploaded file in public id if specified use_filename """
