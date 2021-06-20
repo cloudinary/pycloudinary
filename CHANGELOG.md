@@ -1,3 +1,23 @@
+1.26.0 / 2021-06-20
+==================
+
+New functionality and features
+------------------------------
+
+  * Add support for OAuth authorization
+  * Add support for large file upload in `CloudinaryField`
+  * Add support for `context` and `metadata` parameters in `rename` API
+  * Add support for overriding Django settings with env variables
+  * Add support for `filename_override` upload parameter
+  * Add support for `metadata` parameter in `resources` APIs
+
+Other Changes
+-------------
+
+  * Add validation to `generate_auth_token` to enforce url or acl
+  * Fix `normalize_expression` in advanced cases
+
+
 1.25.0 / 2021-03-26
 ==================
 
