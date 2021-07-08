@@ -1089,6 +1089,10 @@ def build_multi_and_sprite_params(**options):
 
 
 def __process_text_options(layer, layer_parameter):
+    text_style = str(layer.get("text_style", ""))
+    if text_style and not text_style.isspace():
+        return text_style
+
     font_family = layer.get("font_family")
     font_size = layer.get("font_size")
     keywords = []
