@@ -934,6 +934,27 @@ class TestUtils(unittest.TestCase):
             result = cloudinary.utils.process_layer(options, "overlay")
             self.assertEqual(expected, result)
 
+    def test_text_layer_style_identifier_variables(self):
+        options = {
+            "transformation": [
+                {
+                    "variables": [
+                        ["$style", "!Arial_12!"],
+                    ]
+                },
+                {
+                    "overlay": {
+                        "text": "hello-world",
+                        "text_style": "$style"
+                    }
+                }
+            ]
+        }
+
+        public_id = "sample"
+        url, _ = cloudinary.utils.cloudinary_url(public_id, **options)
+        self.assertEqual(DEFAULT_UPLOAD_PATH + "$style_!Arial_12!/l_text:$style:hello-world/sample", url)
+
     def test_overlay_error_1(self):
         """ Must supply font_family for text in overlay """
         with self.assertRaises(ValueError):
