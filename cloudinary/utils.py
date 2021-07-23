@@ -1239,6 +1239,7 @@ PREDEFINED_VARS = {
     "pageY": "py",
     "tags": "tags",
     "width": "w",
+    "preview:duration": "preview:duration",
     "duration": "du",
     "initial_duration": "idu",
     "initialDuration": "idu",
