@@ -1,7 +1,9 @@
+import json
 import os
 import time
 import unittest
 
+from mock.mock import patch
 from six import iterkeys
 from urllib3 import disable_warnings
 
@@ -9,6 +11,7 @@ import cloudinary
 from cloudinary import uploader
 from cloudinary.search import Search
 from test.helper_test import SUFFIX, TEST_IMAGE, TEST_TAG, UNIQUE_TAG, retry_assertion, cleanup_test_resources_by_tag
+from test.test_api import MOCK_RESPONSE
 
 TEST_TAG = 'search_{}'.format(TEST_TAG)
 UNIQUE_TAG = 'search_{}'.format(UNIQUE_TAG)
@@ -171,6 +174,34 @@ class SearchTest(unittest.TestCase):
             self.assertEqual([key for key in iterkeys(res['context'])], [u'stage'])
             self.assertTrue('image_metadata' in res)
             self.assertEqual(len(res['tags']), 2)
+
+    @patch('urllib3.request.RequestMethods.request')
+    def test_should_not_duplicate_values(self, mocker):
+        mocker.return_value = MOCK_RESPONSE
+
+        Search() \
+            .sort_by('created_at', 'asc') \
+            .sort_by('public_id', 'asc') \
+            .sort_by('created_at') \
+            .aggregate('format') \
+            .aggregate('format') \
+            .aggregate('resource_type') \
+            .with_field('context') \
+            .with_field('context') \
+            .with_field('tags') \
+            .execute()
+
+        _, args = mocker.call_args
+        result = json.loads(args['body'])
+
+        self.assertEqual(result, {
+                'sort_by': [
+                    {'created_at': 'desc'},
+                    {'public_id': 'asc'},
+                ],
+                'aggregate': ['format', 'resource_type'],
+                'with_field': ['context', 'tags'],
+        })
 
 
 if __name__ == '__main__':

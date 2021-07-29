@@ -1535,3 +1535,28 @@ def safe_cast(val, casting_fn, default=None):
         return casting_fn(val)
     except (ValueError, TypeError):
         return default
+
+
+def __id(x):
+    """
+    Identity function. Returns the passed in values.
+    """
+    return x
+
+
+def unique(collection, key=None):
+    """
+    Removes duplicates from collection using key function
+
+    :param collection: The collection to remove duplicates from
+    :param key: The function to generate key from each element. If not passed, identity function is used
+    """
+    if key is None:
+        key = __id
+
+    to_return = OrderedDict()
+
+    for element in collection:
+        to_return[key(element)] = element
+
+    return list(to_return.values())
