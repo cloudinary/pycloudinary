@@ -24,6 +24,13 @@ try:  # Python 2.7+
 except ImportError:
     from urllib3.packages.ordered_dict import OrderedDict
 
+try:  # Python 3.4+
+    from pathlib import Path as PathLibPathType
+except ImportError:
+    # fallback to string
+    PathLibPathType = string_types
+
+
 if is_appengine_sandbox():
     # AppEngineManager uses AppEngine's URLFetch API behind the scenes
     _http = AppEngineManager()
@@ -426,6 +433,9 @@ def call_api(action, params, http_headers=None, return_error=False, unsigned=Fal
 
     if file:
         filename = options.get("filename")  # Custom filename provided by user (relevant only for streams and files)
+
+        if isinstance(file, PathLibPathType):
+            file = str(file)
 
         if isinstance(file, string_types):
             if utils.is_remote_url(file):

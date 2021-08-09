@@ -158,6 +158,25 @@ class UploaderTest(unittest.TestCase):
         self.assertEqual(result['metadata'].get(METADATA_FIELD_UNIQUE_EXTERNAL_ID), METADATA_FIELD_VALUE)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_upload_path_lib_path(self):
+        """Should successfully upload a pathlib.Path file object"""
+        try:
+            import pathlib
+        except ImportError:
+            self.skipTest("pathlib is not supported")
+            return
+
+        path_lib_image_path = pathlib.Path(TEST_IMAGE)
+
+        result = uploader.upload(path_lib_image_path, tags=[UNIQUE_TAG])
+
+        self.assertEqual(result["width"], TEST_IMAGE_WIDTH)
+
+        result = uploader.upload_large(path_lib_image_path, tags=[UNIQUE_TAG])
+
+        self.assertEqual(result["width"], TEST_IMAGE_WIDTH)
+
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_unicode_filename(self):
         """Should successfully upload file with unicode characters"""
         expected_name = os.path.splitext(os.path.basename(TEST_UNICODE_IMAGE))[0]
