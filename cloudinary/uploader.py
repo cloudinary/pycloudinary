@@ -27,8 +27,7 @@ except ImportError:
 try:  # Python 3.4+
     from pathlib import Path as PathLibPathType
 except ImportError:
-    # fallback to string
-    PathLibPathType = string_types
+    PathLibPathType = None
 
 
 if is_appengine_sandbox():
@@ -434,10 +433,11 @@ def call_api(action, params, http_headers=None, return_error=False, unsigned=Fal
     if file:
         filename = options.get("filename")  # Custom filename provided by user (relevant only for streams and files)
 
-        if isinstance(file, PathLibPathType):
-            file = str(file)
+        if PathLibPathType and isinstance(file, PathLibPathType):
+            name = file.name
+            data = file.read_bytes()
 
-        if isinstance(file, string_types):
+        elif isinstance(file, string_types):
             if utils.is_remote_url(file):
                 # URL
                 name = None

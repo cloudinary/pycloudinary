@@ -171,8 +171,9 @@ class UploaderTest(unittest.TestCase):
         result = uploader.upload(path_lib_image_path, tags=[UNIQUE_TAG])
 
         self.assertEqual(result["width"], TEST_IMAGE_WIDTH)
+        self.assertEqual(path_lib_image_path.stem, result["original_filename"])
 
-        result = uploader.upload_large(path_lib_image_path, tags=[UNIQUE_TAG])
+        result = uploader.upload_large(path_lib_image_path, tags=[UNIQUE_TAG], resource_type="image")
 
         self.assertEqual(result["width"], TEST_IMAGE_WIDTH)
 
