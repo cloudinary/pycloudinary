@@ -879,11 +879,6 @@ class TestUtils(unittest.TestCase):
                 options={'resource_type': 'video', 'offset': offset},
                 expected_url=VIDEO_UPLOAD_PATH + transformation + "/video_id")
 
-    def test_video_preview(self):
-        self.__test_cloudinary_url(public_id="video_id",
-                                   options={"resource_type": "video", "effect": "preview:duration_2"},
-                                   expected_url=VIDEO_UPLOAD_PATH + "e_preview:duration_2/video_id")
-
     def test_user_agent(self):
         with patch('cloudinary.USER_PLATFORM', ''):
             agent = cloudinary.get_user_agent()

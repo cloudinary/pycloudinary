@@ -16,6 +16,8 @@ NORMALIZATION_EXAMPLES = {
     'double ampersand with no space at the end is not affected': ['foo&&bar', 'foo&&bar'],
     'width recognized as variable and replaced with w': ['width', 'w'],
     'initial aspect ratio recognized as variable and replaced with iar': ['initial_aspect_ratio', 'iar'],
+    'duration is recognized as a variable and replaced with du': ['duration', 'du'],
+    'duration after : is not a variable and is not affected': ['preview:duration_2', 'preview:duration_2'],
     '$width recognized as user variable and not affected': ['$width', '$width'],
     '$initial_aspect_ratio recognized as user variable followed by aspect_ratio variable': [
         '$initial_aspect_ratio',
