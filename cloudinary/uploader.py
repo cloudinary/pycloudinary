@@ -434,9 +434,8 @@ def call_api(action, params, http_headers=None, return_error=False, unsigned=Fal
         filename = options.get("filename")  # Custom filename provided by user (relevant only for streams and files)
 
         if PathLibPathType and isinstance(file, PathLibPathType):
-            name = file.name
+            name = filename or file.name
             data = file.read_bytes()
-
         elif isinstance(file, string_types):
             if utils.is_remote_url(file):
                 # URL
