@@ -376,6 +376,13 @@ _SLIDESHOW_PARAMS = [
 
 
 def create_slideshow(**options):
+    """
+    Creates auto-generated video slideshows.
+
+    :param options: The optional parameters.  See the upload API documentation.
+
+    :return: a dictionary with details about created slideshow
+    """
     options["resource_type"] = options.get("resource_type", "video")
 
     params = {param_name: options.get(param_name) for param_name in _SLIDESHOW_PARAMS}
