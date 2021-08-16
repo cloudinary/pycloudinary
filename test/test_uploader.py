@@ -19,6 +19,7 @@ from test.cache.storage.dummy_cache_storage import DummyCacheStorage
 from test.helper_test import uploader_response_mock, SUFFIX, TEST_IMAGE, get_params, TEST_ICON, TEST_DOC, \
     REMOTE_TEST_IMAGE, UTC, populate_large_file, TEST_UNICODE_IMAGE, get_uri, get_method, get_param, \
     cleanup_test_resources_by_tag, cleanup_test_transformation, cleanup_test_resources, EVAL_STR
+from test.test_utils import TEST_ID
 
 MOCK_RESPONSE = uploader_response_mock()
 
@@ -80,24 +81,24 @@ class UploaderTest(unittest.TestCase):
     rbp_params = {
         "use_cache": True,
         "responsive_breakpoints":
-        [
-            {
-                "create_derived": False,
-                "transformation":
+            [
                 {
-                    "angle": 90
+                    "create_derived": False,
+                    "transformation":
+                        {
+                            "angle": 90
+                        },
+                    "format": "gif"
                 },
-                "format": "gif"
-            },
-            {
-                "create_derived": False,
-                "transformation": rbp_trans,
-                "format": rbp_format
-            },
-            {
-                "create_derived": False
-            }
-        ],
+                {
+                    "create_derived": False,
+                    "transformation": rbp_trans,
+                    "format": rbp_format
+                },
+                {
+                    "create_derived": False
+                }
+            ],
         "type": "upload"
     }
 
@@ -407,7 +408,8 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
 
         # Test explicit with metadata
         resource = uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG])
-        result_metadata = uploader.explicit(resource['public_id'], type="upload", metadata=METADATA_FIELDS, tags=[UNIQUE_TAG])
+        result_metadata = uploader.explicit(resource['public_id'], type="upload", metadata=METADATA_FIELDS,
+                                            tags=[UNIQUE_TAG])
         self.assertIn(METADATA_FIELD_UNIQUE_EXTERNAL_ID, result_metadata['metadata'])
         self.assertEqual(result_metadata['metadata'].get(METADATA_FIELD_UNIQUE_EXTERNAL_ID), METADATA_FIELD_VALUE)
 
@@ -483,6 +485,81 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         result = uploader.text("hello world", public_id=TEXT_ID)
         self.assertGreater(result["width"], 1)
         self.assertGreater(result["height"], 1)
+
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_create_slideshow_from_manifest_transformation(self, mocker):
+        """Should create slideshow from a manifest transformation"""
+        mocker.return_value = MOCK_RESPONSE
+
+        slideshow_manifest = "w_352;h_240;du_5;fps_30;vars_(slides_((media_s64:aHR0cHM6Ly9y" + \
+                             "ZXMuY2xvdWRpbmFyeS5jb20vZGVtby9pbWFnZS91cGxvYWQvY291cGxl);(media_s64:aH" + \
+                             "R0cHM6Ly9yZXMuY2xvdWRpbmFyeS5jb20vZGVtby9pbWFnZS91cGxvYWQvc2FtcGxl)))"
+
+        uploader.create_slideshow(
+            manifest_transformation={
+                "custom_function": {
+                    "function_type": "render",
+                    "source": slideshow_manifest,
+                }
+            },
+            transformation={"fetch_format": "auto", "quality": "auto"},
+            tags=['tag1', 'tag2', 'tag3']
+        )
+
+        args, _ = mocker.call_args
+
+        self.assertTrue(get_uri(args).endswith('/video/create_slideshow'))
+
+        self.assertEqual("fn_render:" + slideshow_manifest, get_params(args)['manifest_transformation'])
+        self.assertEqual("f_auto,q_auto", get_params(args)['transformation'])
+        self.assertEqual("tag1,tag2,tag3", get_params(args)['tags'])
+
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_create_slideshow_from_manifest_json(self, mocker):
+        """Should create slideshow from a manifest json"""
+        mocker.return_value = MOCK_RESPONSE
+        slideshow_manifest_json = OrderedDict((
+            ("w", 848),
+            ("h", 480),
+            ("du", 6),
+            ("fps", 30),
+            ("vars", OrderedDict((
+                ("sdur", 500),
+                ("tdur", 500),
+                ("slides", [
+                    {"media": "i:protests9"},
+                    {"media": "i:protests8"},
+                    {"media": "i:protests7"},
+                    {"media": "i:protests6"},
+                    {"media": "i:protests2"},
+                    {"media": "i:protests1"}
+                ])
+            )))
+        ))
+
+        slideshow_manifest_json_str = '{"w":848,"h":480,"du":6,"fps":30,"vars":{"sdur":500,"tdur":500,' + \
+                                      '"slides":[{"media":"i:protests9"},{"media":"i:protests8"},' + \
+                                      '{"media":"i:protests7"},{"media":"i:protests6"},{"media":"i:protests2"},' + \
+                                      '{"media":"i:protests1"}]}}'
+        notification_url = "https://example.com"
+
+        uploader.create_slideshow(
+            manifest_json=slideshow_manifest_json,
+            overwrite=True,
+            public_id=TEST_ID,
+            notification_url=notification_url,
+            upload_preset=API_TEST_PRESET
+        )
+
+        args, _ = mocker.call_args
+
+        self.assertEqual(slideshow_manifest_json_str, get_params(args)["manifest_json"])
+        self.assertEqual("1", get_params(args)["overwrite"])
+        self.assertEqual(TEST_ID, get_params(args)["public_id"])
+        self.assertEqual(notification_url, get_params(args)["notification_url"])
+        self.assertEqual(API_TEST_PRESET, get_params(args)["upload_preset"])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_tags(self):
@@ -725,8 +802,8 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
 
         # Should accept a dictionary of strings
         acl = OrderedDict((("access_type", "anonymous"),
-                          ("start", "2018-02-22 16:20:57 +0200"),
-                          ("end", "2018-03-22 00:00 +0200")))
+                           ("start", "2018-02-22 16:20:57 +0200"),
+                           ("end", "2018-03-22 00:00 +0200")))
         exp_acl = '[{"access_type":"anonymous","start":"2018-02-22 16:20:57 +0200","end":"2018-03-22 00:00 +0200"}]'
 
         uploader.upload(TEST_IMAGE, access_control=acl)
@@ -737,8 +814,8 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
 
         # Should accept a dictionary of datetime objects
         acl_2 = OrderedDict((("access_type", "anonymous"),
-                            ("start", datetime.strptime("2019-02-22 16:20:57Z", "%Y-%m-%d %H:%M:%SZ")),
-                            ("end", datetime(2019, 3, 22, 0, 0, tzinfo=UTC()))))
+                             ("start", datetime.strptime("2019-02-22 16:20:57Z", "%Y-%m-%d %H:%M:%SZ")),
+                             ("end", datetime(2019, 3, 22, 0, 0, tzinfo=UTC()))))
 
         exp_acl_2 = '[{"access_type":"anonymous","start":"2019-02-22T16:20:57","end":"2019-03-22T00:00:00+00:00"}]'
 
@@ -759,7 +836,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         # Should accept a list of all the above values
         list_of_acl = [acl, acl_2, acl_str]
         # Remove starting "[" and ending "]" in all expected strings and combine them into one string
-        expected_list_of_acl = "[" + ",".join([v[1:-1] for v in(exp_acl, exp_acl_2, exp_acl_str)]) + "]"
+        expected_list_of_acl = "[" + ",".join([v[1:-1] for v in (exp_acl, exp_acl_2, exp_acl_str)]) + "]"
 
         uploader.upload(TEST_IMAGE, access_control=list_of_acl)
         params = get_params(request_mock.call_args[0])

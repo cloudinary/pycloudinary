@@ -3,15 +3,14 @@ import json
 import os
 import socket
 
-import certifi
 from six import string_types
-from urllib3 import PoolManager, ProxyManager
 from urllib3.exceptions import HTTPError
 
 import cloudinary
 from cloudinary import utils
-from cloudinary.exceptions import Error
 from cloudinary.cache.responsive_breakpoints_cache import instance as responsive_breakpoints_cache_instance
+from cloudinary.exceptions import Error
+from cloudinary.utils import build_eager
 
 try:
     from urllib3.contrib.appengine import AppEngineManager, is_appengine_sandbox
@@ -28,7 +27,6 @@ try:  # Python 3.4+
     from pathlib import Path as PathLibPathType
 except ImportError:
     PathLibPathType = None
-
 
 if is_appengine_sandbox():
     # AppEngineManager uses AppEngine's URLFetch API behind the scenes
@@ -367,6 +365,39 @@ def text(text, **options):
     for key in TEXT_PARAMS:
         params[key] = options.get(key)
     return call_api("text", params, **options)
+
+
+_SLIDESHOW_PARAMS = [
+    "notification_url",
+    "public_id",
+    "overwrite",
+    "upload_preset",
+]
+
+
+def create_slideshow(**options):
+    """
+    Creates auto-generated video slideshows.
+
+    :param options: The optional parameters.  See the upload API documentation.
+
+    :return: a dictionary with details about created slideshow
+    """
+    options["resource_type"] = options.get("resource_type", "video")
+
+    params = {param_name: options.get(param_name) for param_name in _SLIDESHOW_PARAMS}
+
+    serialized_params = {
+        "timestamp": utils.now(),
+        "transformation": build_eager(options.get("transformation")),
+        "manifest_transformation": build_eager(options.get("manifest_transformation")),
+        "manifest_json": options.get("manifest_json") and utils.json_encode(options.get("manifest_json")),
+        "tags": options.get("tags") and utils.encode_list(utils.build_array(options["tags"])),
+    }
+
+    params.update(serialized_params)
+
+    return call_api("create_slideshow", params, **options)
 
 
 def _save_responsive_breakpoints_to_cache(result):
