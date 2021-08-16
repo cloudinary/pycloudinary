@@ -520,24 +520,24 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
     def test_create_slideshow_from_manifest_json(self, mocker):
         """Should create slideshow from a manifest json"""
         mocker.return_value = MOCK_RESPONSE
-        slideshow_manifest_json = {
-            "w": 848,
-            "h": 480,
-            "du": 6,
-            "fps": 30,
-            "vars": {
-                "sdur": 500,
-                "tdur": 500,
-                "slides": [
+        slideshow_manifest_json = OrderedDict((
+            ("w", 848),
+            ("h", 480),
+            ("du", 6),
+            ("fps", 30),
+            ("vars", OrderedDict((
+                ("sdur", 500),
+                ("tdur", 500),
+                ("slides", [
                     {"media": "i:protests9"},
                     {"media": "i:protests8"},
                     {"media": "i:protests7"},
                     {"media": "i:protests6"},
                     {"media": "i:protests2"},
-                    {"media": "i:protests1"},
-                ]
-            }
-        }
+                    {"media": "i:protests1"}
+                ])
+            )))
+        ))
 
         slideshow_manifest_json_str = '{"w":848,"h":480,"du":6,"fps":30,"vars":{"sdur":500,"tdur":500,' + \
                                       '"slides":[{"media":"i:protests9"},{"media":"i:protests8"},' + \
