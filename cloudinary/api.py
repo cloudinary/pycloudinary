@@ -598,12 +598,10 @@ def restore_metadata_field_datasource(field_external_id, entries_external_ids, *
 
 
 def reorder_metadata_field_datasource(field_external_id, order_by, direction=None, **options):
-    """Sorts metadata field datasource.
-
-    Currently supports only value.
+    """Reorders metadata field datasource. Currently, supports only value.
 
     :param field_external_id: The ID of the metadata field.
-    :param order_by: Criteria for the sort. Currently supports only value.
+    :param order_by: Criteria for the order. Currently, supports only value.
     :param direction: Optional (gets either asc or desc).
     :param options: Additional options.
 
