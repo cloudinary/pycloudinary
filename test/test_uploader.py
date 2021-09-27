@@ -19,7 +19,7 @@ from test.cache.storage.dummy_cache_storage import DummyCacheStorage
 from test.helper_test import uploader_response_mock, SUFFIX, TEST_IMAGE, get_params, TEST_ICON, TEST_DOC, \
     REMOTE_TEST_IMAGE, UTC, populate_large_file, TEST_UNICODE_IMAGE, get_uri, get_method, get_param, \
     cleanup_test_resources_by_tag, cleanup_test_transformation, cleanup_test_resources, EVAL_STR
-from test.test_utils import TEST_ID
+from test.test_utils import TEST_ID, TEST_FOLDER
 
 MOCK_RESPONSE = uploader_response_mock()
 
@@ -70,6 +70,10 @@ METADATA_FIELDS = {
     METADATA_FIELD_UNIQUE_EXTERNAL_ID: METADATA_FIELD_VALUE,
     METADATA_FIELD_EXTERNAL_ID_SET: [DATASOURCE_ENTRY_1, DATASOURCE_ENTRY_2]
 }
+
+FD_PID_PREFIX = "fd_public_id_prefix"
+ASSET_FOLDER = "asset_folder"
+DISPLAY_NAME = "test"
 
 disable_warnings()
 
@@ -238,6 +242,22 @@ class UploaderTest(unittest.TestCase):
         async_option = {"async": True}
         uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG], **async_option)
         self.assertTrue(get_param(mocker, 'async'))
+
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_upload_folder_decoupling(self, mocker):
+        """Should pass folder decoupling params """
+        mocker.return_value = MOCK_RESPONSE
+
+        fd_params = {"public_id_prefix": FD_PID_PREFIX, "asset_folder": ASSET_FOLDER, "display_name": DISPLAY_NAME,
+                     "use_filename_as_display_name": True, "folder": TEST_FOLDER}
+        uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG], **fd_params)
+
+        self.assertEqual(FD_PID_PREFIX, get_param(mocker, "public_id_prefix"))
+        self.assertEqual(ASSET_FOLDER, get_param(mocker, "asset_folder"))
+        self.assertEqual(DISPLAY_NAME, get_param(mocker, "display_name"))
+        self.assertEqual("1", get_param(mocker, "use_filename_as_display_name"))
+        self.assertEqual(TEST_FOLDER, get_param(mocker, "folder"))
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
