@@ -70,6 +70,7 @@ __URL_KEYS = [
 
 __SIMPLE_UPLOAD_PARAMS = [
     "public_id",
+    "public_id_prefix",
     "callback",
     "format",
     "type",
@@ -80,6 +81,8 @@ __SIMPLE_UPLOAD_PARAMS = [
     "colors",
     "use_filename",
     "unique_filename",
+    "display_name",
+    "use_filename_as_display_name",
     "discard_original_filename",
     "filename_override",
     "invalidate",
@@ -89,6 +92,7 @@ __SIMPLE_UPLOAD_PARAMS = [
     "eval",
     "proxy",
     "folder",
+    "asset_folder",
     "overwrite",
     "moderation",
     "raw_convert",
