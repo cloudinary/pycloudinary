@@ -595,3 +595,18 @@ def restore_metadata_field_datasource(field_external_id, entries_external_ids, *
     uri = [field_external_id, 'datasource_restore']
     params = {"external_ids": entries_external_ids}
     return call_metadata_api("post", uri, params, **options)
+
+
+def reorder_metadata_field_datasource(field_external_id, order_by, direction=None, **options):
+    """Reorders metadata field datasource. Currently, supports only value.
+
+    :param field_external_id: The ID of the metadata field.
+    :param order_by: Criteria for the order. Currently, supports only value.
+    :param direction: Optional (gets either asc or desc).
+    :param options: Additional options.
+
+    :rtype: Response
+    """
+    uri = [field_external_id, 'datasource', 'order']
+    params = {'order_by': order_by, 'direction': direction}
+    return call_metadata_api('post', uri, params, **options)

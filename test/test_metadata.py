@@ -473,6 +473,33 @@ class MetadataTest(unittest.TestCase):
         self.assert_metadata_field_datasource(result)
         self.assertEqual(len(result["values"]), 3)
 
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_order_by_asc_by_default_in_a_metadata_field_data_source(self):
+        # datasource is set with values in the order v2, v3, v4
+        result = api.reorder_metadata_field_datasource(EXTERNAL_ID_SET_3, 'value')
+
+        self.assert_metadata_field_datasource(result)
+
+        self.assertEqual(result['values'][0]['value'], DATASOURCE_MULTIPLE[0]['value'])
+
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_order_by_asc_in_a_metadata_field_data_source(self):
+        # datasource is set with values in the order v2, v3, v4
+        result = api.reorder_metadata_field_datasource(EXTERNAL_ID_SET_3, 'value', 'asc')
+
+        self.assert_metadata_field_datasource(result)
+
+        self.assertEqual(result['values'][0]['value'], DATASOURCE_MULTIPLE[0]['value'])
+
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_order_by_desc_in_a_metadata_field_data_source(self):
+        # datasource is set with values in the order v2, v3, v4
+        result = api.reorder_metadata_field_datasource(EXTERNAL_ID_SET_3, 'value', 'desc')
+
+        self.assert_metadata_field_datasource(result)
+
+        self.assertEqual(result['values'][0]['value'], DATASOURCE_MULTIPLE[-1]['value'])
+
 
 if __name__ == "__main__":
     unittest.main()
