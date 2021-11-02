@@ -346,20 +346,6 @@ class MetadataTest(unittest.TestCase):
         self.assertEqual(json.loads(kargs["body"].decode('utf-8')), {})
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
-    def test11_delete_metadata_field_does_not_release_external_id(self):
-        """Test deleting a metadata field definition then attempting to create a
-        new one with the same external id which should fail.
-        """
-        api.delete_metadata_field(EXTERNAL_ID_DELETE_2)
-
-        with self.assertRaises(BadRequest):
-            api.add_metadata_field({
-                "external_id": EXTERNAL_ID_DELETE_2,
-                "label": EXTERNAL_ID_DELETE_2,
-                "type": "integer",
-            })
-
-    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test12_delete_metadata_field_data_source(self):
         """Delete entries in a metadata field datasource"""
         result = api.delete_datasource_entries(EXTERNAL_ID_SET_2, [DATASOURCE_ENTRY_EXTERNAL_ID])
