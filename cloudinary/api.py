@@ -123,10 +123,42 @@ def resource(public_id, **options):
     resource_type = options.pop("resource_type", "image")
     upload_type = options.pop("type", "upload")
     uri = ["resources", resource_type, upload_type, public_id]
-    params = only(options, "exif", "faces", "colors", "image_metadata", "cinemagraph_analysis",
-                  "pages", "phash", "coordinates", "max_results", "quality_analysis", "derived_next_cursor",
-                  "accessibility_analysis", "versions")
+    params = prepare_asset_details_params(**options)
     return call_api("get", uri, params, **options)
+
+
+def resource_by_asset_id(asset_id, **options):
+    """
+    Returns the details of the specified asset and all its derived assets by asset id.
+
+    Note that if you only need details about the original asset,
+    you can also use the Uploader::upload or Uploader::explicit methods, which return the same information and
+    are not rate limited.
+
+    :param string asset_id:The Asset ID of the asset
+    :param array options: The optional parameters. See the
+                             <a
+                             href=https://cloudinary.com/documentation/admin_api#get_the_details_of_a_single_resource
+                             target="_blank"> Admin API</a> documentation.
+    :return: ApiResponse
+    """
+    uri = ["resources", asset_id]
+    params = prepare_asset_details_params(**options)
+    return call_api("get", uri, params, **options)
+
+
+def prepare_asset_details_params(**options):
+    """
+    Prepares optional parameters for resource_by_asset_id API calls.
+
+    :param options: Additional options
+    :return: Optional parameters
+
+    :internal
+    """
+    return only(options, "exif", "faces", "colors", "image_metadata", "cinemagraph_analysis",
+                "pages", "phash", "coordinates", "max_results", "quality_analysis", "derived_next_cursor",
+                "accessibility_analysis", "versions")
 
 
 def update(public_id, **options):

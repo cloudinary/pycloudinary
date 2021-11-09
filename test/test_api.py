@@ -246,6 +246,29 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(resource["bytes"], 3381)
         self.assertEqual(len(resource["derived"]), 1, "{} should have one derived resource.".format(API_TEST_ID))
 
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test07_a_resource_by_asset_id(self, mocker):
+        mocker.return_value = MOCK_RESPONSE
+        api.resource_by_asset_id(API_TEST_ID, quality_analysis=True , colors=True ,accessibility_analysis=True)
+        args, kargs = mocker.call_args
+        self.assertTrue(get_uri(args).endswith('/resources/{}'.format(API_TEST_ID)))
+        self.assertTrue(get_params(args)['quality_analysis'])
+        self.assertTrue(get_params(args)['colors'])
+        self.assertTrue(get_params(args)['accessibility_analysis'])
+
+
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test07_b_resource_by_asset_id(self):
+        # should allow get resource by asset_id
+        asset_id = api.resource(API_TEST_ID)["asset_id"]
+        resource = api.resource_by_asset_id(asset_id)
+        self.assertNotEqual(resource, None)
+        self.assertEqual(resource["asset_id"], asset_id)
+        self.assertEqual(resource["public_id"], API_TEST_ID)
+        self.assertEqual(resource["bytes"], 3381)
+        self.assertEqual(len(resource["derived"]), 1, "{} should have one derived resource.".format(API_TEST_ID))
+
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test07a_resource_quality_analysis(self):
         """ should allow getting resource quality analysis """
