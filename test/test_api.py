@@ -209,6 +209,33 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(get_param(mocker, 'context'), True)
         self.assertEqual(get_param(mocker, 'tags'), True)
 
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test06b_resources_by_asset_id(self, mocker):
+        """ should allow listing resources by public ids """
+        mocker.return_value = MOCK_RESPONSE
+        api.resources_by_asset_ids([API_TEST_ID], context=True, tags=True)
+        args, kargs = mocker.call_args
+        self.assertTrue(get_uri(args).endswith('/resources/by_asset_ids'), get_uri(args))
+        self.assertIn(API_TEST_ID, get_list_param(mocker, 'asset_ids'))
+        self.assertEqual(get_param(mocker, 'context'), True)
+        self.assertEqual(get_param(mocker, 'tags'), True)
+        self.assertEqual(get_list_param(mocker, 'asset_ids').__len__(), 1)
+
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test06c_resources_by_asset_ids(self, mocker):
+        """ should allow listing resources by public ids """
+        mocker.return_value = MOCK_RESPONSE
+        api.resources_by_asset_ids([API_TEST_ID, API_TEST_ID2], context=True, tags=True)
+        args, kargs = mocker.call_args
+        self.assertTrue(get_uri(args).endswith('/resources/by_asset_ids'), get_uri(args))
+        self.assertIn(API_TEST_ID, get_list_param(mocker, 'asset_ids'))
+        self.assertIn(API_TEST_ID2, get_list_param(mocker, 'asset_ids'))
+        self.assertEqual(get_param(mocker, 'context'), True)
+        self.assertEqual(get_param(mocker, 'tags'), True)
+        self.assertEqual(get_list_param(mocker, 'asset_ids').__len__(), 2)
+
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_resources_by_context(self):
         """ should allow listing resources by context"""
