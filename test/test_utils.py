@@ -794,6 +794,18 @@ class TestUtils(unittest.TestCase):
                                                                                   'level': '3.1'}},
                                    expected_url=VIDEO_UPLOAD_PATH + "vc_h264:basic:3.1/video_id")
 
+        # b_frames=True -> should not add b_frames parameter
+        self.__test_cloudinary_url(public_id="video_id", options={'resource_type': 'video',
+                                                                  'video_codec': {'codec': 'h265', 'profile': 'auto',
+                                                                                  'level': 'auto', 'b_frames': True}},
+                                   expected_url=VIDEO_UPLOAD_PATH + "vc_h265:auto:auto/video_id")
+
+        # should support a b_frames parameter - b_frames=False -> bframes_no
+        self.__test_cloudinary_url(public_id="video_id", options={'resource_type': 'video',
+                                                                  'video_codec': {'codec': 'h265', 'profile': 'auto',
+                                                                                  'level': 'auto', 'b_frames': False}},
+                                   expected_url=VIDEO_UPLOAD_PATH + "vc_h265:auto:auto:bframes_no/video_id")
+
     def test_audio_codec(self):
         # should support a string value
         self.__test_cloudinary_url(public_id="video_id", options={'resource_type': 'video', 'audio_codec': 'acc'},

@@ -530,6 +530,9 @@ def process_video_codec_param(param):
             out_param = out_param + ':' + param['profile']
             if 'level' in param:
                 out_param = out_param + ':' + param['level']
+                if param.get('b_frames') is False:
+                    out_param = out_param + ':' + 'bframes_no'
+
     return out_param
 
 
