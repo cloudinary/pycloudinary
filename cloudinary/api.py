@@ -101,7 +101,7 @@ def resources_by_asset_ids(asset_ids, **options):
     <https://cloudinary.com/documentation/admin_api#get_resources>`_
 
     :param asset_ids:   The requested asset IDs.
-    :type asset_ids:    str
+    :type asset_ids:    list[str]
     :param options:     Additional options
     :type options:      dict, optional
     :return:            Resources (assets) as indicated in the asset IDs
