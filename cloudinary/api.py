@@ -123,10 +123,38 @@ def resource(public_id, **options):
     resource_type = options.pop("resource_type", "image")
     upload_type = options.pop("type", "upload")
     uri = ["resources", resource_type, upload_type, public_id]
-    params = only(options, "exif", "faces", "colors", "image_metadata", "cinemagraph_analysis",
-                  "pages", "phash", "coordinates", "max_results", "quality_analysis", "derived_next_cursor",
-                  "accessibility_analysis", "versions")
+    params = _prepare_asset_details_params(**options)
     return call_api("get", uri, params, **options)
+
+
+def resource_by_asset_id(asset_id, **options):
+    """
+    Returns the details of the specified asset and all its derived assets by asset id.
+
+    :param asset_id:    The Asset ID of the asset
+    :type asset_id:     string
+    :param options:     Additional options
+    :type options:      dict, optional
+    :return:            Resource (asset) of a specific asset_id
+    :rtype:             Response
+    """
+    uri = ["resources", asset_id]
+    params = _prepare_asset_details_params(**options)
+    return call_api("get", uri, params, **options)
+
+
+def _prepare_asset_details_params(**options):
+    """
+    Prepares optional parameters for resource_by_asset_id API calls.
+
+    :param options: Additional options
+    :return: Optional parameters
+
+    :internal
+    """
+    return only(options, "exif", "faces", "colors", "image_metadata", "cinemagraph_analysis",
+                "pages", "phash", "coordinates", "max_results", "quality_analysis", "derived_next_cursor",
+                "accessibility_analysis", "versions")
 
 
 def update(public_id, **options):
