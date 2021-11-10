@@ -1,3 +1,24 @@
+1.27.0 / 2021-11-10
+==================
+
+New functionality and features
+------------------------------
+
+  * Add support for `resources_by_asset_ids` Admin API
+  * Add support for `resource_by_asset_id` Admin API
+  * Add support for `reorder_metadata_field_datasource` Admin API
+  * Add support for folder decoupling
+  * Add support for `create_slideshow` Upload API
+  * Add support for uploading `pathlib.Path`
+  * Add support for variables in text style
+    
+Other Changes
+-------------
+
+  * Remove duplicates in Search API fields
+  * Fix named parameters normalization issue
+  * Remove redundant parameter from `update_sub_account` Provisioning API
+
 1.26.0 / 2021-06-20
 ==================
 
