@@ -1,3 +1,17 @@
+1.28.0 / 2021-11-11
+==================
+
+New functionality and features
+------------------------------
+
+* Add support for `reorder_metadata_fields` Admin API
+* Add support for disabling b-frames in `video_codec` transformation parameter
+  
+Other Changes
+-------------
+
+* Fix regression in `upload_resource` function
+
 1.27.0 / 2021-11-10
 ==================
 
