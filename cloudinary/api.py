@@ -668,6 +668,6 @@ def reorder_metadata_fields(order_by, direction=None, **options):
 
     :rtype: Response
     """
-    uri = ['reorder']
+    uri = ['order']
     params = {'order_by': order_by, 'direction': direction}
     return call_metadata_api('put', uri, params, **options)

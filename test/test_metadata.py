@@ -494,7 +494,7 @@ class MetadataTest(unittest.TestCase):
         api.reorder_metadata_fields('label', 'asc')
         args, kargs = mocker.call_args
 
-        self.assertTrue(get_uri(args).endswith("/metadata_fields/reorder"))
+        self.assertTrue(get_uri(args).endswith("/metadata_fields/order"))
         self.assertEqual(get_method(mocker), "PUT")
         self.assertEqual(get_json_body(mocker)['order_by'], "label")
         self.assertEqual(get_json_body(mocker)['direction'], "asc")
@@ -507,7 +507,7 @@ class MetadataTest(unittest.TestCase):
         api.reorder_metadata_fields('external_id', 'desc')
         args, kargs = mocker.call_args
 
-        self.assertTrue(get_uri(args).endswith("/metadata_fields/reorder"))
+        self.assertTrue(get_uri(args).endswith("/metadata_fields/order"))
         self.assertEqual(get_method(mocker), "PUT")
         self.assertEqual(get_json_body(mocker)['order_by'], "external_id")
         self.assertEqual(get_json_body(mocker)['direction'], "desc")
@@ -520,7 +520,7 @@ class MetadataTest(unittest.TestCase):
         api.reorder_metadata_fields('created_at', 'asc')
         args, kargs = mocker.call_args
 
-        self.assertTrue(get_uri(args).endswith("/metadata_fields/reorder"))
+        self.assertTrue(get_uri(args).endswith("/metadata_fields/order"))
         self.assertEqual(get_method(mocker), "PUT")
         self.assertEqual(get_json_body(mocker)['order_by'], "created_at")
         self.assertEqual(get_json_body(mocker)['direction'], "asc")
