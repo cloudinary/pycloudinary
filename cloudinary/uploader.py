@@ -62,7 +62,12 @@ def upload_image(file, **options):
 
 
 def upload_resource(file, **options):
-    result = upload_large(file, **options)
+    upload_func = upload
+    if hasattr(file, 'size') and file.size > UPLOAD_LARGE_CHUNK_SIZE:
+        upload_func = upload_large
+
+    result = upload_func(file, **options)
+
     return cloudinary.CloudinaryResource(
         result["public_id"], version=str(result["version"]),
         format=result.get("format"), type=result["type"],
