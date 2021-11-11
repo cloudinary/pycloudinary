@@ -11,7 +11,7 @@ import cloudinary
 from cloudinary import api
 from cloudinary.exceptions import BadRequest, NotFound
 from test.helper_test import (
-    UNIQUE_TEST_ID, get_uri, get_params, get_method, api_response_mock, ignore_exception
+    UNIQUE_TEST_ID, get_uri, get_params, get_method, api_response_mock, ignore_exception, get_json_body
 )
 
 MOCK_RESPONSE = api_response_mock()
@@ -485,6 +485,48 @@ class MetadataTest(unittest.TestCase):
         self.assert_metadata_field_datasource(result)
 
         self.assertEqual(result['values'][0]['value'], DATASOURCE_MULTIPLE[-1]['value'])
+
+    @patch("urllib3.request.RequestMethods.request")
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test16_reorder_metadata_fields(self, mocker):
+
+        """Test the reorder of metadata fields for label order by asc"""
+        mocker.return_value = MOCK_RESPONSE
+        result = api.reorder_metadata_fields('label', 'asc')
+        args, kargs = mocker.call_args
+
+        self.assertTrue(get_uri(args).endswith("/metadata_fields/reorder"))
+        self.assertEqual(get_method(mocker), "PUT")
+        self.assertEqual(get_json_body(mocker)['order_by'], "label")
+        self.assertEqual(get_json_body(mocker)['direction'], "asc")
+
+    @patch("urllib3.request.RequestMethods.request")
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test16b_reorder_metadata_fields(self, mocker):
+
+        """Test the reorder of metadata fields for external_id order by desc"""
+        mocker.return_value = MOCK_RESPONSE
+        result = api.reorder_metadata_fields('external_id', 'desc')
+        args, kargs = mocker.call_args
+
+        self.assertTrue(get_uri(args).endswith("/metadata_fields/reorder"))
+        self.assertEqual(get_method(mocker), "PUT")
+        self.assertEqual(get_json_body(mocker)['order_by'], "external_id")
+        self.assertEqual(get_json_body(mocker)['direction'], "desc")
+
+    @patch("urllib3.request.RequestMethods.request")
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test16c_reorder_metadata_fields(self, mocker):
+
+        """Test the reorder of metadata fields for created_at order by asc"""
+        mocker.return_value = MOCK_RESPONSE
+        result = api.reorder_metadata_fields('created_at', 'asc')
+        args, kargs = mocker.call_args
+
+        self.assertTrue(get_uri(args).endswith("/metadata_fields/reorder"))
+        self.assertEqual(get_method(mocker), "PUT")
+        self.assertEqual(get_json_body(mocker)['order_by'], "created_at")
+        self.assertEqual(get_json_body(mocker)['direction'], "asc")
 
 
 if __name__ == "__main__":
