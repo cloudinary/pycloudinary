@@ -488,11 +488,10 @@ class MetadataTest(unittest.TestCase):
 
     @patch("urllib3.request.RequestMethods.request")
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
-    def test16_reorder_metadata_fields(self, mocker):
-
+    def test_reorder_metadata_fields_by_label(self, mocker):
         """Test the reorder of metadata fields for label order by asc"""
         mocker.return_value = MOCK_RESPONSE
-        result = api.reorder_metadata_fields('label', 'asc')
+        api.reorder_metadata_fields('label', 'asc')
         args, kargs = mocker.call_args
 
         self.assertTrue(get_uri(args).endswith("/metadata_fields/reorder"))
@@ -502,11 +501,10 @@ class MetadataTest(unittest.TestCase):
 
     @patch("urllib3.request.RequestMethods.request")
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
-    def test16b_reorder_metadata_fields(self, mocker):
-
+    def test_reorder_metadata_fields_by_external_id(self, mocker):
         """Test the reorder of metadata fields for external_id order by desc"""
         mocker.return_value = MOCK_RESPONSE
-        result = api.reorder_metadata_fields('external_id', 'desc')
+        api.reorder_metadata_fields('external_id', 'desc')
         args, kargs = mocker.call_args
 
         self.assertTrue(get_uri(args).endswith("/metadata_fields/reorder"))
@@ -516,11 +514,10 @@ class MetadataTest(unittest.TestCase):
 
     @patch("urllib3.request.RequestMethods.request")
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
-    def test16c_reorder_metadata_fields(self, mocker):
-
+    def test_reorder_metadata_fields_by_created_at(self, mocker):
         """Test the reorder of metadata fields for created_at order by asc"""
         mocker.return_value = MOCK_RESPONSE
-        result = api.reorder_metadata_fields('created_at', 'asc')
+        api.reorder_metadata_fields('created_at', 'asc')
         args, kargs = mocker.call_args
 
         self.assertTrue(get_uri(args).endswith("/metadata_fields/reorder"))

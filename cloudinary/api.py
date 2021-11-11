@@ -660,7 +660,7 @@ def reorder_metadata_field_datasource(field_external_id, order_by, direction=Non
 
 
 def reorder_metadata_fields(order_by, direction=None, **options):
-    """Support the option to reorder metadata fields according to DAM admin preferences.
+    """Reorders metadata fields.
 
     :param order_by: Criteria for the order (one of the fields 'label', 'external_id', 'created_at').
     :param direction: Optional (gets either asc or desc).
@@ -671,4 +671,3 @@ def reorder_metadata_fields(order_by, direction=None, **options):
     uri = ['reorder']
     params = {'order_by': order_by, 'direction': direction}
     return call_metadata_api('put', uri, params, **options)
-
