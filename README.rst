@@ -370,6 +370,32 @@ Optional parameters:
 
 -  ``public_id`` - The name of the uploaded file in Cloudinary
 
+Django Admin Integration
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+CloudinaryFieldsAdminMixin
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The ``cloudinary.admin.CloudinaryFieldsAdminMixin`` sets ``django.contrib.admin.widgets.AdminFileWidget``
+for ``cloudinary.models.CloudinaryField`` fields in model and ``cloudinary.widgets.AdminCloudinaryJSFileWidget`` for
+fields which has ``CloudinaryJsFileField`` or ``CloudinaryUnsignedJsFileField`` in ``default_form_class``.
+
+To enable widgets in the admin, you need to inherit from ``CloudinaryFieldsAdminMixin``:
+
+.. code:: python
+
+   from django.contrib import admin
+   from myapp.models import MyCloudinaryModel
+
+   from cloudinary.admin import CloudinaryFieldsAdminMixin
+
+   class MyCloudinaryModelAdmin(CloudinaryFieldsAdminMixin, admin.ModelAdmin):
+       """Any admin options you need go here"""
+
+
+   admin.site.register(MyCloudinaryModelAdmin, MyCloudinaryModelAdmin)
+
+
 Code samples
 ------------
 

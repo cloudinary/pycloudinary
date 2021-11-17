@@ -1,0 +1,7 @@
+{% include 'admin/widgets/clearable_file_input.html' with widget=widget.file_input %}
+{% include 'django/forms/widgets/hidden.html' with widget=widget.hidden_input %}
+{% if not widget.is_initial and widget.value %}
+    <p id="{{ widget.status_element_id }}" class="file-upload">{{ widget.upload_text }}: <a href="{{ widget.value.url }}">{{ widget.value }}</a></p>
+{% else %}
+    <p id="{{ widget.status_element_id }}" class="file-upload"></p>
+{% endif %}
