@@ -1,7 +1,7 @@
 import contextlib
 import unittest
 
-from cloudinary.utils import normalize_expression, generate_transformation_string
+from cloudinary.utils import normalize_expression, generate_transformation_string, _SIMPLE_TRANSFORMATION_PARAMS
 
 NORMALIZATION_EXAMPLES = {
     'None is not affected': [None, None],
@@ -43,10 +43,59 @@ NORMALIZATION_EXAMPLES = {
 
 
 class ExpressionNormalizationTest(unittest.TestCase):
+
     def test_expression_normalization(self):
         for description, (input_expression, expected_expression) in NORMALIZATION_EXAMPLES.items():
             with self.subTest(description, input_expression=input_expression):
                 self.assertEqual(expected_expression, normalize_expression(input_expression))
+
+    def test_predefined_parameters_normalization(self):
+        normalized_params = (
+            'angle',
+            'aspect_ratio',
+            'dpr',
+            'effect',
+            'height',
+            'opacity',
+            'quality',
+            'width',
+            'x',
+            'y',
+            'zoom'
+        )
+
+        value = 'width * 2'
+        normalized_value = 'w_mul_2'
+
+        for param in normalized_params:
+            with self.subTest('should normalize value in {}'.format(param), param=param):
+
+                options = {param: value}
+
+                # Set no_html_sizes
+                if param in ['height', 'width']:
+                    options['crop'] = 'fit'
+
+                result = generate_transformation_string(**options)
+
+                self.assertEqual(result[1], {})
+                self.assertFalse(value in result[0])
+                self.assertTrue(normalized_value in result[0])
+
+    def test_simple_parameters_normalization(self):
+        value = 'width * 2'
+        normalized_value = 'w_mul_2'
+        not_normalized_params = list(_SIMPLE_TRANSFORMATION_PARAMS.values())
+        not_normalized_params.extend(['overlay', 'underlay'])
+
+        for param in not_normalized_params:
+            with self.subTest('should not normalize value in {}'.format(param), param=param):
+                options = {param: value}
+
+                result = generate_transformation_string(**options)
+
+                self.assertTrue(value in result[0])
+                self.assertFalse(normalized_value in result[0])
 
     if not hasattr(unittest.TestCase, "subTest"):
         # Support Python before version 3.4

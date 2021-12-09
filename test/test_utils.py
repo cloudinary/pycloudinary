@@ -168,6 +168,7 @@ class TestUtils(unittest.TestCase):
             ({"radius": 10}, "r_10"),
             ({"radius": "10"}, "r_10"),
             ({"radius": "$v", "variables": [("$v", 10)]}, "$v_10,r_$v"),
+            ({"radius": "width * 2"}, "r_w_mul_2"),
             ({"radius": [10, 20]}, "r_10:20"),
             ({"radius": "10:20"}, "r_10:20"),
             ({"radius": "10:$v", "variables": [("$v", 20)]}, "$v_20,r_10:$v"),
