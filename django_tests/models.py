@@ -6,6 +6,7 @@ from django.db import models
 
 @python_2_unicode_compatible
 class Poll(models.Model):
+    id = models.AutoField(primary_key=True)
     question = models.CharField(max_length=200)
     image_width = models.PositiveIntegerField(null=True)
     image_height = models.PositiveIntegerField(null=True)
@@ -17,6 +18,7 @@ class Poll(models.Model):
 
 @python_2_unicode_compatible
 class Choice(models.Model):
+    id = models.AutoField(primary_key=True)
     poll = models.ForeignKey(Poll, on_delete=models.CASCADE)
     choice = models.CharField(max_length=200)
     votes = models.IntegerField()
