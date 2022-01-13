@@ -1,3 +1,9 @@
+1.28.1 / 2022-01-13
+==================
+
+  * Add support for Django 4
+  * Add tests to verify expression normalization
+
 1.28.0 / 2021-11-11
 ==================
 
