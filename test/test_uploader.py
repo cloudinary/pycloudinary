@@ -597,6 +597,27 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         uploader.replace_tag(UNIQUE_TAG, result["public_id"])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_multiple_tags(self):
+        """ Should support adding multiple tags: list ["tag1","tag2"] and comma-separated "tag1,tag2" """
+        result = uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG])
+        result2 = uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG])
+
+        uploader.add_tag(["tag1", "tag2"], [result["public_id"], result2["public_id"]])
+        uploader.add_tag("tag3,tag4", [result["public_id"], result2["public_id"]])
+        self.assertEqual(api.resource(result["public_id"])["tags"], ["tag1", "tag2", "tag3", "tag4", UNIQUE_TAG])
+        self.assertEqual(api.resource(result2["public_id"])["tags"], ["tag1", "tag2", "tag3", "tag4", UNIQUE_TAG])
+
+        uploader.remove_tag(["tag1", "tag2"], result["public_id"])
+        uploader.remove_tag("tag3,tag4", result2["public_id"])
+        self.assertEqual(api.resource(result["public_id"])["tags"], ["tag3", "tag4", UNIQUE_TAG])
+        self.assertEqual(api.resource(result2["public_id"])["tags"], ["tag1", "tag2", UNIQUE_TAG])
+
+        uploader.replace_tag(["tag5", UNIQUE_TAG], result["public_id"])
+        uploader.replace_tag("tag7," + UNIQUE_TAG, result2["public_id"])
+        self.assertEqual(api.resource(result["public_id"])["tags"], ["tag5", UNIQUE_TAG])
+        self.assertEqual(api.resource(result2["public_id"])["tags"], ["tag7", UNIQUE_TAG])
+
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_remove_all_tags(self):
         """Should successfully remove all tags"""
         result = uploader.upload(TEST_IMAGE, public_id=TEST_ID1)
