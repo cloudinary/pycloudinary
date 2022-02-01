@@ -17,11 +17,12 @@ from fractions import Fraction
 from numbers import Number
 
 import six.moves.urllib.parse
-from six import iteritems, string_types
+from six import iteritems
 from urllib3 import ProxyManager, PoolManager
 
 import cloudinary
 from cloudinary import auth_token
+from cloudinary.api_client.tcp_keep_alive_manager import TCPKeepAlivePoolManager, TCPKeepAliveProxyManager
 from cloudinary.compat import PY3, to_bytes, to_bytearray, to_string, string_types, urlparse
 
 VAR_NAME_RE = r'(\$\([a-zA-Z]\w+\))'
@@ -1517,9 +1518,15 @@ def get_http_connector(conf, options):
     :return: ProxyManager if api_proxy is set, otherwise PoolManager object
     """
     if conf.api_proxy:
+        if conf.tcp_keep_alive:
+            return TCPKeepAliveProxyManager(conf.api_proxy, **options)
+
         return ProxyManager(conf.api_proxy, **options)
-    else:
-        return PoolManager(**options)
+
+    if conf.tcp_keep_alive:
+        return TCPKeepAlivePoolManager(**options)
+
+    return PoolManager(**options)
 
 
 def encode_list(obj):
