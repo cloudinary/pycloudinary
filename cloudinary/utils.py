@@ -1510,7 +1510,7 @@ def verify_notification_signature(body, timestamp, signature, valid_for=7200, al
 
 def get_http_connector(conf, options):
     """
-    Used to create http connector, depends on api_proxy configuration parameter
+    Used to create http connector, depends on api_proxy and disable_tcp_keep_alive configuration parameters.
 
     :param conf: configuration object
     :param options: additional options
@@ -1518,15 +1518,15 @@ def get_http_connector(conf, options):
     :return: ProxyManager if api_proxy is set, otherwise PoolManager object
     """
     if conf.api_proxy:
-        if conf.tcp_keep_alive:
-            return TCPKeepAliveProxyManager(conf.api_proxy, **options)
+        if conf.disable_tcp_keep_alive:
+            return ProxyManager(conf.api_proxy, **options)
 
-        return ProxyManager(conf.api_proxy, **options)
+        return TCPKeepAliveProxyManager(conf.api_proxy, **options)
 
-    if conf.tcp_keep_alive:
-        return TCPKeepAlivePoolManager(**options)
+    if conf.disable_tcp_keep_alive:
+        return PoolManager(**options)
 
-    return PoolManager(**options)
+    return TCPKeepAlivePoolManager(**options)
 
 
 def encode_list(obj):

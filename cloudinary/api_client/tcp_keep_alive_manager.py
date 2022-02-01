@@ -3,6 +3,9 @@ import sys
 
 from urllib3 import HTTPSConnectionPool, HTTPConnectionPool, PoolManager, ProxyManager
 
+# Inspired by:
+# https://github.com/finbourne/lusid-sdk-python/blob/b813882e4f1777ea78670a03a7596486639e6f40/sdk/lusid/tcp/tcp_keep_alive_probes.py
+
 # The content to send on Mac OS in the TCP Keep Alive probe
 TCP_KEEPALIVE = 0x10
 # The maximum time to keep the connection idle before sending probes
