@@ -24,7 +24,7 @@ class TCPKeepAliveValidationMethods:
     """
 
     @staticmethod
-    def adjust_connection_socket(conn, protocol: str = "https"):
+    def adjust_connection_socket(conn, protocol="https"):
         """
         Adjusts the socket settings so that the client sends a TCP keep alive probe over the connection. This is only
         applied where possible, if the ability to set the socket options is not available, for example using Anaconda,
@@ -71,7 +71,7 @@ class TCPKeepAliveHTTPSConnectionPool(HTTPSConnectionPool):
         Called right before a request is made, after the socket is created.
         """
         # Call the method on the base class
-        super()._validate_conn(conn)
+        super(TCPKeepAliveHTTPSConnectionPool, self)._validate_conn(conn)
 
         # Set up TCP Keep Alive probes, this is the only line added to this function
         TCPKeepAliveValidationMethods.adjust_connection_socket(conn, "https")
@@ -89,7 +89,7 @@ class TCPKeepAliveHTTPConnectionPool(HTTPConnectionPool):
         Called right before a request is made, after the socket is created.
         """
         # Call the method on the base class
-        super()._validate_conn(conn)
+        super(TCPKeepAliveHTTPConnectionPool, self)._validate_conn(conn)
 
         # Set up TCP Keep Alive probes, this is the only line added to this function
         TCPKeepAliveValidationMethods.adjust_connection_socket(conn, "http")
@@ -102,7 +102,7 @@ class TCPKeepAlivePoolManager(PoolManager):
     """
 
     def __init__(self, num_pools=10, headers=None, **connection_pool_kw):
-        super().__init__(num_pools=num_pools, headers=headers, **connection_pool_kw)
+        super(TCPKeepAlivePoolManager, self).__init__(num_pools=num_pools, headers=headers, **connection_pool_kw)
         self.pool_classes_by_scheme = {"http": TCPKeepAliveHTTPConnectionPool, "https": TCPKeepAliveHTTPSConnectionPool}
 
 
@@ -113,6 +113,7 @@ class TCPKeepAliveProxyManager(ProxyManager):
     """
 
     def __init__(self, proxy_url, num_pools=10, headers=None, proxy_headers=None, **connection_pool_kw):
-        super().__init__(proxy_url=proxy_url, num_pools=num_pools, headers=headers, proxy_headers=proxy_headers,
-                         **connection_pool_kw)
+        super(TCPKeepAliveProxyManager, self).__init__(proxy_url=proxy_url, num_pools=num_pools, headers=headers,
+                                                       proxy_headers=proxy_headers,
+                                                       **connection_pool_kw)
         self.pool_classes_by_scheme = {"http": TCPKeepAliveHTTPConnectionPool, "https": TCPKeepAliveHTTPSConnectionPool}
