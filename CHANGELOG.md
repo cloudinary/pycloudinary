@@ -1,3 +1,17 @@
+1.29.0 / 2022-02-03
+==================
+
+New functionality and features
+------------------------------
+
+  * Add support for multiple tags in `add_tag`, `remove_tag` and `replace_tag`
+
+Other Changes
+-------------
+
+  * Fix connection reset by peer issue
+  * Bump `urllib3` to version `1.26.5`
+
 1.28.1 / 2022-01-13
 ==================
 
