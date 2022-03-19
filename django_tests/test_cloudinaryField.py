@@ -63,6 +63,22 @@ class TestCloudinaryField(TestCase):
         self.assertEqual(upload_mock.call_args[1]['use_filename'], 'true')
         self.assertEqual(upload_mock.call_args[1]['phash'], 'true')
 
+    def test_callable_upload_options(self):
+
+        def get_image_name(instance):
+            return instance.question
+
+        c = CloudinaryField('image', public_id=get_image_name)
+        c.set_attributes_from_name('image')
+        poll = Poll(question="question", image=SimpleUploadedFile(TEST_IMAGE, b''))
+
+        mocked_resource = cloudinary.CloudinaryResource(type="upload", public_id=TEST_IMAGE, resource_type="image")
+        with mock.patch('cloudinary.uploader.upload_resource', return_value=mocked_resource) as upload_mock:
+            c.pre_save(poll, None)
+
+        self.assertTrue(upload_mock.called)
+        self.assertEqual(upload_mock.call_args.kwargs['public_id'], 'question')
+
     def test_pre_save(self):
         c = CloudinaryField('image', width_field="image_width", height_field="image_height")
         c.set_attributes_from_name('image')
