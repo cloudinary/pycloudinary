@@ -128,10 +128,20 @@ class ApiTest(unittest.TestCase):
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_rate_limits(self):
         """ should include details of the account's rate limits"""
-        result = api.ping()
-        self.assertIsInstance(result.rate_limit_allowed, int)
-        self.assertIsInstance(result.rate_limit_reset_at, tuple)
-        self.assertIsInstance(result.rate_limit_remaining, int)
+        results = [
+            api.ping(),
+            api.root_folders(),
+            api.resource_types(),
+        ]
+
+        for result in results:
+            self.assertIsInstance(result.rate_limit_allowed, int)
+            self.assertIsInstance(result.rate_limit_reset_at, tuple)
+            self.assertIsInstance(result.rate_limit_remaining, int)
+
+            self.assertGreater(result.rate_limit_allowed, 0)
+            self.assertIsNotNone(result.rate_limit_reset_at)
+            self.assertGreater(result.rate_limit_remaining, 0)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test01_resource_types(self):
