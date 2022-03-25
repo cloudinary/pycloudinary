@@ -123,7 +123,7 @@ def update_sub_account(sub_account_id, name=None, cloud_name=None, custom_attrib
     return _call_account_api("put", uri, params=params, **options)
 
 
-def users(user_ids=None, sub_account_id=None, pending=None, prefix=None, **options):
+def users(user_ids=None, sub_account_id=None, pending=None, prefix=None, last_login=None, from_date=None, to_date=None, **options):
     """
     List all users
     :param user_ids:        The ids of the users to fetch
@@ -136,6 +136,13 @@ def users(user_ids=None, sub_account_id=None, pending=None, prefix=None, **optio
     :type pending:          bool, optional
     :param prefix:          User prefix
     :type prefix:           str, optional
+    :param last_login:      Return only users that last logged in in the specified range of dates (true), 
+                            users that didn't last logged in in that range (false), or all users (None).
+    :type last_login:       bool, optional
+    :param from_date:       Last login start date.
+    :type from_date:        datetime, optional
+    :param to_date:         Last login end date.
+    :type to_date:          datetime, optional
     :param options:         Generic advanced options dict, see online documentation.
     :type options:          dict, optional
     :return:                List of users associated with the account
@@ -146,7 +153,10 @@ def users(user_ids=None, sub_account_id=None, pending=None, prefix=None, **optio
     params = {"ids": user_ids,
               "sub_account_id": sub_account_id,
               "pending": pending,
-              "prefix": prefix}
+              "prefix": prefix,
+              "last_login": last_login,
+              "from": from_date,
+              "to": to_date}
     return _call_account_api("get", uri, params=params, **options)
 
 

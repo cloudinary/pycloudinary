@@ -163,6 +163,17 @@ class AccountApiTest(unittest.TestCase):
 
     @unittest.skipUnless(cloudinary.provisioning.account_config().provisioning_api_secret,
                          "requires provisioning_api_key/provisioning_api_secret")
+    def test_get_users_by_login(self):
+        res = cloudinary.provisioning.users(user_ids=[self.user_id_1], pending=None, 
+                                            last_login=True, from_date=datetime.today(), to_date=datetime.today())
+        self.assertEqual(len(res["users"]), 0)
+
+        res = cloudinary.provisioning.users(user_ids=[self.user_id_1], pending=None,
+                                            last_login=False, from_date=datetime.today(), to_date=datetime.today())
+        self.assertEqual(len(res["users"]), 1)
+
+    @unittest.skipUnless(cloudinary.provisioning.account_config().provisioning_api_secret,
+                         "requires provisioning_api_key/provisioning_api_secret")
     def test_update_user_group(self):
         now = datetime.now().strftime("%m-%d-%Y")
         new_name = "new-test-name" + now
