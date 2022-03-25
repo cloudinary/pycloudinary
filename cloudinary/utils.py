@@ -370,8 +370,17 @@ def generate_transformation_string(**options):
     flags = ".".join(build_array(options.pop("flags", None)))
     dpr = options.pop("dpr", cloudinary.config().dpr)
     duration = norm_range_value(options.pop("duration", None))
-    start_offset = norm_auto_range_value(options.pop("start_offset", None))
-    end_offset = norm_range_value(options.pop("end_offset", None))
+    
+    so_raw = options.pop("start_offset", None)
+    start_offset = norm_auto_range_value(so_raw)
+    if start_offset == None:
+        start_offset = so_raw
+
+    eo_raw = options.pop("end_offset", None)
+    end_offset = norm_range_value(eo_raw)
+    if end_offset == None:
+        end_offset = eo_raw
+
     offset = split_range(options.pop("offset", None))
     if offset:
         start_offset = norm_auto_range_value(offset[0])
