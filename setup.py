@@ -16,6 +16,9 @@ setup(name='cloudinary',
       author='Cloudinary',
       author_email='info@cloudinary.com',
       url='https://cloudinary.com',
+      project_urls={
+          'Source': 'https://github.com/cloudinary/pycloudinary',
+      },
       license='MIT',
       packages=find_packages(exclude=['ez_setup', 'examples', 'test', 'django_tests', 'django_tests.*']),
       classifiers=[
