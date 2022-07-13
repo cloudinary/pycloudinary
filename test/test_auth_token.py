@@ -96,6 +96,18 @@ class AuthTokenTest(unittest.TestCase):
             acl_token_url_ignored
         )
 
+    def test_should_support_multiple_acls(self):
+        token_options = {"key": KEY, "duration": 3600, 
+                         "acl": ["/i/a/*", "/i/a/*", "/i/a/*"], 
+                         "start_time": 222222222}
+
+        cookie_token = cloudinary.utils.generate_auth_token(**token_options)
+        self.assertEqual(
+            cookie_token,
+            "__cld_token__=st=222222222~exp=222225822~acl=%2fi%2fa%2f*!%2fi%2fa%2f*!"
+            "%2fi%2fa%2f*~hmac=10d9ad42d6ed66dce2386c4b564b2aa25a6ac668e5b90d070363a03c9842965f"
+        )
+
     def test_must_provide_expiration_or_duration(self):
         self.assertRaises(Exception, cloudinary.utils.generate_auth_token, acl="*", expiration=None, duration=None)
 
