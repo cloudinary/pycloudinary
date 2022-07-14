@@ -194,6 +194,8 @@ def update(public_id, **options):
             options.get("custom_coordinates"))
     if "context" in options:
         params["context"] = utils.encode_context(options.get("context"))
+    if "metadata" in options:
+        params["metadata"] = utils.encode_context(options.get("metadata"))
     if "auto_tagging" in options:
         params["auto_tagging"] = str(options.get("auto_tagging"))
     if "access_control" in options:
