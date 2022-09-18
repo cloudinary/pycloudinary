@@ -24,6 +24,7 @@ from cloudinary.http_client import HttpClient
 from cloudinary.compat import urlparse, parse_qs
 
 from platform import python_version
+from platform import platform as pf
 
 CERT_KWARGS = {
     'cert_reqs': 'CERT_REQUIRED',
@@ -40,7 +41,10 @@ API_VERSION = "v1_1"
 
 VERSION = "1.29.0"
 
-USER_AGENT = "CloudinaryPython/{} (Python {})".format(VERSION, python_version())
+OS_INFO = pf().lower()
+OS_INFO = OS_INFO.split("-")
+
+USER_AGENT = "CloudinaryPython/{} (Python {}/{})".format(VERSION, python_version(),OS_INFO[0].capitalize())
 """ :const: USER_AGENT """
 
 USER_PLATFORM = ""
