@@ -94,6 +94,7 @@ __SIMPLE_UPLOAD_PARAMS = [
     "proxy",
     "folder",
     "asset_folder",
+    "use_asset_folder_as_public_id_prefix",
     "overwrite",
     "moderation",
     "raw_convert",
