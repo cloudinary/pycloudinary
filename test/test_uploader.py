@@ -250,13 +250,14 @@ class UploaderTest(unittest.TestCase):
         mocker.return_value = MOCK_RESPONSE
 
         fd_params = {"public_id_prefix": FD_PID_PREFIX, "asset_folder": ASSET_FOLDER, "display_name": DISPLAY_NAME,
-                     "use_filename_as_display_name": True, "folder": TEST_FOLDER}
+                     "use_filename_as_display_name": True, "folder": TEST_FOLDER, "use_asset_folder_as_public_id_prefix": True}
         uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG], **fd_params)
 
         self.assertEqual(FD_PID_PREFIX, get_param(mocker, "public_id_prefix"))
         self.assertEqual(ASSET_FOLDER, get_param(mocker, "asset_folder"))
         self.assertEqual(DISPLAY_NAME, get_param(mocker, "display_name"))
         self.assertEqual("1", get_param(mocker, "use_filename_as_display_name"))
+        self.assertEqual("1", get_param(mocker, "use_asset_folder_as_public_id_prefix"))
         self.assertEqual(TEST_FOLDER, get_param(mocker, "folder"))
 
     @patch('urllib3.request.RequestMethods.request')
