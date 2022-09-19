@@ -311,11 +311,11 @@ class ApiTest(unittest.TestCase):
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_resources_by_asset_folder(self, mocker):
         mocker.return_value = MOCK_RESPONSE
-        api.resources_by_asset_folder(ASSET_FOLDER, context=True, metadata=True)
+        api.resources_by_asset_folder(ASSET_FOLDER, context=True, tags=True)
         args, kargs = mocker.call_args
         self.assertTrue(get_uri(args).endswith('/resources/by_asset_folder'))
         self.assertTrue(get_params(args)['context'])
-        self.assertTrue(get_params(args)['metadata'])
+        self.assertTrue(get_params(args)['tags'])
         self.assertEqual(ASSET_FOLDER, get_param(mocker, "asset_folder"))
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
