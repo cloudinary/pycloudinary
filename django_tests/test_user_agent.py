@@ -12,4 +12,4 @@ class TestUserAgent(TestCase):
         os_info = pf().lower()
         os_info = os_info.split("-")
 
-        six.assertRegex(self, agent, r'^CloudinaryPython\/\d\.\d+\.\d+ \(Python \d\.\d+\.\d+\/{}\)$'.format(os_info[0].capitalize()))
+        six.assertRegex(self, agent, r'^Django\/\d\.\d+\.?\d* CloudinaryPython\/\d\.\d+\.\d+ \(Python \d\.\d+\.\d+\/{}\)$'.format(os_info[0].capitalize()))
