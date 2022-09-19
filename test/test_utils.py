@@ -14,6 +14,8 @@ from os.path import getsize
 import six
 from mock import patch
 
+from platform import platform as pf
+
 import cloudinary.utils
 from cloudinary import CL_BLANK
 from cloudinary.utils import (
@@ -895,7 +897,10 @@ class TestUtils(unittest.TestCase):
     def test_user_agent(self):
         with patch('cloudinary.USER_PLATFORM', ''):
             agent = cloudinary.get_user_agent()
-        six.assertRegex(self, agent, r'^CloudinaryPython\/\d\.\d+\.\d+ \(Python \d\.\d+\.\d+\)$')
+            os_info = pf().lower()
+            os_info = os_info.split("-")
+
+        six.assertRegex(self, agent, r'^CloudinaryPython\/\d\.\d+\.\d+ \(Python \d\.\d+\.\d+\/{}\)$'.format(os_info[0].capitalize()))
 
         platform = 'MyPlatform/1.2.3 (Test code)'
         with patch('cloudinary.USER_PLATFORM', platform):
