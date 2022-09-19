@@ -41,6 +41,7 @@ API_TEST_TRANS_SCALE100_STR = "c_scale,l_{},w_100".format(API_TEST_TRANS_OVERLAY
 API_TEST_TRANS_SEPIA = {"crop": "lfill", "width": 400, "effect": "sepia"}
 API_TEST_TRANS_SEPIA_STR = "c_lfill,e_sepia,w_400"
 API_TEST_PRESET = "api_test_upload_preset"
+ASSET_FOLDER = "asset_folder"
 PREFIX = "test_folder_{}".format(SUFFIX)
 MAPPING_TEST_ID = "api_test_upload_mapping_{}".format(SUFFIX)
 RESTORE_TEST_ID = "api_test_restore_{}".format(SUFFIX)
@@ -305,6 +306,17 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(resource["public_id"], API_TEST_ID)
         self.assertEqual(resource["bytes"], 3381)
         self.assertEqual(len(resource["derived"]), 1, "{} should have one derived resource.".format(API_TEST_ID))
+
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_resources_by_asset_folder(self, mocker):
+        mocker.return_value = MOCK_RESPONSE
+        api.resources_by_asset_folder(ASSET_FOLDER, context=True, metadata=True)
+        args, kargs = mocker.call_args
+        self.assertTrue(get_uri(args).endswith('/resources/by_asset_folder'))
+        self.assertTrue(get_params(args)['context'])
+        self.assertTrue(get_params(args)['metadata'])
+        self.assertEqual(ASSET_FOLDER, get_param(mocker, "asset_folder"))
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test07a_resource_quality_analysis(self):
