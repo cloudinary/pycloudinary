@@ -105,7 +105,7 @@ def resources_by_asset_folder(asset_folder, **options):
     :rtype:             Response
     """
     uri = ["resources", "by_asset_folder"]
-    params = only(options, "max_results", "tags", "moderations", "context", "next_cursor", "metadata")
+    params = only(options, "max_results", "tags", "moderations", "context", "next_cursor")
     params["asset_folder"] = asset_folder
     return call_api("get", uri, params, **options)
 
