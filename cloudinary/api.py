@@ -200,6 +200,12 @@ def update(public_id, **options):
         params["auto_tagging"] = str(options.get("auto_tagging"))
     if "access_control" in options:
         params["access_control"] = utils.json_encode(utils.build_list_of_dicts(options.get("access_control")))
+    if "asset_folder" in options:
+        params["asset_folder"] = options.get("asset_folder")
+    if "display_name" in options:
+        params["display_name"] = options.get("display_name")
+    if "unique_display_name" in options:
+        params["unique_display_name"] = options.get("unique_display_name")
 
     return call_api("post", uri, params, **options)
 
