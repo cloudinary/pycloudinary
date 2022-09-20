@@ -1,3 +1,26 @@
+1.30.0 / 2022-09-20
+==================
+
+New functionality and features
+------------------------------
+
+  * Add support for `resources_by_asset_folder` Admin API
+  * Add support for `unique_display_name` parameter
+  * Add support for `use_asset_folder_as_public_id_prefix` parameter
+  * Add support for `metadata` in `update` Admin API
+  * Add support for multiple ACLs in `AuthToken`
+  
+Other Changes
+-------------
+
+  * Move Django static files to `static/cloudinary`
+  * Allow passing callable parameters to `CloudinaryField`
+  * Fix incorrect Provisioning API parameter for `base_account`
+  * Add OS info to `User-Agent`
+  * Add source URL for PyPi
+  * Improve tests of API response headers
+  * Extend search resources by asset_id tests
+
 1.29.0 / 2022-02-03
 ==================
 
