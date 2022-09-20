@@ -802,6 +802,17 @@ class ApiTest(unittest.TestCase):
         with six.assertRaisesRegex(self, BadRequest, 'Illegal value'):
             api.update(API_TEST_ID, background_removal="illegal")
 
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test33_update_asset_folder(self, mocker):
+        """Should pass folder decoupling params """
+        mocker.return_value = MOCK_RESPONSE
+        api.update(API_TEST_ID, asset_folder="folder_new_update", display_name="new_display_name", unique_display_name=True)
+        self.assertEqual("folder_new_update", get_param(mocker, "asset_folder"))
+        self.assertEqual("new_display_name", get_param(mocker, "display_name"))
+        self.assertTrue(get_param(mocker, "unique_display_name"))
+
+
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     @unittest.skip("For this test to work, 'Auto-create folders' should be enabled in the Upload Settings, " +
                    "and the account should be empty of folders. " +
