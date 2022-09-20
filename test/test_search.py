@@ -127,6 +127,28 @@ class SearchTest(unittest.TestCase):
                      "For this test to work, 'Advanced search' should be enabled for your cloud. " +
                      "Use env variable RUN_SEARCH_TESTS=1 if you really want to test it.")
     @retry_assertion()
+    def test_should_return_resource_by_asset_id_equals(self):
+
+        asset_id = upload_results[1]["asset_id"]
+        results = Search().expression("asset_id={0}".format(asset_id)).execute()
+        self.assertEqual(len(results['resources']), 1)
+
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    @unittest.skipIf(not os.environ.get('RUN_SEARCH_TESTS', False),
+                     "For this test to work, 'Advanced search' should be enabled for your cloud. " +
+                     "Use env variable RUN_SEARCH_TESTS=1 if you really want to test it.")
+    @retry_assertion()
+    def test_should_return_resource_by_asset_id_colon(self):
+
+        asset_id = upload_results[1]["asset_id"]
+        results = Search().expression("asset_id:{0}".format(asset_id)).execute()
+        self.assertEqual(len(results['resources']), 1)
+
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    @unittest.skipIf(not os.environ.get('RUN_SEARCH_TESTS', False),
+                     "For this test to work, 'Advanced search' should be enabled for your cloud. " +
+                     "Use env variable RUN_SEARCH_TESTS=1 if you really want to test it.")
+    @retry_assertion()
     def test_should_paginate_resources_limited_by_tag_and_ordered_by_ascending_public_id(self):
         results = Search().max_results(1).expression("tags={0}".format(UNIQUE_TAG)).sort_by('public_id',
                                                                                             'asc').execute()
