@@ -895,7 +895,7 @@ class TestUtils(unittest.TestCase):
     def test_user_agent(self):
         with patch('cloudinary.USER_PLATFORM', ''):
             agent = cloudinary.get_user_agent()
-        six.assertRegex(self, agent, r'^CloudinaryPython\/\d\.\d+\.\d+ \(Python \d\.\d+\.\d+\)$')
+        six.assertRegex(self, agent, r'^CloudinaryPython\/\d\.\d+\.\d+ \(.*; Python \d\.\d+\.\d+\)$')
 
         platform = 'MyPlatform/1.2.3 (Test code)'
         with patch('cloudinary.USER_PLATFORM', platform):
