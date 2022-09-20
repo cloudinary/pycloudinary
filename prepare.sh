@@ -1,8 +1,8 @@
 #!/bin/bash
 
-/bin/rm -rf cloudinary/static
-mkdir -p cloudinary/static
-cd cloudinary/static
+/bin/rm -rf cloudinary/static/cloudinary
+mkdir -p cloudinary/static/cloudinary
+cd cloudinary/static/cloudinary
 
 OPTIONS=
 
