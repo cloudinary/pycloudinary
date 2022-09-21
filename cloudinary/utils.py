@@ -1052,7 +1052,8 @@ def build_custom_headers(headers):
 
 
 def build_upload_params(**options):
-    params = {param_name: options.get(param_name) for param_name in __SIMPLE_UPLOAD_PARAMS}
+    params = {param_name: options.get(param_name) for param_name in __SIMPLE_UPLOAD_PARAMS if param_name in options}
+    params["upload_preset"] = params.pop("upload_preset", cloudinary.config().upload_preset)
 
     serialized_params = {
         "timestamp": now(),

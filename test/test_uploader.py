@@ -799,6 +799,36 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         self.assertIsNone(get_param(mocker, "signature"))
         self.assertEqual(get_param(mocker, "upload_preset"), API_TEST_PRESET)
 
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_upload_preset_in_config(self, mocker):
+        """Should support uploading using presets from config"""
+        mocker.return_value = MOCK_RESPONSE
+        cloudinary.config().upload_preset = API_TEST_PRESET
+        uploader.upload(TEST_IMAGE)
+
+        args, kargs = mocker.call_args
+
+        self.assertTrue(get_uri(args).endswith("/image/upload"))
+        self.assertEqual("POST", get_method(mocker))
+        self.assertIsNotNone(get_param(mocker, "file"))
+        self.assertEqual(get_param(mocker, "upload_preset"), API_TEST_PRESET)
+
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test1_upload_preset_in_config(self, mocker):
+        """Should support overwriting upload presets in config"""
+        mocker.return_value = MOCK_RESPONSE
+        cloudinary.config().upload_preset = API_TEST_PRESET
+        uploader.upload(TEST_IMAGE, upload_preset=None)
+
+        args, kargs = mocker.call_args
+
+        self.assertTrue(get_uri(args).endswith("/image/upload"))
+        self.assertEqual("POST", get_method(mocker))
+        self.assertIsNotNone(get_param(mocker, "file"))
+        self.assertEqual(get_param(mocker, "upload_preset"), None)
+
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_background_removal(self):
         """Should support requesting background_removal """
