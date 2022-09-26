@@ -31,6 +31,23 @@ def call_api(method, uri, params, **options):
     return _call_api(method, uri, params=params, **options)
 
 
+def _build_api_url(prefix, cloud_name, uri, **options):
+    """
+    The Cloudinary SDK is tighted to the DAM API, which has its own route paths.
+    To allow interacting with the Media Optimizer API too, we have to build a (not so much)
+    different URL.
+    The only difference is that the DAM API includes the API version in the path, which usually is
+    something like "v1_1".
+
+    So we pass in an option called "is_mo" to indicate that we want to build a URL for the Media
+    Optimizer API.
+    """
+    components = [prefix, cloud_name] + uri
+    if not options.get("is_mo"):
+        components.insert(1, cloudinary.API_VERSION)
+    return "/".join(components)
+
+
 def _call_api(method, uri, params=None, body=None, headers=None, **options):
     prefix = options.pop("upload_prefix",
                          cloudinary.config().upload_prefix) or "https://api.cloudinary.com"
@@ -44,7 +61,7 @@ def _call_api(method, uri, params=None, body=None, headers=None, **options):
 
     _validate_authorization(api_key, api_secret, oauth_token)
 
-    api_url = "/".join([prefix, cloudinary.API_VERSION, cloud_name] + uri)
+    api_url = _build_api_url(prefix, cloud_name, uri, **options)
     auth = {"key": api_key, "secret": api_secret, "oauth_token": oauth_token}
 
     if body is not None:
