@@ -459,6 +459,13 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
             "public_ids": public_ids,
         })
 
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_clear_invalid(self, mocker):
+        mocker.return_value = MOCK_RESPONSE
+        uploader.update_metadata(METADATA_FIELDS, public_ids=[TEST_ID], clear_invalid=True)
+        self.assertTrue(get_param(mocker, "clear_invalid"))
+
     def test_upload_with_metadata(self):
         """Upload should support `metadata` parameter"""
         result = uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG], metadata=METADATA_FIELDS)
