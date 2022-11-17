@@ -223,6 +223,8 @@ def update(public_id, **options):
         params["display_name"] = options.get("display_name")
     if "unique_display_name" in options:
         params["unique_display_name"] = options.get("unique_display_name")
+    if "clear_invalid" in options:
+        params["clear_invalid"] = options.get("clear_invalid")
 
     return call_api("post", uri, params, **options)
 

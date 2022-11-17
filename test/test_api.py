@@ -812,6 +812,13 @@ class ApiTest(unittest.TestCase):
         self.assertEqual("new_display_name", get_param(mocker, "display_name"))
         self.assertTrue(get_param(mocker, "unique_display_name"))
 
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test34_update_clear_invalid(self, mocker):
+        """Should pass folder decoupling params """
+        mocker.return_value = MOCK_RESPONSE
+        api.update(API_TEST_ID, clear_invalid=True)
+        self.assertTrue(get_param(mocker, "clear_invalid"))
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     @unittest.skip("For this test to work, 'Auto-create folders' should be enabled in the Upload Settings, " +
