@@ -78,6 +78,7 @@ __SIMPLE_UPLOAD_PARAMS = [
     "backup",
     "faces",
     "image_metadata",
+    "media_metadata",
     "exif",
     "colors",
     "use_filename",

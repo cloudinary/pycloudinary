@@ -188,7 +188,7 @@ def _prepare_asset_details_params(**options):
 
     :internal
     """
-    return only(options, "exif", "faces", "colors", "image_metadata", "cinemagraph_analysis",
+    return only(options, "exif", "faces", "colors", "image_metadata", "media_metadata", "cinemagraph_analysis",
                 "pages", "phash", "coordinates", "max_results", "quality_analysis", "derived_next_cursor",
                 "accessibility_analysis", "versions")
 
