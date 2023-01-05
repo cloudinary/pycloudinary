@@ -288,13 +288,14 @@ class ApiTest(unittest.TestCase):
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test07_a_resource_by_asset_id(self, mocker):
         mocker.return_value = MOCK_RESPONSE
-        api.resource_by_asset_id(API_TEST_ID, quality_analysis=True , colors=True ,accessibility_analysis=True)
+        api.resource_by_asset_id(API_TEST_ID, quality_analysis=True, colors=True, accessibility_analysis=True,
+                                 media_metadata=True)
         args, kargs = mocker.call_args
         self.assertTrue(get_uri(args).endswith('/resources/{}'.format(API_TEST_ID)))
         self.assertTrue(get_params(args)['quality_analysis'])
         self.assertTrue(get_params(args)['colors'])
         self.assertTrue(get_params(args)['accessibility_analysis'])
-
+        self.assertTrue(get_params(args)['media_metadata'])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test07_b_resource_by_asset_id(self):

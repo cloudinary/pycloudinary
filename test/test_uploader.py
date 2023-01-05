@@ -929,34 +929,23 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
                 uploader.upload(TEST_IMAGE, access_control=invalid_value)
 
     @patch('urllib3.request.RequestMethods.request')
-    def test_cinemagraph_analysis(self, request_mock):
-        """Should support cinemagraph analysis in upload and explicit"""
+    def test_various_upload_parameters(self, request_mock):
+        """Should support various parameters in upload and explicit"""
         request_mock.return_value = MOCK_RESPONSE
 
-        uploader.upload(TEST_IMAGE, cinemagraph_analysis=True)
+        options = {'cinemagraph_analysis': True, 'accessibility_analysis':True, 'media_metadata':True}
+        uploader.upload(TEST_IMAGE, **options)
 
         params = get_params(request_mock.call_args[0])
-        self.assertIn("cinemagraph_analysis", params)
+        for param in options.keys():
+            self.assertIn(param, params)
 
-        uploader.explicit(TEST_IMAGE, cinemagraph_analysis=True)
-
-        params = get_params(request_mock.call_args[0])
-        self.assertIn("cinemagraph_analysis", params)
-
-    @patch('urllib3.request.RequestMethods.request')
-    def test_accessibility_analysis(self, request_mock):
-        """Should support accessibility analysis in upload and explicit"""
-        request_mock.return_value = MOCK_RESPONSE
-
-        uploader.upload(TEST_IMAGE, accessibility_analysis=True)
+        uploader.explicit(TEST_IMAGE, **options)
 
         params = get_params(request_mock.call_args[0])
-        self.assertIn("accessibility_analysis", params)
+        for param in options.keys():
+            self.assertIn(param, params)
 
-        uploader.explicit(TEST_IMAGE, accessibility_analysis=True)
-
-        params = get_params(request_mock.call_args[0])
-        self.assertIn("accessibility_analysis", params)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_eval_upload_parameter(self):
