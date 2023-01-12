@@ -8,20 +8,21 @@ from six import iterkeys
 from urllib3 import disable_warnings
 
 import cloudinary
-from cloudinary import uploader
-from cloudinary.search import Search
-from test.helper_test import SUFFIX, TEST_IMAGE, TEST_TAG, UNIQUE_TAG, retry_assertion, cleanup_test_resources_by_tag
+from cloudinary import uploader, SearchFolders, Search
+from test.helper_test import SUFFIX, TEST_IMAGE, TEST_TAG, UNIQUE_TAG, TEST_FOLDER, UNIQUE_TEST_FOLDER, \
+    retry_assertion, cleanup_test_resources_by_tag
 from test.test_api import MOCK_RESPONSE
 
 TEST_TAG = 'search_{}'.format(TEST_TAG)
 UNIQUE_TAG = 'search_{}'.format(UNIQUE_TAG)
 
-
 TEST_IMAGES_COUNT = 3
 MAX_INDEX_RETRIES = 10
 
-public_ids = ["api_test{0}_{1}".format(i, SUFFIX) for i in range(0, TEST_IMAGES_COUNT)]
+public_ids = ["{0}/search_test{1}_{1}".format(UNIQUE_TEST_FOLDER, i, SUFFIX) for i in range(0, TEST_IMAGES_COUNT)]
 upload_results = ["++"]
+
+FOLDERS_SEARCH_EXPRESSION = "path:{}*".format(TEST_FOLDER)
 
 disable_warnings()
 
@@ -187,8 +188,8 @@ class SearchTest(unittest.TestCase):
     @retry_assertion()
     def test_should_include_context_tags_and_image_metadata(self):
 
-        results = Search().expression("tags={0}".format(UNIQUE_TAG)).\
-            with_field('context').with_field('tags').\
+        results = Search().expression("tags={0}".format(UNIQUE_TAG)). \
+            with_field('context').with_field('tags'). \
             with_field('image_metadata').execute()
 
         self.assertEqual(len(results['resources']), TEST_IMAGES_COUNT)
@@ -217,13 +218,39 @@ class SearchTest(unittest.TestCase):
         result = json.loads(args['body'])
 
         self.assertEqual(result, {
-                'sort_by': [
-                    {'created_at': 'desc'},
-                    {'public_id': 'asc'},
-                ],
-                'aggregate': ['format', 'resource_type'],
-                'with_field': ['context', 'tags'],
+            'sort_by': [
+                {'created_at': 'desc'},
+                {'public_id': 'asc'},
+            ],
+            'aggregate': ['format', 'resource_type'],
+            'with_field': ['context', 'tags'],
         })
+
+    @patch('urllib3.request.RequestMethods.request')
+    def test_should_search_folders_endpoint(self, mocker):
+        mocker.return_value = MOCK_RESPONSE
+
+        SearchFolders() \
+            .expression(FOLDERS_SEARCH_EXPRESSION) \
+            .execute()
+
+        args, kwargs = mocker.call_args
+        url = args[1]
+        result = json.loads(kwargs['body'])
+
+        self.assertTrue(url.endswith('folders/search'))
+
+        self.assertEqual({'expression': FOLDERS_SEARCH_EXPRESSION}, result)
+
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_should_search_folders(self):
+
+        results = SearchFolders() \
+            .expression(FOLDERS_SEARCH_EXPRESSION) \
+            .max_results(1) \
+            .execute()
+
+        self.assertEqual(1, len(results['folders']))
 
 
 if __name__ == '__main__':
