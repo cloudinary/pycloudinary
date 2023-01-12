@@ -234,6 +234,7 @@ _http_client = HttpClient()
 
 # FIXME: circular import issue
 from cloudinary.search import Search
+from cloudinary.search_folders import SearchFolders
 
 
 @python_2_unicode_compatible
