@@ -1,3 +1,19 @@
+1.31.0 / 2023-01-12
+==================
+
+New functionality and features
+------------------------------
+
+  * Add support for `SearchFolders` API
+  * Add support for `media_metadata` API parameter
+  * Add support for `clear_invalid` metadata parameter
+  * Add support for `upload_preset` in configuration
+
+Other Changes
+-------------
+
+  * Fix API error handling
+
 1.30.0 / 2022-09-20
 ==================
 
