@@ -4,7 +4,7 @@ from cloudinary.api_client.call_api import call_json_api
 from cloudinary.utils import unique
 
 
-class Search:
+class Search(object):
     ASSETS = 'resources'
 
     _endpoint = ASSETS

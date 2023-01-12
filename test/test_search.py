@@ -246,7 +246,6 @@ class SearchTest(unittest.TestCase):
     def test_should_search_folders(self):
 
         results = SearchFolders() \
-            .expression(FOLDERS_SEARCH_EXPRESSION) \
             .max_results(1) \
             .execute()
 
