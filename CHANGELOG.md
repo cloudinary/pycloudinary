@@ -1,3 +1,11 @@
+1.32.0 / 2023-02-09
+==================
+
+New functionality and features
+------------------------------
+
+  * Add support for related assets APIs
+
 1.31.0 / 2023-01-12
 ==================
 
