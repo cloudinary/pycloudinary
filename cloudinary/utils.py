@@ -1579,3 +1579,19 @@ def unique(collection, key=None):
         to_return[key(element)] = element
 
     return list(to_return.values())
+
+
+def fq_public_id(public_id, resource_type="image", type="upload"):
+    """
+    Returns the fully qualified public id of form resource_type/type/public_id.
+
+    :param public_id: The public ID of the asset.
+    :type public_id: str
+    :param resource_type: The type of the asset. Defaults to "image".
+    :type resource_type: str
+    :param type: The upload type. Defaults to "upload".
+    :type type: str
+
+    :return:
+    """
+    return "{resource_type}/{type}/{public_id}".format(resource_type=resource_type, type=type, public_id=public_id)
