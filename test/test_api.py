@@ -9,6 +9,7 @@ from urllib3 import disable_warnings, ProxyManager, PoolManager
 
 import cloudinary
 from cloudinary import api, uploader, utils
+from cloudinary.utils import fq_public_id
 from test.helper_test import SUFFIX, TEST_IMAGE, get_uri, get_params, get_list_param, get_param, TEST_DOC, get_method, \
     UNIQUE_TAG, api_response_mock, ignore_exception, cleanup_test_resources_by_tag, cleanup_test_transformation, \
     cleanup_test_resources, UNIQUE_TEST_FOLDER, EVAL_STR, get_json_body
@@ -463,6 +464,33 @@ class ApiTest(unittest.TestCase):
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_add_related_assets(self, mocker):
+        """ should allow adding related assets """
+        mocker.return_value = MOCK_RESPONSE
+        api.add_related_assets(API_TEST_ID, [fq_public_id(API_TEST_ID2), fq_public_id(API_TEST_ID3)])
+        args, kargs = mocker.call_args
+        self.assertEqual(args[0], 'POST')
+        self.assertTrue(get_uri(args).endswith('/resources/related_assets/image/upload/' + API_TEST_ID))
+        param = get_json_body(mocker)['assets_to_relate']
+        self.assertIn(fq_public_id(API_TEST_ID2), param)
+        self.assertIn(fq_public_id(API_TEST_ID3), param)
+
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_delete_related_assets(self, mocker):
+        """ should allow deleting related assets """
+        mocker.return_value = MOCK_RESPONSE
+        api.delete_related_assets(API_TEST_ID, [fq_public_id(API_TEST_ID2), fq_public_id(API_TEST_ID3)])
+        args, kargs = mocker.call_args
+        self.assertEqual(args[0], 'DELETE')
+        self.assertTrue(get_uri(args).endswith('/resources/related_assets/image/upload/' + API_TEST_ID))
+        param = get_json_body(mocker)['assets_to_unrelate']
+        self.assertIn(fq_public_id(API_TEST_ID2), param)
+        self.assertIn(fq_public_id(API_TEST_ID3), param)
+
+
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test10_tags(self, mocker):
         """ should allow listing tags """
         mocker.return_value = MOCK_RESPONSE
@@ -869,11 +897,11 @@ class ApiTest(unittest.TestCase):
     def test_root_folders_allows_next_cursor_and_max_results_parameter(self, mocker):
         """ should allow next_cursor and max_results parameters """
         mocker.return_value = MOCK_RESPONSE
-        
+
         api.root_folders(next_cursor=NEXT_CURSOR, max_results=10)
-        
+
         args, kwargs = mocker.call_args
-        
+
         self.assertTrue("next_cursor" in get_params(args))
         self.assertTrue("max_results" in get_params(args))
 
@@ -882,11 +910,11 @@ class ApiTest(unittest.TestCase):
     def test_subfolders_allows_next_cursor_and_max_results_parameter(self, mocker):
         """ should allow next_cursor and max_results parameters """
         mocker.return_value = MOCK_RESPONSE
-        
+
         api.subfolders(API_TEST_ID, next_cursor=NEXT_CURSOR, max_results=10)
-        
+
         args, kwargs = mocker.call_args
-        
+
         self.assertTrue("next_cursor" in get_params(args))
         self.assertTrue("max_results" in get_params(args))
 
@@ -996,26 +1024,22 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(exp_acl, params["access_control"])
 
     @patch('urllib3.request.RequestMethods.request')
-    def test_cinemagraph_analysis_resource(self, mocker):
-        """ should allow the user to pass cinemagraph_analysis in the resource function """
+    def test_various_resource_parameters(self, mocker):
+        """ should allow the user to pass various parameters to the resource function """
         mocker.return_value = MOCK_RESPONSE
 
-        api.resource(API_TEST_ID, cinemagraph_analysis=True)
+        options = {
+            "cinemagraph_analysis": True,
+            "accessibility_analysis": True,
+            "related": True,
+            "related_next_cursor": NEXT_CURSOR,
+        }
+
+        api.resource(TEST_IMAGE, **options)
 
         params = get_params(mocker.call_args[0])
-
-        self.assertIn("cinemagraph_analysis", params)
-
-    @patch('urllib3.request.RequestMethods.request')
-    def test_accessibility_analysis_resource(self, mocker):
-        """ should allow the user to pass accessibility_analysis in the resource function """
-        mocker.return_value = MOCK_RESPONSE
-
-        api.resource(API_TEST_ID, accessibility_analysis=True)
-
-        params = get_params(mocker.call_args[0])
-
-        self.assertIn("accessibility_analysis", params)
+        for param in options.keys():
+            self.assertIn(param, params)
 
     @patch('urllib3.request.RequestMethods.request')
     def test_api_url_escapes_special_characters(self, mocker):
