@@ -29,6 +29,9 @@ API_TEST_ID4 = "api_test_{}4".format(SUFFIX)
 API_TEST_ID5 = "api_test_{}5".format(SUFFIX)
 API_TEST_ID6 = "api_test_{}6".format(SUFFIX)
 API_TEST_ID7 = "api_test_{}7".format(SUFFIX)
+API_TEST_ASSET_ID = "4af5a0d1d4047808528b5425d166c101"
+API_TEST_ASSET_ID2 = "4af5a0d1d4047808528b5425d166c102"
+API_TEST_ASSET_ID3 = "4af5a0d1d4047808528b5425d166c103"
 API_TEST_TRANS = "api_test_transformation_{}".format(SUFFIX)
 API_TEST_TRANS2 = "api_test_transformation_{}2".format(SUFFIX)
 API_TEST_TRANS3 = "api_test_transformation_{}3".format(SUFFIX)
@@ -66,11 +69,16 @@ class ApiTest(unittest.TestCase):
             "default_value": METADATA_DEFAULT_VALUE
         })
 
-        for id in [API_TEST_ID, API_TEST_ID2]:
-            uploader.upload(TEST_IMAGE,
-                            public_id=id, tags=[API_TEST_TAG, ],
-                            context="key=value", eager=[API_TEST_TRANS_SCALE100],
-                            overwrite=True)
+        global API_TEST_ASSET_ID, API_TEST_ASSET_ID2
+        API_TEST_ASSET_ID = cls._upload_test_asset(API_TEST_ID)
+        API_TEST_ASSET_ID2 = cls._upload_test_asset(API_TEST_ID2)
+
+    @staticmethod
+    def _upload_test_asset(public_id):
+        return uploader.upload(TEST_IMAGE,
+                               public_id=public_id, tags=[API_TEST_TAG, ],
+                               context="key=value", eager=[API_TEST_TRANS_SCALE100],
+                               overwrite=True)["asset_id"]
 
     @classmethod
     def tearDownClass(cls):
@@ -226,10 +234,10 @@ class ApiTest(unittest.TestCase):
     def test06b_resources_by_asset_id(self, mocker):
         """ should allow listing resources by public ids """
         mocker.return_value = MOCK_RESPONSE
-        api.resources_by_asset_ids([API_TEST_ID], context=True, tags=True)
+        api.resources_by_asset_ids([API_TEST_ASSET_ID], context=True, tags=True)
         args, kargs = mocker.call_args
         self.assertTrue(get_uri(args).endswith('/resources/by_asset_ids'), get_uri(args))
-        self.assertIn(API_TEST_ID, get_list_param(mocker, 'asset_ids'))
+        self.assertIn(API_TEST_ASSET_ID, get_list_param(mocker, 'asset_ids'))
         self.assertEqual(get_param(mocker, 'context'), True)
         self.assertEqual(get_param(mocker, 'tags'), True)
         self.assertEqual(get_list_param(mocker, 'asset_ids').__len__(), 1)
@@ -239,11 +247,11 @@ class ApiTest(unittest.TestCase):
     def test06c_resources_by_asset_ids(self, mocker):
         """ should allow listing resources by public ids """
         mocker.return_value = MOCK_RESPONSE
-        api.resources_by_asset_ids([API_TEST_ID, API_TEST_ID2], context=True, tags=True)
+        api.resources_by_asset_ids([API_TEST_ASSET_ID, API_TEST_ASSET_ID2], context=True, tags=True)
         args, kargs = mocker.call_args
         self.assertTrue(get_uri(args).endswith('/resources/by_asset_ids'), get_uri(args))
-        self.assertIn(API_TEST_ID, get_list_param(mocker, 'asset_ids'))
-        self.assertIn(API_TEST_ID2, get_list_param(mocker, 'asset_ids'))
+        self.assertIn(API_TEST_ASSET_ID, get_list_param(mocker, 'asset_ids'))
+        self.assertIn(API_TEST_ASSET_ID2, get_list_param(mocker, 'asset_ids'))
         self.assertEqual(get_param(mocker, 'context'), True)
         self.assertEqual(get_param(mocker, 'tags'), True)
         self.assertEqual(get_list_param(mocker, 'asset_ids').__len__(), 2)
@@ -289,10 +297,10 @@ class ApiTest(unittest.TestCase):
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test07_a_resource_by_asset_id(self, mocker):
         mocker.return_value = MOCK_RESPONSE
-        api.resource_by_asset_id(API_TEST_ID, quality_analysis=True, colors=True, accessibility_analysis=True,
+        api.resource_by_asset_id(API_TEST_ASSET_ID, quality_analysis=True, colors=True, accessibility_analysis=True,
                                  media_metadata=True)
         args, kargs = mocker.call_args
-        self.assertTrue(get_uri(args).endswith('/resources/{}'.format(API_TEST_ID)))
+        self.assertTrue(get_uri(args).endswith('/resources/{}'.format(API_TEST_ASSET_ID)))
         self.assertTrue(get_params(args)['quality_analysis'])
         self.assertTrue(get_params(args)['colors'])
         self.assertTrue(get_params(args)['accessibility_analysis'])
@@ -301,10 +309,9 @@ class ApiTest(unittest.TestCase):
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test07_b_resource_by_asset_id(self):
         # should allow get resource by asset_id
-        asset_id = api.resource(API_TEST_ID)["asset_id"]
-        resource = api.resource_by_asset_id(asset_id)
+        resource = api.resource_by_asset_id(API_TEST_ASSET_ID)
         self.assertNotEqual(resource, None)
-        self.assertEqual(resource["asset_id"], asset_id)
+        self.assertEqual(resource["asset_id"], API_TEST_ASSET_ID)
         self.assertEqual(resource["public_id"], API_TEST_ID)
         self.assertEqual(resource["bytes"], 3381)
         self.assertEqual(len(resource["derived"]), 1, "{} should have one derived resource.".format(API_TEST_ID))
@@ -477,6 +484,19 @@ class ApiTest(unittest.TestCase):
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_add_related_assets_by_asset_ids(self, mocker):
+        """ should allow adding related assets by asset ids"""
+        mocker.return_value = MOCK_RESPONSE
+        api.add_related_assets_by_asset_ids(API_TEST_ASSET_ID, [API_TEST_ASSET_ID2, API_TEST_ASSET_ID3])
+        args, _ = mocker.call_args
+        self.assertEqual(args[0], 'POST')
+        self.assertTrue(get_uri(args).endswith('/resources/related_assets/' + API_TEST_ASSET_ID))
+        param = get_json_body(mocker)['assets_to_relate']
+        self.assertIn(API_TEST_ASSET_ID2, param)
+        self.assertIn(API_TEST_ASSET_ID3, param)
+
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_delete_related_assets(self, mocker):
         """ should allow deleting related assets """
         mocker.return_value = MOCK_RESPONSE
@@ -488,6 +508,18 @@ class ApiTest(unittest.TestCase):
         self.assertIn(fq_public_id(API_TEST_ID2), param)
         self.assertIn(fq_public_id(API_TEST_ID3), param)
 
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_delete_related_assets_by_asset_ids(self, mocker):
+        """ should allow deleting related assets by asset ids """
+        mocker.return_value = MOCK_RESPONSE
+        api.delete_related_assets_by_asset_ids(API_TEST_ASSET_ID, [API_TEST_ASSET_ID2, API_TEST_ASSET_ID3])
+        args, _ = mocker.call_args
+        self.assertEqual(args[0], 'DELETE')
+        self.assertTrue(get_uri(args).endswith('/resources/related_assets/' + API_TEST_ASSET_ID))
+        param = get_json_body(mocker)['assets_to_unrelate']
+        self.assertIn(API_TEST_ASSET_ID2, param)
+        self.assertIn(API_TEST_ASSET_ID3, param)
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -836,7 +868,8 @@ class ApiTest(unittest.TestCase):
     def test33_update_asset_folder(self, mocker):
         """Should pass folder decoupling params """
         mocker.return_value = MOCK_RESPONSE
-        api.update(API_TEST_ID, asset_folder="folder_new_update", display_name="new_display_name", unique_display_name=True)
+        api.update(API_TEST_ID, asset_folder="folder_new_update", display_name="new_display_name",
+                   unique_display_name=True)
         self.assertEqual("folder_new_update", get_param(mocker, "asset_folder"))
         self.assertEqual("new_display_name", get_param(mocker, "display_name"))
         self.assertTrue(get_param(mocker, "unique_display_name"))
