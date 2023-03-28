@@ -508,6 +508,13 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         uploader.upload(TEST_IMAGE, headers={"Link": "1"}, tags=[UNIQUE_TAG])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_extra_headers(self):
+        """Should support extra headers"""
+        uploader.upload(TEST_IMAGE, extra_headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                                                                 'AppleWebKit/537.36 (KHTML, like Gecko) '
+                                                                 'Chrome/58.0.3029.110 Safari/537.3'})
+
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_text(self):
         """Should successfully generate text image """
         result = uploader.text("hello world", public_id=TEXT_ID)
