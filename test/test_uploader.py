@@ -108,11 +108,18 @@ class UploaderTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        cloudinary.reset_config()
+        if not cloudinary.config().api_secret:
+            return
+
+        print("Running tests for cloud: {}".format(cloudinary.config().cloud_name))
+
         api.add_metadata_field({
             "external_id": METADATA_FIELD_UNIQUE_EXTERNAL_ID,
             "label": METADATA_FIELD_UNIQUE_EXTERNAL_ID,
             "type": "string",
         })
+
         api.add_metadata_field({
             "external_id": METADATA_FIELD_EXTERNAL_ID_SET,
             "label": METADATA_FIELD_EXTERNAL_ID_SET,
