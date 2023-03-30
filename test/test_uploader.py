@@ -523,7 +523,6 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
                                                                  'AppleWebKit/537.36 (KHTML, like Gecko) '
                                                                  'Chrome/58.0.3029.110 Safari/537.3'})
         headers = get_headers(mocker.call_args[0])
-        print("headers", headers)
         self.assertTrue(headers.get('User-Agent'))
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
