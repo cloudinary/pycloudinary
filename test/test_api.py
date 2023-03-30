@@ -293,7 +293,9 @@ class ApiTest(unittest.TestCase):
                                                                  'AppleWebKit/537.36 (KHTML, like Gecko) '
                                                                  'Chrome/58.0.3029.110 Safari/537.3'})
         headers = get_headers(mocker.call_args[0])
-        self.assertTrue(headers.get('User-Agent'))
+        self.assertEqual(headers.get('User-Agent'), 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ' 
+                                                    'AppleWebKit/537.36 (KHTML, like Gecko) '
+                                                    'Chrome/58.0.3029.110 Safari/537.3')
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test07_resource_metadata(self):
