@@ -16,7 +16,7 @@ from cloudinary.cache import responsive_breakpoints_cache
 from cloudinary.cache.adapter.key_value_cache_adapter import KeyValueCacheAdapter
 from cloudinary.compat import urlparse, parse_qs
 from test.cache.storage.dummy_cache_storage import DummyCacheStorage
-from test.helper_test import uploader_response_mock, SUFFIX, TEST_IMAGE, get_params, TEST_ICON, TEST_DOC, \
+from test.helper_test import uploader_response_mock, SUFFIX, TEST_IMAGE, get_params, get_headers, TEST_ICON, TEST_DOC, \
     REMOTE_TEST_IMAGE, UTC, populate_large_file, TEST_UNICODE_IMAGE, get_uri, get_method, get_param, \
     cleanup_test_resources_by_tag, cleanup_test_transformation, cleanup_test_resources, EVAL_STR
 from test.test_utils import TEST_ID, TEST_FOLDER
@@ -514,12 +514,17 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         uploader.upload(TEST_IMAGE, headers=["Link: 1"], tags=[UNIQUE_TAG])
         uploader.upload(TEST_IMAGE, headers={"Link": "1"}, tags=[UNIQUE_TAG])
 
+    @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
-    def test_extra_headers(self):
+    def test_extra_headers(self, mocker):
         """Should support extra headers"""
+        mocker.return_value = MOCK_RESPONSE
         uploader.upload(TEST_IMAGE, extra_headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
                                                                  'AppleWebKit/537.36 (KHTML, like Gecko) '
                                                                  'Chrome/58.0.3029.110 Safari/537.3'})
+        headers = get_headers(mocker.call_args[0])
+        print("headers", headers)
+        self.assertTrue(headers.get('User-Agent'))
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_text(self):

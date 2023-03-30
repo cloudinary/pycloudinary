@@ -1,11 +1,3 @@
-1.32.1 / 2023-03-28
-==================
-
-New functionality and features
-------------------------------
-
-  * Add support for `extra_headers` parameter in Upload and Admin API
-
 1.32.0 / 2023-02-09
 ==================
 
