@@ -10,7 +10,7 @@ from urllib3 import disable_warnings, ProxyManager, PoolManager
 import cloudinary
 from cloudinary import api, uploader, utils
 from cloudinary.utils import fq_public_id
-from test.helper_test import SUFFIX, TEST_IMAGE, get_uri, get_params, get_list_param, get_param, TEST_DOC, get_method, \
+from test.helper_test import SUFFIX, TEST_IMAGE, get_uri, get_headers, get_params, get_list_param, get_param, TEST_DOC, get_method, \
     UNIQUE_TAG, api_response_mock, ignore_exception, cleanup_test_resources_by_tag, cleanup_test_transformation, \
     cleanup_test_resources, UNIQUE_TEST_FOLDER, EVAL_STR, get_json_body
 from cloudinary.exceptions import BadRequest, NotFound
@@ -283,6 +283,19 @@ class ApiTest(unittest.TestCase):
         args, kargs = mocker.call_args
         self.assertTrue(get_uri(args).endswith('/resources/image/tags/{}'.format(API_TEST_TAG)))
         self.assertEqual(get_params(args)['direction'], 'desc')
+
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_extra_headers(self, mocker):
+        """Should support extra headers"""
+        mocker.return_value = MOCK_RESPONSE
+        uploader.upload(TEST_IMAGE, extra_headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                                                                 'AppleWebKit/537.36 (KHTML, like Gecko) '
+                                                                 'Chrome/58.0.3029.110 Safari/537.3'})
+        headers = get_headers(mocker.call_args[0])
+        self.assertEqual(headers.get('User-Agent'), 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ' 
+                                                    'AppleWebKit/537.36 (KHTML, like Gecko) '
+                                                    'Chrome/58.0.3029.110 Safari/537.3')
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test07_resource_metadata(self):
