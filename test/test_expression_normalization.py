@@ -61,6 +61,8 @@ class ExpressionNormalizationTest(unittest.TestCase):
             'width',
             'x',
             'y',
+            'start_offset',
+            'end_offset',
             'zoom'
         )
 
@@ -96,6 +98,20 @@ class ExpressionNormalizationTest(unittest.TestCase):
 
                 self.assertTrue(value in result[0])
                 self.assertFalse(normalized_value in result[0])
+
+    def test_support_start_offset(self):
+        result = generate_transformation_string(**{"width": "100", "start_offset": "idu - 5"})
+        self.assertIn("so_idu_sub_5", result[0])
+
+        result = generate_transformation_string(**{"width": "100", "start_offset": "$logotime"})
+        self.assertIn("so_$logotime", result[0])
+
+    def test_support_end_offset(self):
+        result = generate_transformation_string(**{"width": "100", "end_offset": "idu - 5"})
+        self.assertIn("eo_idu_sub_5", result[0])
+
+        result = generate_transformation_string(**{"width": "100", "end_offset": "$logotime"})
+        self.assertIn("eo_$logotime", result[0])
 
     if not hasattr(unittest.TestCase, "subTest"):
         # Support Python before version 3.4
