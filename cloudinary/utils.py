@@ -1008,6 +1008,7 @@ def archive_params(**options):
         "skip_transformation_name": options.get("skip_transformation_name"),
         "tags": options.get("tags") and build_array(options.get("tags")),
         "target_format": options.get("target_format"),
+        "target_asset_folder": options.get("target_asset_folder"),
         "target_public_id": options.get("target_public_id"),
         "target_tags": options.get("target_tags") and build_array(options.get("target_tags")),
         "timestamp": timestamp,
