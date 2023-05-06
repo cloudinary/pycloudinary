@@ -1076,6 +1076,11 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         self.assertIn("timestamp", parameters)
         self.assertIn("signature", parameters)
 
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_create_zip_with_target_asset_folder(self):
+        """Should pass target_asset_folder parameter on archive generation"""
+        create_zip_res = uploader.create_zip(tags="test-tag", target_asset_folder="test-asset-folder")
+        self.assertEqual("test-asset-folder", create_zip_res.get("asset_folder"))
 
 if __name__ == '__main__':
     unittest.main()
