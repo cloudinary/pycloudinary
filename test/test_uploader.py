@@ -1076,6 +1076,13 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         self.assertIn("timestamp", parameters)
         self.assertIn("signature", parameters)
 
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_create_zip_with_target_asset_folder(self, mocker):
+        """Should pass target_asset_folder parameter on archive generation"""
+        mocker.return_value = MOCK_RESPONSE
+        uploader.create_zip(tags="test-tag", target_asset_folder="test-asset-folder")
+        self.assertEqual("test-asset-folder", get_param(mocker, "target_asset_folder"))
 
 if __name__ == '__main__':
     unittest.main()
