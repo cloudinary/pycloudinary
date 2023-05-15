@@ -109,7 +109,7 @@ class Search(object):
         if next_cursor is None:
             next_cursor = _next_cursor
 
-        b64query = base64url_encode(json_encode(query))
+        b64query = base64url_encode(json_encode(query, sort_keys=True))
 
         prefix = build_distribution_domain(options)
 

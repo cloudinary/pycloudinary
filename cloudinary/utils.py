@@ -281,7 +281,7 @@ def encode_context(context):
     return "|".join(("{}={}".format(k, normalize_context_value(v))) for k, v in iteritems(context))
 
 
-def json_encode(value):
+def json_encode(value, sort_keys=False):
     """
     Converts value to a json encoded string
 
@@ -289,7 +289,7 @@ def json_encode(value):
 
     :return: JSON encoded string
     """
-    return json.dumps(value, default=__json_serializer, separators=(',', ':'), sort_keys=True)
+    return json.dumps(value, default=__json_serializer, separators=(',', ':'), sort_keys=sort_keys)
 
 
 def encode_date_to_usage_api_format(date_obj):
