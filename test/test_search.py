@@ -11,7 +11,8 @@ import cloudinary
 from cloudinary import uploader, SearchFolders, Search
 from test.helper_test import SUFFIX, TEST_IMAGE, TEST_TAG, UNIQUE_TAG, TEST_FOLDER, UNIQUE_TEST_FOLDER, \
     retry_assertion, cleanup_test_resources_by_tag
-from test.test_api import MOCK_RESPONSE
+from test.test_api import MOCK_RESPONSE, NEXT_CURSOR
+from test.test_config import CLOUD_NAME, API_KEY, API_SECRET
 
 TEST_TAG = 'search_{}'.format(TEST_TAG)
 UNIQUE_TAG = 'search_{}'.format(UNIQUE_TAG)
@@ -59,6 +60,9 @@ class SearchTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cleanup_test_resources_by_tag([(UNIQUE_TAG,)])
+
+    def tearDown(self):
+        cloudinary.reset_config()
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_should_create_empty_json(self):
@@ -225,6 +229,84 @@ class SearchTest(unittest.TestCase):
             'aggregate': ['format', 'resource_type'],
             'with_field': ['context', 'tags'],
         })
+
+    def test_should_build_search_url(self):
+        cloudinary.config(cloud_name=CLOUD_NAME, api_key=API_KEY, api_secret=API_SECRET, secure=True)
+
+        search = Search() \
+            .expression("resource_type:image AND tags=kitten AND uploaded_at>1d AND bytes>1m") \
+            .sort_by("public_id", "desc") \
+            .max_results("30")
+
+        b64query = "eyJleHByZXNzaW9uIjoicmVzb3VyY2VfdHlwZTppbWFnZSBBTkQgdGFncz1raXR0ZW4gQU5EIHVwbG9hZGVkX2F0PjFkIEFO" \
+                   "RCBieXRlcz4xbSIsInNvcnRfYnkiOlt7InB1YmxpY19pZCI6ImRlc2MifV0sIm1heF9yZXN1bHRzIjoiMzAifQ=="
+
+        ttl300_sig = "2e02b03611f0a0bbbdb81fdaa0ba9d29d28e453f74098e744fa9ba9145b52105"
+        ttl1000_sig = "ba4fa65f6619ae569b32c9d0e5108cafe799773231926973989d5138bab96b14"
+
+        # default usage
+        self.assertEqual("https://res.cloudinary.com/{cloud}/search/{sig}/{ttl}/{query}".format(
+            cloud=CLOUD_NAME,
+            sig=ttl300_sig,
+            ttl=300,
+            query=b64query
+        ),
+            search.to_url()
+        )
+
+        # same signature with next cursor
+        self.assertEqual("https://res.cloudinary.com/{cloud}/search/{sig}/{ttl}/{query}/{cursor}".format(
+            cloud=CLOUD_NAME,
+            sig=ttl300_sig,
+            ttl=300,
+            query=b64query,
+            cursor=NEXT_CURSOR
+        ),
+            search.to_url(next_cursor=NEXT_CURSOR)
+        )
+
+        # with custom ttl and next cursor
+        self.assertEqual("https://res.cloudinary.com/{cloud}/search/{sig}/{ttl}/{query}/{cursor}".format(
+            cloud=CLOUD_NAME,
+            sig=ttl1000_sig,
+            ttl=1000,
+            query=b64query,
+            cursor=NEXT_CURSOR
+        ),
+            search.to_url(ttl=1000, next_cursor=NEXT_CURSOR)
+        )
+
+        # ttl and cursor are set from the class
+        self.assertEqual("https://res.cloudinary.com/{cloud}/search/{sig}/{ttl}/{query}/{cursor}".format(
+            cloud=CLOUD_NAME,
+            sig=ttl1000_sig,
+            ttl=1000,
+            query=b64query,
+            cursor=NEXT_CURSOR
+        ),
+            search.ttl(1000).next_cursor(NEXT_CURSOR).to_url()
+        )
+
+        # private cdn
+        self.assertEqual("https://{cloud}-res.cloudinary.com/search/{sig}/{ttl}/{query}".format(
+            cloud=CLOUD_NAME,
+            sig=ttl300_sig,
+            ttl=300,
+            query=b64query
+        ),
+            search.to_url(ttl=300, next_cursor="", private_cdn=True)
+        )
+
+        # private cdn from config
+        cloudinary.config(private_cdn=True)
+        self.assertEqual("https://{cloud}-res.cloudinary.com/search/{sig}/{ttl}/{query}".format(
+            cloud=CLOUD_NAME,
+            sig=ttl300_sig,
+            ttl=300,
+            query=b64query
+        ),
+            search.to_url(ttl=300, next_cursor="")
+        )
 
     @patch('urllib3.request.RequestMethods.request')
     def test_should_search_folders_endpoint(self, mocker):
