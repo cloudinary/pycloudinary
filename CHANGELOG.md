@@ -1,3 +1,15 @@
+1.33.0 / 2023-05-15
+==================
+
+New functionality and features
+------------------------------
+
+  * Add support for Search URL
+  * Add support for `target_asset_folder` API parameter
+  * Add support for expressions in `start_offset` and `end_offset`
+  * Add support for `extra_headers` option in Upload and Admin API
+  * Add support for `add_related_assets_by_asset_ids` and `delete_related_assets_by_asset_ids`
+
 1.32.0 / 2023-02-09
 ==================
 
