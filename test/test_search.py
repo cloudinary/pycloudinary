@@ -239,10 +239,10 @@ class SearchTest(unittest.TestCase):
             .max_results("30")
 
         b64query = "eyJleHByZXNzaW9uIjoicmVzb3VyY2VfdHlwZTppbWFnZSBBTkQgdGFncz1raXR0ZW4gQU5EIHVwbG9hZGVkX2F0PjFkIEFO" \
-                   "RCBieXRlcz4xbSIsInNvcnRfYnkiOlt7InB1YmxpY19pZCI6ImRlc2MifV0sIm1heF9yZXN1bHRzIjoiMzAifQ=="
+                   "RCBieXRlcz4xbSIsIm1heF9yZXN1bHRzIjoiMzAiLCJzb3J0X2J5IjpbeyJwdWJsaWNfaWQiOiJkZXNjIn1dfQ=="
 
-        ttl300_sig = "2e02b03611f0a0bbbdb81fdaa0ba9d29d28e453f74098e744fa9ba9145b52105"
-        ttl1000_sig = "ba4fa65f6619ae569b32c9d0e5108cafe799773231926973989d5138bab96b14"
+        ttl300_sig = "eadda21336fcce66ce195cce1b57cddd66a8e475ba151c39174133264278d5a5"
+        ttl1000_sig = "63091d184c88299dd2c7b0235560a6c119c5beb22eefd94401104060b436b334"
 
         # default usage
         self.assertEqual("https://res.cloudinary.com/{cloud}/search/{sig}/{ttl}/{query}".format(

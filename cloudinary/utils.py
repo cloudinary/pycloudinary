@@ -289,7 +289,7 @@ def json_encode(value):
 
     :return: JSON encoded string
     """
-    return json.dumps(value, default=__json_serializer, separators=(',', ':'))
+    return json.dumps(value, default=__json_serializer, separators=(',', ':'), sort_keys=True)
 
 
 def encode_date_to_usage_api_format(date_obj):
