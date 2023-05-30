@@ -236,13 +236,13 @@ class SearchTest(unittest.TestCase):
         search = Search() \
             .expression("resource_type:image AND tags=kitten AND uploaded_at>1d AND bytes>1m") \
             .sort_by("public_id", "desc") \
-            .max_results("30")
+            .max_results(30)
 
-        b64query = "eyJleHByZXNzaW9uIjoicmVzb3VyY2VfdHlwZTppbWFnZSBBTkQgdGFncz1raXR0ZW4gQU5EIHVwbG9hZGVkX2F0PjFkIEFO" \
-                   "RCBieXRlcz4xbSIsIm1heF9yZXN1bHRzIjoiMzAiLCJzb3J0X2J5IjpbeyJwdWJsaWNfaWQiOiJkZXNjIn1dfQ=="
+        b64query = "eyJleHByZXNzaW9uIjoicmVzb3VyY2VfdHlwZTppbWFnZSBBTkQgdGFncz1raXR0ZW4gQU5EIHVwbG9hZGVkX2F0" \
+                   "PjFkIEFORCBieXRlcz4xbSIsIm1heF9yZXN1bHRzIjozMCwic29ydF9ieSI6W3sicHVibGljX2lkIjoiZGVzYyJ9XX0="
 
-        ttl300_sig = "eadda21336fcce66ce195cce1b57cddd66a8e475ba151c39174133264278d5a5"
-        ttl1000_sig = "63091d184c88299dd2c7b0235560a6c119c5beb22eefd94401104060b436b334"
+        ttl300_sig = "431454b74cefa342e2f03e2d589b2e901babb8db6e6b149abf25bc0dd7ab20b7"
+        ttl1000_sig = "25b91426a37d4f633a9b34383c63889ff8952e7ffecef29a17d600eeb3db0db7"
 
         # default usage
         self.assertEqual("https://res.cloudinary.com/{cloud}/search/{sig}/{ttl}/{query}".format(
