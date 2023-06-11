@@ -163,7 +163,7 @@ def visual_search(image_url=None, image_asset_id=None, text=None, **options):
     :type image_url:        str
     :param image_asset_id:  The asset_id of an image in your account.
     :type image_asset_id:   str
-    :param text:            A textual description, e.g., “cat”
+    :param text:            A textual description, e.g., "cat"
     :type text:             str
     :param options:         Additional options
     :type options:          dict, optional
