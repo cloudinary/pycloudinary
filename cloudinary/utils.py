@@ -106,6 +106,7 @@ __SIMPLE_UPLOAD_PARAMS = [
     "categorization",
     "detection",
     "similarity_search",
+    "visual_search",
     "background_removal",
     "upload_preset",
     "phash",

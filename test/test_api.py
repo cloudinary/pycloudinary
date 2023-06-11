@@ -10,9 +10,9 @@ from urllib3 import disable_warnings, ProxyManager, PoolManager
 import cloudinary
 from cloudinary import api, uploader, utils
 from cloudinary.utils import fq_public_id
-from test.helper_test import SUFFIX, TEST_IMAGE, get_uri, get_headers, get_params, get_list_param, get_param, TEST_DOC, get_method, \
-    UNIQUE_TAG, api_response_mock, ignore_exception, cleanup_test_resources_by_tag, cleanup_test_transformation, \
-    cleanup_test_resources, UNIQUE_TEST_FOLDER, EVAL_STR, get_json_body
+from test.helper_test import SUFFIX, TEST_IMAGE, get_uri, get_headers, get_params, get_list_param, get_param, \
+    TEST_DOC, get_method, UNIQUE_TAG, api_response_mock, ignore_exception, cleanup_test_resources_by_tag, \
+    cleanup_test_transformation, cleanup_test_resources, UNIQUE_TEST_FOLDER, EVAL_STR, get_json_body, REMOTE_TEST_IMAGE
 from cloudinary.exceptions import BadRequest, NotFound
 
 MOCK_RESPONSE = api_response_mock()
@@ -283,6 +283,22 @@ class ApiTest(unittest.TestCase):
         args, kargs = mocker.call_args
         self.assertTrue(get_uri(args).endswith('/resources/image/tags/{}'.format(API_TEST_TAG)))
         self.assertEqual(get_params(args)['direction'], 'desc')
+
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_visual_search(self, mocker):
+        """ should allow using visual search """
+        mocker.return_value = MOCK_RESPONSE
+
+        api.visual_search(REMOTE_TEST_IMAGE, API_TEST_ASSET_ID, "sample image")
+
+        args, kwargs = mocker.call_args
+        self.assertTrue(get_uri(args).endswith('/resources/visual_search'))
+
+        params = get_params(args)
+        self.assertEqual(REMOTE_TEST_IMAGE, params['image_url'])
+        self.assertEqual(API_TEST_ASSET_ID, params['image_asset_id'])
+        self.assertEqual("sample image", params['text'])
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
