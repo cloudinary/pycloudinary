@@ -953,7 +953,13 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         """Should support various parameters in upload and explicit"""
         request_mock.return_value = MOCK_RESPONSE
 
-        options = {'cinemagraph_analysis': True, 'accessibility_analysis':True, 'media_metadata':True}
+        options = {
+            'cinemagraph_analysis': True,
+            'accessibility_analysis': True,
+            'media_metadata': True,
+            'visual_search': True,
+        }
+
         uploader.upload(TEST_IMAGE, **options)
 
         params = get_params(request_mock.call_args[0])
