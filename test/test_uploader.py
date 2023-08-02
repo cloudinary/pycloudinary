@@ -18,7 +18,7 @@ from cloudinary.compat import urlparse, parse_qs
 from test.cache.storage.dummy_cache_storage import DummyCacheStorage
 from test.helper_test import uploader_response_mock, SUFFIX, TEST_IMAGE, get_params, get_headers, TEST_ICON, TEST_DOC, \
     REMOTE_TEST_IMAGE, UTC, populate_large_file, TEST_UNICODE_IMAGE, get_uri, get_method, get_param, \
-    cleanup_test_resources_by_tag, cleanup_test_transformation, cleanup_test_resources, EVAL_STR
+    cleanup_test_resources_by_tag, cleanup_test_transformation, cleanup_test_resources, EVAL_STR, ON_SUCCESS_STR
 from test.test_utils import TEST_ID, TEST_FOLDER
 
 MOCK_RESPONSE = uploader_response_mock()
@@ -958,6 +958,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
             'accessibility_analysis': True,
             'media_metadata': True,
             'visual_search': True,
+            'on_success': ON_SUCCESS_STR
         }
 
         uploader.upload(TEST_IMAGE, **options)
@@ -971,7 +972,6 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         params = get_params(request_mock.call_args[0])
         for param in options.keys():
             self.assertIn(param, params)
-
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_eval_upload_parameter(self):
