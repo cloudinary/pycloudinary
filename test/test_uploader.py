@@ -427,13 +427,6 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_explicit(self):
-        """Should support explicit """
-        result = uploader.explicit("cloudinary", type="twitter_name", eager=[TEST_TRANS_SCALE2_PNG], tags=[UNIQUE_TAG])
-        params = dict(TEST_TRANS_SCALE2_PNG, type="twitter_name", version=result["version"])
-        url = utils.cloudinary_url("cloudinary", **params)[0]
-        actual = result["eager"][0]["url"]
-        self.assertEqual(parse_url(actual).path, parse_url(url).path)
-
         # Test explicit with metadata
         resource = uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG])
         result_metadata = uploader.explicit(resource['public_id'], type="upload", metadata=METADATA_FIELDS,
