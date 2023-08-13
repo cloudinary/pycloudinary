@@ -92,6 +92,7 @@ __SIMPLE_UPLOAD_PARAMS = [
     "eager_notification_url",
     "eager_async",
     "eval",
+    "on_success",
     "proxy",
     "folder",
     "asset_folder",
