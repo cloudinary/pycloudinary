@@ -1,3 +1,13 @@
+
+1.34.0 / 2023-08-14
+===================
+
+New functionality and features
+------------------------------
+
+  * Add support for `on_success` upload parameter
+  * Add support for `visual_search` Admin API
+
 1.33.0 / 2023-05-15
 ==================
 
