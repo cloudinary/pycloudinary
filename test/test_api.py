@@ -12,7 +12,8 @@ from cloudinary import api, uploader, utils
 from cloudinary.utils import fq_public_id
 from test.helper_test import SUFFIX, TEST_IMAGE, get_uri, get_headers, get_params, get_list_param, get_param, \
     TEST_DOC, get_method, UNIQUE_TAG, api_response_mock, ignore_exception, cleanup_test_resources_by_tag, \
-    cleanup_test_transformation, cleanup_test_resources, UNIQUE_TEST_FOLDER, EVAL_STR, get_json_body, REMOTE_TEST_IMAGE
+    cleanup_test_transformation, cleanup_test_resources, UNIQUE_TEST_FOLDER, EVAL_STR, get_json_body, REMOTE_TEST_IMAGE, \
+    TEST_IMAGE_SIZE
 from cloudinary.exceptions import BadRequest, NotFound
 
 MOCK_RESPONSE = api_response_mock()
@@ -290,15 +291,20 @@ class ApiTest(unittest.TestCase):
         """ should allow using visual search """
         mocker.return_value = MOCK_RESPONSE
 
-        api.visual_search(REMOTE_TEST_IMAGE, API_TEST_ASSET_ID, "sample image")
+        api.visual_search(REMOTE_TEST_IMAGE, API_TEST_ASSET_ID, "sample image", TEST_IMAGE)
 
         args, kwargs = mocker.call_args
         self.assertTrue(get_uri(args).endswith('/resources/visual_search'))
+        self.assertEqual('POST', args[0])
 
         params = get_params(args)
         self.assertEqual(REMOTE_TEST_IMAGE, params['image_url'])
         self.assertEqual(API_TEST_ASSET_ID, params['image_asset_id'])
         self.assertEqual("sample image", params['text'])
+        self.assertIn('image_file', params)
+        self.assertEqual(2, len(params['image_file']))
+        self.assertEqual('file', params['image_file'][0])
+        self.assertEqual(TEST_IMAGE_SIZE, len(params['image_file'][1]))
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -319,7 +325,7 @@ class ApiTest(unittest.TestCase):
         resource = api.resource(API_TEST_ID)
         self.assertNotEqual(resource, None)
         self.assertEqual(resource["public_id"], API_TEST_ID)
-        self.assertEqual(resource["bytes"], 3381)
+        self.assertEqual(resource["bytes"], TEST_IMAGE_SIZE)
         self.assertEqual(len(resource["derived"]), 1, "{} should have one derived resource.".format(API_TEST_ID))
 
     @patch('urllib3.request.RequestMethods.request')
@@ -342,7 +348,7 @@ class ApiTest(unittest.TestCase):
         self.assertNotEqual(resource, None)
         self.assertEqual(resource["asset_id"], API_TEST_ASSET_ID)
         self.assertEqual(resource["public_id"], API_TEST_ID)
-        self.assertEqual(resource["bytes"], 3381)
+        self.assertEqual(resource["bytes"], TEST_IMAGE_SIZE)
         self.assertEqual(len(resource["derived"]), 1, "{} should have one derived resource.".format(API_TEST_ID))
 
     @patch('urllib3.request.RequestMethods.request')
@@ -997,7 +1003,7 @@ class ApiTest(unittest.TestCase):
         uploader.upload(TEST_IMAGE, public_id=RESTORE_TEST_ID, backup=True, tags=[UNIQUE_API_TAG])
         resource = api.resource(RESTORE_TEST_ID)
         self.assertNotEqual(resource, None)
-        self.assertEqual(resource["bytes"], 3381)
+        self.assertEqual(resource["bytes"], TEST_IMAGE_SIZE)
         api.delete_resources([RESTORE_TEST_ID])
         resource = api.resource(RESTORE_TEST_ID)
         self.assertNotEqual(resource, None)
@@ -1006,10 +1012,10 @@ class ApiTest(unittest.TestCase):
         response = api.restore([RESTORE_TEST_ID])
         info = response[RESTORE_TEST_ID]
         self.assertNotEqual(info, None)
-        self.assertEqual(info["bytes"], 3381)
+        self.assertEqual(info["bytes"], TEST_IMAGE_SIZE)
         resource = api.resource(RESTORE_TEST_ID)
         self.assertNotEqual(resource, None)
-        self.assertEqual(resource["bytes"], 3381)
+        self.assertEqual(resource["bytes"], TEST_IMAGE_SIZE)
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")

@@ -155,7 +155,7 @@ def resources_by_context(key, value=None, **options):
     return call_api("get", uri, params, **options)
 
 
-def visual_search(image_url=None, image_asset_id=None, text=None, **options):
+def visual_search(image_url=None, image_asset_id=None, text=None, image_file=None, **options):
     """
     Find images based on their visual content.
 
@@ -165,14 +165,17 @@ def visual_search(image_url=None, image_asset_id=None, text=None, **options):
     :type image_asset_id:   str
     :param text:            A textual description, e.g., "cat"
     :type text:             str
+    :param image_file:      The image file.
+    :type image_file:       str|callable|Path|bytes
     :param options:         Additional options
     :type options:          dict, optional
     :return:                Resources (assets) that were found
     :rtype:                 Response
     """
     uri = ["resources", "visual_search"]
-    params = {"image_url": image_url, "image_asset_id": image_asset_id, "text": text}
-    return call_api("get", uri, params, **options)
+    params = {"image_url": image_url, "image_asset_id": image_asset_id, "text": text,
+              "image_file": utils.handle_file_parameter(image_file, "file")}
+    return call_api("post", uri, params, **options)
 
 
 def resource(public_id, **options):

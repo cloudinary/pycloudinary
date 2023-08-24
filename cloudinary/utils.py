@@ -25,6 +25,11 @@ from cloudinary import auth_token
 from cloudinary.api_client.tcp_keep_alive_manager import TCPKeepAlivePoolManager, TCPKeepAliveProxyManager
 from cloudinary.compat import PY3, to_bytes, to_bytearray, to_string, string_types, urlparse
 
+try:  # Python 3.4+
+    from pathlib import Path as PathLibPathType
+except ImportError:
+    PathLibPathType = None
+
 VAR_NAME_RE = r'(\$\([a-zA-Z]\w+\))'
 
 urlencode = six.moves.urllib.parse.urlencode
@@ -570,6 +575,9 @@ def process_params(params):
         processed_params = {}
         for key, value in params.items():
             if isinstance(value, list) or isinstance(value, tuple):
+                if len(value) == 2 and value[0] == "file":  # keep file parameter as is.
+                    processed_params[key] = value
+                    continue
                 value_list = {"{}[{}]".format(key, i): i_value for i, i_value in enumerate(value)}
                 processed_params.update(value_list)
             elif value is not None:
@@ -1099,6 +1107,37 @@ def build_upload_params(**options):
     params.update(serialized_params)
 
     return params
+
+
+def handle_file_parameter(file, filename):
+    if not file:
+        return None
+    
+    if PathLibPathType and isinstance(file, PathLibPathType):
+        name = filename or file.name
+        data = file.read_bytes()
+    elif isinstance(file, string_types):
+        if is_remote_url(file):
+            # URL
+            name = None
+            data = file
+        else:
+            # file path
+            name = filename or file
+            with open(file, "rb") as opened:
+                data = opened.read()
+    elif hasattr(file, 'read') and callable(file.read):
+        # stream
+        data = file.read()
+        name = filename or (file.name if hasattr(file, 'name') and isinstance(file.name, str) else "stream")
+    elif isinstance(file, tuple):
+        name, data = file
+    else:
+        # Not a string, not a stream
+        name = filename or "file"
+        data = file
+
+    return (name, data) if name else data
 
 
 def build_multi_and_sprite_params(**options):
