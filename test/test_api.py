@@ -294,15 +294,14 @@ class ApiTest(unittest.TestCase):
         test_params = {"image_url": REMOTE_TEST_IMAGE, "image_asset_id": API_TEST_ASSET_ID, "text": "sample image"}
 
         for param_name, param_value in test_params.items():
-            with self.subTest():
-                api.visual_search(**{param_name: param_value})
+            api.visual_search(**{param_name: param_value})
 
-                args, kwargs = mocker.call_args
-                self.assertTrue(get_uri(args).endswith('/resources/visual_search'))
-                self.assertEqual('POST', args[0])
+            args, kwargs = mocker.call_args
+            self.assertTrue(get_uri(args).endswith('/resources/visual_search'))
+            self.assertEqual('POST', args[0])
 
-                actual_params = get_params(args)
-                self.assertEqual(param_value, actual_params[param_name])
+            actual_params = get_params(args)
+            self.assertEqual(param_value, actual_params[param_name])
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
