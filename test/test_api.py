@@ -291,16 +291,32 @@ class ApiTest(unittest.TestCase):
         """ should allow using visual search """
         mocker.return_value = MOCK_RESPONSE
 
-        api.visual_search(REMOTE_TEST_IMAGE, API_TEST_ASSET_ID, "sample image", TEST_IMAGE)
+        test_params = {"image_url": REMOTE_TEST_IMAGE, "image_asset_id": API_TEST_ASSET_ID, "text": "sample image"}
+
+        for param_name, param_value in test_params.items():
+            with self.subTest():
+                api.visual_search(**{param_name: param_value})
+
+                args, kwargs = mocker.call_args
+                self.assertTrue(get_uri(args).endswith('/resources/visual_search'))
+                self.assertEqual('POST', args[0])
+
+                actual_params = get_params(args)
+                self.assertEqual(param_value, actual_params[param_name])
+
+    @patch('urllib3.request.RequestMethods.request')
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_visual_search_image_file(self, mocker):
+        """ should allow using visual search """
+        mocker.return_value = MOCK_RESPONSE
+
+        api.visual_search(image_file=TEST_IMAGE)
 
         args, kwargs = mocker.call_args
         self.assertTrue(get_uri(args).endswith('/resources/visual_search'))
         self.assertEqual('POST', args[0])
 
         params = get_params(args)
-        self.assertEqual(REMOTE_TEST_IMAGE, params['image_url'])
-        self.assertEqual(API_TEST_ASSET_ID, params['image_asset_id'])
-        self.assertEqual("sample image", params['text'])
         self.assertIn('image_file', params)
         self.assertEqual(2, len(params['image_file']))
         self.assertEqual('file', params['image_file'][0])
