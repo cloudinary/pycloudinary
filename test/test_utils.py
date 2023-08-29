@@ -47,7 +47,8 @@ DEFAULT_FETCH_PATH = DEFAULT_ROOT_PATH + 'image/fetch/'
 VIDEO_UPLOAD_PATH = DEFAULT_ROOT_PATH + 'video/upload/'
 TEST_ID = 'test'
 
-FETCH_URL = "http://cloudinary.com/images/logo.png"
+FETCH_URL = "https://cloudinary.com/images/logo.png"
+FETCH_VIDEO_URL = "https://demo-res.cloudinary.com/videos/dog.mp4"
 
 IMAGE_VERSION = "1234"
 IMAGE_VERSION_STR = "v" + IMAGE_VERSION
@@ -436,6 +437,14 @@ class TestUtils(unittest.TestCase):
             expected_url=(
                     DEFAULT_UPLOAD_PATH
                     + "l_fetch:aHR0cDovL2Nsb3VkaW5hcnkuY29tL2ltYWdlcy9vbGRfbG9nby5wbmc=/"
+                    + "test"))
+
+        """should support videooverlay"""
+        self.__test_cloudinary_url(
+            options={"overlay": "video:fetch:" + FETCH_VIDEO_URL},
+            expected_url=(
+                    DEFAULT_UPLOAD_PATH
+                    + "l_video:fetch:aHR0cHM6Ly9kZW1vLXJlcy5jbG91ZGluYXJ5LmNvbS92aWRlb3MvZG9nLm1wNA==/"
                     + "test"))
 
         self.__test_cloudinary_url(
@@ -940,7 +949,9 @@ class TestUtils(unittest.TestCase):
              "subtitles:Arial_40:sample_sub_he.srt"),
             ({'url': "https://upload.wikimedia.org/wikipedia/commons/2/2b/고창갯벌.jpg"},
              "fetch:aHR0cHM6Ly91cGxvYWQud2lraW1lZGlhLm9yZy93aWtpcGVkaWEvY29"
-             "tbW9ucy8yLzJiLyVFQSVCMyVBMCVFQyVCMCVCRCVFQSVCMCVBRiVFQiVCMiU4Qy5qcGc=")
+             "tbW9ucy8yLzJiLyVFQSVCMyVBMCVFQyVCMCVCRCVFQSVCMCVBRiVFQiVCMiU4Qy5qcGc="),
+            ({'url': FETCH_VIDEO_URL, "resource_type": "video"},
+             "video:fetch:aHR0cHM6Ly9kZW1vLXJlcy5jbG91ZGluYXJ5LmNvbS92aWRlb3MvZG9nLm1wNA==")
         ]
 
         for options, expected in tests:

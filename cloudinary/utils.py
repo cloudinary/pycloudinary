@@ -1205,8 +1205,21 @@ def __process_text_options(layer, layer_parameter):
 
 
 def process_layer(layer, layer_parameter):
-    if isinstance(layer, string_types) and layer.startswith("fetch:"):
-        layer = {"url": layer[len('fetch:'):]}
+    if isinstance(layer, string_types):
+        resource_type = None
+        if layer.startswith("fetch:"):
+            url = layer[len('fetch:'):]
+        elif layer.find(":fetch:", 0, 12) != -1:
+            resource_type, _, url = layer.split(":", 2)
+        else:
+            # nothing to process, a raw string, keep as is.
+            return layer
+
+        # handle remote fetch URL
+        layer = {"url": url, "type": "fetch"}
+        if resource_type:
+            layer["resource_type"] = resource_type
+
     if not isinstance(layer, dict):
         return layer
 
@@ -1215,19 +1228,19 @@ def process_layer(layer, layer_parameter):
     type = layer.get("type")
     public_id = layer.get("public_id")
     format = layer.get("format")
-    fetch = layer.get("url")
+    fetch_url = layer.get("url")
     components = list()
 
     if text is not None and resource_type is None:
         resource_type = "text"
 
-    if fetch and resource_type is None:
-        resource_type = "fetch"
+    if fetch_url and type is None:
+        type = "fetch"
 
     if public_id is not None and format is not None:
         public_id = public_id + "." + format
 
-    if public_id is None and resource_type != "text" and resource_type != "fetch":
+    if public_id is None and resource_type != "text" and type != "fetch":
         raise ValueError("Must supply public_id for for non-text " + layer_parameter)
 
     if resource_type is not None and resource_type != "image":
@@ -1251,8 +1264,6 @@ def process_layer(layer, layer_parameter):
 
         if text is not None:
             var_pattern = VAR_NAME_RE
-            match = re.findall(var_pattern, text)
-
             parts = filter(lambda p: p is not None, re.split(var_pattern, text))
             encoded_text = []
             for part in parts:
@@ -1262,11 +1273,9 @@ def process_layer(layer, layer_parameter):
                     encoded_text.append(smart_escape(smart_escape(part, r"([,/])")))
 
             text = ''.join(encoded_text)
-            # text = text.replace("%2C", "%252C")
-            # text = text.replace("/", "%252F")
             components.append(text)
-    elif resource_type == "fetch":
-        b64 = base64_encode_url(fetch)
+    elif type == "fetch":
+        b64 = base64_encode_url(fetch_url)
         components.append(b64)
     else:
         public_id = public_id.replace("/", ':')
