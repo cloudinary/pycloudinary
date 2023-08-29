@@ -439,7 +439,7 @@ class TestUtils(unittest.TestCase):
                     + "l_fetch:aHR0cDovL2Nsb3VkaW5hcnkuY29tL2ltYWdlcy9vbGRfbG9nby5wbmc=/"
                     + "test"))
 
-        """should support videooverlay"""
+        """should support video overlay"""
         self.__test_cloudinary_url(
             options={"overlay": "video:fetch:" + FETCH_VIDEO_URL},
             expected_url=(
