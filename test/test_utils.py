@@ -649,6 +649,18 @@ class TestUtils(unittest.TestCase):
             options={"version": 1234, "type": "fetch", "sign_url": True},
             expected_url=DEFAULT_ROOT_PATH + "image/fetch/s--hH_YcbiS--/v1234/http://google.com/path/to/image.png")
 
+        self.__test_cloudinary_url(
+            public_id="image.jpg",
+            options={"type": "authenticated", "transformation": {"color": "red", "overlay": {"text": "Cool%25F0%259F%2598%258D", "font_family": "Times", "font_size": 70, "font_weight": "bold"}},
+                     "sign_url": True},
+            expected_url=DEFAULT_ROOT_PATH + "image/authenticated/s--Uqk1a-5W--/co_red,l_text:Times_70_bold:Cool%25F0%259F%2598%258D/image.jpg")
+
+        self.__test_cloudinary_url(
+            public_id="image.jpg",
+            options={"type": "authenticated", "transformation": {"raw_transformation": "co_red,l_text:Times_70_bold:Cool%25F0%259F%2598%258D"},
+                     "sign_url": True},
+            expected_url=DEFAULT_ROOT_PATH + "image/authenticated/s--Uqk1a-5W--/co_red,l_text:Times_70_bold:Cool%25F0%259F%2598%258D/image.jpg")
+
     def test_signed_url_sha256(self):
         sha256_config = cloudinary.Config()
         sha256_config.update(**vars(cloudinary.config()))
