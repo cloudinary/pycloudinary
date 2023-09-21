@@ -85,7 +85,7 @@ Document any external behavior in the [README](README.md).
 
 #### Running the tests
 
-Run the basic test suite with::
+Run the basic test suite with your `CLOUDINARY_URL`:
 
     CLOUDINARY_URL=cloudinary://apikey:apisecret@cloudname python setup.py test
 
@@ -93,7 +93,7 @@ This only runs the tests for the current environment.
 Travis-CI will run the full suite when you submit your pull request.
 
 The full test suite takes a long time to run because it tests multiple combinations of Python and Django.
-You need to have Python 2.7, 3.4, 3.5, 3.6, 3.7 installed to run all of the environments. Then run::
+You need to have Python 2.7, 3.4, 3.5, 3.6, 3.7 installed to run all environments. Then run:
 
     CLOUDINARY_URL=cloudinary://apikey:apisecret@cloudname tox
 
