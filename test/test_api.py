@@ -744,6 +744,18 @@ class ApiTest(unittest.TestCase):
         self.assertNotIn("used_percent", result_2["bandwidth"])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_config(self):
+        """ should support config API """
+        res = api.config()
+
+        self.assertEqual(cloudinary.config().cloud_name, res["cloud_name"])
+        self.assertNotIn("settings", res)
+
+        res = api.config(settings="true")
+
+        self.assertIn("settings", res)
+
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     @unittest.skip("Skip delete all derived resources by default")
     def test19_delete_derived(self):
         """ should allow deleting all resource """
