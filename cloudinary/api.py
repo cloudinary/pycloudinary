@@ -54,6 +54,19 @@ def usage(**options):
     return call_api("get", uri, {}, **options)
 
 
+def config(**options):
+    """
+    Get account config details.
+
+    :param options:     Additional options.
+    :type options:      dict, optional
+    :return:            Detailed config information.
+    :rtype:             Response
+    """
+    params = only(options, "settings")
+    return call_api("get", ["config"], params, **options)
+
+
 def resource_types(**options):
     return call_api("get", ["resources"], {}, **options)
 
