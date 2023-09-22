@@ -651,15 +651,15 @@ class TestUtils(unittest.TestCase):
 
         self.__test_cloudinary_url(
             public_id="image.jpg",
-            options={"type": "authenticated", "transformation": {"color": "red", "overlay": {"text": "Cool%25F0%259F%2598%258D", "font_family": "Times", "font_size": 70, "font_weight": "bold"}},
+            options={"type": "authenticated", "transformation": {"color": "red", "overlay": {"text": "Cool%F0%9F%98%8D", "font_family": "Times", "font_size": 70, "font_weight": "bold"}},
                      "sign_url": True},
-            expected_url=DEFAULT_ROOT_PATH + "image/authenticated/s--Uqk1a-5W--/co_red,l_text:Times_70_bold:Cool%25F0%259F%2598%258D/image.jpg")
+            expected_url="http://res.cloudinary.com/test123/image/authenticated/s--Uqk1a-5W--/co_red,l_text:Times_70_bold:Cool%25F0%259F%2598%258D/image.jpg")
 
         self.__test_cloudinary_url(
             public_id="image.jpg",
             options={"type": "authenticated", "transformation": {"raw_transformation": "co_red,l_text:Times_70_bold:Cool%25F0%259F%2598%258D"},
                      "sign_url": True},
-            expected_url=DEFAULT_ROOT_PATH + "image/authenticated/s--Uqk1a-5W--/co_red,l_text:Times_70_bold:Cool%25F0%259F%2598%258D/image.jpg")
+            expected_url="http://res.cloudinary.com/test123/image/authenticated/s--Uqk1a-5W--/co_red,l_text:Times_70_bold:Cool%25F0%259F%2598%258D/image.jpg")
 
     def test_signed_url_sha256(self):
         sha256_config = cloudinary.Config()
