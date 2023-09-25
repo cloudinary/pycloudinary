@@ -1,3 +1,19 @@
+1.35.0 / 2023-09-25
+==================
+
+New functionality and features
+------------------------------
+
+  * Add support for `image_file` in `visual_search` Admin API
+  * Add support for `last_login` field in `users` Provisioning API
+  * Add support for `config` Admin API
+
+Other Changes
+-------------
+
+  * Fix fetch video overlay
+  * Add additional tests for a signed url
+
 
 1.34.0 / 2023-08-14
 ===================
