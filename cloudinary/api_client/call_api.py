@@ -2,8 +2,7 @@ import json
 
 import cloudinary
 from cloudinary.api_client.execute_request import execute_request
-from cloudinary.utils import get_http_connector
-
+from cloudinary.utils import get_http_connector, normalize_params
 
 logger = cloudinary.logger
 _http = get_http_connector(cloudinary.config(), cloudinary.CERT_KWARGS)
@@ -55,7 +54,7 @@ def _call_api(method, uri, params=None, body=None, headers=None, extra_headers=N
 
     return execute_request(http_connector=_http,
                            method=method,
-                           params=params,
+                           params=normalize_params(params),
                            headers=headers,
                            auth=auth,
                            api_url=api_url,
