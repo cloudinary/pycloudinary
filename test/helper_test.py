@@ -44,6 +44,15 @@ EVAL_STR = 'if (resource_info["width"] < 450) { upload_options["quality_analysis
 
 ON_SUCCESS_STR = 'current_asset.update({tags: ["autocaption"]});'
 
+try:
+    # urllib3 2.x support
+    # noinspection PyProtectedMember
+    import urllib3._request_methods
+    URLLIB3_REQUEST = "urllib3._request_methods.RequestMethods.request"
+except ImportError:
+    URLLIB3_REQUEST = "urllib3.request.RequestMethods.request"
+
+
 class UTC(tzinfo):
     """UTC"""
 
@@ -58,22 +67,18 @@ class UTC(tzinfo):
 
 
 def get_method(mocker):
-    return mocker.call_args[0][0]
+    return mocker.call_args[1]["method"]
 
 
-def get_request_url(mocker):
-    return mocker.call_args[0][1]
+def get_uri(mocker):
+    return mocker.call_args[1]["url"]
 
 
-def get_uri(args):
-    return args[1]
+def get_headers(mocker):
+    return mocker.call_args[1]["headers"]
 
 
-def get_headers(args):
-    return args[3] if len(args) > 3 else tuple()
-
-
-def get_params(args):
+def get_params(mocker):
     """
     Extracts query parameters from mocked urllib3.request `fields` param.
     Supports both list and dict values of `fields`. Returns params as dictionary.
@@ -82,11 +87,12 @@ def get_params(args):
       - [("urls[]", "http://host1"), ("urls[]", "http://host2")]
     In both cases the result would be {"urls": ["http://host1", "http://host2"]}
     """
-    if not args or not args[2]:
+    if not mocker.call_args[1].get("fields"):
         return {}
     params = {}
     reg = re.compile(r'^(.*)\[\d*]$')
-    fields = args[2].items() if isinstance(args[2], dict) else args[2]
+    fields = mocker.call_args[1].get("fields")
+    fields = fields.items() if isinstance(fields, dict) else fields
     for k, v in fields:
         match = reg.match(k)
         if match:
@@ -110,8 +116,7 @@ def get_param(mocker, name):
     :param name: the name of the parameter
     :return: the value of the parameter if present or None
     """
-    args, kargs = mocker.call_args
-    params = get_params(args)
+    params = get_params(mocker)
     return params.get(name)
 
 

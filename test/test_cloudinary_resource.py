@@ -6,7 +6,8 @@ from urllib3 import disable_warnings
 import cloudinary
 from cloudinary import CloudinaryResource
 from cloudinary import uploader
-from test.helper_test import SUFFIX, TEST_IMAGE, http_response_mock, get_request_url, cleanup_test_resources_by_tag
+from test.helper_test import SUFFIX, TEST_IMAGE, http_response_mock, get_uri, cleanup_test_resources_by_tag, \
+    URLLIB3_REQUEST
 
 disable_warnings()
 
@@ -76,16 +77,16 @@ class TestCloudinaryResource(TestCase):
         self.assertNotIn(' src="{url}'.format(url=self.res.build_url(width="auto", crop="scale")), image)
         self.assertIn('data-src="{url}'.format(url=self.res.build_url(width="auto", crop="scale")), image)
 
-    @mock.patch('urllib3.request.RequestMethods.request', return_value=mocked_response)
+    @mock.patch(URLLIB3_REQUEST, return_value=mocked_response)
     def test_fetch_breakpoints(self, mocked_request):
         """Should retrieve responsive breakpoints from cloudinary resource (mocked)"""
         actual_breakpoints = self.res._fetch_breakpoints()
 
         self.assertEqual(self.mocked_breakpoints, actual_breakpoints)
 
-        self.assertIn(self.expected_transformation, get_request_url(mocked_request))
+        self.assertIn(self.expected_transformation, get_uri(mocked_request))
 
-    @mock.patch('urllib3.request.RequestMethods.request', return_value=mocked_response)
+    @mock.patch(URLLIB3_REQUEST, return_value=mocked_response)
     def test_fetch_breakpoints_with_transformation(self, mocked_request):
         """Should retrieve responsive breakpoints from cloudinary resource with custom transformation (mocked)"""
         srcset = {"transformation": self.crop_transformation}
@@ -94,7 +95,7 @@ class TestCloudinaryResource(TestCase):
         self.assertEqual(self.mocked_breakpoints, actual_breakpoints)
 
         self.assertIn(self.crop_transformation_str + "/" + self.expected_transformation,
-                      get_request_url(mocked_request))
+                      get_uri(mocked_request))
 
     def test_fetch_breakpoints_real(self):
         """Should retrieve responsive breakpoints from cloudinary resource (real request)"""

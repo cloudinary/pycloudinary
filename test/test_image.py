@@ -140,7 +140,7 @@ class ImageTest(unittest.TestCase):
         six.assertRegex(self, tag, expected_re)
 
     def _common_image_tag_helper(self, tag_name, public_id, common_trans_str, custom_trans_str=None,
-                                srcset_breakpoints=None, attributes=None, is_void=False):
+                                 srcset_breakpoints=None, attributes=None, is_void=False):
         """
         Helper method for generating expected img and source tags
 
@@ -342,14 +342,14 @@ class ImageTest(unittest.TestCase):
     def test_srcset_invalid_values(self):
         """Should raise ValueError on invalid values"""
         invalid_srcset_params = [
-            {'sizes': True},                                          # srcset data not provided
-            {'max_width': 300, 'max_images': 3},                      # no min_width
-            {'min_width': '1', 'max_width': 300, 'max_images': 3},    # invalid min_width
-            {'min_width': 100, 'max_images': 3},                      # no max_width
-            {'min_width': 100, 'max_width': '3', 'max_images': 3},    # invalid max_width
-            {'min_width': 200, 'max_width': 100, 'max_images': 3},    # min_width > max_width
-            {'min_width': 100, 'max_width': 300},                     # no max_images
-            {'min_width': 100, 'max_width': 300, 'max_images': 0},    # invalid max_images
+            {'sizes': True},  # srcset data not provided
+            {'max_width': 300, 'max_images': 3},  # no min_width
+            {'min_width': '1', 'max_width': 300, 'max_images': 3},  # invalid min_width
+            {'min_width': 100, 'max_images': 3},  # no max_width
+            {'min_width': 100, 'max_width': '3', 'max_images': 3},  # invalid max_width
+            {'min_width': 200, 'max_width': 100, 'max_images': 3},  # min_width > max_width
+            {'min_width': 100, 'max_width': 300},  # no max_images
+            {'min_width': 100, 'max_width': 300, 'max_images': 0},  # invalid max_images
             {'min_width': 100, 'max_width': 300, 'max_images': -17},  # invalid max_images
             {'min_width': 100, 'max_width': 300, 'max_images': '3'},  # invalid max_images
         ]
@@ -402,7 +402,7 @@ class ImageTest(unittest.TestCase):
         media = {"min_width": self.min_width, "max_width": self.max_width}
         tag = CloudinaryImage(self.full_public_id).source(media=media)
         expected_media = "(min-width: {min}px) and (max-width: {max}px)".format(min=self.min_width,
-                                                                                     max=self.max_width)
+                                                                                max=self.max_width)
         expected_tag = self._get_expected_cl_source_tag(self.full_public_id, "", attributes={"media": expected_media})
 
         self.assertEqual(expected_tag, tag)

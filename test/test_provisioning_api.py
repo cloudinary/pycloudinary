@@ -8,7 +8,7 @@ import cloudinary.provisioning.account
 from cloudinary.provisioning import account_config, reset_config
 from cloudinary.exceptions import AuthorizationRequired, NotFound
 
-from test.helper_test import UNIQUE_SUB_ACCOUNT_ID
+from test.helper_test import UNIQUE_SUB_ACCOUNT_ID, UNIQUE_TEST_ID
 
 disable_warnings()
 
@@ -212,27 +212,35 @@ class AccountApiTest(unittest.TestCase):
     def test_get_access_keys(self):
         res = cloudinary.provisioning.access_keys(self.cloud_id)
 
-        self.assertEqual(1, res["total"])
-        self.assertEqual(1, len(res["access_keys"]))
+        self.assertGreater(res["total"], 0)
+        self.assertGreater(len(res["access_keys"]), 0)
 
     @unittest.skipUnless(cloudinary.provisioning.account_config().provisioning_api_secret,
                          "requires provisioning_api_key/provisioning_api_secret")
     def test_generate_access_key(self):
-        res = cloudinary.provisioning.generate_access_key(self.cloud_id, name="test_key", enabled=False)
+        key_name = UNIQUE_TEST_ID + "_test_key"
+        res = cloudinary.provisioning.generate_access_key(self.cloud_id, name=key_name, enabled=False)
 
-        self.assertEqual("test_key", res["name"])
+        self.assertEqual(key_name, res["name"])
         self.assertEqual(False, res["enabled"])
 
     @unittest.skipUnless(cloudinary.provisioning.account_config().provisioning_api_secret,
                          "requires provisioning_api_key/provisioning_api_secret")
     def test_update_access_key(self):
-        key_res = cloudinary.provisioning.generate_access_key(self.cloud_id, name="test_key", enabled=False)
+        key_name = UNIQUE_TEST_ID + "_before_update_test_key"
+        updated_key_name = UNIQUE_TEST_ID + "_updated_test_key"
+
+        key_res = cloudinary.provisioning.generate_access_key(self.cloud_id, name=key_name, enabled=True)
+
+        self.assertEqual(key_name, key_res["name"])
+        self.assertEqual(True, key_res["enabled"])
 
         res = cloudinary.provisioning.update_access_key(self.cloud_id, key_res["api_key"],
-                                                        name="updated_key", enabled=True)
+                                                        name=updated_key_name, enabled=False)
 
-        self.assertEqual("updated_key", res["name"])
-        self.assertEqual(True, res["enabled"])
+        self.assertEqual(updated_key_name, res["name"])
+        self.assertEqual(False, res["enabled"])
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -10,7 +10,7 @@ from urllib3 import disable_warnings
 import cloudinary
 from cloudinary import uploader, SearchFolders, Search
 from test.helper_test import SUFFIX, TEST_IMAGE, TEST_TAG, UNIQUE_TAG, TEST_FOLDER, UNIQUE_TEST_FOLDER, \
-    retry_assertion, cleanup_test_resources_by_tag
+    retry_assertion, cleanup_test_resources_by_tag, URLLIB3_REQUEST, get_json_body, get_uri
 from test.test_api import MOCK_RESPONSE, NEXT_CURSOR
 from test.test_config import CLOUD_NAME, API_KEY, API_SECRET
 
@@ -202,7 +202,7 @@ class SearchTest(unittest.TestCase):
             self.assertTrue('image_metadata' in res)
             self.assertEqual(len(res['tags']), 2)
 
-    @patch('urllib3.request.RequestMethods.request')
+    @patch(URLLIB3_REQUEST)
     def test_should_not_duplicate_values(self, mocker):
         mocker.return_value = MOCK_RESPONSE
 
@@ -308,7 +308,7 @@ class SearchTest(unittest.TestCase):
             search.to_url(ttl=300, next_cursor="")
         )
 
-    @patch('urllib3.request.RequestMethods.request')
+    @patch(URLLIB3_REQUEST)
     def test_should_search_folders_endpoint(self, mocker):
         mocker.return_value = MOCK_RESPONSE
 
@@ -316,11 +316,9 @@ class SearchTest(unittest.TestCase):
             .expression(FOLDERS_SEARCH_EXPRESSION) \
             .execute()
 
-        args, kwargs = mocker.call_args
-        url = args[1]
-        result = json.loads(kwargs['body'])
+        result = get_json_body(mocker)
 
-        self.assertTrue(url.endswith('folders/search'))
+        self.assertTrue(get_uri(mocker).endswith('folders/search'))
 
         self.assertEqual({'expression': FOLDERS_SEARCH_EXPRESSION}, result)
 

@@ -18,7 +18,8 @@ from cloudinary.compat import urlparse, parse_qs
 from test.cache.storage.dummy_cache_storage import DummyCacheStorage
 from test.helper_test import uploader_response_mock, SUFFIX, TEST_IMAGE, get_params, get_headers, TEST_ICON, TEST_DOC, \
     REMOTE_TEST_IMAGE, UTC, populate_large_file, TEST_UNICODE_IMAGE, get_uri, get_method, get_param, \
-    cleanup_test_resources_by_tag, cleanup_test_transformation, cleanup_test_resources, EVAL_STR, ON_SUCCESS_STR
+    cleanup_test_resources_by_tag, cleanup_test_transformation, cleanup_test_resources, EVAL_STR, ON_SUCCESS_STR, \
+    URLLIB3_REQUEST
 from test.test_utils import TEST_ID, TEST_FOLDER
 
 MOCK_RESPONSE = uploader_response_mock()
@@ -241,7 +242,7 @@ class UploaderTest(unittest.TestCase):
 
         self.assertEqual('overridden', result["original_filename"])
 
-    @patch('urllib3.request.RequestMethods.request')
+    @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_async(self, mocker):
         """Should pass async value """
@@ -250,7 +251,7 @@ class UploaderTest(unittest.TestCase):
         uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG], **async_option)
         self.assertTrue(get_param(mocker, 'async'))
 
-    @patch('urllib3.request.RequestMethods.request')
+    @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_folder_decoupling(self, mocker):
         """Should pass folder decoupling params """
@@ -267,14 +268,14 @@ class UploaderTest(unittest.TestCase):
         self.assertEqual("1", get_param(mocker, "use_asset_folder_as_public_id_prefix"))
         self.assertEqual(TEST_FOLDER, get_param(mocker, "folder"))
 
-    @patch('urllib3.request.RequestMethods.request')
+    @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_ocr(self, mocker):
         """Should pass ocr value """
         mocker.return_value = MOCK_RESPONSE
         uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG], ocr='adv_ocr')
-        args, kargs = mocker.call_args
-        self.assertEqual(get_params(args)['ocr'], 'adv_ocr')
+        
+        self.assertEqual(get_params(mocker)['ocr'], 'adv_ocr')
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_quality_analysis(self):
@@ -298,7 +299,7 @@ class UploaderTest(unittest.TestCase):
         self.assertIn("focus", result["quality_analysis"])
         self.assertIsInstance(result["quality_analysis"]["focus"], float)
 
-    @patch('urllib3.request.RequestMethods.request')
+    @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_quality_override(self, mocker):
         """Should pass quality_override """
@@ -378,44 +379,44 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         uploader.rename(result2["public_id"], result["public_id"] + "2", overwrite=True)
         self.assertEqual(api.resource(result["public_id"] + "2")["format"], "ico")
 
-    @patch('urllib3.request.RequestMethods.request')
+    @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_rename_parameters(self, mocker):
         """Should support to_type, invalidate, and overwrite """
         mocker.return_value = MOCK_RESPONSE
         uploader.rename(TEST_IMAGE, TEST_IMAGE + "2", to_type='raw', invalidate=True, overwrite=False)
-        args, kargs = mocker.call_args
-        self.assertEqual(get_params(args)['to_type'], 'raw')
-        self.assertTrue(get_params(args)['invalidate'])
-        self.assertTrue(get_params(args)['overwrite'])
+        
+        self.assertEqual(get_params(mocker)['to_type'], 'raw')
+        self.assertTrue(get_params(mocker)['invalidate'])
+        self.assertTrue(get_params(mocker)['overwrite'])
 
-    @patch('urllib3.request.RequestMethods.request')
+    @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_rename_supports_context(self, mocker):
         """Should support context"""
         mocker.return_value = MOCK_RESPONSE
 
         uploader.rename(TEST_IMAGE, TEST_IMAGE + "2", context=True)
-        args, kargs = mocker.call_args
-        self.assertTrue(get_params(args)['context'])
+        
+        self.assertTrue(get_params(mocker)['context'])
 
         uploader.rename(TEST_IMAGE, TEST_IMAGE + "2")
-        args, kargs = mocker.call_args
-        self.assertIsNone(get_params(args).get('context'))
+        
+        self.assertIsNone(get_params(mocker).get('context'))
 
-    @patch('urllib3.request.RequestMethods.request')
+    @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_rename_supports_metadata(self, mocker):
         """Should support metadata"""
         mocker.return_value = MOCK_RESPONSE
 
         uploader.rename(TEST_IMAGE, TEST_IMAGE + "2", metadata=True)
-        args, kargs = mocker.call_args
-        self.assertTrue(get_params(args)['metadata'])
+        
+        self.assertTrue(get_params(mocker)['metadata'])
 
         uploader.rename(TEST_IMAGE, TEST_IMAGE + "2")
-        args, kargs = mocker.call_args
-        self.assertIsNone(get_params(args).get('metadata'))
+        
+        self.assertIsNone(get_params(mocker).get('metadata'))
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_use_filename(self):
@@ -459,7 +460,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
             "public_ids": public_ids,
         })
 
-    @patch('urllib3.request.RequestMethods.request')
+    @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_clear_invalid(self, mocker):
         mocker.return_value = MOCK_RESPONSE
@@ -507,7 +508,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         uploader.upload(TEST_IMAGE, headers=["Link: 1"], tags=[UNIQUE_TAG])
         uploader.upload(TEST_IMAGE, headers={"Link": "1"}, tags=[UNIQUE_TAG])
 
-    @patch('urllib3.request.RequestMethods.request')
+    @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_extra_headers(self, mocker):
         """Should support extra headers"""
@@ -515,7 +516,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         uploader.upload(TEST_IMAGE, extra_headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
                                                                  'AppleWebKit/537.36 (KHTML, like Gecko) '
                                                                  'Chrome/58.0.3029.110 Safari/537.3'})
-        headers = get_headers(mocker.call_args[0])
+        headers = get_headers(mocker)
         self.assertEqual(headers.get('User-Agent'), 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ' 
                                                     'AppleWebKit/537.36 (KHTML, like Gecko) '
                                                     'Chrome/58.0.3029.110 Safari/537.3')
@@ -527,7 +528,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         self.assertGreater(result["width"], 1)
         self.assertGreater(result["height"], 1)
 
-    @patch('urllib3.request.RequestMethods.request')
+    @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_create_slideshow_from_manifest_transformation(self, mocker):
         """Should create slideshow from a manifest transformation"""
@@ -550,13 +551,13 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
 
         args, _ = mocker.call_args
 
-        self.assertTrue(get_uri(args).endswith('/video/create_slideshow'))
+        self.assertTrue(get_uri(mocker).endswith('/video/create_slideshow'))
 
-        self.assertEqual("fn_render:" + slideshow_manifest, get_params(args)['manifest_transformation'])
-        self.assertEqual("f_auto,q_auto", get_params(args)['transformation'])
-        self.assertEqual("tag1,tag2,tag3", get_params(args)['tags'])
+        self.assertEqual("fn_render:" + slideshow_manifest, get_params(mocker)['manifest_transformation'])
+        self.assertEqual("f_auto,q_auto", get_params(mocker)['transformation'])
+        self.assertEqual("tag1,tag2,tag3", get_params(mocker)['tags'])
 
-    @patch('urllib3.request.RequestMethods.request')
+    @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_create_slideshow_from_manifest_json(self, mocker):
         """Should create slideshow from a manifest json"""
@@ -596,11 +597,11 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
 
         args, _ = mocker.call_args
 
-        self.assertEqual(slideshow_manifest_json_str, get_params(args)["manifest_json"])
-        self.assertEqual("1", get_params(args)["overwrite"])
-        self.assertEqual(TEST_ID, get_params(args)["public_id"])
-        self.assertEqual(notification_url, get_params(args)["notification_url"])
-        self.assertEqual(API_TEST_PRESET, get_params(args)["upload_preset"])
+        self.assertEqual(slideshow_manifest_json_str, get_params(mocker)["manifest_json"])
+        self.assertEqual("1", get_params(mocker)["overwrite"])
+        self.assertEqual(TEST_ID, get_params(mocker)["public_id"])
+        self.assertEqual(notification_url, get_params(mocker)["notification_url"])
+        self.assertEqual(API_TEST_PRESET, get_params(mocker)["upload_preset"])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_tags(self):
@@ -803,7 +804,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
             self.assertEqual(resource["width"], LARGE_FILE_WIDTH)
             self.assertEqual(resource["height"], LARGE_FILE_HEIGHT)
 
-    @patch('urllib3.request.RequestMethods.request')
+    @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_preset(self, mocker):
         """Should support unsigned uploading using presets """
@@ -811,15 +812,15 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
 
         uploader.unsigned_upload(TEST_IMAGE, API_TEST_PRESET)
 
-        args, kargs = mocker.call_args
+        
 
-        self.assertTrue(get_uri(args).endswith("/image/upload"))
+        self.assertTrue(get_uri(mocker).endswith("/image/upload"))
         self.assertEqual("POST", get_method(mocker))
         self.assertIsNotNone(get_param(mocker, "file"))
         self.assertIsNone(get_param(mocker, "signature"))
         self.assertEqual(get_param(mocker, "upload_preset"), API_TEST_PRESET)
 
-    @patch('urllib3.request.RequestMethods.request')
+    @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_preset_in_config(self, mocker):
         """Should support uploading using presets from config"""
@@ -827,14 +828,14 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         cloudinary.config().upload_preset = API_TEST_PRESET
         uploader.upload(TEST_IMAGE)
 
-        args, kargs = mocker.call_args
+        
 
-        self.assertTrue(get_uri(args).endswith("/image/upload"))
+        self.assertTrue(get_uri(mocker).endswith("/image/upload"))
         self.assertEqual("POST", get_method(mocker))
         self.assertIsNotNone(get_param(mocker, "file"))
         self.assertEqual(get_param(mocker, "upload_preset"), API_TEST_PRESET)
 
-    @patch('urllib3.request.RequestMethods.request')
+    @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test1_upload_preset_in_config(self, mocker):
         """Should support overwriting upload presets in config"""
@@ -842,9 +843,9 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         cloudinary.config().upload_preset = API_TEST_PRESET
         uploader.upload(TEST_IMAGE, upload_preset=None)
 
-        args, kargs = mocker.call_args
+        
 
-        self.assertTrue(get_uri(args).endswith("/image/upload"))
+        self.assertTrue(get_uri(mocker).endswith("/image/upload"))
         self.assertEqual("POST", get_method(mocker))
         self.assertIsNotNone(get_param(mocker, "file"))
         self.assertEqual(get_param(mocker, "upload_preset"), None)
@@ -888,7 +889,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
                          "a_45")
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
-    @patch('urllib3.request.RequestMethods.request')
+    @patch(URLLIB3_REQUEST)
     def test_access_control(self, request_mock):
         request_mock.return_value = MOCK_RESPONSE
 
@@ -899,7 +900,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         exp_acl = '[{"access_type":"anonymous","start":"2018-02-22 16:20:57 +0200","end":"2018-03-22 00:00 +0200"}]'
 
         uploader.upload(TEST_IMAGE, access_control=acl)
-        params = get_params(request_mock.call_args[0])
+        params = get_params(request_mock)
 
         self.assertIn("access_control", params)
         self.assertEqual(exp_acl, params["access_control"])
@@ -912,7 +913,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         exp_acl_2 = '[{"access_type":"anonymous","start":"2019-02-22T16:20:57","end":"2019-03-22T00:00:00+00:00"}]'
 
         uploader.upload(TEST_IMAGE, access_control=acl_2)
-        params = get_params(request_mock.call_args[0])
+        params = get_params(request_mock)
 
         self.assertEqual(exp_acl_2, params["access_control"])
 
@@ -921,7 +922,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         exp_acl_str = '[{"access_type":"anonymous","start":"2019-02-22 16:20:57 +0200","end":"2019-03-22 00:00 +0200"}]'
 
         uploader.upload(TEST_IMAGE, access_control=acl_str)
-        params = get_params(request_mock.call_args[0])
+        params = get_params(request_mock)
 
         self.assertEqual(exp_acl_str, params["access_control"])
 
@@ -931,7 +932,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         expected_list_of_acl = "[" + ",".join([v[1:-1] for v in (exp_acl, exp_acl_2, exp_acl_str)]) + "]"
 
         uploader.upload(TEST_IMAGE, access_control=list_of_acl)
-        params = get_params(request_mock.call_args[0])
+        params = get_params(request_mock)
 
         self.assertEqual(expected_list_of_acl, params["access_control"])
 
@@ -941,7 +942,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
             with self.assertRaises(ValueError):
                 uploader.upload(TEST_IMAGE, access_control=invalid_value)
 
-    @patch('urllib3.request.RequestMethods.request')
+    @patch(URLLIB3_REQUEST)
     def test_various_upload_parameters(self, request_mock):
         """Should support various parameters in upload and explicit"""
         request_mock.return_value = MOCK_RESPONSE
@@ -956,13 +957,13 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
 
         uploader.upload(TEST_IMAGE, **options)
 
-        params = get_params(request_mock.call_args[0])
+        params = get_params(request_mock)
         for param in options.keys():
             self.assertIn(param, params)
 
         uploader.explicit(TEST_IMAGE, **options)
 
-        params = get_params(request_mock.call_args[0])
+        params = get_params(request_mock)
         for param in options.keys():
             self.assertIn(param, params)
 
@@ -1075,7 +1076,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         self.assertIn("timestamp", parameters)
         self.assertIn("signature", parameters)
 
-    @patch('urllib3.request.RequestMethods.request')
+    @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_create_zip_with_target_asset_folder(self, mocker):
         """Should pass target_asset_folder parameter on archive generation"""
