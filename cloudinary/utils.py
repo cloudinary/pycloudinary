@@ -190,8 +190,7 @@ def build_array(arg):
         return arg
     elif arg is None:
         return []
-    else:
-        return [arg]
+    return [arg]
 
 
 def build_list_of_dicts(val):
@@ -240,8 +239,7 @@ def encode_double_array(array):
     array = build_array(array)
     if len(array) > 0 and isinstance(array[0], list):
         return "|".join([",".join([str(i) for i in build_array(inner)]) for inner in array])
-    else:
-        return encode_list([str(i) for i in array])
+    return encode_list([str(i) for i in array])
 
 
 def encode_dict(arg):
@@ -251,8 +249,7 @@ def encode_dict(arg):
         else:
             items = arg.iteritems()
         return "|".join((k + "=" + v) for k, v in items)
-    else:
-        return arg
+    return arg
 
 
 def normalize_context_value(value):
@@ -356,8 +353,7 @@ def generate_transformation_string(**options):
         def recurse(bs):
             if isinstance(bs, dict):
                 return generate_transformation_string(**bs)[0]
-            else:
-                return generate_transformation_string(transformation=bs)[0]
+            return generate_transformation_string(transformation=bs)[0]
 
         base_transformations = list(map(recurse, base_transformations))
         named_transformation = None
@@ -518,8 +514,7 @@ def split_range(range):
         return [range[0], range[-1]]
     elif isinstance(range, string_types) and re.match(RANGE_RE, range):
         return range.split("..", 1)
-    else:
-        return None
+    return None
 
 
 def norm_range_value(value):
@@ -1425,8 +1420,7 @@ def normalize_expression(expression):
         result = re.sub(replaceRE, translate_if, result)
         result = re.sub('[ _]+', '_', result)
         return result
-    else:
-        return expression
+    return expression
 
 
 def __join_pair(key, value):
@@ -1434,8 +1428,7 @@ def __join_pair(key, value):
         return None
     elif value is True:
         return key
-    else:
-        return u"{0}=\"{1}\"".format(key, value)
+    return u"{0}=\"{1}\"".format(key, value)
 
 
 def html_attrs(attrs, only=None):
@@ -1445,7 +1438,6 @@ def html_attrs(attrs, only=None):
 def __safe_value(v):
     if isinstance(v, bool):
         return "1" if v else "0"
-
     return v
 
 
