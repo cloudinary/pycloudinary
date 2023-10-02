@@ -227,8 +227,8 @@ class ApiTest(unittest.TestCase):
         self.assertTrue(get_uri(args).endswith('/resources/image/upload'), get_uri(args))
         self.assertIn(API_TEST_ID, get_list_param(mocker, 'public_ids'))
         self.assertIn(API_TEST_ID2, get_list_param(mocker, 'public_ids'))
-        self.assertEqual(get_param(mocker, 'context'), True)
-        self.assertEqual(get_param(mocker, 'tags'), True)
+        self.assertEqual(get_param(mocker, 'context'), 'true')
+        self.assertEqual(get_param(mocker, 'tags'), 'true')
 
     @patch('urllib3.request.RequestMethods.request')
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -239,8 +239,8 @@ class ApiTest(unittest.TestCase):
         args, kargs = mocker.call_args
         self.assertTrue(get_uri(args).endswith('/resources/by_asset_ids'), get_uri(args))
         self.assertIn(API_TEST_ASSET_ID, get_list_param(mocker, 'asset_ids'))
-        self.assertEqual(get_param(mocker, 'context'), True)
-        self.assertEqual(get_param(mocker, 'tags'), True)
+        self.assertEqual(get_param(mocker, 'context'), 'true')
+        self.assertEqual(get_param(mocker, 'tags'), 'true')
         self.assertEqual(get_list_param(mocker, 'asset_ids').__len__(), 1)
 
     @patch('urllib3.request.RequestMethods.request')
@@ -253,8 +253,8 @@ class ApiTest(unittest.TestCase):
         self.assertTrue(get_uri(args).endswith('/resources/by_asset_ids'), get_uri(args))
         self.assertIn(API_TEST_ASSET_ID, get_list_param(mocker, 'asset_ids'))
         self.assertIn(API_TEST_ASSET_ID2, get_list_param(mocker, 'asset_ids'))
-        self.assertEqual(get_param(mocker, 'context'), True)
-        self.assertEqual(get_param(mocker, 'tags'), True)
+        self.assertEqual(get_param(mocker, 'context'), 'true')
+        self.assertEqual(get_param(mocker, 'tags'), 'true')
         self.assertEqual(get_list_param(mocker, 'asset_ids').__len__(), 2)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -615,7 +615,7 @@ class ApiTest(unittest.TestCase):
         mocker.return_value = MOCK_RESPONSE
         api.transformations(named=True)
         params = get_params(mocker.call_args[0])
-        self.assertEqual(params['named'], True)
+        self.assertEqual(params['named'], 'true')
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test13_transformation_metadata(self):
@@ -751,7 +751,7 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(cloudinary.config().cloud_name, res["cloud_name"])
         self.assertNotIn("settings", res)
 
-        res = api.config(settings="true")
+        res = api.config(settings=True)
 
         self.assertIn("settings", res)
 

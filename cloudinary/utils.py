@@ -581,8 +581,26 @@ def process_params(params):
 
 
 def cleanup_params(params):
+    """
+    Cleans and normalizes parameters when calculating signature in Upload API.
+
+    :param params:
+    :return:
+    """
     return dict([(k, __safe_value(v)) for (k, v) in params.items() if v is not None and not v == ""])
 
+
+def normalize_params(params):
+    """
+    Normalizes Admin API parameters.
+
+    :param params:
+    :return:
+    """
+    if not params or not isinstance(params, dict):
+        return params
+
+    return dict([(k, __bool_string(v)) for (k, v) in params.items() if v is not None and not v == ""])
 
 def sign_request(params, options):
     api_key = options.get("api_key", cloudinary.config().api_key)
@@ -1422,6 +1440,12 @@ def __safe_value(v):
         return "1" if v else "0"
     return v
 
+
+def __bool_string(v):
+    if isinstance(v, bool):
+        return "true" if v else "false"
+
+    return v
 
 def __crc(source):
     return str((zlib.crc32(to_bytearray(source)) & 0xffffffff) % 5 + 1)

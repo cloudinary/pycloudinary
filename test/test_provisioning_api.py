@@ -165,11 +165,11 @@ class AccountApiTest(unittest.TestCase):
                          "requires provisioning_api_key/provisioning_api_secret")
     def test_get_users_by_login(self):
         res = cloudinary.provisioning.users(user_ids=[self.user_id_1], pending=None, 
-                                            last_login=True, from_date=datetime.today(), to_date=datetime.today())
+                                            last_login="true", from_date=datetime.today(), to_date=datetime.today())
         self.assertEqual(len(res["users"]), 0)
 
         res = cloudinary.provisioning.users(user_ids=[self.user_id_1], pending=None,
-                                            last_login=False, from_date=datetime.today(), to_date=datetime.today())
+                                            last_login="false", from_date=datetime.today(), to_date=datetime.today())
         self.assertEqual(len(res["users"]), 1)
 
     @unittest.skipUnless(cloudinary.provisioning.account_config().provisioning_api_secret,
@@ -207,6 +207,32 @@ class AccountApiTest(unittest.TestCase):
         # Ensure we can find our ID in the list(Which means we got a real list as a response)
         self.assertEqual(group_by_id[0]["id"], self.group_id)
 
+    @unittest.skipUnless(cloudinary.provisioning.account_config().provisioning_api_secret,
+                         "requires provisioning_api_key/provisioning_api_secret")
+    def test_get_access_keys(self):
+        res = cloudinary.provisioning.access_keys(self.cloud_id)
+
+        self.assertEqual(1, res["total"])
+        self.assertEqual(1, len(res["access_keys"]))
+
+    @unittest.skipUnless(cloudinary.provisioning.account_config().provisioning_api_secret,
+                         "requires provisioning_api_key/provisioning_api_secret")
+    def test_generate_access_key(self):
+        res = cloudinary.provisioning.generate_access_key(self.cloud_id, name="test_key", enabled=False)
+
+        self.assertEqual("test_key", res["name"])
+        self.assertEqual(False, res["enabled"])
+
+    @unittest.skipUnless(cloudinary.provisioning.account_config().provisioning_api_secret,
+                         "requires provisioning_api_key/provisioning_api_secret")
+    def test_update_access_key(self):
+        key_res = cloudinary.provisioning.generate_access_key(self.cloud_id, name="test_key", enabled=False)
+
+        res = cloudinary.provisioning.update_access_key(self.cloud_id, key_res["api_key"],
+                                                        name="updated_key", enabled=True)
+
+        self.assertEqual("updated_key", res["name"])
+        self.assertEqual(True, res["enabled"])
 
 if __name__ == '__main__':
     unittest.main()

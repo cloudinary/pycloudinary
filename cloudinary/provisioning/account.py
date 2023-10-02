@@ -1,10 +1,10 @@
 from cloudinary.api_client.call_account_api import _call_account_api
 from cloudinary.utils import encode_list
 
-
 SUB_ACCOUNTS_SUB_PATH = "sub_accounts"
 USERS_SUB_PATH = "users"
 USER_GROUPS_SUB_PATH = "user_groups"
+ACCESS_KEYS = "access_keys"
 
 
 class Role(object):
@@ -123,7 +123,8 @@ def update_sub_account(sub_account_id, name=None, cloud_name=None, custom_attrib
     return _call_account_api("put", uri, params=params, **options)
 
 
-def users(user_ids=None, sub_account_id=None, pending=None, prefix=None, last_login=None, from_date=None, to_date=None, **options):
+def users(user_ids=None, sub_account_id=None, pending=None, prefix=None, last_login=None, from_date=None, to_date=None,
+          **options):
     """
     List all users
     :param user_ids:        The ids of the users to fetch
@@ -361,7 +362,7 @@ def user_in_user_groups(user_id, **options):
     """
     Get all user groups a user belongs to
     :param user_id:             The id of user
-    :param user_id:             str
+    :type user_id:              str
     :param options:             Generic advanced options dict, see online documentation
     :type options:              dict, optional
     :return:                    List of groups user is in
@@ -369,3 +370,81 @@ def user_in_user_groups(user_id, **options):
     """
     uri = [USER_GROUPS_SUB_PATH, user_id]
     return _call_account_api("get", uri, {}, **options)
+
+
+def access_keys(sub_account_id, page_size=None, page=None, sort_by=None, sort_order=None, **options):
+    """
+    Get sub account access keys.
+
+    :param sub_account_id:  The id of the sub account.
+    :type sub_account_id:   str
+    :param page_size:       How many entries to display on each page.
+    :type page_size:        int
+    :param page:            Which page to return (maximum pages: 100). **Default**: All pages are returned.
+    :type page:             int
+    :param sort_by:         Which response parameter to sort by.
+                                **Possible values**: `api_key`, `created_at`, `name`, `enabled`.
+    :type sort_by:          str
+    :param sort_order:      Control the order of returned keys. **Possible values**: `desc` (default), `asc`.
+    :type sort_order:       str
+    :param options:         Generic advanced options dict, see online documentation.
+    :type options:          dict, optional
+    :return:                List of access keys
+    :rtype:                 dict
+    """
+    uri = [SUB_ACCOUNTS_SUB_PATH, sub_account_id, ACCESS_KEYS]
+    params = {
+        "page_size": page_size,
+        "page": page,
+        "sort_by": sort_by,
+        "sort_order": sort_order,
+    }
+    return _call_account_api("get", uri, params, **options)
+
+
+def generate_access_key(sub_account_id, name=None, enabled=None, **options):
+    """
+    Generate a new access key.
+
+    :param sub_account_id:      The id of the sub account.
+    :type sub_account_id:       str
+    :param name:                The name of the new access key.
+    :type name:                 str
+    :param enabled:             Whether the new access key is enabled or disabled.
+    :type enabled:              bool
+    :param options:             Generic advanced options dict, see online documentation.
+    :type options:              dict, optional
+    :return:                    Access key details
+    :rtype:                     dict
+    """
+    uri = [SUB_ACCOUNTS_SUB_PATH, sub_account_id, ACCESS_KEYS]
+    params = {
+        "name": name,
+        "enabled": enabled,
+    }
+    return _call_account_api("post", uri, params, **options)
+
+
+def update_access_key(sub_account_id, api_key, name=None, enabled=None, **options):
+    """
+    Update the name and/or status of an existing access key.
+
+    :param sub_account_id:      The id of the sub account.
+    :type sub_account_id:       str
+    :param api_key:             The API key of the access key.
+    :type api_key:              str|int
+    :param name:                The updated name of the access key.
+    :type name:                 str
+    :param enabled:             Enable or disable the access key.
+    :type enabled:              bool
+    :param options:             Generic advanced options dict, see online documentation.
+    :type options:              dict, optional
+    :return:                    Access key details
+    :rtype:                     dict
+    """
+    uri = [SUB_ACCOUNTS_SUB_PATH, sub_account_id, ACCESS_KEYS, str(api_key)]
+    params = {
+        "name": name,
+        "enabled": enabled,
+    }
+    return _call_account_api("put", uri, params, **options)
