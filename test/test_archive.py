@@ -15,7 +15,7 @@ import urllib3
 from urllib3 import disable_warnings
 
 from test.helper_test import SUFFIX, TEST_IMAGE, api_response_mock, cleanup_test_resources_by_tag, UNIQUE_TEST_ID, \
-    get_uri, get_list_param, get_params
+    get_uri, get_list_param, get_params, URLLIB3_REQUEST
 
 MOCK_RESPONSE = api_response_mock()
 
@@ -48,7 +48,7 @@ class ArchiveTest(unittest.TestCase):
             tags=[TEST_TAG], transformations=[{"width": 0.5}, {"width": 2.0}], target_tags=[TEST_TAG_RAW])
         self.assertEqual(4, result2.get("file_count"))
 
-    @patch('urllib3.request.RequestMethods.request')
+    @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_optional_parameters(self, mocker):
         """should allow optional parameters"""
@@ -60,7 +60,7 @@ class ArchiveTest(unittest.TestCase):
             allow_missing=True,
             skip_transformation_name=True,
         )
-        params = get_params(mocker.call_args[0])
+        params = get_params(mocker)
         self.assertEqual(params['expires_at'], expires_at)
         self.assertTrue(params['allow_missing'])
         self.assertTrue(params['skip_transformation_name'])
@@ -114,7 +114,7 @@ class ArchiveTest(unittest.TestCase):
         download_folder_url = utils.download_folder(folder_path="folder/", use_original_filename=True)
         self.assertIn("use_original_filename", download_folder_url)
 
-    @patch('urllib3.request.RequestMethods.request')
+    @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_create_archive_multiple_resource_types(self, mocker):
         """should allow fully_qualified_public_ids"""
@@ -131,9 +131,7 @@ class ArchiveTest(unittest.TestCase):
             fully_qualified_public_ids=test_ids
         )
 
-        args, kargs = mocker.call_args
-
-        self.assertTrue(get_uri(args).endswith('/auto/generate_archive'))
+        self.assertTrue(get_uri(mocker).endswith('/auto/generate_archive'))
         self.assertEqual(test_ids, get_list_param(mocker, 'fully_qualified_public_ids'))
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")

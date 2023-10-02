@@ -60,7 +60,7 @@ setup(name='cloudinary',
       test_suite="test",
       install_requires=[
           "six",
-          "urllib3>=1.26.5,<2",
+          "urllib3>=1.26.5",
           "certifi"
       ],
       tests_require=[

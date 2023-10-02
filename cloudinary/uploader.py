@@ -506,7 +506,7 @@ def call_api(action, params, http_headers=None, return_error=False, unsigned=Fal
 
     code = 200
     try:
-        response = _http.request("POST", api_url, param_list, headers, **kw)
+        response = _http.request(method="POST", url=api_url, fields=param_list, headers=headers, **kw)
     except HTTPError as e:
         raise Error("Unexpected error - {0!r}".format(e))
     except socket.error as e:

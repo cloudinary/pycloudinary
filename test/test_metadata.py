@@ -11,7 +11,7 @@ import cloudinary
 from cloudinary import api
 from cloudinary.exceptions import BadRequest, NotFound
 from test.helper_test import (
-    UNIQUE_TEST_ID, get_uri, get_params, get_method, api_response_mock, ignore_exception, get_json_body
+    UNIQUE_TEST_ID, get_uri, get_params, get_method, api_response_mock, ignore_exception, get_json_body, URLLIB3_REQUEST
 )
 
 MOCK_RESPONSE = api_response_mock()
@@ -172,17 +172,16 @@ class MetadataTest(unittest.TestCase):
             if "state" in datasource["values"][0]:
                 self.assertIn(datasource["values"][0]["state"], ["active", "inactive"])
 
-    @patch("urllib3.request.RequestMethods.request")
+    @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test01_list_metadata_fields(self, mocker):
         """Test getting a list of all metadata fields"""
         mocker.return_value = MOCK_RESPONSE
         api.list_metadata_fields()
-        args, kargs = mocker.call_args
 
-        self.assertTrue(get_uri(args).endswith("/metadata_fields"))
+        self.assertTrue(get_uri(mocker).endswith("/metadata_fields"))
         self.assertEqual(get_method(mocker), "GET")
-        self.assertFalse(get_params(args).get("fields"))
+        self.assertFalse(get_params(mocker).get("fields"))
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test02_get_metadata_field(self):
@@ -191,7 +190,7 @@ class MetadataTest(unittest.TestCase):
 
         self.assert_metadata_field(result, "string", {"label": EXTERNAL_ID_GENERAL})
 
-    @patch("urllib3.request.RequestMethods.request")
+    @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test03_create_string_metadata_field(self, mocker):
         """Test creating a string metadata field"""
@@ -201,17 +200,16 @@ class MetadataTest(unittest.TestCase):
             "label": EXTERNAL_ID_STRING,
             "type": "string",
         })
-        args, kargs = mocker.call_args
 
-        self.assertTrue(get_uri(args).endswith("/metadata_fields"))
+        self.assertTrue(get_uri(mocker).endswith("/metadata_fields"))
         self.assertEqual(get_method(mocker), "POST")
-        self.assertEqual(json.loads(kargs["body"].decode('utf-8')), {
+        self.assertEqual(get_json_body(mocker), {
             "type": "string",
             "external_id": EXTERNAL_ID_STRING,
             "label": EXTERNAL_ID_STRING,
         })
 
-    @patch("urllib3.request.RequestMethods.request")
+    @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test04_create_int_metadata_field(self, mocker):
         """Test creating an integer metadata field"""
@@ -221,11 +219,10 @@ class MetadataTest(unittest.TestCase):
             "label": EXTERNAL_ID_INT,
             "type": "integer",
         })
-        args, kargs = mocker.call_args
 
-        self.assertTrue(get_uri(args).endswith("/metadata_fields"))
+        self.assertTrue(get_uri(mocker).endswith("/metadata_fields"))
         self.assertEqual(get_method(mocker), "POST")
-        self.assertEqual(json.loads(kargs["body"].decode('utf-8')), {
+        self.assertEqual(get_json_body(mocker), {
             "type": "integer",
             "external_id": EXTERNAL_ID_INT,
             "label": EXTERNAL_ID_INT,
@@ -246,7 +243,7 @@ class MetadataTest(unittest.TestCase):
             "mandatory": False,
         })
 
-    @patch("urllib3.request.RequestMethods.request")
+    @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test06_create_enum_metadata_field(self, mocker):
         """Test creating an Enum metadata field"""
@@ -259,11 +256,10 @@ class MetadataTest(unittest.TestCase):
             "label": EXTERNAL_ID_ENUM,
             "type": "enum",
         })
-        args, kargs = mocker.call_args
 
-        self.assertTrue(get_uri(args).endswith("/metadata_fields"))
+        self.assertTrue(get_uri(mocker).endswith("/metadata_fields"))
         self.assertEqual(get_method(mocker), "POST")
-        self.assertEqual(json.loads(kargs["body"].decode('utf-8')), {
+        self.assertEqual(get_json_body(mocker), {
             "datasource": {
                 "values": DATASOURCE_SINGLE,
             },
@@ -331,19 +327,18 @@ class MetadataTest(unittest.TestCase):
         self.assertEqual(len(DATASOURCE_MULTIPLE), len(result["values"]))
         self.assertEqual(DATASOURCE_SINGLE[0]["value"], result["values"][0]["value"])
 
-    @patch("urllib3.request.RequestMethods.request")
+    @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test10_delete_metadata_field(self, mocker):
         """Test deleting a metadata field definition by its external id."""
         mocker.return_value = MOCK_RESPONSE
         api.delete_metadata_field(EXTERNAL_ID_DELETE)
-        args, kargs = mocker.call_args
 
         target_uri = "/metadata_fields/{}".format(EXTERNAL_ID_DELETE)
-        self.assertTrue(get_uri(args).endswith(target_uri))
+        self.assertTrue(get_uri(mocker).endswith(target_uri))
         self.assertEqual(get_method(mocker), "DELETE")
 
-        self.assertEqual(json.loads(kargs["body"].decode('utf-8')), {})
+        self.assertEqual(get_json_body(mocker), {})
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test12_delete_metadata_field_data_source(self):
@@ -486,41 +481,38 @@ class MetadataTest(unittest.TestCase):
 
         self.assertEqual(result['values'][0]['value'], DATASOURCE_MULTIPLE[-1]['value'])
 
-    @patch("urllib3.request.RequestMethods.request")
+    @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_reorder_metadata_fields_by_label(self, mocker):
         """Test the reorder of metadata fields for label order by asc"""
         mocker.return_value = MOCK_RESPONSE
         api.reorder_metadata_fields('label', 'asc')
-        args, kargs = mocker.call_args
 
-        self.assertTrue(get_uri(args).endswith("/metadata_fields/order"))
+        self.assertTrue(get_uri(mocker).endswith("/metadata_fields/order"))
         self.assertEqual(get_method(mocker), "PUT")
         self.assertEqual(get_json_body(mocker)['order_by'], "label")
         self.assertEqual(get_json_body(mocker)['direction'], "asc")
 
-    @patch("urllib3.request.RequestMethods.request")
+    @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_reorder_metadata_fields_by_external_id(self, mocker):
         """Test the reorder of metadata fields for external_id order by desc"""
         mocker.return_value = MOCK_RESPONSE
         api.reorder_metadata_fields('external_id', 'desc')
-        args, kargs = mocker.call_args
 
-        self.assertTrue(get_uri(args).endswith("/metadata_fields/order"))
+        self.assertTrue(get_uri(mocker).endswith("/metadata_fields/order"))
         self.assertEqual(get_method(mocker), "PUT")
         self.assertEqual(get_json_body(mocker)['order_by'], "external_id")
         self.assertEqual(get_json_body(mocker)['direction'], "desc")
 
-    @patch("urllib3.request.RequestMethods.request")
+    @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_reorder_metadata_fields_by_created_at(self, mocker):
         """Test the reorder of metadata fields for created_at order by asc"""
         mocker.return_value = MOCK_RESPONSE
         api.reorder_metadata_fields('created_at', 'asc')
-        args, kargs = mocker.call_args
 
-        self.assertTrue(get_uri(args).endswith("/metadata_fields/order"))
+        self.assertTrue(get_uri(mocker).endswith("/metadata_fields/order"))
         self.assertEqual(get_method(mocker), "PUT")
         self.assertEqual(get_json_body(mocker)['order_by'], "created_at")
         self.assertEqual(get_json_body(mocker)['direction'], "asc")
