@@ -1,3 +1,17 @@
+1.36.0 / 2023-10-02
+==================
+
+New functionality and features
+------------------------------
+
+  * Add support for access keys management in Provisioning API
+
+Other Changes
+-------------
+
+  * Add support for `urllib3` version `2.0`
+  * Remove unnecessary `else` statements
+
 1.35.0 / 2023-09-25
 ==================
 
