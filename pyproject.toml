@@ -1,0 +1,61 @@
+[project]
+name = "cloudinary"
+description = "Python and Django SDK for Cloudinary"
+version = "1.36.0"
+
+authors = [{ name = "Cloudinary", email = "info@cloudinary.com" }]
+license = { file = "LICENSE.txt" }
+keywords = ["cloudinary", "image", "video", "upload", "crop", "resize", "filter", "transformation", "manipulation", "cdn"]
+readme = "README.md"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Web Environment",
+    "Framework :: Django",
+    "Framework :: Django :: 1.11",
+    "Framework :: Django :: 2.0",
+    "Framework :: Django :: 2.1",
+    "Framework :: Django :: 2.2",
+    "Framework :: Django :: 3.0",
+    "Framework :: Django :: 3.1",
+    "Framework :: Django :: 3.2",
+    "Framework :: Django :: 4.0",
+    "Framework :: Django :: 4.1",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 2",
+    "Programming Language :: Python :: 2.7",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+    "Topic :: Multimedia :: Graphics",
+    "Topic :: Multimedia :: Graphics :: Graphics Conversion",
+    "Topic :: Multimedia :: Sound/Audio",
+    "Topic :: Multimedia :: Sound/Audio :: Conversion",
+    "Topic :: Multimedia :: Video",
+    "Topic :: Multimedia :: Video :: Conversion",
+    "Topic :: Software Development :: Libraries :: Python Modules"
+]
+dependencies = [
+    "six",
+    "urllib3>=1.26.5",
+    "certifi"
+]
+
+[project.urls]
+Homepage = "https://cloudinary.com"
+Repository = "https://github.com/cloudinary/pycloudinary"
+Changelog = "https://raw.githubusercontent.com/cloudinary/pycloudinary/master/CHANGELOG.md"
+
+[tool.setuptools]
+zip-safe = false
+include-package-data = true
+py-modules = []
+
+[tool.setuptools.packages.find]
+exclude = ['ez_setup', 'examples', 'test', 'django_tests', 'django_tests.*']
