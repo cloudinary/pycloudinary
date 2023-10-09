@@ -47,6 +47,11 @@ dependencies = [
     "certifi"
 ]
 
+[project.optional-dependencies]
+dev = [
+    "tox"
+]
+
 [project.urls]
 Homepage = "https://cloudinary.com"
 Repository = "https://github.com/cloudinary/pycloudinary"
