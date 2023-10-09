@@ -56,11 +56,3 @@ dev = [
 Homepage = "https://cloudinary.com"
 Repository = "https://github.com/cloudinary/pycloudinary"
 Changelog = "https://raw.githubusercontent.com/cloudinary/pycloudinary/master/CHANGELOG.md"
-
-[tool.setuptools]
-zip-safe = false
-include-package-data = true
-py-modules = []
-
-[tool.setuptools.packages.find]
-exclude = ['ez_setup', 'examples', 'test', 'django_tests', 'django_tests.*']
