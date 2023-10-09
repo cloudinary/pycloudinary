@@ -6,11 +6,6 @@ setup(packages=find_packages(exclude=['ez_setup', 'examples', 'test', 'django_te
       include_package_data=True,
       zip_safe=False,
       test_suite="test",
-      install_requires=[
-          "six",
-          "urllib3>=1.26.5",
-          "certifi"
-      ],
       tests_require=[
           "mock" + ("<4" if version_info < (3, 6) else "")
       ],
