@@ -54,7 +54,7 @@ dev = [
 
 [project.urls]
 Homepage = "https://cloudinary.com"
-Repository = "https://github.com/cloudinary/pycloudinary"
+Source = "https://github.com/cloudinary/pycloudinary"
 Changelog = "https://raw.githubusercontent.com/cloudinary/pycloudinary/master/CHANGELOG.md"
 
 
