@@ -57,6 +57,14 @@ Homepage = "https://cloudinary.com"
 Source = "https://github.com/cloudinary/pycloudinary"
 Changelog = "https://raw.githubusercontent.com/cloudinary/pycloudinary/master/CHANGELOG.md"
 
+[tool.setuptools]
+include-package-data = true
+zip-safe = false
+
+[tool.setuptools.packages.find]
+exclude = ["samples", "tools", "test*", "django_tests*", "venv*"]
+namespaces = false
+
 
 [build-system]
 requires = ["setuptools"]
