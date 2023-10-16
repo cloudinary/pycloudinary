@@ -20,7 +20,15 @@ class StreamingProfilesTest(unittest.TestCase):
         if not cloudinary.config().api_secret:
             return
 
-    __predefined_sp = ["4k", "full_hd", "hd", "sd", "full_hd_wifi", "full_hd_lean", "hd_lean"]
+    __predefined_sp = [
+        "4k",
+        "full_hd",
+        "hd",
+        "sd",
+        "full_hd_wifi",
+        "full_hd_lean",
+        "hd_lean",
+    ]
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_create_streaming_profile(self):
@@ -28,9 +36,17 @@ class StreamingProfilesTest(unittest.TestCase):
         name = self.test_id + "_streaming_profile"
         result = api.create_streaming_profile(
             name,
-            representations=[{"transformation": {
-                "bit_rate": "5m", "height": 1200, "width": 1200, "crop": "limit"
-            }}])
+            representations=[
+                {
+                    "transformation": {
+                        "bit_rate": "5m",
+                        "height": 1200,
+                        "width": 1200,
+                        "crop": "limit",
+                    }
+                }
+            ],
+        )
         self.assertIn("representations", result["data"])
         reps = result["data"]["representations"]
         self.assertIsInstance(reps, list)
@@ -71,14 +87,30 @@ class StreamingProfilesTest(unittest.TestCase):
         name = self.test_id + "_streaming_profile_delete"
         api.create_streaming_profile(
             name,
-            representations=[{"transformation": {
-                "bit_rate": "5m", "height": 1200, "width": 1200, "crop": "limit"
-            }}])
+            representations=[
+                {
+                    "transformation": {
+                        "bit_rate": "5m",
+                        "height": 1200,
+                        "width": 1200,
+                        "crop": "limit",
+                    }
+                }
+            ],
+        )
         result = api.update_streaming_profile(
             name,
-            representations=[{"transformation": {
-                "bit_rate": "5m", "height": 1000, "width": 1000, "crop": "scale"
-            }}])
+            representations=[
+                {
+                    "transformation": {
+                        "bit_rate": "5m",
+                        "height": 1000,
+                        "width": 1000,
+                        "crop": "scale",
+                    }
+                }
+            ],
+        )
         self.assertIn("representations", result["data"])
         reps = result["data"]["representations"]
         self.assertIsInstance(reps, list)

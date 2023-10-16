@@ -2,7 +2,9 @@ import unittest
 
 from cloudinary.cache import responsive_breakpoints_cache
 from cloudinary.cache.adapter.key_value_cache_adapter import KeyValueCacheAdapter
-from cloudinary.cache.storage.file_system_key_value_storage import FileSystemKeyValueStorage
+from cloudinary.cache.storage.file_system_key_value_storage import (
+    FileSystemKeyValueStorage,
+)
 from test.cache.storage.dummy_cache_storage import DummyCacheStorage
 from test.helper_test import UNIQUE_TEST_ID
 
@@ -55,7 +57,9 @@ class ResponsiveBreakpointsCacheTest(unittest.TestCase):
         self.assertFalse(self.cache.flush_all())
 
     def test_rb_cache_filesystem_storage(self):
-        self.cache.set_cache_adapter(KeyValueCacheAdapter(FileSystemKeyValueStorage(None)))
+        self.cache.set_cache_adapter(
+            KeyValueCacheAdapter(FileSystemKeyValueStorage(None))
+        )
 
         res = None
         try:
@@ -65,5 +69,3 @@ class ResponsiveBreakpointsCacheTest(unittest.TestCase):
             self.cache.delete(self.public_id)
 
         self.assertEqual(self.breakpoints, res)
-
-

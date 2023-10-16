@@ -13,7 +13,7 @@ from six import python_2_unicode_compatible, add_metaclass
 
 logger = logging.getLogger("Cloudinary")
 ch = logging.StreamHandler()
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 ch.setFormatter(formatter)
 logger.addHandler(ch)
 
@@ -26,15 +26,17 @@ from cloudinary.compat import urlparse, parse_qs
 from platform import python_version, platform
 
 CERT_KWARGS = {
-    'cert_reqs': 'CERT_REQUIRED',
-    'ca_certs': certifi.where(),
+    "cert_reqs": "CERT_REQUIRED",
+    "ca_certs": certifi.where(),
 }
 
 CF_SHARED_CDN = "d3jpl91pxevbkh.cloudfront.net"
 OLD_AKAMAI_SHARED_CDN = "cloudinary-a.akamaihd.net"
 AKAMAI_SHARED_CDN = "res.cloudinary.com"
 SHARED_CDN = AKAMAI_SHARED_CDN
-CL_BLANK = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+CL_BLANK = (
+    "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+)
 URI_SCHEME = "cloudinary"
 API_VERSION = "v1_1"
 
@@ -68,8 +70,7 @@ def get_user_agent():
 
     if USER_PLATFORM == "":
         return USER_AGENT
-    else:
-        return USER_PLATFORM + " " + USER_AGENT
+    return USER_PLATFORM + " " + USER_AGENT
 
 
 def import_django_settings():
@@ -82,15 +83,17 @@ def import_django_settings():
             # We can get a situation when Django module is installed in the system, but not initialized,
             # which means we are running not in a Django process.
             # In this case the following line throws ImproperlyConfigured exception
-            if 'cloudinary' in _django_settings.INSTALLED_APPS:
+            if "cloudinary" in _django_settings.INSTALLED_APPS:
                 from django import get_version as _get_django_version
-                global USER_PLATFORM
-                USER_PLATFORM = "Django/{django_version}".format(django_version=_get_django_version())
 
-            if 'CLOUDINARY' in dir(_django_settings):
+                global USER_PLATFORM
+                USER_PLATFORM = "Django/{django_version}".format(
+                    django_version=_get_django_version()
+                )
+
+            if "CLOUDINARY" in dir(_django_settings):
                 return _django_settings.CLOUDINARY
-            else:
-                return None
+            return None
 
         except ImproperlyConfigured:
             return None
@@ -113,10 +116,10 @@ class BaseConfig(object):
 
     @staticmethod
     def _is_nested_key(key):
-        return re.match(r'\w+\[\w+\]', key)
+        return re.match(r"\w+\[\w+\]", key)
 
     def _put_nested_key(self, key, value):
-        chain = re.split(r'[\[\]]+', key)
+        chain = re.split(r"[\[\]]+", key)
         chain = [k for k in chain if k]
         outer = self.__dict__
         last_key = chain.pop()
@@ -186,7 +189,9 @@ class Config(BaseConfig):
 
     def _config_from_parsed_url(self, parsed_url):
         if not self._is_url_scheme_valid(parsed_url):
-            raise ValueError("Invalid CLOUDINARY_URL scheme. Expecting to start with 'cloudinary://'")
+            raise ValueError(
+                "Invalid CLOUDINARY_URL scheme. Expecting to start with 'cloudinary://'"
+            )
 
         is_private_cdn = parsed_url.path != ""
         result = {
@@ -202,11 +207,14 @@ class Config(BaseConfig):
 
     def _load_config_from_env(self):
         if os.environ.get("CLOUDINARY_CLOUD_NAME"):
-            config_keys = [key for key in os.environ.keys()
-                           if key.startswith("CLOUDINARY_") and key != "CLOUDINARY_URL"]
+            config_keys = [
+                key
+                for key in os.environ.keys()
+                if key.startswith("CLOUDINARY_") and key != "CLOUDINARY_URL"
+            ]
 
             for full_key in config_keys:
-                conf_key = full_key[len("CLOUDINARY_"):].lower()
+                conf_key = full_key[len("CLOUDINARY_") :].lower()
                 conf_val = os.environ[full_key]
                 if conf_val in ["true", "false"]:
                     conf_val = conf_val == "true"
@@ -242,35 +250,36 @@ class CloudinaryResource(object):
     """
     Recommended sources for video tag
     """
+
     default_video_sources = [
-        {
-            "type": "mp4",
-            "codecs": "hev1",
-            "transformations": {"video_codec": "h265"}
-        }, {
-            "type": "webm",
-            "codecs": "vp9",
-            "transformations": {"video_codec": "vp9"}
-        }, {
-            "type": "mp4",
-            "transformations": {"video_codec": "auto"}
-        }, {
-            "type": "webm",
-            "transformations": {"video_codec": "auto"}
-        },
+        {"type": "mp4", "codecs": "hev1", "transformations": {"video_codec": "h265"}},
+        {"type": "webm", "codecs": "vp9", "transformations": {"video_codec": "vp9"}},
+        {"type": "mp4", "transformations": {"video_codec": "auto"}},
+        {"type": "webm", "transformations": {"video_codec": "auto"}},
     ]
 
-    def __init__(self, public_id=None, format=None, version=None,
-                 signature=None, url_options=None, metadata=None, type=None, resource_type=None,
-                 default_resource_type=None):
+    def __init__(
+        self,
+        public_id=None,
+        format=None,
+        version=None,
+        signature=None,
+        url_options=None,
+        metadata=None,
+        type=None,
+        resource_type=None,
+        default_resource_type=None,
+    ):
         self.metadata = metadata
         metadata = metadata or {}
-        self.public_id = public_id or metadata.get('public_id')
-        self.format = format or metadata.get('format')
-        self.version = version or metadata.get('version')
-        self.signature = signature or metadata.get('signature')
-        self.type = type or metadata.get('type') or "upload"
-        self.resource_type = resource_type or metadata.get('resource_type') or default_resource_type
+        self.public_id = public_id or metadata.get("public_id")
+        self.format = format or metadata.get("format")
+        self.version = version or metadata.get("version")
+        self.signature = signature or metadata.get("signature")
+        self.type = type or metadata.get("type") or "upload"
+        self.resource_type = (
+            resource_type or metadata.get("resource_type") or default_resource_type
+        )
         self.url_options = url_options or {}
 
     def __str__(self):
@@ -283,35 +292,40 @@ class CloudinaryResource(object):
         return self.signature == self.get_expected_signature()
 
     def get_prep_value(self):
-        if None in [self.public_id,
-                    self.type,
-                    self.resource_type]:
+        if None in [self.public_id, self.type, self.resource_type]:
             return None
-        prep = ''
-        prep = prep + self.resource_type + '/' + self.type + '/'
+        prep = ""
+        prep = prep + self.resource_type + "/" + self.type + "/"
         if self.version:
-            prep = prep + 'v' + str(self.version) + '/'
+            prep = prep + "v" + str(self.version) + "/"
         prep = prep + self.public_id
         if self.format:
-            prep = prep + '.' + self.format
+            prep = prep + "." + self.format
         return prep
 
     def get_presigned(self):
-        return self.get_prep_value() + '#' + self.get_expected_signature()
+        return self.get_prep_value() + "#" + self.get_expected_signature()
 
     def get_expected_signature(self):
-        return utils.api_sign_request({"public_id": self.public_id, "version": self.version}, config().api_secret,
-                                      config().signature_algorithm)
+        return utils.api_sign_request(
+            {"public_id": self.public_id, "version": self.version},
+            config().api_secret,
+            config().signature_algorithm,
+        )
 
     @property
     def url(self):
         return self.build_url(**self.url_options)
 
     def __build_url(self, **options):
-        combined_options = dict(format=self.format, version=self.version, type=self.type,
-                                resource_type=self.resource_type or "image")
+        combined_options = {
+            "format": self.format,
+            "version": self.version,
+            "type": self.type,
+            "resource_type": self.resource_type or "image",
+        }
         combined_options.update(options)
-        public_id = combined_options.get('public_id') or self.public_id
+        public_id = combined_options.get("public_id") or self.public_id
         return utils.cloudinary_url(public_id, **combined_options)
 
     def build_url(self, **options):
@@ -323,7 +337,7 @@ class CloudinaryResource(object):
 
     @staticmethod
     def default_source_types():
-        return ['webm', 'mp4', 'ogv']
+        return ["webm", "mp4", "ogv"]
 
     @staticmethod
     def _validate_srcset_data(srcset_data):
@@ -338,10 +352,14 @@ class CloudinaryResource(object):
 
         :return: bool True on success or False on failure
         """
-        if not all(k in srcset_data and isinstance(srcset_data[k], numbers.Number) for k in ("min_width", "max_width",
-                                                                                             "max_images")):
-            logger.warning("Either valid (min_width, max_width, max_images)" +
-                           "or breakpoints must be provided to the image srcset attribute")
+        if not all(
+            k in srcset_data and isinstance(srcset_data[k], numbers.Number)
+            for k in ("min_width", "max_width", "max_images")
+        ):
+            logger.warning(
+                "Either valid (min_width, max_width, max_images)"
+                + "or breakpoints must be provided to the image srcset attribute"
+            )
             return False
 
         if srcset_data["min_width"] > srcset_data["max_width"]:
@@ -378,13 +396,21 @@ class CloudinaryResource(object):
         if not self._validate_srcset_data(srcset_data):
             return None
 
-        min_width, max_width, max_images = srcset_data["min_width"], srcset_data["max_width"], srcset_data["max_images"]
+        min_width, max_width, max_images = (
+            srcset_data["min_width"],
+            srcset_data["max_width"],
+            srcset_data["max_images"],
+        )
 
         if max_images == 1:
             # if user requested only 1 image in srcset, we return max_width one
             min_width = max_width
 
-        step_size = int(ceil(float(max_width - min_width) / (max_images - 1 if max_images > 1 else 1)))
+        step_size = int(
+            ceil(
+                float(max_width - min_width) / (max_images - 1 if max_images > 1 else 1)
+            )
+        )
 
         curr_breakpoint = min_width
 
@@ -424,8 +450,14 @@ class CloudinaryResource(object):
         kbytes_step = int(ceil(float(bytes_step) / 1024))
 
         breakpoints_width_param = "auto:breakpoints_{min_width}_{max_width}_{kbytes_step}_{max_images}:json".format(
-            min_width=min_width, max_width=max_width, kbytes_step=kbytes_step, max_images=max_images)
-        breakpoints_url = utils.cloudinary_scaled_url(self.public_id, breakpoints_width_param, transformation, options)
+            min_width=min_width,
+            max_width=max_width,
+            kbytes_step=kbytes_step,
+            max_images=max_images,
+        )
+        breakpoints_url = utils.cloudinary_scaled_url(
+            self.public_id, breakpoints_width_param, transformation, options
+        )
 
         return _http_client.get_json(breakpoints_url).get("breakpoints", None)
 
@@ -449,15 +481,23 @@ class CloudinaryResource(object):
             return breakpoints
 
         if srcset_data.get("use_cache"):
-            breakpoints = responsive_breakpoints_cache.instance.get(self.public_id, **options)
+            breakpoints = responsive_breakpoints_cache.instance.get(
+                self.public_id, **options
+            )
             if not breakpoints:
                 try:
                     breakpoints = self._fetch_breakpoints(srcset_data, **options)
                 except GeneralError as e:
-                    logger.warning("Failed getting responsive breakpoints: {error}".format(error=e.message))
+                    logger.warning(
+                        "Failed getting responsive breakpoints: {error}".format(
+                            error=e.message
+                        )
+                    )
 
                 if breakpoints:
-                    responsive_breakpoints_cache.instance.set(self.public_id, breakpoints, **options)
+                    responsive_breakpoints_cache.instance.set(
+                        self.public_id, breakpoints, **options
+                    )
 
         if not breakpoints:
             # Static calculation if cache is not enabled or we failed to fetch breakpoints
@@ -483,8 +523,17 @@ class CloudinaryResource(object):
         if transformation is None:
             transformation = dict()
 
-        return ", ".join(["{0} {1}w".format(utils.cloudinary_scaled_url(
-            self.public_id, w, transformation, options), w) for w in breakpoints])
+        return ", ".join(
+            [
+                "{0} {1}w".format(
+                    utils.cloudinary_scaled_url(
+                        self.public_id, w, transformation, options
+                    ),
+                    w,
+                )
+                for w in breakpoints
+            ]
+        )
 
     @staticmethod
     def _generate_sizes_attribute(breakpoints):
@@ -498,7 +547,9 @@ class CloudinaryResource(object):
         if not breakpoints:
             return None
 
-        return ", ".join("(max-width: {bp}px) {bp}px".format(bp=bp) for bp in breakpoints)
+        return ", ".join(
+            "(max-width: {bp}px) {bp}px".format(bp=bp) for bp in breakpoints
+        )
 
     def _generate_image_responsive_attributes(self, attributes, srcset_data, **options):
         """
@@ -526,7 +577,9 @@ class CloudinaryResource(object):
         if "srcset" not in attributes:
             breakpoints = self._get_or_generate_breakpoints(srcset_data, **options)
             transformation = srcset_data.get("transformation")
-            srcset_attr = self._generate_srcset_attribute(breakpoints, transformation, **options)
+            srcset_attr = self._generate_srcset_attribute(
+                breakpoints, transformation, **options
+            )
             if srcset_attr:
                 responsive_attributes["srcset"] = srcset_attr
 
@@ -581,7 +634,9 @@ class CloudinaryResource(object):
             if src == "blank":
                 src = CL_BLANK
 
-        responsive_attrs = self._generate_image_responsive_attributes(custom_attributes, srcset_data, **options)
+        responsive_attrs = self._generate_image_responsive_attributes(
+            custom_attributes, srcset_data, **options
+        )
 
         if responsive_attrs:
             # width and height attributes override srcset behavior, they should be removed from html attributes.
@@ -595,7 +650,7 @@ class CloudinaryResource(object):
         if src:
             attrs["src"] = src
 
-        return u"<img {0}/>".format(utils.html_attrs(attrs))
+        return "<img {0}/>".format(utils.html_attrs(attrs))
 
     def video_thumbnail(self, **options):
         self.default_poster_options(options)
@@ -614,13 +669,15 @@ class CloudinaryResource(object):
         :return: Resulting mime type
         """
 
-        video_type = 'ogg' if video_type == 'ogv' else video_type
+        video_type = "ogg" if video_type == "ogv" else video_type
 
         if not video_type:
             return ""
 
         codecs_str = ", ".join(codecs) if isinstance(codecs, (list, tuple)) else codecs
-        codecs_attr = "; codecs={codecs_str}".format(codecs_str=codecs_str) if codecs_str else ""
+        codecs_attr = (
+            "; codecs={codecs_str}".format(codecs_str=codecs_str) if codecs_str else ""
+        )
 
         return "video/{}{}".format(video_type, codecs_attr)
 
@@ -635,10 +692,10 @@ class CloudinaryResource(object):
         """
         attributes = video_options.copy()
 
-        if 'html_width' in attributes:
-            attributes['width'] = attributes.pop('html_width')
-        if 'html_height' in attributes:
-            attributes['height'] = attributes.pop('html_height')
+        if "html_width" in attributes:
+            attributes["width"] = attributes.pop("html_width")
+        if "html_height" in attributes:
+            attributes["height"] = attributes.pop("html_height")
 
         if "poster" in attributes and not attributes["poster"]:
             attributes.pop("poster", None)
@@ -654,18 +711,18 @@ class CloudinaryResource(object):
 
         :return: Resulting video poster URL
         """
-        if 'poster' not in video_options:
+        if "poster" not in video_options:
             return self.video_thumbnail(public_id=source, **video_options)
 
-        poster_options = video_options['poster']
+        poster_options = video_options["poster"]
 
         if not isinstance(poster_options, dict):
             return poster_options
 
-        if 'public_id' not in poster_options:
+        if "public_id" not in poster_options:
             return self.video_thumbnail(public_id=source, **poster_options)
 
-        return utils.cloudinary_url(poster_options['public_id'], **poster_options)[0]
+        return utils.cloudinary_url(poster_options["public_id"], **poster_options)[0]
 
     def _populate_video_source_tags(self, source, options):
         """
@@ -682,20 +739,30 @@ class CloudinaryResource(object):
         source_tags = []
 
         # Consume all relevant options, otherwise they are left and passed as attributes
-        video_sources = options.pop('sources', [])
-        source_types = options.pop('source_types', [])
-        source_transformation = options.pop('source_transformation', {})
+        video_sources = options.pop("sources", [])
+        source_types = options.pop("source_types", [])
+        source_transformation = options.pop("source_transformation", {})
 
         if video_sources and isinstance(video_sources, list):
             # processing new source structure with codecs
             for source_data in video_sources:
                 transformation = options.copy()
                 transformation.update(source_data.get("transformations", {}))
-                source_type = source_data.get("type", '')
-                src = utils.cloudinary_url(source, format=source_type, **transformation)[0]
+                source_type = source_data.get("type", "")
+                src = utils.cloudinary_url(
+                    source, format=source_type, **transformation
+                )[0]
                 codecs = source_data.get("codecs", [])
-                source_tags.append("<source {attributes}>".format(
-                    attributes=utils.html_attrs({'src': src, 'type': self._video_mime_type(source_type, codecs)})))
+                source_tags.append(
+                    "<source {attributes}>".format(
+                        attributes=utils.html_attrs(
+                            {
+                                "src": src,
+                                "type": self._video_mime_type(source_type, codecs),
+                            }
+                        )
+                    )
+                )
 
             return source_tags
 
@@ -710,8 +777,13 @@ class CloudinaryResource(object):
             transformation = options.copy()
             transformation.update(source_transformation.get(source_type, {}))
             src = utils.cloudinary_url(source, format=source_type, **transformation)[0]
-            source_tags.append("<source {attributes}>".format(
-                attributes=utils.html_attrs({'src': src, 'type': self._video_mime_type(source_type)})))
+            source_tags.append(
+                "<source {attributes}>".format(
+                    attributes=utils.html_attrs(
+                        {"src": src, "type": self._video_mime_type(source_type)}
+                    )
+                )
+            )
 
         return source_tags
 
@@ -740,15 +812,17 @@ class CloudinaryResource(object):
 
         :return: Video tag
         """
-        public_id = options.get('public_id', self.public_id)
-        source = re.sub(r"\.({0})$".format("|".join(self.default_source_types())), '', public_id)
+        public_id = options.get("public_id", self.public_id)
+        source = re.sub(
+            r"\.({0})$".format("|".join(self.default_source_types())), "", public_id
+        )
 
         custom_attributes = options.pop("attributes", dict())
 
-        fallback = options.pop('fallback_content', '')
+        fallback = options.pop("fallback_content", "")
 
         # Save source types for a single video source handling (it can be a single type)
-        source_types = options.get('source_types', "")
+        source_types = options.get("source_types", "")
 
         poster_options = options.copy()
         if "poster" not in custom_attributes:
@@ -761,19 +835,22 @@ class CloudinaryResource(object):
         source_tags = self._populate_video_source_tags(source, options)
 
         if not source_tags:
-            source = source + '.' + utils.build_array(source_types)[0]
+            source = source + "." + utils.build_array(source_types)[0]
 
         video_url, video_options = utils.cloudinary_url(source, **options)
 
         if not source_tags:
-            custom_attributes['src'] = video_url
+            custom_attributes["src"] = video_url
 
         attributes = self._collect_video_tag_attributes(video_options)
         attributes.update(custom_attributes)
 
-        sources_str = ''.join(str(x) for x in source_tags)
+        sources_str = "".join(str(x) for x in source_tags)
         html = "<video {attributes}>{sources}{fallback}</video>".format(
-            attributes=utils.html_attrs(attributes), sources=sources_str, fallback=fallback)
+            attributes=utils.html_attrs(attributes),
+            sources=sources_str,
+            fallback=fallback,
+        )
 
         return html
 
@@ -781,9 +858,13 @@ class CloudinaryResource(object):
     def __generate_media_attr(**media_options):
         media_query_conditions = []
         if "min_width" in media_options:
-            media_query_conditions.append("(min-width: {}px)".format(media_options["min_width"]))
+            media_query_conditions.append(
+                "(min-width: {}px)".format(media_options["min_width"])
+            )
         if "max_width" in media_options:
-            media_query_conditions.append("(max-width: {}px)".format(media_options["max_width"]))
+            media_query_conditions.append(
+                "(max-width: {}px)".format(media_options["max_width"])
+            )
 
         return " and ".join(media_query_conditions)
 
@@ -794,7 +875,9 @@ class CloudinaryResource(object):
         srcset_data = srcset_data.copy()
         srcset_data.update(options.pop("srcset", dict()))
 
-        responsive_attrs = self._generate_image_responsive_attributes(attrs, srcset_data, **options)
+        responsive_attrs = self._generate_image_responsive_attributes(
+            attrs, srcset_data, **options
+        )
 
         attrs.update(responsive_attrs)
 
@@ -807,7 +890,7 @@ class CloudinaryResource(object):
             if media_attr:
                 attrs["media"] = media_attr
 
-        return u"<source {0}>".format(utils.html_attrs(attrs))
+        return "<source {0}>".format(utils.html_attrs(attrs))
 
     def picture(self, **options):
         sub_tags = []
@@ -816,22 +899,30 @@ class CloudinaryResource(object):
             curr_options = deepcopy(options)
 
             if "transformation" in source:
-                curr_options = utils.chain_transformations(curr_options, source["transformation"])
+                curr_options = utils.chain_transformations(
+                    curr_options, source["transformation"]
+                )
 
-            curr_options["media"] = dict((k, source[k]) for k in ['min_width', 'max_width'] if k in source)
+            curr_options["media"] = dict(
+                (k, source[k]) for k in ["min_width", "max_width"] if k in source
+            )
 
             sub_tags.append(self.source(**curr_options))
 
         sub_tags.append(self.image(**options))
 
-        return u"<picture>{}</picture>".format("".join(sub_tags))
+        return "<picture>{}</picture>".format("".join(sub_tags))
 
 
 class CloudinaryImage(CloudinaryResource):
     def __init__(self, public_id=None, **kwargs):
-        super(CloudinaryImage, self).__init__(public_id=public_id, default_resource_type="image", **kwargs)
+        super(CloudinaryImage, self).__init__(
+            public_id=public_id, default_resource_type="image", **kwargs
+        )
 
 
 class CloudinaryVideo(CloudinaryResource):
     def __init__(self, public_id=None, **kwargs):
-        super(CloudinaryVideo, self).__init__(public_id=public_id, default_resource_type="video", **kwargs)
+        super(CloudinaryVideo, self).__init__(
+            public_id=public_id, default_resource_type="video", **kwargs
+        )

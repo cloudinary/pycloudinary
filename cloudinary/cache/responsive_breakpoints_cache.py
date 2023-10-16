@@ -1,6 +1,5 @@
 import copy
 
-import collections
 
 import cloudinary
 from cloudinary.cache.adapter.cache_adapter import CacheAdapter
@@ -11,6 +10,7 @@ class ResponsiveBreakpointsCache:
     """
     Caches breakpoint values for image resources
     """
+
     def __init__(self, **cache_options):
         """
         Initialize the cache
@@ -58,7 +58,9 @@ class ResponsiveBreakpointsCache:
         :return: A list of values used to calculate the cache key
         """
         options_copy = copy.deepcopy(options)
-        transformation, _ = cloudinary.utils.generate_transformation_string(**options_copy)
+        transformation, _ = cloudinary.utils.generate_transformation_string(
+            **options_copy
+        )
         file_format = options.get("format", "")
         storage_type = options.get("type", "upload")
         resource_type = options.get("resource_type", "image")
@@ -93,9 +95,16 @@ class ResponsiveBreakpointsCache:
         if not (isinstance(value, (list, tuple))):
             raise ValueError("A list of breakpoints is expected")
 
-        storage_type, resource_type, transformation, file_format = self._options_to_parameters(**options)
+        (
+            storage_type,
+            resource_type,
+            transformation,
+            file_format,
+        ) = self._options_to_parameters(**options)
 
-        return self._cache_adapter.set(public_id, storage_type, resource_type, transformation, file_format, value)
+        return self._cache_adapter.set(
+            public_id, storage_type, resource_type, transformation, file_format, value
+        )
 
     @check_property_enabled
     def delete(self, public_id, **options):

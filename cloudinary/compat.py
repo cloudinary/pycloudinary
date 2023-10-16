@@ -13,9 +13,9 @@ urllib2 = six.moves.urllib.request
 NotConnected = six.moves.http_client.NotConnected
 
 if PY3:
-    to_bytes = lambda s: s.encode('utf8')
-    to_bytearray = lambda s: bytearray(s, 'utf8')
-    to_string = lambda b: b.decode('utf8')
+    to_bytes = lambda s: s.encode("utf8")
+    to_bytearray = lambda s: bytearray(s, "utf8")
+    to_string = lambda b: b.decode("utf8")
 
 else:
     to_bytes = str
@@ -25,11 +25,14 @@ else:
 try:
     cldrange = xrange
 except NameError:
+
     def cldrange(*args, **kwargs):
         return iter(range(*args, **kwargs))
+
 
 try:
     advance_iterator = next
 except NameError:
+
     def advance_iterator(it):
         return it.next()

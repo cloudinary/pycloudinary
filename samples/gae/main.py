@@ -25,11 +25,11 @@ from google.appengine.ext.webapp import template
 
 class MainHandler(webapp2.RequestHandler):
     def get(self):
-        path = os.path.join(os.path.dirname(__file__), 'index.html')
+        path = os.path.join(os.path.dirname(__file__), "index.html")
         template_values = {
-            'image_url': None,
-            'thumbnail_url1': None,
-            'thumbnail_url2': None
+            "image_url": None,
+            "thumbnail_url1": None,
+            "thumbnail_url2": None,
         }
         self.response.write(template.render(path, template_values))
 
@@ -37,25 +37,35 @@ class MainHandler(webapp2.RequestHandler):
         image_url = None
         thumbnail_url1 = None
         thumbnail_url2 = None
-        file_to_upload = self.request.get('file')
+        file_to_upload = self.request.get("file")
         if file_to_upload:
             str_file = StringIO(file_to_upload)
-            str_file.name = 'file'
+            str_file.name = "file"
             upload_result = upload(str_file)
-            image_url = upload_result['url']
-            thumbnail_url1, options = cloudinary_url(upload_result['public_id'], format="jpg", crop="fill", width=100,
-                                                     height=100)
-            thumbnail_url2, options = cloudinary_url(upload_result['public_id'], format="jpg", crop="fill", width=200,
-                                                     height=100, radius=20, effect="sepia")
+            image_url = upload_result["url"]
+            thumbnail_url1, options = cloudinary_url(
+                upload_result["public_id"],
+                format="jpg",
+                crop="fill",
+                width=100,
+                height=100,
+            )
+            thumbnail_url2, options = cloudinary_url(
+                upload_result["public_id"],
+                format="jpg",
+                crop="fill",
+                width=200,
+                height=100,
+                radius=20,
+                effect="sepia",
+            )
         template_values = {
-            'image_url': image_url,
-            'thumbnail_url1': thumbnail_url1,
-            'thumbnail_url2': thumbnail_url2
+            "image_url": image_url,
+            "thumbnail_url1": thumbnail_url1,
+            "thumbnail_url2": thumbnail_url2,
         }
-        path = os.path.join(os.path.dirname(__file__), 'index.html')
+        path = os.path.join(os.path.dirname(__file__), "index.html")
         self.response.write(template.render(path, template_values))
 
 
-app = webapp2.WSGIApplication([
-    ('/', MainHandler)
-], debug=True)
+app = webapp2.WSGIApplication([("/", MainHandler)], debug=True)

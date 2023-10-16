@@ -18,7 +18,7 @@ from cloudinary import utils, logger, api
 from cloudinary.exceptions import NotFound
 from test.addon_types import ADDON_ALL
 
-SUFFIX = os.environ.get('TRAVIS_JOB_ID') or random.randint(10000, 99999)
+SUFFIX = os.environ.get("TRAVIS_JOB_ID") or random.randint(10000, 99999)
 
 REMOTE_TEST_IMAGE = "http://cloudinary.com/images/old_logo.png"
 
@@ -26,7 +26,7 @@ RESOURCES_PATH = "test/resources/"
 
 TEST_IMAGE = RESOURCES_PATH + "logo.png"
 TEST_IMAGE_SIZE = 3381
-TEST_UNICODE_IMAGE = RESOURCES_PATH + u"üni_näme_lögö.png"
+TEST_UNICODE_IMAGE = RESOURCES_PATH + "üni_näme_lögö.png"
 TEST_DOC = RESOURCES_PATH + "docx.docx"
 TEST_ICON = RESOURCES_PATH + "favicon.ico"
 
@@ -39,8 +39,10 @@ UNIQUE_TEST_FOLDER = UNIQUE_TAG + TEST_FOLDER
 
 ZERO = timedelta(0)
 
-EVAL_STR = 'if (resource_info["width"] < 450) { upload_options["quality_analysis"] = true }; ' \
-           'upload_options["context"] = "width=" + resource_info["width"]'
+EVAL_STR = (
+    'if (resource_info["width"] < 450) { upload_options["quality_analysis"] = true }; '
+    'upload_options["context"] = "width=" + resource_info["width"]'
+)
 
 ON_SUCCESS_STR = 'current_asset.update({tags: ["autocaption"]});'
 
@@ -48,6 +50,7 @@ try:
     # urllib3 2.x support
     # noinspection PyProtectedMember
     import urllib3._request_methods
+
     URLLIB3_REQUEST = "urllib3._request_methods.RequestMethods.request"
 except ImportError:
     URLLIB3_REQUEST = "urllib3.request.RequestMethods.request"
@@ -90,7 +93,7 @@ def get_params(mocker):
     if not mocker.call_args[1].get("fields"):
         return {}
     params = {}
-    reg = re.compile(r'^(.*)\[\d*]$')
+    reg = re.compile(r"^(.*)\[\d*]$")
     fields = mocker.call_args[1].get("fields")
     fields = fields.items() if isinstance(fields, dict) else fields
     for k, v in fields:
@@ -106,7 +109,7 @@ def get_params(mocker):
 
 
 def get_json_body(mocker):
-    return json.loads(mocker.call_args[1]["body"].decode('utf-8') or {})
+    return json.loads(mocker.call_args[1]["body"].decode("utf-8") or {})
 
 
 def get_param(mocker, name):
@@ -141,9 +144,14 @@ def http_response_mock(body="", headers=None, status=200):
 
 
 def api_response_mock():
-    return http_response_mock('{"foo":"bar"}', {"x-featureratelimit-limit": '0',
-                                                "x-featureratelimit-reset": 'Sat, 01 Apr 2017 22:00:00 GMT',
-                                                "x-featureratelimit-remaining": '0'})
+    return http_response_mock(
+        '{"foo":"bar"}',
+        {
+            "x-featureratelimit-limit": "0",
+            "x-featureratelimit-reset": "Sat, 01 Apr 2017 22:00:00 GMT",
+            "x-featureratelimit-remaining": "0",
+        },
+    )
 
 
 def uploader_response_mock():
@@ -151,11 +159,13 @@ def uploader_response_mock():
 
 
 def populate_large_file(file_io, size, chunk_size=4096):
-    file_io.write(b"BMJ\xB9Y\x00\x00\x00\x00\x00\x8A\x00\x00\x00|\x00\x00\x00x\x05\x00\x00x\x05\x00\x00\x01\
+    file_io.write(
+        b"BMJ\xB9Y\x00\x00\x00\x00\x00\x8A\x00\x00\x00|\x00\x00\x00x\x05\x00\x00x\x05\x00\x00\x01\
 \x00\x18\x00\x00\x00\x00\x00\xC0\xB8Y\x00a\x0F\x00\x00a\x0F\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xFF\x00\
 \x00\xFF\x00\x00\xFF\x00\x00\x00\x00\x00\x00\xFFBGRs\x00\x00\x00\x00\x00\x00\x00\x00T\xB8\x1E\xFC\x00\x00\x00\x00\
 \x00\x00\x00\x00fff\xFC\x00\x00\x00\x00\x00\x00\x00\x00\xC4\xF5(\xFF\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\
-\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00")
+\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+    )
 
     remaining_size = size - utils.file_io_size(file_io)
 
@@ -184,8 +194,11 @@ def retry_assertion(num_tries=3, delay=3):
                 try:
                     return func(*args, **kwargs)
                 except AssertionError:
-                    logger.warning("Assertion #{} out of {} failed, retrying in {} seconds".format(try_num, num_tries,
-                                                                                                   delay))
+                    logger.warning(
+                        "Assertion #{} out of {} failed, retrying in {} seconds".format(
+                            try_num, num_tries, delay
+                        )
+                    )
                     time.sleep(delay)
                     try_num += 1
 
@@ -221,7 +234,11 @@ def cleanup_test_resources(params):
 
 def cleanup_test_transformation(params):
     for transformations_with_options in params:
-        options = transformations_with_options[1] if len(transformations_with_options) > 1 else {}
+        options = (
+            transformations_with_options[1]
+            if len(transformations_with_options) > 1
+            else {}
+        )
         for transformation in transformations_with_options[0]:
             with ignore_exception(suppress_traceback_classes=(NotFound,)):
                 api.delete_transformation(transformation, **options)
@@ -235,8 +252,10 @@ def should_test_addon(addon):
     :return:      True if that add-on should be tested, False otherwise.
     :rtype:       bool
     """
-    cld_test_addons = os.environ.get('CLD_TEST_ADDONS').lower()
+    cld_test_addons = os.environ.get("CLD_TEST_ADDONS").lower()
     if cld_test_addons == ADDON_ALL:
         return True
-    cld_test_addons_list = [addon_name.strip() for addon_name in cld_test_addons.split(',')]
+    cld_test_addons_list = [
+        addon_name.strip() for addon_name in cld_test_addons.split(",")
+    ]
     return addon in cld_test_addons_list

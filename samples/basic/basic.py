@@ -7,9 +7,9 @@ from cloudinary.uploader import upload
 from cloudinary.utils import cloudinary_url
 
 # config
-os.chdir(os.path.join(os.path.dirname(sys.argv[0]), '.'))
-if os.path.exists('settings.py'):
-    exec(open('settings.py').read())
+os.chdir(os.path.join(os.path.dirname(sys.argv[0]), "."))
+if os.path.exists("settings.py"):
+    exec(open("settings.py").read())
 
 DEFAULT_TAG = "python_sample_basic"
 
@@ -25,11 +25,11 @@ def upload_files():
     response = upload("pizza.jpg", tags=DEFAULT_TAG)
     dump_response(response)
     url, options = cloudinary_url(
-        response['public_id'],
-        format=response['format'],
+        response["public_id"],
+        format=response["format"],
         width=200,
         height=150,
-        crop="fill"
+        crop="fill",
     )
     print("Fill 200x150 url: " + url)
     print("")
@@ -42,11 +42,11 @@ def upload_files():
     )
     dump_response(response)
     url, options = cloudinary_url(
-        response['public_id'],
-        format=response['format'],
+        response["public_id"],
+        format=response["format"],
         width=200,
         height=150,
-        crop="fit"
+        crop="fit",
     )
     print("Fit into 200x150 url: " + url)
     print("")
@@ -56,16 +56,12 @@ def upload_files():
         "lake.jpg",
         tags=DEFAULT_TAG,
         public_id="eager_custom_name",
-        eager=dict(
-            width=200,
-            height=150,
-            crop="scale"
-        ),
+        eager=dict(width=200, height=150, crop="scale"),
     )
     dump_response(response)
     url, options = cloudinary_url(
-        response['public_id'],
-        format=response['format'],
+        response["public_id"],
+        format=response["format"],
         width=200,
         height=150,
         crop="scale",
@@ -75,13 +71,12 @@ def upload_files():
 
     print("--- Upload by fetching a remote image")
     response = upload(
-        "http://res.cloudinary.com/demo/image/upload/couple.jpg",
-        tags=DEFAULT_TAG
+        "http://res.cloudinary.com/demo/image/upload/couple.jpg", tags=DEFAULT_TAG
     )
     dump_response(response)
     url, options = cloudinary_url(
-        response['public_id'],
-        format=response['format'],
+        response["public_id"],
+        format=response["format"],
         width=200,
         height=150,
         crop="thumb",
@@ -90,7 +85,9 @@ def upload_files():
     print("Face detection based 200x150 thumbnail url: " + url)
     print("")
 
-    print("--- Fetch an uploaded remote image, fitting it into 500x500 and reducing saturation")
+    print(
+        "--- Fetch an uploaded remote image, fitting it into 500x500 and reducing saturation"
+    )
     response = upload(
         "http://res.cloudinary.com/demo/image/upload/couple.jpg",
         tags=DEFAULT_TAG,
@@ -101,8 +98,8 @@ def upload_files():
     )
     dump_response(response)
     url, options = cloudinary_url(
-        response['public_id'],
-        format=response['format'],
+        response["public_id"],
+        format=response["format"],
         width=200,
         height=150,
         crop="fill",
@@ -116,7 +113,7 @@ def upload_files():
 
 def cleanup():
     response = resources_by_tag(DEFAULT_TAG)
-    resources = response.get('resources', [])
+    resources = response.get("resources", [])
     if not resources:
         print("No images found")
         return
@@ -126,12 +123,14 @@ def cleanup():
 
 
 if len(sys.argv) > 1:
-    if sys.argv[1] == 'upload':
+    if sys.argv[1] == "upload":
         upload_files()
-    if sys.argv[1] == 'cleanup':
+    if sys.argv[1] == "cleanup":
         cleanup()
 else:
     print("--- Uploading files and then cleaning up")
-    print("    you can only choose one instead by passing 'upload' or 'cleanup' as an argument")
+    print(
+        "    you can only choose one instead by passing 'upload' or 'cleanup' as an argument"
+    )
     print("")
     upload_files()

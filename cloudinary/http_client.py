@@ -19,12 +19,16 @@ class HttpClient:
     @property
     def _http_client(self):
         if self._http_client_instance is None:
-            self._http_client_instance = PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
+            self._http_client_instance = PoolManager(
+                cert_reqs="CERT_REQUIRED", ca_certs=certifi.where()
+            )
         return self._http_client_instance
 
     def get_json(self, url):
         try:
-            response = self._http_client.request(method="GET", url=url, timeout=self.timeout)
+            response = self._http_client.request(
+                method="GET", url=url, timeout=self.timeout
+            )
             body = response.data
         except HTTPError as e:
             raise GeneralError("Unexpected error %s" % str(e))
@@ -32,12 +36,18 @@ class HttpClient:
             raise GeneralError("Socket Error: %s" % str(e))
 
         if response.status != 200:
-            raise GeneralError("Server returned unexpected status code - {} - {}".format(response.status,
-                                                                                         response.data))
+            raise GeneralError(
+                "Server returned unexpected status code - {} - {}".format(
+                    response.status, response.data
+                )
+            )
         try:
-            result = json.loads(body.decode('utf-8'))
+            result = json.loads(body.decode("utf-8"))
         except Exception as e:
             # Error is parsing json
-            raise GeneralError("Error parsing server response (%d) - %s. Got - %s" % (response.status, body, e))
+            raise GeneralError(
+                "Error parsing server response (%d) - %s. Got - %s"
+                % (response.status, body, e)
+            )
 
         return result

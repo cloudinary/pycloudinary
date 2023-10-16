@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 import os
 
-from cloudinary import BaseConfig, import_django_settings
+from cloudinary import BaseConfig
 
 ACCOUNT_URI_SCHEME = "account"
 
@@ -15,7 +15,9 @@ class AccountConfig(BaseConfig):
 
     def _config_from_parsed_url(self, parsed_url):
         if not self._is_url_scheme_valid(parsed_url):
-            raise ValueError("Invalid CLOUDINARY_ACCOUNT_URL scheme. URL should begin with 'account://'")
+            raise ValueError(
+                "Invalid CLOUDINARY_ACCOUNT_URL scheme. URL should begin with 'account://'"
+            )
 
         return {
             "account_id": parsed_url.hostname,

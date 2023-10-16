@@ -14,7 +14,9 @@ from test.test_uploader import API_TEST_PRESET
 
 class ApiAuthorizationTest(unittest.TestCase):
     def setUp(self):
-        self.config = cloudinary.config(cloud_name=CLOUD_NAME, api_key=API_KEY, api_secret=API_SECRET)
+        self.config = cloudinary.config(
+            cloud_name=CLOUD_NAME, api_key=API_KEY, api_secret=API_SECRET
+        )
 
     @patch(URLLIB3_REQUEST)
     def test_oauth_token_admin_api(self, mocker):
@@ -121,5 +123,5 @@ class ApiAuthorizationTest(unittest.TestCase):
         self.assertTrue("upload_preset" in params)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

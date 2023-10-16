@@ -5,6 +5,7 @@ class KeyValueStorage:
     """
     A simple key-value storage abstract base class
     """
+
     __metaclass__ = ABCMeta
 
     @abstractmethod

@@ -10,7 +10,9 @@ class Poll(models.Model):
     question = models.CharField(max_length=200)
     image_width = models.PositiveIntegerField(null=True)
     image_height = models.PositiveIntegerField(null=True)
-    image = CloudinaryField('image', null=True, width_field='image_width', height_field='image_height')
+    image = CloudinaryField(
+        "image", null=True, width_field="image_width", height_field="image_height"
+    )
 
     def __str__(self):
         return self.question

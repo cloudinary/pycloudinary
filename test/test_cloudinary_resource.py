@@ -6,8 +6,14 @@ from urllib3 import disable_warnings
 import cloudinary
 from cloudinary import CloudinaryResource
 from cloudinary import uploader
-from test.helper_test import SUFFIX, TEST_IMAGE, http_response_mock, get_uri, cleanup_test_resources_by_tag, \
-    URLLIB3_REQUEST
+from test.helper_test import (
+    SUFFIX,
+    TEST_IMAGE,
+    http_response_mock,
+    get_uri,
+    cleanup_test_resources_by_tag,
+    URLLIB3_REQUEST,
+)
 
 disable_warnings()
 
@@ -20,8 +26,8 @@ class TestCloudinaryResource(TestCase):
     mocked_breakpoints = [50, 500, 1000]
     expected_transformation = "c_scale,w_auto:breakpoints_50_1000_20_20:json"
 
-    crop_transformation = {'crop': 'crop', 'width': 100}
-    crop_transformation_str = 'c_crop,w_100'
+    crop_transformation = {"crop": "crop", "width": 100}
+    crop_transformation_str = "c_crop,w_100"
 
     @classmethod
     def setUpClass(cls):
@@ -53,7 +59,8 @@ class TestCloudinaryResource(TestCase):
         value = "image/upload/v{version}/{id}.{format}".format(
             version=self.uploaded["version"],
             id=self.uploaded["public_id"],
-            format=self.uploaded["format"])
+            format=self.uploaded["format"],
+        )
 
         self.assertEqual(value, self.res.get_prep_value())
 
@@ -62,7 +69,8 @@ class TestCloudinaryResource(TestCase):
             version=self.uploaded["version"],
             id=self.uploaded["public_id"],
             format=self.uploaded["format"],
-            signature=self.uploaded["signature"])
+            signature=self.uploaded["signature"],
+        )
 
         self.assertEqual(value, self.res.get_presigned())
 
@@ -74,8 +82,16 @@ class TestCloudinaryResource(TestCase):
         self.assertIn(' src="{url}'.format(url=self.res.url), image)
         self.assertNotIn('data-src="{url}'.format(url=self.res.url), image)
         image = self.res.image(responsive=True, width="auto", crop="scale")
-        self.assertNotIn(' src="{url}'.format(url=self.res.build_url(width="auto", crop="scale")), image)
-        self.assertIn('data-src="{url}'.format(url=self.res.build_url(width="auto", crop="scale")), image)
+        self.assertNotIn(
+            ' src="{url}'.format(url=self.res.build_url(width="auto", crop="scale")),
+            image,
+        )
+        self.assertIn(
+            'data-src="{url}'.format(
+                url=self.res.build_url(width="auto", crop="scale")
+            ),
+            image,
+        )
 
     @mock.patch(URLLIB3_REQUEST, return_value=mocked_response)
     def test_fetch_breakpoints(self, mocked_request):
@@ -94,8 +110,10 @@ class TestCloudinaryResource(TestCase):
 
         self.assertEqual(self.mocked_breakpoints, actual_breakpoints)
 
-        self.assertIn(self.crop_transformation_str + "/" + self.expected_transformation,
-                      get_uri(mocked_request))
+        self.assertIn(
+            self.crop_transformation_str + "/" + self.expected_transformation,
+            get_uri(mocked_request),
+        )
 
     def test_fetch_breakpoints_real(self):
         """Should retrieve responsive breakpoints from cloudinary resource (real request)"""

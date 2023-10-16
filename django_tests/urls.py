@@ -8,5 +8,5 @@ else:
 from .views import index
 
 urlpatterns = [
-    url(r'^polls$', view=index, name='index'),
+    url(r"^polls$", view=index, name="index"),
 ]

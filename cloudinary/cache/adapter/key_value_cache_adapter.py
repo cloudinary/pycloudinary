@@ -10,6 +10,7 @@ class KeyValueCacheAdapter(CacheAdapter):
     """
     A cache adapter for a key-value storage type
     """
+
     def __init__(self, storage):
         """Create a new adapter for the provided storage interface"""
         if not isinstance(storage, KeyValueStorage):
@@ -23,19 +24,25 @@ class KeyValueCacheAdapter(CacheAdapter):
 
     @check_property_enabled
     def get(self, public_id, type, resource_type, transformation, format):
-        key = self.generate_cache_key(public_id, type, resource_type, transformation, format)
+        key = self.generate_cache_key(
+            public_id, type, resource_type, transformation, format
+        )
         value_str = self._key_value_storage.get(key)
         return json.loads(value_str) if value_str else value_str
 
     @check_property_enabled
     def set(self, public_id, type, resource_type, transformation, format, value):
-        key = self.generate_cache_key(public_id, type, resource_type, transformation, format)
+        key = self.generate_cache_key(
+            public_id, type, resource_type, transformation, format
+        )
         return self._key_value_storage.set(key, json.dumps(value))
 
     @check_property_enabled
     def delete(self, public_id, type, resource_type, transformation, format):
         return self._key_value_storage.delete(
-            self.generate_cache_key(public_id, type, resource_type, transformation, format)
+            self.generate_cache_key(
+                public_id, type, resource_type, transformation, format
+            )
         )
 
     @check_property_enabled
@@ -56,6 +63,8 @@ class KeyValueCacheAdapter(CacheAdapter):
         :return: Resulting cache key
         """
 
-        valid_params = [p for p in [public_id, type, resource_type, transformation, format] if p]
+        valid_params = [
+            p for p in [public_id, type, resource_type, transformation, format] if p
+        ]
 
         return sha1("/".join(valid_params).encode("utf-8")).hexdigest()

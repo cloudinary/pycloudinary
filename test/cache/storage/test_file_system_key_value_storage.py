@@ -3,7 +3,9 @@ import shutil
 import tempfile
 import unittest
 
-from cloudinary.cache.storage.file_system_key_value_storage import FileSystemKeyValueStorage
+from cloudinary.cache.storage.file_system_key_value_storage import (
+    FileSystemKeyValueStorage,
+)
 from test.helper_test import UNIQUE_TEST_ID, ignore_exception
 
 

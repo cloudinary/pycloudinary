@@ -22,17 +22,23 @@ def call_metadata_api(method, uri, params, **options):
 
 
 def call_json_api(method, uri, json_body, **options):
-    data = json.dumps(json_body).encode('utf-8')
-    return _call_api(method, uri, body=data, headers={'Content-Type': 'application/json'}, **options)
+    data = json.dumps(json_body).encode("utf-8")
+    return _call_api(
+        method, uri, body=data, headers={"Content-Type": "application/json"}, **options
+    )
 
 
 def call_api(method, uri, params, **options):
     return _call_api(method, uri, params=params, **options)
 
 
-def _call_api(method, uri, params=None, body=None, headers=None, extra_headers=None, **options):
-    prefix = options.pop("upload_prefix",
-                         cloudinary.config().upload_prefix) or "https://api.cloudinary.com"
+def _call_api(
+    method, uri, params=None, body=None, headers=None, extra_headers=None, **options
+):
+    prefix = (
+        options.pop("upload_prefix", cloudinary.config().upload_prefix)
+        or "https://api.cloudinary.com"
+    )
     cloud_name = options.pop("cloud_name", cloudinary.config().cloud_name)
     if not cloud_name:
         raise Exception("Must supply cloud_name")
@@ -52,13 +58,15 @@ def _call_api(method, uri, params=None, body=None, headers=None, extra_headers=N
     if extra_headers is not None:
         headers.update(extra_headers)
 
-    return execute_request(http_connector=_http,
-                           method=method,
-                           params=normalize_params(params),
-                           headers=headers,
-                           auth=auth,
-                           api_url=api_url,
-                           **options)
+    return execute_request(
+        http_connector=_http,
+        method=method,
+        params=normalize_params(params),
+        headers=headers,
+        auth=auth,
+        api_url=api_url,
+        **options
+    )
 
 
 def _validate_authorization(api_key, api_secret, oauth_token):

@@ -41,23 +41,40 @@ class TCPKeepAliveValidationMethods:
         # TCP Keep Alive Probes for different platforms
         platform = sys.platform
         # TCP Keep Alive Probes for Linux
-        if (platform == 'linux' and hasattr(conn.sock, "setsockopt") and hasattr(socket, "SO_KEEPALIVE") and
-                hasattr(socket, "TCP_KEEPIDLE") and hasattr(socket, "TCP_KEEPINTVL") and hasattr(socket,
-                                                                                                 "TCP_KEEPCNT")):
+        if (
+            platform == "linux"
+            and hasattr(conn.sock, "setsockopt")
+            and hasattr(socket, "SO_KEEPALIVE")
+            and hasattr(socket, "TCP_KEEPIDLE")
+            and hasattr(socket, "TCP_KEEPINTVL")
+            and hasattr(socket, "TCP_KEEPCNT")
+        ):
             conn.sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
             conn.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, TCP_KEEP_IDLE)
-            conn.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, TCP_KEEPALIVE_INTERVAL)
+            conn.sock.setsockopt(
+                socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, TCP_KEEPALIVE_INTERVAL
+            )
             conn.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPCNT, TCP_KEEP_CNT)
 
         # TCP Keep Alive Probes for Windows OS
-        elif platform == 'win32' and hasattr(socket, "SIO_KEEPALIVE_VALS") and getattr(conn.sock, "ioctl",
-                                                                                       None) is not None:
-            conn.sock.ioctl(socket.SIO_KEEPALIVE_VALS, (1, TCP_KEEP_IDLE * 1000, TCP_KEEPALIVE_INTERVAL * 1000))
+        elif (
+            platform == "win32"
+            and hasattr(socket, "SIO_KEEPALIVE_VALS")
+            and getattr(conn.sock, "ioctl", None) is not None
+        ):
+            conn.sock.ioctl(
+                socket.SIO_KEEPALIVE_VALS,
+                (1, TCP_KEEP_IDLE * 1000, TCP_KEEPALIVE_INTERVAL * 1000),
+            )
 
         # TCP Keep Alive Probes for Mac OS
-        elif platform == 'darwin' and getattr(conn.sock, "setsockopt", None) is not None:
+        elif (
+            platform == "darwin" and getattr(conn.sock, "setsockopt", None) is not None
+        ):
             conn.sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
-            conn.sock.setsockopt(socket.IPPROTO_TCP, TCP_KEEPALIVE, TCP_KEEPALIVE_INTERVAL)
+            conn.sock.setsockopt(
+                socket.IPPROTO_TCP, TCP_KEEPALIVE, TCP_KEEPALIVE_INTERVAL
+            )
 
 
 class TCPKeepAliveHTTPSConnectionPool(HTTPSConnectionPool):
@@ -102,8 +119,13 @@ class TCPKeepAlivePoolManager(PoolManager):
     """
 
     def __init__(self, num_pools=10, headers=None, **connection_pool_kw):
-        super(TCPKeepAlivePoolManager, self).__init__(num_pools=num_pools, headers=headers, **connection_pool_kw)
-        self.pool_classes_by_scheme = {"http": TCPKeepAliveHTTPConnectionPool, "https": TCPKeepAliveHTTPSConnectionPool}
+        super(TCPKeepAlivePoolManager, self).__init__(
+            num_pools=num_pools, headers=headers, **connection_pool_kw
+        )
+        self.pool_classes_by_scheme = {
+            "http": TCPKeepAliveHTTPConnectionPool,
+            "https": TCPKeepAliveHTTPSConnectionPool,
+        }
 
 
 class TCPKeepAliveProxyManager(ProxyManager):
@@ -112,8 +134,22 @@ class TCPKeepAliveProxyManager(ProxyManager):
     connection pools rather than the default connection pools.
     """
 
-    def __init__(self, proxy_url, num_pools=10, headers=None, proxy_headers=None, **connection_pool_kw):
-        super(TCPKeepAliveProxyManager, self).__init__(proxy_url=proxy_url, num_pools=num_pools, headers=headers,
-                                                       proxy_headers=proxy_headers,
-                                                       **connection_pool_kw)
-        self.pool_classes_by_scheme = {"http": TCPKeepAliveHTTPConnectionPool, "https": TCPKeepAliveHTTPSConnectionPool}
+    def __init__(
+        self,
+        proxy_url,
+        num_pools=10,
+        headers=None,
+        proxy_headers=None,
+        **connection_pool_kw
+    ):
+        super(TCPKeepAliveProxyManager, self).__init__(
+            proxy_url=proxy_url,
+            num_pools=num_pools,
+            headers=headers,
+            proxy_headers=proxy_headers,
+            **connection_pool_kw
+        )
+        self.pool_classes_by_scheme = {
+            "http": TCPKeepAliveHTTPConnectionPool,
+            "https": TCPKeepAliveHTTPSConnectionPool,
+        }

@@ -6,20 +6,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('django_tests', '0002_remove_poll_pub_date'),
+        ("django_tests", "0002_remove_poll_pub_date"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='poll',
-            name='image_height',
+            model_name="poll",
+            name="image_height",
             field=models.PositiveIntegerField(null=True),
         ),
         migrations.AddField(
-            model_name='poll',
-            name='image_width',
+            model_name="poll",
+            name="image_width",
             field=models.PositiveIntegerField(null=True),
         ),
     ]

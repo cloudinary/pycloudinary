@@ -11,6 +11,7 @@ class Role(object):
     """
     A user role to use in the user management API (create/update user).
     """
+
     MASTER_ADMIN = "master_admin"
     ADMIN = "admin"
     BILLING = "billing"
@@ -40,8 +41,14 @@ def sub_accounts(enabled=None, ids=None, prefix=None, **options):
     return _call_account_api("GET", uri, params=params, **options)
 
 
-def create_sub_account(name, cloud_name=None, custom_attributes=None, enabled=None,
-                       base_account=None, **options):
+def create_sub_account(
+    name,
+    cloud_name=None,
+    custom_attributes=None,
+    enabled=None,
+    base_account=None,
+    **options
+):
     """
     Create a new sub account
     :param name:                Name of the new sub account
@@ -61,11 +68,13 @@ def create_sub_account(name, cloud_name=None, custom_attributes=None, enabled=No
     :rtype:                     dict
     """
     uri = [SUB_ACCOUNTS_SUB_PATH]
-    params = {"name": name,
-              "cloud_name": cloud_name,
-              "custom_attributes": custom_attributes,
-              "enabled": enabled,
-              "base_sub_account_id": base_account}
+    params = {
+        "name": name,
+        "cloud_name": cloud_name,
+        "custom_attributes": custom_attributes,
+        "enabled": enabled,
+        "base_sub_account_id": base_account,
+    }
     return _call_account_api("POST", uri, params=params, **options)
 
 
@@ -97,7 +106,14 @@ def sub_account(sub_account_id, **options):
     return _call_account_api("get", uri, {}, **options)
 
 
-def update_sub_account(sub_account_id, name=None, cloud_name=None, custom_attributes=None, enabled=None, **options):
+def update_sub_account(
+    sub_account_id,
+    name=None,
+    cloud_name=None,
+    custom_attributes=None,
+    enabled=None,
+    **options
+):
     """
     Update a sub account
     :param sub_account_id:      The id of the sub account
@@ -116,15 +132,25 @@ def update_sub_account(sub_account_id, name=None, cloud_name=None, custom_attrib
     :rtype:                     dict
     """
     uri = [SUB_ACCOUNTS_SUB_PATH, sub_account_id]
-    params = {"name": name,
-              "cloud_name": cloud_name,
-              "custom_attributes": custom_attributes,
-              "enabled": enabled}
+    params = {
+        "name": name,
+        "cloud_name": cloud_name,
+        "custom_attributes": custom_attributes,
+        "enabled": enabled,
+    }
     return _call_account_api("put", uri, params=params, **options)
 
 
-def users(user_ids=None, sub_account_id=None, pending=None, prefix=None, last_login=None, from_date=None, to_date=None,
-          **options):
+def users(
+    user_ids=None,
+    sub_account_id=None,
+    pending=None,
+    prefix=None,
+    last_login=None,
+    from_date=None,
+    to_date=None,
+    **options
+):
     """
     List all users
     :param user_ids:        The ids of the users to fetch
@@ -137,7 +163,7 @@ def users(user_ids=None, sub_account_id=None, pending=None, prefix=None, last_lo
     :type pending:          bool, optional
     :param prefix:          User prefix
     :type prefix:           str, optional
-    :param last_login:      Return only users that last logged in in the specified range of dates (true), 
+    :param last_login:      Return only users that last logged in in the specified range of dates (true),
                             users that didn't last logged in in that range (false), or all users (None).
     :type last_login:       bool, optional
     :param from_date:       Last login start date.
@@ -151,13 +177,15 @@ def users(user_ids=None, sub_account_id=None, pending=None, prefix=None, last_lo
     """
     uri = [USERS_SUB_PATH]
     user_ids = encode_list(user_ids)
-    params = {"ids": user_ids,
-              "sub_account_id": sub_account_id,
-              "pending": pending,
-              "prefix": prefix,
-              "last_login": last_login,
-              "from": from_date,
-              "to": to_date}
+    params = {
+        "ids": user_ids,
+        "sub_account_id": sub_account_id,
+        "pending": pending,
+        "prefix": prefix,
+        "last_login": last_login,
+        "from": from_date,
+        "to": to_date,
+    }
     return _call_account_api("get", uri, params=params, **options)
 
 
@@ -178,10 +206,12 @@ def create_user(name, email, role, sub_account_ids=None, **options):
     :rtype:                     dict
     """
     uri = [USERS_SUB_PATH]
-    params = {"name": name,
-              "email": email,
-              "role": role,
-              "sub_account_ids": sub_account_ids}
+    params = {
+        "name": name,
+        "email": email,
+        "role": role,
+        "sub_account_ids": sub_account_ids,
+    }
     return _call_account_api("post", uri, params=params, **options)
 
 
@@ -213,7 +243,9 @@ def user(user_id, **options):
     return _call_account_api("get", uri, {}, **options)
 
 
-def update_user(user_id, name=None, email=None, role=None, sub_account_ids=None, **options):
+def update_user(
+    user_id, name=None, email=None, role=None, sub_account_ids=None, **options
+):
     """
     Update a user
     :param user_id:             The id of the user to update
@@ -233,10 +265,12 @@ def update_user(user_id, name=None, email=None, role=None, sub_account_ids=None,
     :rtype:                     dict
     """
     uri = [USERS_SUB_PATH, user_id]
-    params = {"name": name,
-              "email": email,
-              "role": role,
-              "sub_account_ids": sub_account_ids}
+    params = {
+        "name": name,
+        "email": email,
+        "role": role,
+        "sub_account_ids": sub_account_ids,
+    }
     return _call_account_api("put", uri, params=params, **options)
 
 
@@ -372,7 +406,9 @@ def user_in_user_groups(user_id, **options):
     return _call_account_api("get", uri, {}, **options)
 
 
-def access_keys(sub_account_id, page_size=None, page=None, sort_by=None, sort_order=None, **options):
+def access_keys(
+    sub_account_id, page_size=None, page=None, sort_by=None, sort_order=None, **options
+):
     """
     Get sub account access keys.
 

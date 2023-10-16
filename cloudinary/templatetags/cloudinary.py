@@ -20,8 +20,8 @@ def cloudinary_url(context, source, options_dict=None, **options):
     else:
         options = dict(options_dict, **options)
     try:
-        if context['request'].is_secure() and 'secure' not in options:
-            options['secure'] = True
+        if context["request"].is_secure() and "secure" not in options:
+            options["secure"] = True
     except KeyError:
         pass
     if not isinstance(source, CloudinaryResource):
@@ -29,15 +29,15 @@ def cloudinary_url(context, source, options_dict=None, **options):
     return source.build_url(**options)
 
 
-@register.simple_tag(name='cloudinary', takes_context=True)
+@register.simple_tag(name="cloudinary", takes_context=True)
 def cloudinary_tag(context, image, options_dict=None, **options):
     if options_dict is None:
         options = dict(**options)
     else:
         options = dict(options_dict, **options)
     try:
-        if context['request'].is_secure() and 'secure' not in options:
-            options['secure'] = True
+        if context["request"].is_secure() and "secure" not in options:
+            options["secure"] = True
     except KeyError:
         pass
     if not isinstance(image, CloudinaryResource):
@@ -56,31 +56,44 @@ def cloudinary_direct_upload_field(field_name="image", request=None):
     return value
 
 
-@register.inclusion_tag('cloudinary_direct_upload.html')
+@register.inclusion_tag("cloudinary_direct_upload.html")
 def cloudinary_direct_upload(callback_url, **options):
     """Deprecated - please use cloudinary_direct_upload_field, or a proper form"""
     params = utils.build_upload_params(callback=callback_url, **options)
     params = utils.sign_request(params, options)
 
-    api_url = utils.cloudinary_api_url("upload", resource_type=options.get("resource_type", "image"),
-                                       upload_prefix=options.get("upload_prefix"))
+    api_url = utils.cloudinary_api_url(
+        "upload",
+        resource_type=options.get("resource_type", "image"),
+        upload_prefix=options.get("upload_prefix"),
+    )
 
     return {"params": params, "url": api_url}
 
 
-@register.inclusion_tag('cloudinary_includes.html')
+@register.inclusion_tag("cloudinary_includes.html")
 def cloudinary_includes(processing=False):
     return {"processing": processing}
 
 
-CLOUDINARY_JS_CONFIG_PARAMS = ("api_key", "cloud_name", "private_cdn", "secure_distribution", "cdn_subdomain")
+CLOUDINARY_JS_CONFIG_PARAMS = (
+    "api_key",
+    "cloud_name",
+    "private_cdn",
+    "secure_distribution",
+    "cdn_subdomain",
+)
 
 
-@register.inclusion_tag('cloudinary_js_config.html')
+@register.inclusion_tag("cloudinary_js_config.html")
 def cloudinary_js_config():
     config = cloudinary.config()
     return dict(
-        params=json.dumps(dict(
-          (param, getattr(config, param)) for param in CLOUDINARY_JS_CONFIG_PARAMS if getattr(config, param, None)
-        ))
+        params=json.dumps(
+            dict(
+                (param, getattr(config, param))
+                for param in CLOUDINARY_JS_CONFIG_PARAMS
+                if getattr(config, param, None)
+            )
+        )
     )

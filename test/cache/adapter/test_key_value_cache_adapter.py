@@ -5,17 +5,21 @@ from test.cache.storage.dummy_cache_storage import DummyCacheStorage
 
 
 class KeyValueCacheAdapterTest(unittest.TestCase):
-    parameters = {"public_id": "public_id",
-                  "type": "upload",
-                  "resource_type": "image",
-                  "transformation": "w_100",
-                  "format": "jpg"}
+    parameters = {
+        "public_id": "public_id",
+        "type": "upload",
+        "resource_type": "image",
+        "transformation": "w_100",
+        "format": "jpg",
+    }
     value = [100, 200, 300, 399]
-    parameters2 = {"public_id": "public_id2",
-                   "type": "fetch",
-                   "resource_type": "image",
-                   "transformation": "w_300",
-                   "format": "png"}
+    parameters2 = {
+        "public_id": "public_id2",
+        "type": "fetch",
+        "resource_type": "image",
+        "transformation": "w_300",
+        "format": "png",
+    }
     value2 = [101, 201, 301, 398]
 
     def setUp(self):
@@ -30,15 +34,7 @@ class KeyValueCacheAdapterTest(unittest.TestCase):
         self.assertEqual(valid_storage, valid_adapter._key_value_storage)
 
     def test_invalid_initialization(self):
-        invalid_storage_providers = [
-            None,
-            'notAStorage',
-            '',
-            5375,
-            [],
-            True,
-            object
-        ]
+        invalid_storage_providers = [None, "notAStorage", "", 5375, [], True, object]
 
         for invalid_storage_provider in invalid_storage_providers:
             with self.assertRaises(ValueError):
@@ -46,12 +42,15 @@ class KeyValueCacheAdapterTest(unittest.TestCase):
 
     def test_generate_cache_key(self):
         values = [
-            ("467d06e5a695b15468f9362e5a58d44de523026b",
-             self.parameters),
-            ("1576396c59fc50ac8dc37b75e1184268882c9bc2",
-             dict(self.parameters, transformation="", format=None)),
-            ("d8d824ca4e9ac735544ff3c45c1df67749cc1520",
-             dict(self.parameters, type="", resource_type=None))
+            ("467d06e5a695b15468f9362e5a58d44de523026b", self.parameters),
+            (
+                "1576396c59fc50ac8dc37b75e1184268882c9bc2",
+                dict(self.parameters, transformation="", format=None),
+            ),
+            (
+                "d8d824ca4e9ac735544ff3c45c1df67749cc1520",
+                dict(self.parameters, type="", resource_type=None),
+            ),
         ]
 
         for value in values:
@@ -80,7 +79,6 @@ class KeyValueCacheAdapterTest(unittest.TestCase):
         self.assertTrue(result)
 
     def test_flush_all(self):
-
         self.adapter.set(value=self.value, **self.parameters)
         self.adapter.set(value=self.value2, **self.parameters2)
 

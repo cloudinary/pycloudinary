@@ -10,6 +10,7 @@ from cloudinary.cache.storage.key_value_storage import KeyValueStorage
 
 class FileSystemKeyValueStorage(KeyValueStorage):
     """File-based key-value storage"""
+
     _item_ext = ".cldci"
 
     def __init__(self, root_path):
@@ -32,13 +33,13 @@ class FileSystemKeyValueStorage(KeyValueStorage):
         if not self._exists(key):
             return None
 
-        with open(self._get_key_full_path(key), 'r') as f:
+        with open(self._get_key_full_path(key), "r") as f:
             value = f.read()
 
         return value
 
     def set(self, key, value):
-        with open(self._get_key_full_path(key), 'w') as f:
+        with open(self._get_key_full_path(key), "w") as f:
             f.write(value)
 
         return True
@@ -53,7 +54,9 @@ class FileSystemKeyValueStorage(KeyValueStorage):
         return True
 
     def clear(self):
-        for cache_item_path in glob.iglob(os.path.join(self._root_path, '*' + self._item_ext)):
+        for cache_item_path in glob.iglob(
+            os.path.join(self._root_path, "*" + self._item_ext)
+        ):
             os.remove(cache_item_path)
 
         return True

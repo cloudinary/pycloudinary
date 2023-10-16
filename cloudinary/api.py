@@ -1,30 +1,13 @@
 # Copyright Cloudinary
 
 import datetime
-import email.utils
 import json
-import socket
 
-import urllib3
 from six import string_types
-from urllib3.exceptions import HTTPError
 
 import cloudinary
 from cloudinary import utils
-from cloudinary.api_client.call_api import (
-    call_api,
-    call_metadata_api,
-    call_json_api
-)
-from cloudinary.exceptions import (
-    BadRequest,
-    AuthorizationRequired,
-    NotAllowed,
-    NotFound,
-    AlreadyExists,
-    RateLimited,
-    GeneralError
-)
+from cloudinary.api_client.call_api import call_api, call_metadata_api, call_json_api
 
 
 def ping(**options):
@@ -77,24 +60,50 @@ def resources(**options):
     uri = ["resources", resource_type]
     if upload_type:
         uri.append(upload_type)
-    params = only(options, "next_cursor", "max_results", "prefix", "tags",
-                  "context", "moderations", "direction", "start_at", "metadata")
+    params = only(
+        options,
+        "next_cursor",
+        "max_results",
+        "prefix",
+        "tags",
+        "context",
+        "moderations",
+        "direction",
+        "start_at",
+        "metadata",
+    )
     return call_api("get", uri, params, **options)
 
 
 def resources_by_tag(tag, **options):
     resource_type = options.pop("resource_type", "image")
     uri = ["resources", resource_type, "tags", tag]
-    params = only(options, "next_cursor", "max_results", "tags",
-                  "context", "moderations", "direction", "metadata")
+    params = only(
+        options,
+        "next_cursor",
+        "max_results",
+        "tags",
+        "context",
+        "moderations",
+        "direction",
+        "metadata",
+    )
     return call_api("get", uri, params, **options)
 
 
 def resources_by_moderation(kind, status, **options):
     resource_type = options.pop("resource_type", "image")
     uri = ["resources", resource_type, "moderations", kind, status]
-    params = only(options, "next_cursor", "max_results", "tags",
-                  "context", "moderations", "direction", "metadata")
+    params = only(
+        options,
+        "next_cursor",
+        "max_results",
+        "tags",
+        "context",
+        "moderations",
+        "direction",
+        "metadata",
+    )
     return call_api("get", uri, params, **options)
 
 
@@ -102,7 +111,9 @@ def resources_by_ids(public_ids, **options):
     resource_type = options.pop("resource_type", "image")
     upload_type = options.pop("type", "upload")
     uri = ["resources", resource_type, upload_type]
-    params = dict(only(options, "tags", "moderations", "context"), public_ids=public_ids)
+    params = dict(
+        only(options, "tags", "moderations", "context"), public_ids=public_ids
+    )
     return call_api("get", uri, params, **options)
 
 
@@ -118,7 +129,9 @@ def resources_by_asset_folder(asset_folder, **options):
     :rtype:             Response
     """
     uri = ["resources", "by_asset_folder"]
-    params = only(options, "max_results", "tags", "moderations", "context", "next_cursor")
+    params = only(
+        options, "max_results", "tags", "moderations", "context", "next_cursor"
+    )
     params["asset_folder"] = asset_folder
     return call_api("get", uri, params, **options)
 
@@ -137,7 +150,7 @@ def resources_by_asset_ids(asset_ids, **options):
     :return:            Resources (assets) as indicated in the asset IDs
     :rtype:             Response
     """
-    uri = ["resources", 'by_asset_ids']
+    uri = ["resources", "by_asset_ids"]
     params = dict(only(options, "tags", "moderations", "context"), asset_ids=asset_ids)
     return call_api("get", uri, params, **options)
 
@@ -160,15 +173,25 @@ def resources_by_context(key, value=None, **options):
     """
     resource_type = options.pop("resource_type", "image")
     uri = ["resources", resource_type, "context"]
-    params = only(options, "next_cursor", "max_results", "tags",
-                  "context", "moderations", "direction", "metadata")
+    params = only(
+        options,
+        "next_cursor",
+        "max_results",
+        "tags",
+        "context",
+        "moderations",
+        "direction",
+        "metadata",
+    )
     params["key"] = key
     if value is not None:
         params["value"] = value
     return call_api("get", uri, params, **options)
 
 
-def visual_search(image_url=None, image_asset_id=None, text=None, image_file=None, **options):
+def visual_search(
+    image_url=None, image_asset_id=None, text=None, image_file=None, **options
+):
     """
     Find images based on their visual content.
 
@@ -186,8 +209,12 @@ def visual_search(image_url=None, image_asset_id=None, text=None, image_file=Non
     :rtype:                 Response
     """
     uri = ["resources", "visual_search"]
-    params = {"image_url": image_url, "image_asset_id": image_asset_id, "text": text,
-              "image_file": utils.handle_file_parameter(image_file, "file")}
+    params = {
+        "image_url": image_url,
+        "image_asset_id": image_asset_id,
+        "text": text,
+        "image_file": utils.handle_file_parameter(image_file, "file"),
+    }
     return call_api("post", uri, params, **options)
 
 
@@ -224,27 +251,53 @@ def _prepare_asset_details_params(**options):
 
     :internal
     """
-    return only(options, "exif", "faces", "colors", "image_metadata", "media_metadata", "cinemagraph_analysis",
-                "pages", "phash", "coordinates", "max_results", "quality_analysis", "derived_next_cursor",
-                "accessibility_analysis", "versions", "related", "related_next_cursor")
+    return only(
+        options,
+        "exif",
+        "faces",
+        "colors",
+        "image_metadata",
+        "media_metadata",
+        "cinemagraph_analysis",
+        "pages",
+        "phash",
+        "coordinates",
+        "max_results",
+        "quality_analysis",
+        "derived_next_cursor",
+        "accessibility_analysis",
+        "versions",
+        "related",
+        "related_next_cursor",
+    )
 
 
 def update(public_id, **options):
     resource_type = options.pop("resource_type", "image")
     upload_type = options.pop("type", "upload")
     uri = ["resources", resource_type, upload_type, public_id]
-    params = only(options, "moderation_status", "raw_convert",
-                  "quality_override", "ocr",
-                  "categorization", "detection", "similarity_search",
-                  "background_removal", "notification_url")
+    params = only(
+        options,
+        "moderation_status",
+        "raw_convert",
+        "quality_override",
+        "ocr",
+        "categorization",
+        "detection",
+        "similarity_search",
+        "background_removal",
+        "notification_url",
+    )
     if "tags" in options:
         params["tags"] = ",".join(utils.build_array(options["tags"]))
     if "face_coordinates" in options:
         params["face_coordinates"] = utils.encode_double_array(
-            options.get("face_coordinates"))
+            options.get("face_coordinates")
+        )
     if "custom_coordinates" in options:
         params["custom_coordinates"] = utils.encode_double_array(
-            options.get("custom_coordinates"))
+            options.get("custom_coordinates")
+        )
     if "context" in options:
         params["context"] = utils.encode_context(options.get("context"))
     if "metadata" in options:
@@ -252,7 +305,9 @@ def update(public_id, **options):
     if "auto_tagging" in options:
         params["auto_tagging"] = str(options.get("auto_tagging"))
     if "access_control" in options:
-        params["access_control"] = utils.json_encode(utils.build_list_of_dicts(options.get("access_control")))
+        params["access_control"] = utils.json_encode(
+            utils.build_list_of_dicts(options.get("access_control"))
+        )
     if "asset_folder" in options:
         params["asset_folder"] = options.get("asset_folder")
     if "display_name" in options:
@@ -302,9 +357,14 @@ def delete_derived_resources(derived_resource_ids, **options):
     return call_api("delete", uri, params, **options)
 
 
-def delete_derived_by_transformation(public_ids, transformations,
-                                     resource_type='image', type='upload', invalidate=None,
-                                     **options):
+def delete_derived_by_transformation(
+    public_ids,
+    transformations,
+    resource_type="image",
+    type="upload",
+    invalidate=None,
+    **options
+):
     """Delete derived resources of public ids, identified by transformations
 
     :param public_ids: the base resources
@@ -323,15 +383,19 @@ def delete_derived_by_transformation(public_ids, transformations,
     uri = ["resources", resource_type, type]
     if not isinstance(public_ids, list):
         public_ids = [public_ids]
-    params = {"public_ids": public_ids,
-              "transformations": utils.build_eager(transformations),
-              "keep_original": True}
+    params = {
+        "public_ids": public_ids,
+        "transformations": utils.build_eager(transformations),
+        "keep_original": True,
+    }
     if invalidate is not None:
-        params['invalidate'] = invalidate
+        params["invalidate"] = invalidate
     return call_api("delete", uri, params, **options)
 
 
-def add_related_assets(public_id, assets_to_relate, resource_type="image", type="upload", **options):
+def add_related_assets(
+    public_id, assets_to_relate, resource_type="image", type="upload", **options
+):
     """
     Relates an asset to other assets by public IDs.
 
@@ -371,7 +435,9 @@ def add_related_assets_by_asset_ids(asset_id, assets_to_relate, **options):
     return call_json_api("post", uri, params, **options)
 
 
-def delete_related_assets(public_id, assets_to_unrelate, resource_type="image", type="upload", **options):
+def delete_related_assets(
+    public_id, assets_to_unrelate, resource_type="image", type="upload", **options
+):
     """
     Unrelates an asset from other assets by public IDs.
 
@@ -414,7 +480,9 @@ def delete_related_assets_by_asset_ids(asset_id, assets_to_unrelate, **options):
 def tags(**options):
     resource_type = options.pop("resource_type", "image")
     uri = ["tags", resource_type]
-    return call_api("get", uri, only(options, "next_cursor", "max_results", "prefix"), **options)
+    return call_api(
+        "get", uri, only(options, "next_cursor", "max_results", "prefix"), **options
+    )
 
 
 def transformations(**options):
@@ -467,7 +535,9 @@ def create_transformation(name, definition, **options):
 def publish_by_ids(public_ids, **options):
     resource_type = options.pop("resource_type", "image")
     uri = ["resources", resource_type, "publish_resources"]
-    params = dict(only(options, "type", "overwrite", "invalidate"), public_ids=public_ids)
+    params = dict(
+        only(options, "type", "overwrite", "invalidate"), public_ids=public_ids
+    )
     return call_api("post", uri, params, **options)
 
 
@@ -521,11 +591,18 @@ def create_folder(path, **options):
 
 
 def root_folders(**options):
-    return call_api("get", ["folders"], only(options, "next_cursor", "max_results"), **options)
+    return call_api(
+        "get", ["folders"], only(options, "next_cursor", "max_results"), **options
+    )
 
 
 def subfolders(of_folder_path, **options):
-    return call_api("get", ["folders", of_folder_path], only(options, "next_cursor", "max_results"), **options)
+    return call_api(
+        "get",
+        ["folders", of_folder_path],
+        only(options, "next_cursor", "max_results"),
+        **options
+    )
 
 
 def delete_folder(path, **options):
@@ -582,30 +659,30 @@ def create_upload_mapping(name, **options):
 
 def list_streaming_profiles(**options):
     uri = ["streaming_profiles"]
-    return call_api('GET', uri, {}, **options)
+    return call_api("GET", uri, {}, **options)
 
 
 def get_streaming_profile(name, **options):
     uri = ["streaming_profiles", name]
-    return call_api('GET', uri, {}, **options)
+    return call_api("GET", uri, {}, **options)
 
 
 def delete_streaming_profile(name, **options):
     uri = ["streaming_profiles", name]
-    return call_api('DELETE', uri, {}, **options)
+    return call_api("DELETE", uri, {}, **options)
 
 
 def create_streaming_profile(name, **options):
     uri = ["streaming_profiles"]
     params = __prepare_streaming_profile_params(**options)
     params["name"] = name
-    return call_api('POST', uri, params, **options)
+    return call_api("POST", uri, params, **options)
 
 
 def update_streaming_profile(name, **options):
     uri = ["streaming_profiles", name]
     params = __prepare_streaming_profile_params(**options)
-    return call_api('PUT', uri, params, **options)
+    return call_api("PUT", uri, params, **options)
 
 
 def only(source, *keys):
@@ -615,22 +692,25 @@ def only(source, *keys):
 def transformation_string(transformation):
     if isinstance(transformation, string_types):
         return transformation
-    else:
-        return cloudinary.utils.generate_transformation_string(**transformation)[0]
+    return cloudinary.utils.generate_transformation_string(**transformation)[0]
 
 
 def __prepare_streaming_profile_params(**options):
     params = only(options, "display_name")
     if "representations" in options:
-        representations = [{"transformation": transformation_string(trans)}
-                           for trans in options["representations"]]
+        representations = [
+            {"transformation": transformation_string(trans)}
+            for trans in options["representations"]
+        ]
         params["representations"] = json.dumps(representations)
     return params
 
 
 def __delete_resource_params(options, **params):
-    p = dict(transformations=utils.build_eager(options.get('transformations')),
-             **only(options, "keep_original", "next_cursor", "invalidate"))
+    p = dict(
+        transformations=utils.build_eager(options.get("transformations")),
+        **only(options, "keep_original", "next_cursor", "invalidate")
+    )
     p.update(params)
     return p
 
@@ -672,8 +752,16 @@ def add_metadata_field(field, **options):
 
     :rtype: Response
     """
-    params = only(field, "type", "external_id", "label", "mandatory",
-                  "default_value", "validation", "datasource")
+    params = only(
+        field,
+        "type",
+        "external_id",
+        "label",
+        "mandatory",
+        "default_value",
+        "validation",
+        "datasource",
+    )
     return call_metadata_api("post", [], params, **options)
 
 
@@ -765,7 +853,9 @@ def update_metadata_field_datasource(field_external_id, entries_external_id, **o
     return call_metadata_api("put", uri, params, **options)
 
 
-def restore_metadata_field_datasource(field_external_id, entries_external_ids, **options):
+def restore_metadata_field_datasource(
+    field_external_id, entries_external_ids, **options
+):
     """Restores entries in a metadata field datasource
 
     Restores (unblocks) any previously deleted datasource entries for a specified
@@ -782,12 +872,14 @@ def restore_metadata_field_datasource(field_external_id, entries_external_ids, *
 
     :rtype: Response
     """
-    uri = [field_external_id, 'datasource_restore']
+    uri = [field_external_id, "datasource_restore"]
     params = {"external_ids": entries_external_ids}
     return call_metadata_api("post", uri, params, **options)
 
 
-def reorder_metadata_field_datasource(field_external_id, order_by, direction=None, **options):
+def reorder_metadata_field_datasource(
+    field_external_id, order_by, direction=None, **options
+):
     """Reorders metadata field datasource. Currently, supports only value.
 
     :param field_external_id: The ID of the metadata field.
@@ -797,9 +889,9 @@ def reorder_metadata_field_datasource(field_external_id, order_by, direction=Non
 
     :rtype: Response
     """
-    uri = [field_external_id, 'datasource', 'order']
-    params = {'order_by': order_by, 'direction': direction}
-    return call_metadata_api('post', uri, params, **options)
+    uri = [field_external_id, "datasource", "order"]
+    params = {"order_by": order_by, "direction": direction}
+    return call_metadata_api("post", uri, params, **options)
 
 
 def reorder_metadata_fields(order_by, direction=None, **options):
@@ -811,6 +903,6 @@ def reorder_metadata_fields(order_by, direction=None, **options):
 
     :rtype: Response
     """
-    uri = ['order']
-    params = {'order_by': order_by, 'direction': direction}
-    return call_metadata_api('put', uri, params, **options)
+    uri = ["order"]
+    params = {"order_by": order_by, "direction": direction}
+    return call_metadata_api("put", uri, params, **options)

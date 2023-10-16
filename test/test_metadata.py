@@ -11,7 +11,14 @@ import cloudinary
 from cloudinary import api
 from cloudinary.exceptions import BadRequest, NotFound
 from test.helper_test import (
-    UNIQUE_TEST_ID, get_uri, get_params, get_method, api_response_mock, ignore_exception, get_json_body, URLLIB3_REQUEST
+    UNIQUE_TEST_ID,
+    get_uri,
+    get_params,
+    get_method,
+    api_response_mock,
+    ignore_exception,
+    get_json_body,
+    URLLIB3_REQUEST,
 )
 
 MOCK_RESPONSE = api_response_mock()
@@ -50,7 +57,9 @@ EXTERNAL_ID_ENUM = "metadata_external_id_enum_{}".format(UNIQUE_TEST_ID)
 EXTERNAL_ID_DELETE = "metadata_deletion_{}".format(UNIQUE_TEST_ID)
 
 # Sample datasource data
-DATASOURCE_ENTRY_EXTERNAL_ID = "metadata_datasource_entry_external_id{}".format(UNIQUE_TEST_ID)
+DATASOURCE_ENTRY_EXTERNAL_ID = "metadata_datasource_entry_external_id{}".format(
+    UNIQUE_TEST_ID
+)
 
 DATASOURCE_SINGLE = [
     {
@@ -141,7 +150,9 @@ class MetadataTest(unittest.TestCase):
         if field_type:
             self.assertEqual(metadata_field["type"], field_type)
         else:
-            self.assertIn(metadata_field["type"], ["string", "integer", "date", "enum", "set"])
+            self.assertIn(
+                metadata_field["type"], ["string", "integer", "date", "enum", "set"]
+            )
 
         self.assertIsInstance(metadata_field["label"], text_type)
         self.assertIsInstance(metadata_field["mandatory"], bool)
@@ -195,125 +206,163 @@ class MetadataTest(unittest.TestCase):
     def test03_create_string_metadata_field(self, mocker):
         """Test creating a string metadata field"""
         mocker.return_value = MOCK_RESPONSE
-        api.add_metadata_field({
-            "external_id": EXTERNAL_ID_STRING,
-            "label": EXTERNAL_ID_STRING,
-            "type": "string",
-        })
+        api.add_metadata_field(
+            {
+                "external_id": EXTERNAL_ID_STRING,
+                "label": EXTERNAL_ID_STRING,
+                "type": "string",
+            }
+        )
 
         self.assertTrue(get_uri(mocker).endswith("/metadata_fields"))
         self.assertEqual(get_method(mocker), "POST")
-        self.assertEqual(get_json_body(mocker), {
-            "type": "string",
-            "external_id": EXTERNAL_ID_STRING,
-            "label": EXTERNAL_ID_STRING,
-        })
+        self.assertEqual(
+            get_json_body(mocker),
+            {
+                "type": "string",
+                "external_id": EXTERNAL_ID_STRING,
+                "label": EXTERNAL_ID_STRING,
+            },
+        )
 
     @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test04_create_int_metadata_field(self, mocker):
         """Test creating an integer metadata field"""
         mocker.return_value = MOCK_RESPONSE
-        api.add_metadata_field({
-            "external_id": EXTERNAL_ID_INT,
-            "label": EXTERNAL_ID_INT,
-            "type": "integer",
-        })
+        api.add_metadata_field(
+            {
+                "external_id": EXTERNAL_ID_INT,
+                "label": EXTERNAL_ID_INT,
+                "type": "integer",
+            }
+        )
 
         self.assertTrue(get_uri(mocker).endswith("/metadata_fields"))
         self.assertEqual(get_method(mocker), "POST")
-        self.assertEqual(get_json_body(mocker), {
-            "type": "integer",
-            "external_id": EXTERNAL_ID_INT,
-            "label": EXTERNAL_ID_INT,
-        })
+        self.assertEqual(
+            get_json_body(mocker),
+            {
+                "type": "integer",
+                "external_id": EXTERNAL_ID_INT,
+                "label": EXTERNAL_ID_INT,
+            },
+        )
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test05_create_date_metadata_field(self):
         """Test creating a date metadata field"""
-        result = api.add_metadata_field({
-            "external_id": EXTERNAL_ID_DATE,
-            "label": EXTERNAL_ID_DATE,
-            "type": "date",
-        })
+        result = api.add_metadata_field(
+            {
+                "external_id": EXTERNAL_ID_DATE,
+                "label": EXTERNAL_ID_DATE,
+                "type": "date",
+            }
+        )
 
-        self.assert_metadata_field(result, "date", {
-            "label": EXTERNAL_ID_DATE,
-            "external_id": EXTERNAL_ID_DATE,
-            "mandatory": False,
-        })
+        self.assert_metadata_field(
+            result,
+            "date",
+            {
+                "label": EXTERNAL_ID_DATE,
+                "external_id": EXTERNAL_ID_DATE,
+                "mandatory": False,
+            },
+        )
 
     @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test06_create_enum_metadata_field(self, mocker):
         """Test creating an Enum metadata field"""
         mocker.return_value = MOCK_RESPONSE
-        api.add_metadata_field({
-            "datasource": {
-                "values": DATASOURCE_SINGLE,
-            },
-            "external_id": EXTERNAL_ID_ENUM,
-            "label": EXTERNAL_ID_ENUM,
-            "type": "enum",
-        })
+        api.add_metadata_field(
+            {
+                "datasource": {
+                    "values": DATASOURCE_SINGLE,
+                },
+                "external_id": EXTERNAL_ID_ENUM,
+                "label": EXTERNAL_ID_ENUM,
+                "type": "enum",
+            }
+        )
 
         self.assertTrue(get_uri(mocker).endswith("/metadata_fields"))
         self.assertEqual(get_method(mocker), "POST")
-        self.assertEqual(get_json_body(mocker), {
-            "datasource": {
-                "values": DATASOURCE_SINGLE,
+        self.assertEqual(
+            get_json_body(mocker),
+            {
+                "datasource": {
+                    "values": DATASOURCE_SINGLE,
+                },
+                "external_id": EXTERNAL_ID_ENUM,
+                "label": EXTERNAL_ID_ENUM,
+                "type": "enum",
             },
-            "external_id": EXTERNAL_ID_ENUM,
-            "label": EXTERNAL_ID_ENUM,
-            "type": "enum",
-        })
+        )
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test07_create_set_metadata_field(self):
         """Test creating a set metadata field"""
-        result = api.add_metadata_field({
-            "datasource": {
-                "values": DATASOURCE_MULTIPLE,
-            },
-            "external_id": EXTERNAL_ID_SET,
-            "label": EXTERNAL_ID_SET,
-            "type": "set",
-        })
+        result = api.add_metadata_field(
+            {
+                "datasource": {
+                    "values": DATASOURCE_MULTIPLE,
+                },
+                "external_id": EXTERNAL_ID_SET,
+                "label": EXTERNAL_ID_SET,
+                "type": "set",
+            }
+        )
 
-        self.assert_metadata_field(result, "set", {
-            "label": EXTERNAL_ID_SET,
-            "external_id": EXTERNAL_ID_SET,
-            "mandatory": False,
-        })
+        self.assert_metadata_field(
+            result,
+            "set",
+            {
+                "label": EXTERNAL_ID_SET,
+                "external_id": EXTERNAL_ID_SET,
+                "mandatory": False,
+            },
+        )
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test08_update_metadata_field(self):
         """Update a metadata field by external id"""
         new_label = "update_metadata_test_new_label{}".format(EXTERNAL_ID_GENERAL)
-        new_default_value = "update_metadata_test_new_default_value{}".format(EXTERNAL_ID_GENERAL)
+        new_default_value = "update_metadata_test_new_default_value{}".format(
+            EXTERNAL_ID_GENERAL
+        )
 
         # Call the API to update the metadata field
         # Will also attempt to update some fields that cannot be updated
         # (external_id and type) which will be ignored
-        result = api.update_metadata_field(EXTERNAL_ID_GENERAL, {
-            "external_id": EXTERNAL_ID_SET,
-            "label": new_label,
-            "type": "integer",
-            "mandatory": True,
-            "default_value": new_default_value,
-        })
+        result = api.update_metadata_field(
+            EXTERNAL_ID_GENERAL,
+            {
+                "external_id": EXTERNAL_ID_SET,
+                "label": new_label,
+                "type": "integer",
+                "mandatory": True,
+                "default_value": new_default_value,
+            },
+        )
 
-        self.assert_metadata_field(result, "string", {
-            "external_id": EXTERNAL_ID_GENERAL,
-            "label": new_label,
-            "default_value": new_default_value,
-            "mandatory": True,
-        })
+        self.assert_metadata_field(
+            result,
+            "string",
+            {
+                "external_id": EXTERNAL_ID_GENERAL,
+                "label": new_label,
+                "default_value": new_default_value,
+                "mandatory": True,
+            },
+        )
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test09_update_metadata_field_datasource(self):
         """Update a metadata field datasource"""
-        result = api.update_metadata_field_datasource(EXTERNAL_ID_ENUM_2, DATASOURCE_SINGLE)
+        result = api.update_metadata_field_datasource(
+            EXTERNAL_ID_ENUM_2, DATASOURCE_SINGLE
+        )
 
         self.assert_metadata_field_datasource(result)
 
@@ -322,7 +371,10 @@ class MetadataTest(unittest.TestCase):
             if item == DATASOURCE_SINGLE[0]:
                 matched = True
 
-        self.assertTrue(matched, msg="The updated metadata field does not contain the updated datasource")
+        self.assertTrue(
+            matched,
+            msg="The updated metadata field does not contain the updated datasource",
+        )
 
         self.assertEqual(len(DATASOURCE_MULTIPLE), len(result["values"]))
         self.assertEqual(DATASOURCE_SINGLE[0]["value"], result["values"][0]["value"])
@@ -343,7 +395,9 @@ class MetadataTest(unittest.TestCase):
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test12_delete_metadata_field_data_source(self):
         """Delete entries in a metadata field datasource"""
-        result = api.delete_datasource_entries(EXTERNAL_ID_SET_2, [DATASOURCE_ENTRY_EXTERNAL_ID])
+        result = api.delete_datasource_entries(
+            EXTERNAL_ID_SET_2, [DATASOURCE_ENTRY_EXTERNAL_ID]
+        )
 
         self.assert_metadata_field_datasource(result)
         self.assertEqual(len(DATASOURCE_MULTIPLE) - 1, len(result["values"]))
@@ -386,20 +440,26 @@ class MetadataTest(unittest.TestCase):
         }
         result = api.add_metadata_field(metadata_field)
 
-        self.assert_metadata_field(result, "date", {
-            "validation": last_three_days_validation,
-            "default_value": metadata_field["default_value"],
-        })
+        self.assert_metadata_field(
+            result,
+            "date",
+            {
+                "validation": last_three_days_validation,
+                "default_value": metadata_field["default_value"],
+            },
+        )
 
         # Test entering a metadata field with date validation and an invalid default value
         with self.assertRaises(BadRequest):
-            api.add_metadata_field({
-                "external_id": EXTERNAL_ID_DATE_VALIDATION_2,
-                "label": EXTERNAL_ID_DATE_VALIDATION_2,
-                "type": "date",
-                "default_value": time.strftime("%Y-%m-%d", future_date.timetuple()),
-                "validation": last_three_days_validation,
-            })
+            api.add_metadata_field(
+                {
+                    "external_id": EXTERNAL_ID_DATE_VALIDATION_2,
+                    "label": EXTERNAL_ID_DATE_VALIDATION_2,
+                    "type": "date",
+                    "default_value": time.strftime("%Y-%m-%d", future_date.timetuple()),
+                    "validation": last_three_days_validation,
+                }
+            )
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test14_integer_field_validation(self):
@@ -420,36 +480,48 @@ class MetadataTest(unittest.TestCase):
         }
         result = api.add_metadata_field(metadata_field)
 
-        self.assert_metadata_field(result, "integer", {
-            "validation": validation,
-            "default_value": metadata_field["default_value"],
-        })
+        self.assert_metadata_field(
+            result,
+            "integer",
+            {
+                "validation": validation,
+                "default_value": metadata_field["default_value"],
+            },
+        )
 
         # Test entering a metadata field with integer validation and a valid default value
         with self.assertRaises(BadRequest):
-            api.add_metadata_field({
-                "external_id": EXTERNAL_ID_INT_VALIDATION_2,
-                "label": EXTERNAL_ID_INT_VALIDATION_2,
-                "type": "integer",
-                "default_value": 6,
-                "validation": validation,
-            })
+            api.add_metadata_field(
+                {
+                    "external_id": EXTERNAL_ID_INT_VALIDATION_2,
+                    "label": EXTERNAL_ID_INT_VALIDATION_2,
+                    "type": "integer",
+                    "default_value": 6,
+                    "validation": validation,
+                }
+            )
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test15_restore_metadata_field_datasource(self):
         """Restore a deleted entry in a metadata field datasource"""
         # Begin by deleting a datasource entry
-        result = api.delete_datasource_entries(EXTERNAL_ID_SET_3, [
-            DATASOURCE_ENTRY_EXTERNAL_ID,
-        ])
+        result = api.delete_datasource_entries(
+            EXTERNAL_ID_SET_3,
+            [
+                DATASOURCE_ENTRY_EXTERNAL_ID,
+            ],
+        )
 
         self.assert_metadata_field_datasource(result)
         self.assertEqual(len(result["values"]), 2)
 
         # Restore datasource entry
-        result = api.restore_metadata_field_datasource(EXTERNAL_ID_SET_3, [
-            DATASOURCE_ENTRY_EXTERNAL_ID,
-        ])
+        result = api.restore_metadata_field_datasource(
+            EXTERNAL_ID_SET_3,
+            [
+                DATASOURCE_ENTRY_EXTERNAL_ID,
+            ],
+        )
 
         self.assert_metadata_field_datasource(result)
         self.assertEqual(len(result["values"]), 3)
@@ -457,65 +529,69 @@ class MetadataTest(unittest.TestCase):
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_order_by_asc_by_default_in_a_metadata_field_data_source(self):
         # datasource is set with values in the order v2, v3, v4
-        result = api.reorder_metadata_field_datasource(EXTERNAL_ID_SET_3, 'value')
+        result = api.reorder_metadata_field_datasource(EXTERNAL_ID_SET_3, "value")
 
         self.assert_metadata_field_datasource(result)
 
-        self.assertEqual(result['values'][0]['value'], DATASOURCE_MULTIPLE[0]['value'])
+        self.assertEqual(result["values"][0]["value"], DATASOURCE_MULTIPLE[0]["value"])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_order_by_asc_in_a_metadata_field_data_source(self):
         # datasource is set with values in the order v2, v3, v4
-        result = api.reorder_metadata_field_datasource(EXTERNAL_ID_SET_3, 'value', 'asc')
+        result = api.reorder_metadata_field_datasource(
+            EXTERNAL_ID_SET_3, "value", "asc"
+        )
 
         self.assert_metadata_field_datasource(result)
 
-        self.assertEqual(result['values'][0]['value'], DATASOURCE_MULTIPLE[0]['value'])
+        self.assertEqual(result["values"][0]["value"], DATASOURCE_MULTIPLE[0]["value"])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_order_by_desc_in_a_metadata_field_data_source(self):
         # datasource is set with values in the order v2, v3, v4
-        result = api.reorder_metadata_field_datasource(EXTERNAL_ID_SET_3, 'value', 'desc')
+        result = api.reorder_metadata_field_datasource(
+            EXTERNAL_ID_SET_3, "value", "desc"
+        )
 
         self.assert_metadata_field_datasource(result)
 
-        self.assertEqual(result['values'][0]['value'], DATASOURCE_MULTIPLE[-1]['value'])
+        self.assertEqual(result["values"][0]["value"], DATASOURCE_MULTIPLE[-1]["value"])
 
     @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_reorder_metadata_fields_by_label(self, mocker):
         """Test the reorder of metadata fields for label order by asc"""
         mocker.return_value = MOCK_RESPONSE
-        api.reorder_metadata_fields('label', 'asc')
+        api.reorder_metadata_fields("label", "asc")
 
         self.assertTrue(get_uri(mocker).endswith("/metadata_fields/order"))
         self.assertEqual(get_method(mocker), "PUT")
-        self.assertEqual(get_json_body(mocker)['order_by'], "label")
-        self.assertEqual(get_json_body(mocker)['direction'], "asc")
+        self.assertEqual(get_json_body(mocker)["order_by"], "label")
+        self.assertEqual(get_json_body(mocker)["direction"], "asc")
 
     @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_reorder_metadata_fields_by_external_id(self, mocker):
         """Test the reorder of metadata fields for external_id order by desc"""
         mocker.return_value = MOCK_RESPONSE
-        api.reorder_metadata_fields('external_id', 'desc')
+        api.reorder_metadata_fields("external_id", "desc")
 
         self.assertTrue(get_uri(mocker).endswith("/metadata_fields/order"))
         self.assertEqual(get_method(mocker), "PUT")
-        self.assertEqual(get_json_body(mocker)['order_by'], "external_id")
-        self.assertEqual(get_json_body(mocker)['direction'], "desc")
+        self.assertEqual(get_json_body(mocker)["order_by"], "external_id")
+        self.assertEqual(get_json_body(mocker)["direction"], "desc")
 
     @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_reorder_metadata_fields_by_created_at(self, mocker):
         """Test the reorder of metadata fields for created_at order by asc"""
         mocker.return_value = MOCK_RESPONSE
-        api.reorder_metadata_fields('created_at', 'asc')
+        api.reorder_metadata_fields("created_at", "asc")
 
         self.assertTrue(get_uri(mocker).endswith("/metadata_fields/order"))
         self.assertEqual(get_method(mocker), "PUT")
-        self.assertEqual(get_json_body(mocker)['order_by'], "created_at")
-        self.assertEqual(get_json_body(mocker)['direction'], "asc")
+        self.assertEqual(get_json_body(mocker)["order_by"], "created_at")
+        self.assertEqual(get_json_body(mocker)["direction"], "asc")
 
 
 if __name__ == "__main__":

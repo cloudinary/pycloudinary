@@ -5,6 +5,7 @@ class CacheAdapter:
     """
     CacheAdapter Abstract Base Class
     """
+
     __metaclass__ = ABCMeta
 
     @abstractmethod
