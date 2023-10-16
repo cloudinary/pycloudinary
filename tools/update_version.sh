@@ -186,7 +186,7 @@ function update_version
 
     echo ""
     echo "# After editing CHANGELOG.md, optionally review changes and issue these commands:"
-    echo git add setup.py cloudinary/__init__.py CHANGELOG.md
+    echo git add setup.py cloudinary/__init__.py pyproject.toml CHANGELOG.md
     echo git commit -m "\"Version ${NEW_VERSION}\""
     echo sed -e "'1,/^${NEW_VERSION//./\\.}/d'" \
              -e "'/^=/d'" \
@@ -201,7 +201,7 @@ function update_version
     echo ""
     read -p "Run the above commands automatically? (y/N): " confirm && [[ ${confirm} == [yY] || ${confirm} == [yY][eE][sS] ]] || { popd; return 0; }
 
-    git add setup.py cloudinary/__init__.py CHANGELOG.md
+    git git add setup.py cloudinary/__init__.py pyproject.toml CHANGELOG.md
     git commit -m "Version ${NEW_VERSION}"
     sed -e "1,/^${NEW_VERSION//./\\.}/d" \
         -e "/^=/d" \
