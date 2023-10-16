@@ -172,7 +172,10 @@ function update_version
                  "VERSION = \"${NEW_VERSION}\""\
                  cloudinary/__init__.py\
                  || return 1
-
+    safe_replace "version = \"${current_version_re}\""\
+                 "version = \"${NEW_VERSION}\""\
+                 pyproject.toml\
+                 || return 1
 
     if [[ "${UPDATE_ONLY}" = true ]]; then
       popd;
