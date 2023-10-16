@@ -477,7 +477,7 @@ def call_cacheable_api(
     unsigned=False,
     file=None,
     timeout=None,
-    **options,
+    **options
 ):
     """
     Calls Upload API and saves results to cache (if enabled)
@@ -502,7 +502,7 @@ def call_api(
     file=None,
     timeout=None,
     extra_headers=None,
-    **options,
+    **options
 ):
     params = utils.cleanup_params(params)
 
