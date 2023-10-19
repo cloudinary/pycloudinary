@@ -1,6 +1,7 @@
 from cloudinary.uploader import upload
 from cloudinary.utils import cloudinary_url
 from flask import Flask, render_template, request
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 
@@ -13,7 +14,8 @@ def upload_file():
     if request.method == 'POST':
         file_to_upload = request.files['file']
         if file_to_upload:
-            upload_result = upload(file_to_upload)
+            filename = secure_filename(file_to_upload.filename)
+            upload_result = upload(file_to_upload, filename=filename)
             thumbnail_url1, options = cloudinary_url(upload_result['public_id'], format="jpg", crop="fill", width=100,
                                                      height=100)
             thumbnail_url2, options = cloudinary_url(upload_result['public_id'], format="jpg", crop="fill", width=200,
