@@ -44,7 +44,9 @@ classifiers = [
 dependencies = [
     "six",
     "urllib3>=1.26.5",
-    "certifi"
+    "certifi",
+    "pytest==4.6; python_version< '3.7'",
+    "pytest; python_version >= '3.7'"
 ]
 
 [project.optional-dependencies]
