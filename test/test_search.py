@@ -212,10 +212,13 @@ class SearchTest(unittest.TestCase):
             .sort_by('created_at') \
             .aggregate('format') \
             .aggregate('format') \
-            .aggregate('resource_type') \
+            .aggregate(['resource_type', 'type']) \
             .with_field('context') \
             .with_field('context') \
             .with_field('tags') \
+            .fields(('tags', 'context')) \
+            .fields('metadata') \
+            .fields('tags') \
             .execute()
 
         _, args = mocker.call_args
@@ -226,8 +229,9 @@ class SearchTest(unittest.TestCase):
                 {'created_at': 'desc'},
                 {'public_id': 'asc'},
             ],
-            'aggregate': ['format', 'resource_type'],
+            'aggregate': ['format', 'resource_type', 'type'],
             'with_field': ['context', 'tags'],
+            'fields': ['tags', 'context', 'metadata'],
         })
 
     def test_should_build_search_url(self):

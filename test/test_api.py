@@ -207,6 +207,24 @@ class ApiTest(unittest.TestCase):
 
     @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test06_resources_fields(self, mocker):
+        """ should allow listing resources and returning only specified fields """
+        mocker.return_value = MOCK_RESPONSE
+        api.resources(fields=["tags", "secure_url"], type="upload")
+
+        self.assertTrue(get_uri(mocker).endswith('/resources/image/upload'))
+        self.assertEqual(get_params(mocker)['fields'], "tags,secure_url")
+
+        api.resources(fields="context,url", type="upload")
+
+        self.assertEqual(get_params(mocker)['fields'], "context,url")
+
+        api.resources(fields="", type="upload")
+
+        self.assertNotIn('fields', get_params(mocker))
+
+    @patch(URLLIB3_REQUEST)
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test06_resources_tag(self, mocker):
         """ should allow listing resources by tag """
         mocker.return_value = MOCK_RESPONSE
@@ -978,8 +996,6 @@ class ApiTest(unittest.TestCase):
         mocker.return_value = MOCK_RESPONSE
 
         api.delete_folder(UNIQUE_TEST_FOLDER)
-
-        
 
         self.assertEqual("DELETE", get_method(mocker))
         self.assertTrue(get_uri(mocker).endswith('/folders/' + UNIQUE_TEST_FOLDER))

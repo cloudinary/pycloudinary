@@ -77,24 +77,22 @@ def resources(**options):
     uri = ["resources", resource_type]
     if upload_type:
         uri.append(upload_type)
-    params = only(options, "next_cursor", "max_results", "prefix", "tags",
-                  "context", "moderations", "direction", "start_at", "metadata")
+    params = __list_resources_params(**options)
+    params.update(only(options, "prefix", "start_at"))
     return call_api("get", uri, params, **options)
 
 
 def resources_by_tag(tag, **options):
     resource_type = options.pop("resource_type", "image")
     uri = ["resources", resource_type, "tags", tag]
-    params = only(options, "next_cursor", "max_results", "tags",
-                  "context", "moderations", "direction", "metadata")
+    params = __list_resources_params(**options)
     return call_api("get", uri, params, **options)
 
 
 def resources_by_moderation(kind, status, **options):
     resource_type = options.pop("resource_type", "image")
     uri = ["resources", resource_type, "moderations", kind, status]
-    params = only(options, "next_cursor", "max_results", "tags",
-                  "context", "moderations", "direction", "metadata")
+    params = __list_resources_params(**options)
     return call_api("get", uri, params, **options)
 
 
@@ -102,7 +100,7 @@ def resources_by_ids(public_ids, **options):
     resource_type = options.pop("resource_type", "image")
     upload_type = options.pop("type", "upload")
     uri = ["resources", resource_type, upload_type]
-    params = dict(only(options, "tags", "moderations", "context"), public_ids=public_ids)
+    params = dict(__resources_params(**options), public_ids=public_ids)
     return call_api("get", uri, params, **options)
 
 
@@ -118,7 +116,7 @@ def resources_by_asset_folder(asset_folder, **options):
     :rtype:             Response
     """
     uri = ["resources", "by_asset_folder"]
-    params = only(options, "max_results", "tags", "moderations", "context", "next_cursor")
+    params = __list_resources_params(**options)
     params["asset_folder"] = asset_folder
     return call_api("get", uri, params, **options)
 
@@ -138,7 +136,7 @@ def resources_by_asset_ids(asset_ids, **options):
     :rtype:             Response
     """
     uri = ["resources", 'by_asset_ids']
-    params = dict(only(options, "tags", "moderations", "context"), asset_ids=asset_ids)
+    params = dict(__resources_params(**options), asset_ids=asset_ids)
     return call_api("get", uri, params, **options)
 
 
@@ -160,12 +158,40 @@ def resources_by_context(key, value=None, **options):
     """
     resource_type = options.pop("resource_type", "image")
     uri = ["resources", resource_type, "context"]
-    params = only(options, "next_cursor", "max_results", "tags",
-                  "context", "moderations", "direction", "metadata")
+    params = __list_resources_params(**options)
     params["key"] = key
     if value is not None:
         params["value"] = value
     return call_api("get", uri, params, **options)
+
+
+def __resources_params(**options):
+    """
+       Prepares optional parameters for resources_* API calls.
+
+       :param options: Additional options
+       :return: Optional parameters
+
+       :internal
+       """
+    params = only(options, "tags", "context", "metadata", "moderations")
+    params["fields"] = options.get("fields") and utils.encode_list(utils.build_array(options["fields"]))
+    return params
+
+
+def __list_resources_params(**options):
+    """
+       Prepares optional parameters for resources_* API calls.
+
+       :param options: Additional options
+       :return: Optional parameters
+
+       :internal
+       """
+    resources_params = __resources_params(**options)
+    resources_params.update(only(options, "next_cursor", "max_results", "direction"))
+
+    return resources_params
 
 
 def visual_search(image_url=None, image_asset_id=None, text=None, image_file=None, **options):
