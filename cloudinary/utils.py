@@ -186,7 +186,7 @@ def compute_hex_hash(s, algorithm=SIGNATURE_SHA1):
 
 
 def build_array(arg):
-    if isinstance(arg, list):
+    if isinstance(arg, (list, tuple)):
         return arg
     elif arg is None:
         return []
@@ -601,6 +601,7 @@ def normalize_params(params):
         return params
 
     return dict([(k, __bool_string(v)) for (k, v) in params.items() if v is not None and not v == ""])
+
 
 def sign_request(params, options):
     api_key = options.get("api_key", cloudinary.config().api_key)
