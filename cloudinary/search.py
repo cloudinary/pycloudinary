@@ -3,8 +3,8 @@ import json
 
 import cloudinary
 from cloudinary.api_client.call_api import call_json_api
-from cloudinary.utils import unique, unsigned_download_url_prefix, build_distribution_domain, base64url_encode, \
-    json_encode, compute_hex_hash, SIGNATURE_SHA256, build_array, encode_list
+from cloudinary.utils import (unique, build_distribution_domain, base64url_encode, json_encode, compute_hex_hash,
+                              SIGNATURE_SHA256, build_array)
 
 
 class Search(object):
