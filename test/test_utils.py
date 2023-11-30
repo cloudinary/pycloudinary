@@ -455,8 +455,18 @@ class TestUtils(unittest.TestCase):
             expected_url=(
                     DEFAULT_UPLOAD_PATH +
                     "l_fetch:"
-                    "aHR0cHM6Ly91cGxvYWQud2lraW1lZGlhLm9yZy93aWtpcGVkaWEvY29"
-                    "tbW9ucy8yLzJiLyVFQSVCMyVBMCVFQyVCMCVCRCVFQSVCMCVBRiVFQiVCMiU4Qy5qcGc=/"
+                    "aHR0cHM6Ly91cGxvYWQud2lraW1lZGlhLm9yZy93aWtpcGVkaWEvY29tbW9ucy8yLzJiL-qzoOywveqwr-uyjC5qcGc=/"
+                    "test"))
+
+        self.__test_cloudinary_url(
+            options={
+                "overlay": {
+                    "url":
+                        "https://www.test.com/test/JE01118-YGP900_1_lar.jpg?version=432023"}},
+            expected_url=(
+                    DEFAULT_UPLOAD_PATH +
+                    "l_fetch:"
+                    "aHR0cHM6Ly93d3cudGVzdC5jb20vdGVzdC9KRTAxMTE4LVlHUDkwMF8xX2xhci5qcGc_dmVyc2lvbj00MzIwMjM=/"
                     "test"))
 
     def test_underlay(self):
@@ -960,8 +970,7 @@ class TestUtils(unittest.TestCase):
               'font_family': "Arial", 'font_size': 40},
              "subtitles:Arial_40:sample_sub_he.srt"),
             ({'url': "https://upload.wikimedia.org/wikipedia/commons/2/2b/고창갯벌.jpg"},
-             "fetch:aHR0cHM6Ly91cGxvYWQud2lraW1lZGlhLm9yZy93aWtpcGVkaWEvY29"
-             "tbW9ucy8yLzJiLyVFQSVCMyVBMCVFQyVCMCVCRCVFQSVCMCVBRiVFQiVCMiU4Qy5qcGc="),
+             "fetch:aHR0cHM6Ly91cGxvYWQud2lraW1lZGlhLm9yZy93aWtpcGVkaWEvY29tbW9ucy8yLzJiL-qzoOywveqwr-uyjC5qcGc="),
             ({'url': FETCH_VIDEO_URL, "resource_type": "video"},
              "video:fetch:aHR0cHM6Ly9kZW1vLXJlcy5jbG91ZGluYXJ5LmNvbS92aWRlb3MvZG9nLm1wNA==")
         ]

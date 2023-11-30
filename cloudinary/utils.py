@@ -1289,7 +1289,7 @@ def process_layer(layer, layer_parameter):
             text = ''.join(encoded_text)
             components.append(text)
     elif type == "fetch":
-        b64 = base64_encode_url(fetch_url)
+        b64 = base64url_encode(fetch_url)
         components.append(b64)
     else:
         public_id = public_id.replace("/", ':')
