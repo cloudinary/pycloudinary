@@ -1,3 +1,17 @@
+1.37.0 / 2023-12-03
+==================
+
+New functionality and features
+------------------------------
+
+  * Add support for `fields` parameter in Search and Admin APIs
+
+Other Changes
+-------------
+
+  * Fix special characters encoding in `fetch` overlays
+  * Migrate to `pyproject.toml`
+
 1.36.0 / 2023-10-02
 ==================
 

@@ -1,7 +1,7 @@
 [project]
 name = "cloudinary"
 description = "Python and Django SDK for Cloudinary"
-version = "1.36.0"
+version = "1.37.0"
 
 authors = [{ name = "Cloudinary", email = "info@cloudinary.com" }]
 license = { file = "LICENSE.txt" }
