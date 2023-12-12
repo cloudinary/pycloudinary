@@ -169,6 +169,20 @@ class VideoTest(unittest.TestCase):
             self.video.video(poster=expected_url.format('', 'jpg'), sources=self.video.default_video_sources)
         )
 
+    def test_video_tag_default_sources_use_fetch_format(self):
+        video = CloudinaryVideo("sample.mp4")
+        expected_url = VIDEO_UPLOAD_PATH + "f_{1},{0}/sample.mp4"
+
+        self.assertEqual(
+            "<video poster=\"" + VIDEO_UPLOAD_PATH + "f_jpg/sample.mp4" + "\">" +
+            "<source src=\"" + expected_url.format('vc_h265', 'mp4') + "\" type=\"video/mp4; codecs=hev1\">" +
+            "<source src=\"" + expected_url.format('vc_vp9', 'webm') + "\" type=\"video/webm; codecs=vp9\">" +
+            "<source src=\"" + expected_url.format('vc_auto', 'mp4') + "\" type=\"video/mp4\">" +
+            "<source src=\"" + expected_url.format('vc_auto', 'webm') + "\" type=\"video/webm\">" +
+            "</video>",
+            video.video(sources=self.video.default_video_sources, use_fetch_format=True)
+        )
+
     def test_video_tag_custom_sources(self):
         custom_sources = [
             {

@@ -311,11 +311,13 @@ def patch_fetch_format(options):
     """
     When upload type is fetch, remove the format options.
     In addition, set the fetch_format options to the format value unless it was already set.
-    Mutates the options parameter!
+    Mutates the "options" parameter!
 
     :param options: URL and transformation options
     """
-    if options.get("type", "upload") != "fetch":
+    use_fetch_format = options.pop("use_fetch_format", cloudinary.config().use_fetch_format)
+
+    if options.get("type", "upload") != "fetch" and not use_fetch_format:
         return
 
     resource_format = options.pop("format", None)
