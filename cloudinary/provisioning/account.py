@@ -425,7 +425,7 @@ def generate_access_key(sub_account_id, name=None, enabled=None, **options):
     return _call_account_api("post", uri, params, **options)
 
 
-def update_access_key(sub_account_id, api_key, name=None, enabled=None, **options):
+def update_access_key(sub_account_id, api_key, name=None, enabled=None, dedicated_for=None, **options):
     """
     Update the name and/or status of an existing access key.
 
@@ -437,6 +437,10 @@ def update_access_key(sub_account_id, api_key, name=None, enabled=None, **option
     :type name:                 str
     :param enabled:             Enable or disable the access key.
     :type enabled:              bool
+    :param dedicated_for:       Designates the access key for a specific purpose while allowing it to be used for
+                                other purposes, as well. This action replaces any previously assigned key.
+                                **Possible values**: `webhooks`
+    :type dedicated_for:        str
     :param options:             Generic advanced options dict, see online documentation.
     :type options:              dict, optional
     :return:                    Access key details
@@ -446,6 +450,7 @@ def update_access_key(sub_account_id, api_key, name=None, enabled=None, **option
     params = {
         "name": name,
         "enabled": enabled,
+        "dedicated_for": dedicated_for,
     }
     return _call_account_api("put", uri, params, **options)
 
