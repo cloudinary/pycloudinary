@@ -448,3 +448,29 @@ def update_access_key(sub_account_id, api_key, name=None, enabled=None, **option
         "enabled": enabled,
     }
     return _call_account_api("put", uri, params, **options)
+
+
+def delete_access_key(sub_account_id, api_key=None, name=None, **options):
+    """
+    Delete an existing access key by api_key or by name.
+
+    :param sub_account_id:      The id of the sub account.
+    :type sub_account_id:       str
+    :param api_key:             The API key of the access key.
+    :type api_key:              str|int
+    :param name:                The name of the access key.
+    :type name:                 str
+    :param options:             Generic advanced options dict, see online documentation.
+    :type options:              dict, optional
+    :return:                    Operation status.
+    :rtype:                     dict
+    """
+    uri = [SUB_ACCOUNTS_SUB_PATH, sub_account_id, ACCESS_KEYS]
+
+    if api_key is not None:
+        uri.append(str(api_key))
+
+    params = {
+        "name": name
+    }
+    return _call_account_api("delete", uri, params, **options)

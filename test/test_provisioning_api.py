@@ -241,6 +241,26 @@ class AccountApiTest(unittest.TestCase):
         self.assertEqual(updated_key_name, res["name"])
         self.assertEqual(False, res["enabled"])
 
+    @unittest.skipUnless(cloudinary.provisioning.account_config().provisioning_api_secret,
+                         "requires provisioning_api_key/provisioning_api_secret")
+    def test_delete_access_key(self):
+        key_name = UNIQUE_TEST_ID + "_delete_key"
+        named_key_name = UNIQUE_TEST_ID + "_delete_by_name_key"
+
+        key_res = cloudinary.provisioning.generate_access_key(self.cloud_id, name=key_name, enabled=True)
+        self.assertEqual(key_name, key_res["name"])
+        self.assertEqual(True, key_res["enabled"])
+
+        named_key_res = cloudinary.provisioning.generate_access_key(self.cloud_id, name=named_key_name, enabled=True)
+        self.assertEqual(named_key_name, named_key_res["name"])
+        self.assertEqual(True, named_key_res["enabled"])
+
+        key_del_res = cloudinary.provisioning.delete_access_key(self.cloud_id, named_key_res["api_key"])
+        self.assertEqual("ok", key_del_res["message"])
+
+        named_key_del_res = cloudinary.provisioning.delete_access_key(self.cloud_id, name=key_name)
+        self.assertEqual("ok", named_key_del_res["message"])
+
 
 if __name__ == '__main__':
     unittest.main()
