@@ -230,16 +230,18 @@ class AccountApiTest(unittest.TestCase):
         key_name = UNIQUE_TEST_ID + "_before_update_test_key"
         updated_key_name = UNIQUE_TEST_ID + "_updated_test_key"
 
-        key_res = cloudinary.provisioning.generate_access_key(self.cloud_id, name=key_name, enabled=True)
+        key_res = cloudinary.provisioning.generate_access_key(self.cloud_id, name=key_name, enabled=False)
 
         self.assertEqual(key_name, key_res["name"])
-        self.assertEqual(True, key_res["enabled"])
+        self.assertEqual(False, key_res["enabled"])
 
         res = cloudinary.provisioning.update_access_key(self.cloud_id, key_res["api_key"],
-                                                        name=updated_key_name, enabled=False)
+                                                        name=updated_key_name, enabled=True, dedicated_for="webhooks")
 
         self.assertEqual(updated_key_name, res["name"])
-        self.assertEqual(False, res["enabled"])
+        self.assertEqual(True, res["enabled"])
+        self.assertEqual(1, len(res["dedicated_for"]))
+        self.assertEqual("webhooks", res["dedicated_for"][0])
 
     @unittest.skipUnless(cloudinary.provisioning.account_config().provisioning_api_secret,
                          "requires provisioning_api_key/provisioning_api_secret")
