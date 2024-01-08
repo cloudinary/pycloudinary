@@ -1,3 +1,14 @@
+1.38.0 / 2024-01-08
+==================
+
+New functionality and features
+------------------------------
+
+  * Add support for `analyze` API
+  * Add support for `dedicated_for` parameter in `update_access_key` Provisioning API
+  * Add support for `delete_access_key` in Provisioning API
+  * Add support for `use_fetch_format` parameter in video tag
+
 1.37.0 / 2023-12-03
 ==================
 
