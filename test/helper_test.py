@@ -48,6 +48,7 @@ try:
     # urllib3 2.x support
     # noinspection PyProtectedMember
     import urllib3._request_methods
+
     URLLIB3_REQUEST = "urllib3._request_methods.RequestMethods.request"
 except ImportError:
     URLLIB3_REQUEST = "urllib3.request.RequestMethods.request"
@@ -140,10 +141,10 @@ def http_response_mock(body="", headers=None, status=200):
     return HTTPResponse(body, HTTPHeaderDict(headers), status=status)
 
 
-def api_response_mock():
-    return http_response_mock('{"foo":"bar"}', {"x-featureratelimit-limit": '0',
-                                                "x-featureratelimit-reset": 'Sat, 01 Apr 2017 22:00:00 GMT',
-                                                "x-featureratelimit-remaining": '0'})
+def api_response_mock(body='{"foo":"bar"}'):
+    return http_response_mock(body, {"x-featureratelimit-limit": '0',
+                                     "x-featureratelimit-reset": 'Sat, 01 Apr 2017 22:00:00 GMT',
+                                     "x-featureratelimit-remaining": '0'})
 
 
 def uploader_response_mock():

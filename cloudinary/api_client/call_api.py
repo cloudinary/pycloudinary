@@ -26,6 +26,10 @@ def call_json_api(method, uri, json_body, **options):
     return _call_api(method, uri, body=data, headers={'Content-Type': 'application/json'}, **options)
 
 
+def _call_v2_api(method, uri, json_body, **options):
+    return call_json_api(method, uri, json_body=json_body, api_version='v2', **options)
+
+
 def call_api(method, uri, params, **options):
     return _call_api(method, uri, params=params, **options)
 
@@ -42,9 +46,10 @@ def _call_api(method, uri, params=None, body=None, headers=None, extra_headers=N
     oauth_token = options.pop("oauth_token", cloudinary.config().oauth_token)
 
     _validate_authorization(api_key, api_secret, oauth_token)
-
-    api_url = "/".join([prefix, cloudinary.API_VERSION, cloud_name] + uri)
     auth = {"key": api_key, "secret": api_secret, "oauth_token": oauth_token}
+
+    api_version = options.pop("api_version",  cloudinary.API_VERSION)
+    api_url = "/".join([prefix, api_version, cloud_name] + uri)
 
     if body is not None:
         options["body"] = body
