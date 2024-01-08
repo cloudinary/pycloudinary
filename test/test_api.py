@@ -1218,6 +1218,26 @@ class ApiTest(unittest.TestCase):
         for resource in result["resources"]:
             self.assertNotIn("metadata", resource)
 
+    @patch(URLLIB3_REQUEST)
+    def test_analyze(self, mocker):
+        mocker.return_value = MOCK_RESPONSE
+
+        options = {
+            "input_type": "uri",
+            "analysis_type": "captioning",
+            "uri": "https://res.cloudinary.com/demo/image/upload/dog",
+        }
+
+        api.analyze(**options)
+
+        uri = get_uri(mocker)
+        self.assertIn("/v2/", uri)
+        self.assertTrue(uri.endswith("/analysis/analyze"))
+
+        params = get_json_body(mocker)
+        for param in options.keys():
+            self.assertIn(param, params)
+
 
 if __name__ == '__main__':
     unittest.main()

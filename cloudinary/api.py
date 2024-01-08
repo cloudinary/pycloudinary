@@ -14,7 +14,8 @@ from cloudinary import utils
 from cloudinary.api_client.call_api import (
     call_api,
     call_metadata_api,
-    call_json_api
+    call_json_api,
+    _call_v2_api
 )
 from cloudinary.exceptions import (
     BadRequest,
@@ -840,3 +841,18 @@ def reorder_metadata_fields(order_by, direction=None, **options):
     uri = ['order']
     params = {'order_by': order_by, 'direction': direction}
     return call_metadata_api('put', uri, params, **options)
+
+
+def analyze(input_type, analysis_type, uri=None, **options):
+    """Analyzes an asset with the requested analysis type.
+
+    :param input_type: The type of input for the asset to analyze ('uri').
+    :param analysis_type: The type of analysis to run ('google_tagging', 'captioning', 'fashion').
+    :param uri: The URI of the asset to analyze.
+    :param options: Additional options.
+
+    :rtype: Response
+    """
+    api_uri = ['analysis', 'analyze']
+    params = {'input_type': input_type, 'analysis_type': analysis_type, 'uri': uri}
+    return _call_v2_api('post', api_uri, params, **options)
