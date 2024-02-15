@@ -939,7 +939,7 @@ class ApiTest(unittest.TestCase):
                    asset_folder="folder_new_update",
                    display_name="new_display_name",
                    unique_display_name=True,
-                   regions={"box_1": [[1, 2], [3, 4]], "box_2": [[5, 6], [7, 8]]})
+                   regions=OrderedDict((("box_1", [[1, 2], [3, 4]]), ("box_2", [[5, 6], [7, 8]]))))
 
         self.assertEqual("folder_new_update", get_param(mocker, "asset_folder"))
         self.assertEqual("new_display_name", get_param(mocker, "display_name"))
