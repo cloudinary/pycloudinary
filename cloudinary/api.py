@@ -699,9 +699,8 @@ def add_metadata_field(field, **options):
 
     :rtype: Response
     """
-    params = only(field, "type", "external_id", "label", "mandatory",
-                  "default_value", "validation", "datasource")
-    return call_metadata_api("post", [], params, **options)
+
+    return call_metadata_api("post", [], __metadata_field_params(field), **options)
 
 
 def update_metadata_field(field_external_id, field, **options):
@@ -720,8 +719,13 @@ def update_metadata_field(field_external_id, field, **options):
     :rtype: Response
     """
     uri = [field_external_id]
-    params = only(field, "label", "mandatory", "default_value", "validation")
-    return call_metadata_api("put", uri, params, **options)
+
+    return call_metadata_api("put", uri, __metadata_field_params(field), **options)
+
+
+def __metadata_field_params(field):
+    return only(field, "type", "external_id", "label", "mandatory", "restrictions",
+                "default_value", "validation", "datasource")
 
 
 def delete_metadata_field(field_external_id, **options):

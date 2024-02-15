@@ -199,6 +199,7 @@ class MetadataTest(unittest.TestCase):
             "external_id": EXTERNAL_ID_STRING,
             "label": EXTERNAL_ID_STRING,
             "type": "string",
+            "restrictions": {"readonly_ui": True}
         })
 
         self.assertTrue(get_uri(mocker).endswith("/metadata_fields"))
@@ -207,6 +208,7 @@ class MetadataTest(unittest.TestCase):
             "type": "string",
             "external_id": EXTERNAL_ID_STRING,
             "label": EXTERNAL_ID_STRING,
+            "restrictions": {"readonly_ui": True}
         })
 
     @patch(URLLIB3_REQUEST)
@@ -235,12 +237,14 @@ class MetadataTest(unittest.TestCase):
             "external_id": EXTERNAL_ID_DATE,
             "label": EXTERNAL_ID_DATE,
             "type": "date",
+            "restrictions": {"readonly_ui": True}
         })
 
         self.assert_metadata_field(result, "date", {
             "label": EXTERNAL_ID_DATE,
             "external_id": EXTERNAL_ID_DATE,
             "mandatory": False,
+            "restrictions": {"readonly_ui": True}
         })
 
     @patch(URLLIB3_REQUEST)
@@ -301,6 +305,7 @@ class MetadataTest(unittest.TestCase):
             "type": "integer",
             "mandatory": True,
             "default_value": new_default_value,
+            "restrictions": {"readonly_ui": True}
         })
 
         self.assert_metadata_field(result, "string", {
@@ -308,6 +313,7 @@ class MetadataTest(unittest.TestCase):
             "label": new_label,
             "default_value": new_default_value,
             "mandatory": True,
+            "restrictions": {"readonly_ui": True}
         })
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
