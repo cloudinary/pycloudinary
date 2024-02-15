@@ -132,6 +132,7 @@ __SERIALIZED_UPLOAD_PARAMS = [
     "allowed_formats",
     "face_coordinates",
     "custom_coordinates",
+    "regions",
     "context",
     "auto_tagging",
     "responsive_breakpoints",
@@ -290,9 +291,14 @@ def json_encode(value, sort_keys=False):
     Converts value to a json encoded string
 
     :param value: value to be encoded
+    :param sort_keys: whether to sort keys
 
     :return: JSON encoded string
     """
+
+    if isinstance(value, str) or value is None:
+        return value
+
     return json.dumps(value, default=__json_serializer, separators=(',', ':'), sort_keys=sort_keys)
 
 
@@ -378,7 +384,7 @@ def generate_transformation_string(**options):
     flags = ".".join(build_array(options.pop("flags", None)))
     dpr = options.pop("dpr", cloudinary.config().dpr)
     duration = norm_range_value(options.pop("duration", None))
-    
+
     so_raw = options.pop("start_offset", None)
     start_offset = norm_auto_range_value(so_raw)
     if start_offset == None:
@@ -1110,6 +1116,7 @@ def build_upload_params(**options):
         "allowed_formats": options.get("allowed_formats") and encode_list(build_array(options["allowed_formats"])),
         "face_coordinates": encode_double_array(options.get("face_coordinates")),
         "custom_coordinates": encode_double_array(options.get("custom_coordinates")),
+        "regions": json_encode(options.get("regions")),
         "context": encode_context(options.get("context")),
         "auto_tagging": options.get("auto_tagging") and str(options.get("auto_tagging")),
         "responsive_breakpoints": generate_responsive_breakpoints_string(options.get("responsive_breakpoints")),
@@ -1128,7 +1135,7 @@ def build_upload_params(**options):
 def handle_file_parameter(file, filename):
     if not file:
         return None
-    
+
     if PathLibPathType and isinstance(file, PathLibPathType):
         name = filename or file.name
         data = file.read_bytes()

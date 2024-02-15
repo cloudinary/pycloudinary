@@ -267,11 +267,11 @@ def update(public_id, **options):
     if "tags" in options:
         params["tags"] = ",".join(utils.build_array(options["tags"]))
     if "face_coordinates" in options:
-        params["face_coordinates"] = utils.encode_double_array(
-            options.get("face_coordinates"))
+        params["face_coordinates"] = utils.encode_double_array(options.get("face_coordinates"))
     if "custom_coordinates" in options:
-        params["custom_coordinates"] = utils.encode_double_array(
-            options.get("custom_coordinates"))
+        params["custom_coordinates"] = utils.encode_double_array(options.get("custom_coordinates"))
+    if "regions" in options:
+        params["regions"] = utils.json_encode(options.get("regions"))
     if "context" in options:
         params["context"] = utils.encode_context(options.get("context"))
     if "metadata" in options:

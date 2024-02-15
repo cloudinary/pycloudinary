@@ -167,7 +167,7 @@ class ApiTest(unittest.TestCase):
         """ should allow listing resources """
         mocker.return_value = MOCK_RESPONSE
         api.resources()
-        
+
         self.assertTrue(get_uri(mocker).endswith('/resources/image'))
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -347,7 +347,7 @@ class ApiTest(unittest.TestCase):
                                                                  'AppleWebKit/537.36 (KHTML, like Gecko) '
                                                                  'Chrome/58.0.3029.110 Safari/537.3'})
         headers = get_headers(mocker)
-        self.assertEqual(headers.get('User-Agent'), 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ' 
+        self.assertEqual(headers.get('User-Agent'), 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
                                                     'AppleWebKit/537.36 (KHTML, like Gecko) '
                                                     'Chrome/58.0.3029.110 Safari/537.3')
 
@@ -366,7 +366,7 @@ class ApiTest(unittest.TestCase):
         mocker.return_value = MOCK_RESPONSE
         api.resource_by_asset_id(API_TEST_ASSET_ID, quality_analysis=True, colors=True, accessibility_analysis=True,
                                  media_metadata=True)
-        
+
         self.assertTrue(get_uri(mocker).endswith('/resources/{}'.format(API_TEST_ASSET_ID)))
         self.assertTrue(get_params(mocker)['quality_analysis'])
         self.assertTrue(get_params(mocker)['colors'])
@@ -388,7 +388,7 @@ class ApiTest(unittest.TestCase):
     def test_resources_by_asset_folder(self, mocker):
         mocker.return_value = MOCK_RESPONSE
         api.resources_by_asset_folder(ASSET_FOLDER, context=True, tags=True)
-        
+
         self.assertTrue(get_uri(mocker).endswith('/resources/by_asset_folder'))
         self.assertTrue(get_params(mocker)['context'])
         self.assertTrue(get_params(mocker)['tags'])
@@ -432,7 +432,7 @@ class ApiTest(unittest.TestCase):
         """ should allow deleting derived resource """
         mocker.return_value = MOCK_RESPONSE
         api.delete_derived_resources([API_TEST_ID])
-        
+
         self.assertTrue(get_uri(mocker).endswith('/derived_resources'))
         self.assertIn(API_TEST_ID, get_list_param(mocker, 'derived_resource_ids'))
 
@@ -471,7 +471,7 @@ class ApiTest(unittest.TestCase):
         """ should allow deleting resources """
         mocker.return_value = MOCK_RESPONSE
         api.delete_resources([API_TEST_ID, API_TEST_ID2])
-        
+
         self.assertEqual(get_method(mocker), 'DELETE')
         self.assertTrue(get_uri(mocker).endswith('/resources/image/upload'))
         param = get_list_param(mocker, 'public_ids')
@@ -484,7 +484,7 @@ class ApiTest(unittest.TestCase):
         """ should allow deleting resources by prefix """
         mocker.return_value = MOCK_RESPONSE
         api.delete_resources_by_prefix("api_test")
-        
+
         self.assertEqual(get_method(mocker), 'DELETE')
         self.assertTrue(get_uri(mocker).endswith('/resources/image/upload'))
         self.assertEqual(get_params(mocker)['prefix'], "api_test")
@@ -495,7 +495,7 @@ class ApiTest(unittest.TestCase):
         """ should allow deleting resources by tags """
         mocker.return_value = MOCK_RESPONSE
         api.delete_resources_by_tag("api_test_tag_for_delete")
-        
+
         self.assertEqual(get_method(mocker), 'DELETE')
         self.assertTrue(get_uri(mocker).endswith('/resources/image/tags/api_test_tag_for_delete'))
 
@@ -527,7 +527,7 @@ class ApiTest(unittest.TestCase):
         """ should allow deleting resources """
         mocker.return_value = MOCK_RESPONSE
         api.delete_resources((API_TEST_ID, API_TEST_ID2,))
-        
+
         self.assertEqual(get_method(mocker), 'DELETE')
         self.assertTrue(get_uri(mocker).endswith('/resources/image/upload'))
         param = get_list_param(mocker, 'public_ids')
@@ -540,7 +540,7 @@ class ApiTest(unittest.TestCase):
         """ should allow adding related assets """
         mocker.return_value = MOCK_RESPONSE
         api.add_related_assets(API_TEST_ID, [fq_public_id(API_TEST_ID2), fq_public_id(API_TEST_ID3)])
-        
+
         self.assertEqual(get_method(mocker), 'POST')
         self.assertTrue(get_uri(mocker).endswith('/resources/related_assets/image/upload/' + API_TEST_ID))
         param = get_json_body(mocker)['assets_to_relate']
@@ -566,7 +566,7 @@ class ApiTest(unittest.TestCase):
         """ should allow deleting related assets """
         mocker.return_value = MOCK_RESPONSE
         api.delete_related_assets(API_TEST_ID, [fq_public_id(API_TEST_ID2), fq_public_id(API_TEST_ID3)])
-        
+
         self.assertEqual(get_method(mocker), 'DELETE')
         self.assertTrue(get_uri(mocker).endswith('/resources/related_assets/image/upload/' + API_TEST_ID))
         param = get_json_body(mocker)['assets_to_unrelate']
@@ -592,7 +592,7 @@ class ApiTest(unittest.TestCase):
         """ should allow listing tags """
         mocker.return_value = MOCK_RESPONSE
         api.tags()
-        
+
         self.assertTrue(get_uri(mocker).endswith('/tags/image'))
 
     @patch(URLLIB3_REQUEST)
@@ -601,7 +601,7 @@ class ApiTest(unittest.TestCase):
         """ should allow listing tag by prefix """
         mocker.return_value = MOCK_RESPONSE
         api.tags(prefix=API_TEST_PREFIX)
-        
+
         self.assertTrue(get_uri(mocker).endswith('/tags/image'))
         self.assertEqual(get_params(mocker)['prefix'], API_TEST_PREFIX)
 
@@ -648,7 +648,7 @@ class ApiTest(unittest.TestCase):
         """ should allow updating transformation allowed_for_strict """
         mocker.return_value = MOCK_RESPONSE
         api.update_transformation(API_TEST_TRANS_SCALE100_STR, allowed_for_strict=True)
-        
+
         self.assertEqual(get_method(mocker), 'PUT')
         self.assertTrue(get_uri(mocker).endswith('/transformations'))
         self.assertTrue(get_params(mocker)['allowed_for_strict'])
@@ -660,7 +660,7 @@ class ApiTest(unittest.TestCase):
         """ should allow creating named transformation """
         mocker.return_value = MOCK_RESPONSE
         api.create_transformation(API_TEST_TRANS, {"crop": "scale", "width": 102})
-        
+
         self.assertEqual(get_method(mocker), 'POST')
         self.assertTrue(get_uri(mocker).endswith('/transformations'), get_uri(mocker))
         self.assertEqual(get_params(mocker)['transformation'], 'c_scale,w_102')
@@ -689,8 +689,6 @@ class ApiTest(unittest.TestCase):
 
         api.create_transformation(with_extension_str, with_extension)
 
-        
-
         self.assertEqual(get_method(mocker), 'POST')
         self.assertTrue(get_uri(mocker).endswith('/transformations'), get_uri(mocker))
         self.assertEqual(with_extension_str, get_params(mocker)['transformation'])
@@ -708,8 +706,6 @@ class ApiTest(unittest.TestCase):
         with_extension_str = API_TEST_TRANS_SCALE100_STR + "/"
 
         api.create_transformation(with_extension_str, with_extension)
-
-        
 
         self.assertEqual(get_method(mocker), 'POST')
         self.assertTrue(get_uri(mocker).endswith('/transformations'), get_uri(mocker))
@@ -730,7 +726,7 @@ class ApiTest(unittest.TestCase):
         """ should allow deleting implicit transformation """
         mocker.return_value = MOCK_RESPONSE
         api.delete_transformation(API_TEST_TRANS_SCALE100)
-        
+
         self.assertEqual(get_method(mocker), 'DELETE')
         self.assertTrue(get_uri(mocker).endswith('/transformations'))
         self.assertEqual(API_TEST_TRANS_SCALE100_STR, get_params(mocker)['transformation'])
@@ -838,7 +834,7 @@ class ApiTest(unittest.TestCase):
         """ should support requesting ocr """
         mocker.return_value = MOCK_RESPONSE
         api.update(API_TEST_ID, ocr='adv_ocr')
-        
+
         params = get_params(mocker)
         self.assertEqual(params['ocr'], 'adv_ocr')
 
@@ -860,7 +856,7 @@ class ApiTest(unittest.TestCase):
         mocker.return_value = MOCK_RESPONSE
         start_at = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime())
         api.resources(type="upload", start_at=start_at, direction="asc")
-        
+
         params = get_params(mocker)
         self.assertEqual(params['start_at'], start_at)
 
@@ -872,8 +868,6 @@ class ApiTest(unittest.TestCase):
 
         api.create_upload_preset(name=API_TEST_PRESET, folder="folder", live=True,
                                  eval=EVAL_STR)
-
-        
 
         self.assertTrue(get_uri(mocker).endswith("/upload_presets"))
         self.assertEqual("POST", get_method(mocker))
@@ -890,8 +884,6 @@ class ApiTest(unittest.TestCase):
 
         api.upload_presets()
 
-        
-
         self.assertTrue(get_uri(mocker).endswith("/upload_presets"))
         self.assertEqual("GET", get_method(mocker))
 
@@ -903,8 +895,6 @@ class ApiTest(unittest.TestCase):
 
         api.upload_preset(API_TEST_PRESET)
 
-        
-
         self.assertTrue(get_uri(mocker).endswith("/upload_presets/" + API_TEST_PRESET))
         self.assertEqual("GET", get_method(mocker))
 
@@ -914,7 +904,7 @@ class ApiTest(unittest.TestCase):
         """ should allow deleting upload_presets """
         mocker.return_value = MOCK_RESPONSE
         api.delete_upload_preset(API_TEST_PRESET)
-        
+
         self.assertEqual(get_method(mocker), 'DELETE')
         self.assertTrue(get_uri(mocker).endswith('/upload_presets/{}'.format(API_TEST_PRESET)))
 
@@ -925,7 +915,7 @@ class ApiTest(unittest.TestCase):
         mocker.return_value = MOCK_RESPONSE
         api.update_upload_preset(API_TEST_PRESET, colors=True, unsigned=True, disallow_public_id=True, live=True,
                                  eval=EVAL_STR)
-        
+
         self.assertEqual(get_method(mocker), 'PUT')
         self.assertTrue(get_uri(mocker).endswith('/upload_presets/{}'.format(API_TEST_PRESET)))
         self.assertTrue(get_params(mocker)['colors'])
@@ -942,14 +932,19 @@ class ApiTest(unittest.TestCase):
 
     @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
-    def test33_update_asset_folder(self, mocker):
-        """Should pass folder decoupling params """
+    def test33_update_asset(self, mocker):
+        """Should pass update params """
         mocker.return_value = MOCK_RESPONSE
-        api.update(API_TEST_ID, asset_folder="folder_new_update", display_name="new_display_name",
-                   unique_display_name=True)
+        api.update(API_TEST_ID,
+                   asset_folder="folder_new_update",
+                   display_name="new_display_name",
+                   unique_display_name=True,
+                   regions=OrderedDict((("box_1", [[1, 2], [3, 4]]), ("box_2", [[5, 6], [7, 8]]))))
+
         self.assertEqual("folder_new_update", get_param(mocker, "asset_folder"))
         self.assertEqual("new_display_name", get_param(mocker, "display_name"))
         self.assertTrue(get_param(mocker, "unique_display_name"))
+        self.assertEqual('{"box_1":[[1,2],[3,4]],"box_2":[[5,6],[7,8]]}', get_param(mocker, "regions"))
 
     @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -984,8 +979,6 @@ class ApiTest(unittest.TestCase):
         mocker.return_value = MOCK_RESPONSE
 
         api.create_folder(UNIQUE_TEST_FOLDER)
-
-        
 
         self.assertEqual("POST", get_method(mocker))
         self.assertTrue(get_uri(mocker).endswith('/folders/' + UNIQUE_TEST_FOLDER))

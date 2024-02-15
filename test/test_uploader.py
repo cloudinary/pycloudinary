@@ -258,7 +258,8 @@ class UploaderTest(unittest.TestCase):
         mocker.return_value = MOCK_RESPONSE
 
         fd_params = {"public_id_prefix": FD_PID_PREFIX, "asset_folder": ASSET_FOLDER, "display_name": DISPLAY_NAME,
-                     "use_filename_as_display_name": True, "folder": TEST_FOLDER, "use_asset_folder_as_public_id_prefix": True}
+                     "use_filename_as_display_name": True, "folder": TEST_FOLDER,
+                     "use_asset_folder_as_public_id_prefix": True}
         uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG], **fd_params)
 
         self.assertEqual(FD_PID_PREFIX, get_param(mocker, "public_id_prefix"))
@@ -274,7 +275,7 @@ class UploaderTest(unittest.TestCase):
         """Should pass ocr value """
         mocker.return_value = MOCK_RESPONSE
         uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG], ocr='adv_ocr')
-        
+
         self.assertEqual(get_params(mocker)['ocr'], 'adv_ocr')
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -385,7 +386,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         """Should support to_type, invalidate, and overwrite """
         mocker.return_value = MOCK_RESPONSE
         uploader.rename(TEST_IMAGE, TEST_IMAGE + "2", to_type='raw', invalidate=True, overwrite=False)
-        
+
         self.assertEqual(get_params(mocker)['to_type'], 'raw')
         self.assertTrue(get_params(mocker)['invalidate'])
         self.assertTrue(get_params(mocker)['overwrite'])
@@ -397,11 +398,11 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         mocker.return_value = MOCK_RESPONSE
 
         uploader.rename(TEST_IMAGE, TEST_IMAGE + "2", context=True)
-        
+
         self.assertTrue(get_params(mocker)['context'])
 
         uploader.rename(TEST_IMAGE, TEST_IMAGE + "2")
-        
+
         self.assertIsNone(get_params(mocker).get('context'))
 
     @patch(URLLIB3_REQUEST)
@@ -411,11 +412,11 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         mocker.return_value = MOCK_RESPONSE
 
         uploader.rename(TEST_IMAGE, TEST_IMAGE + "2", metadata=True)
-        
+
         self.assertTrue(get_params(mocker)['metadata'])
 
         uploader.rename(TEST_IMAGE, TEST_IMAGE + "2")
-        
+
         self.assertIsNone(get_params(mocker).get('metadata'))
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -517,7 +518,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
                                                                  'AppleWebKit/537.36 (KHTML, like Gecko) '
                                                                  'Chrome/58.0.3029.110 Safari/537.3'})
         headers = get_headers(mocker)
-        self.assertEqual(headers.get('User-Agent'), 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ' 
+        self.assertEqual(headers.get('User-Agent'), 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
                                                     'AppleWebKit/537.36 (KHTML, like Gecko) '
                                                     'Chrome/58.0.3029.110 Safari/537.3')
 
@@ -812,8 +813,6 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
 
         uploader.unsigned_upload(TEST_IMAGE, API_TEST_PRESET)
 
-        
-
         self.assertTrue(get_uri(mocker).endswith("/image/upload"))
         self.assertEqual("POST", get_method(mocker))
         self.assertIsNotNone(get_param(mocker, "file"))
@@ -828,8 +827,6 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         cloudinary.config().upload_preset = API_TEST_PRESET
         uploader.upload(TEST_IMAGE)
 
-        
-
         self.assertTrue(get_uri(mocker).endswith("/image/upload"))
         self.assertEqual("POST", get_method(mocker))
         self.assertIsNotNone(get_param(mocker, "file"))
@@ -842,8 +839,6 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         mocker.return_value = MOCK_RESPONSE
         cloudinary.config().upload_preset = API_TEST_PRESET
         uploader.upload(TEST_IMAGE, upload_preset=None)
-
-        
 
         self.assertTrue(get_uri(mocker).endswith("/image/upload"))
         self.assertEqual("POST", get_method(mocker))
@@ -952,7 +947,8 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
             'accessibility_analysis': True,
             'media_metadata': True,
             'visual_search': True,
-            'on_success': ON_SUCCESS_STR
+            'on_success': ON_SUCCESS_STR,
+            'regions': {"box_1": [[1, 2], [3, 4]], "box_2": [[5, 6], [7, 8]]}
         }
 
         uploader.upload(TEST_IMAGE, **options)
@@ -1083,6 +1079,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         mocker.return_value = MOCK_RESPONSE
         uploader.create_zip(tags="test-tag", target_asset_folder="test-asset-folder")
         self.assertEqual("test-asset-folder", get_param(mocker, "target_asset_folder"))
+
 
 if __name__ == '__main__':
     unittest.main()
