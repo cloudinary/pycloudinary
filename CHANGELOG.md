@@ -1,3 +1,12 @@
+1.39.0 / 2024-02-27
+==================
+
+New functionality and features
+------------------------------
+
+  * Add support for `restrictions` metadata field parameter
+  * Add support for `regions` upload parameter
+
 1.38.0 / 2024-01-08
 ==================
 
