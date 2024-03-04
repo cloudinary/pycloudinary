@@ -6,7 +6,8 @@ if version_info[0] >= 3:
 
     setup(test_suite="test",
           tests_require=[
-              "mock" + ("<4" if version_info < (3, 6) else "")
+              "mock" + ("<4" if version_info < (3, 6) else ""),
+              "pytest"
           ],
           )
 
@@ -76,6 +77,7 @@ else:
               "certifi"
           ],
           tests_require=[
-              "mock<4"
+              "mock<4",
+              "pytest<4.6"
           ],
           )
