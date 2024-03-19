@@ -1216,16 +1216,15 @@ class ApiTest(unittest.TestCase):
         mocker.return_value = MOCK_RESPONSE
 
         options = {
-            "input_type": "uri",
             "analysis_type": "captioning",
             "uri": "https://res.cloudinary.com/demo/image/upload/dog",
         }
 
-        api.analyze(**options)
+        api.analyze(input_type="uri", **options)
 
         uri = get_uri(mocker)
         self.assertIn("/v2/", uri)
-        self.assertTrue(uri.endswith("/analysis/analyze"))
+        self.assertTrue(uri.endswith("/analysis/analyze/uri"))
 
         params = get_json_body(mocker)
         for param in options.keys():

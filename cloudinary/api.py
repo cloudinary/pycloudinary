@@ -857,6 +857,6 @@ def analyze(input_type, analysis_type, uri=None, **options):
 
     :rtype: Response
     """
-    api_uri = ['analysis', 'analyze']
-    params = {'input_type': input_type, 'analysis_type': analysis_type, 'uri': uri}
+    api_uri = ['analysis', 'analyze', input_type]
+    params = {'analysis_type': analysis_type, 'uri': uri, 'parameters': options.get("parameters")}
     return _call_v2_api('post', api_uri, params, **options)
