@@ -988,10 +988,12 @@ class ApiTest(unittest.TestCase):
         """ should delete folder """
         mocker.return_value = MOCK_RESPONSE
 
-        api.delete_folder(UNIQUE_TEST_FOLDER)
+        api.delete_folder(UNIQUE_TEST_FOLDER, skip_backup=True)
 
         self.assertEqual("DELETE", get_method(mocker))
         self.assertTrue(get_uri(mocker).endswith('/folders/' + UNIQUE_TEST_FOLDER))
+        self.assertTrue("skip_backup" in get_params(mocker))
+        self.assertEqual("true", get_params(mocker)["skip_backup"])
 
     @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -1000,8 +1002,6 @@ class ApiTest(unittest.TestCase):
         mocker.return_value = MOCK_RESPONSE
 
         api.root_folders(next_cursor=NEXT_CURSOR, max_results=10)
-
-        args, kwargs = mocker.call_args
 
         self.assertTrue("next_cursor" in get_params(mocker))
         self.assertTrue("max_results" in get_params(mocker))
