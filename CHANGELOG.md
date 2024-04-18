@@ -1,3 +1,11 @@
+1.40.0 / 2024-04-18
+==================
+
+New functionality and features
+------------------------------
+
+  * Add support for `skip_backup` in `delete_folder` Admin API
+
 1.39.1 / 2024-03-19
 ==================
 
