@@ -560,8 +560,8 @@ def rename_folder(from_path, to_path, **options):
     Renames folder
 
     :param from_path: The full path of an existing asset folder.
-    :param to_path:	The full path of the new asset folder.
-    :param options: Additional options
+    :param to_path:   The full path of the new asset folder.
+    :param options:   Additional options
 
     :rtype: Response
     """
