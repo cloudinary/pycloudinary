@@ -984,6 +984,18 @@ class ApiTest(unittest.TestCase):
         self.assertTrue(get_uri(mocker).endswith('/folders/' + UNIQUE_TEST_FOLDER))
 
     @patch(URLLIB3_REQUEST)
+    def test_rename_folder(self, mocker):
+        """ should rename folder """
+        mocker.return_value = MOCK_RESPONSE
+
+        api.rename_folder(UNIQUE_TEST_FOLDER, UNIQUE_TEST_FOLDER + "_new")
+
+        self.assertEqual("PUT", get_method(mocker))
+        self.assertTrue(get_uri(mocker).endswith('/folders/' + UNIQUE_TEST_FOLDER))
+        self.assertTrue("to_folder" in get_params(mocker))
+        self.assertEqual(UNIQUE_TEST_FOLDER + "_new", get_params(mocker)["to_folder"])
+
+    @patch(URLLIB3_REQUEST)
     def test_delete_folder(self, mocker):
         """ should delete folder """
         mocker.return_value = MOCK_RESPONSE
