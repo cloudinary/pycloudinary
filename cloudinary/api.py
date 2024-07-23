@@ -741,7 +741,7 @@ def update_metadata_field(field_external_id, field, **options):
 
 def __metadata_field_params(field):
     return only(field, "type", "external_id", "label", "mandatory", "restrictions",
-                "default_value", "validation", "datasource")
+                "default_value", "default_disabled", "validation", "datasource")
 
 
 def delete_metadata_field(field_external_id, **options):
