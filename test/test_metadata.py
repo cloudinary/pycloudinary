@@ -199,15 +199,19 @@ class MetadataTest(unittest.TestCase):
             "external_id": EXTERNAL_ID_STRING,
             "label": EXTERNAL_ID_STRING,
             "type": "string",
-            "restrictions": {"readonly_ui": True}
+            "restrictions": {"readonly_ui": True},
+            "mandatory": False,
+            "default_disabled": True
         })
 
         self.assertTrue(get_uri(mocker).endswith("/metadata_fields"))
         self.assertEqual(get_method(mocker), "POST")
         self.assertEqual(get_json_body(mocker), {
+            'default_disabled': True,
             "type": "string",
             "external_id": EXTERNAL_ID_STRING,
             "label": EXTERNAL_ID_STRING,
+            'mandatory': False,
             "restrictions": {"readonly_ui": True}
         })
 
