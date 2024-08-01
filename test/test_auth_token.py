@@ -64,6 +64,16 @@ class AuthTokenTest(unittest.TestCase):
                               "w_300/sample.jpg?__cld_token__=st=222222222~exp=222222322~hmac"
                               "=55cfe516530461213fe3b3606014533b1eca8ff60aeab79d1bb84c9322eebc1f")
 
+    def test_should_set_url_signature(self):
+        cloudinary.config(private_cdn=True)
+        url, _ = cloudinary.utils.cloudinary_url("sample.jpg", sign_url=True,
+                                                 auth_token={"key": ALT_KEY, "start_time": 222222222, "duration": 100,
+                                                             "set_url_signature": True},
+                                                 type="authenticated", transformation={"crop": "scale", "width": 300})
+        self.assertEqual("http://test123-res.cloudinary.com/image/authenticated/s--Ok4O32K7--/"
+                         "c_scale,w_300/sample.jpg?__cld_token__=st=222222222~exp=222222322~hmac"
+                         "=92a55aaed531b2dab074074bbd1430120119f9cb1b901656925dda2e514a63cc", url)
+
     def test_should_compute_expiration_as_start_time_plus_duration(self):
         cloudinary.config(private_cdn=True)
         token = {"key": KEY, "start_time": 11111111, "duration": 300}
@@ -75,8 +85,7 @@ class AuthTokenTest(unittest.TestCase):
 
     def test_generate_token_string(self):
         user = "foobar"  # we can't rely on the default "now" value in tests
-        token_options = {"key": KEY, "duration": 300, "acl": "/*/t_%s" % user}
-        token_options["start_time"] = 222222222  # we can't rely on the default "now" value in tests
+        token_options = {"key": KEY, "duration": 300, "acl": "/*/t_%s" % user, "start_time": 222222222}
         cookie_token = cloudinary.utils.generate_auth_token(**token_options)
         self.assertEqual(
             cookie_token,
@@ -97,8 +106,8 @@ class AuthTokenTest(unittest.TestCase):
         )
 
     def test_should_support_multiple_acls(self):
-        token_options = {"key": KEY, "duration": 3600, 
-                         "acl": ["/i/a/*", "/i/a/*", "/i/a/*"], 
+        token_options = {"key": KEY, "duration": 3600,
+                         "acl": ["/i/a/*", "/i/a/*", "/i/a/*"],
                          "start_time": 222222222}
 
         cookie_token = cloudinary.utils.generate_auth_token(**token_options)
@@ -126,7 +135,6 @@ class AuthTokenTest(unittest.TestCase):
             "__cld_token__=st=1111111111~exp=1111111411~hmac="
             "639406f8c07fc6a1613e1f6192baba631f9d5719185a32049281e94e15c5619b"
         )
-
 
 
 if __name__ == '__main__':
