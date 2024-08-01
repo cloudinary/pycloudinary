@@ -1,3 +1,13 @@
+1.41.0 / 2024-08-01
+==================
+
+New functionality and features
+------------------------------
+
+  * Add support for `set_url_signature` in `AuthToken`
+  * Add support for `default_disabled` parameter in `MetadataField`
+  * Add support for `rename_folder` Admin API
+
 1.40.0 / 2024-04-18
 ==================
 

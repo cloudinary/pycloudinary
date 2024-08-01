@@ -13,7 +13,7 @@ if version_info[0] >= 3:
 else:
     # Following code is legacy (Python 2.7 compatibiltiy) and will be removed in the future!
     # TODO: Remove in next major update (when dropping Python 2.7 compatibility)
-    version = "1.40.0"
+    version = "1.41.0"
 
     with open('README.md') as file:
         long_description = file.read()
