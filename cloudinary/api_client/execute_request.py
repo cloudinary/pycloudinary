@@ -70,6 +70,8 @@ def execute_request(http_connector, method, params, headers, auth, api_url, **op
         raise GeneralError("Unexpected error %s" % str(e))
     except socket.error as e:
         raise GeneralError("Socket Error: %s" % str(e))
+    except Exception as e:
+        raise GeneralError("API is only supported on dynamic folders please check your folder mode on  https://console.cloudinary.com/pm/developer-dashboard Error:%s " % str(e))
 
     try:
         result = json.loads(body.decode('utf-8'))
