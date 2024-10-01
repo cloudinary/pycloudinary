@@ -76,8 +76,7 @@ def execute_request(http_connector, method, params, headers, auth, api_url, **op
     try:
         result = json.loads(body.decode('utf-8'))
     except Exception as e:
-        # Error is parsing json
-        raise GeneralError("Error parsing server response (%d) - %s. Got - %s" % (response.status, body, e))
+        raise GeneralError("API is only supported on dynamic folders please check your folder mode on  https://console.cloudinary.com/pm/developer-dashboard Error:%s " % str(e))
 
     if "error" in result:
         exception_class = EXCEPTION_CODES.get(response.status) or Exception
