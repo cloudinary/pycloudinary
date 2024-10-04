@@ -27,7 +27,7 @@ matrix:
   - python: 3.11
     env: TOXENV=py311-django41
 install:
-- pip install tox pytest  # Install pytest alongside tox
+- pip install tox
 
 before_script: >
   export CLOUDINARY_URL=$(bash tools/get_test_cloud.sh);
