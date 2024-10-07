@@ -1,13 +1,12 @@
 from unittest import TestCase
 
-import mock
 from urllib3 import disable_warnings
 
 import cloudinary
 from cloudinary import CloudinaryResource
 from cloudinary import uploader
 from test.helper_test import SUFFIX, TEST_IMAGE, http_response_mock, get_uri, cleanup_test_resources_by_tag, \
-    URLLIB3_REQUEST
+    URLLIB3_REQUEST, mock
 
 disable_warnings()
 

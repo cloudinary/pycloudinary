@@ -1,9 +1,7 @@
-import json
 import time
 import unittest
 from datetime import datetime, timedelta
 
-from mock import patch
 from six import text_type
 from urllib3 import disable_warnings
 
@@ -11,7 +9,8 @@ import cloudinary
 from cloudinary import api
 from cloudinary.exceptions import BadRequest, NotFound
 from test.helper_test import (
-    UNIQUE_TEST_ID, get_uri, get_params, get_method, api_response_mock, ignore_exception, get_json_body, URLLIB3_REQUEST
+    UNIQUE_TEST_ID, get_uri, get_params, get_method, api_response_mock, ignore_exception, get_json_body,
+    URLLIB3_REQUEST, patch
 )
 
 MOCK_RESPONSE = api_response_mock()

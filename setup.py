@@ -3,15 +3,9 @@ from sys import version_info
 from setuptools import find_packages, setup
 
 if version_info[0] >= 3:
-
-    setup(test_suite="test",
-          tests_require=[
-              "mock" + ("<4" if version_info < (3, 6) else "")
-          ],
-          )
-
+    setup()
 else:
-    # Following code is legacy (Python 2.7 compatibiltiy) and will be removed in the future!
+    # Following code is legacy (Python 2.7 compatibility) and will be removed in the future!
     # TODO: Remove in next major update (when dropping Python 2.7 compatibility)
     version = "1.41.0"
 
@@ -76,6 +70,7 @@ else:
               "certifi"
           ],
           tests_require=[
-              "mock<4"
+              "mock<4",
+              "pytest"
           ],
           )

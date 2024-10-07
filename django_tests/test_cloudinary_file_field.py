@@ -1,6 +1,6 @@
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
-from mock import mock
+from test.helper_test import mock
 
 import cloudinary
 from cloudinary import CloudinaryResource

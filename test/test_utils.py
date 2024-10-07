@@ -4,7 +4,6 @@ import re
 import tempfile
 import unittest
 import uuid
-import json
 import time
 from collections import OrderedDict
 from datetime import datetime, date
@@ -12,7 +11,6 @@ from fractions import Fraction
 from os.path import getsize
 
 import six
-from mock import patch
 
 import cloudinary.utils
 from cloudinary import CL_BLANK
@@ -32,7 +30,7 @@ from cloudinary.utils import (
     verify_api_response_signature,
 )
 from cloudinary.compat import to_bytes
-from test.helper_test import TEST_IMAGE, REMOTE_TEST_IMAGE
+from test.helper_test import TEST_IMAGE, REMOTE_TEST_IMAGE, patch
 from test.test_api import (
     API_TEST_TRANS_SCALE100,
     API_TEST_TRANS_SCALE100_STR,
@@ -57,6 +55,7 @@ TEST_FOLDER = 'folder/test'
 
 MOCKED_NOW = 1549533574
 API_SECRET = 'X7qLTrsES31MzxxkxPPA-pAGGfU'
+
 
 class TestUtils(unittest.TestCase):
     crop_transformation = {'crop': 'crop', 'width': 100}

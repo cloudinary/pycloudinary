@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from mock import mock
+from test.helper_test import mock
 from urllib3.util import parse_url
 
 import cloudinary
@@ -77,7 +77,7 @@ class TestCloudinaryField(TestCase):
             c.pre_save(poll, None)
 
         self.assertTrue(upload_mock.called)
-        self.assertEqual(upload_mock.call_args.kwargs['public_id'], 'question')
+        self.assertEqual(upload_mock.call_args[1]['public_id'], 'question')
 
     def test_pre_save(self):
         c = CloudinaryField('image', width_field="image_width", height_field="image_height")

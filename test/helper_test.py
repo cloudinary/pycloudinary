@@ -18,6 +18,14 @@ from cloudinary import utils, logger, api
 from cloudinary.exceptions import NotFound
 from test.addon_types import ADDON_ALL
 
+try:
+    from unittest import mock
+except ImportError:
+    # Python 2.7
+    import mock
+
+patch = mock.patch
+
 SUFFIX = os.environ.get('TRAVIS_JOB_ID') or random.randint(10000, 99999)
 
 REMOTE_TEST_IMAGE = "http://cloudinary.com/images/old_logo.png"

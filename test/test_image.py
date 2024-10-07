@@ -6,10 +6,10 @@ import unittest
 from collections import OrderedDict
 
 import six
-from mock import mock
 
 import cloudinary
 from cloudinary import CloudinaryImage
+from test.helper_test import mock
 
 
 class ImageTest(unittest.TestCase):
