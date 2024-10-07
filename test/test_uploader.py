@@ -17,7 +17,7 @@ from test.cache.storage.dummy_cache_storage import DummyCacheStorage
 from test.helper_test import uploader_response_mock, SUFFIX, TEST_IMAGE, get_params, get_headers, TEST_ICON, TEST_DOC, \
     REMOTE_TEST_IMAGE, UTC, populate_large_file, TEST_UNICODE_IMAGE, get_uri, get_method, get_param, \
     cleanup_test_resources_by_tag, cleanup_test_transformation, cleanup_test_resources, EVAL_STR, ON_SUCCESS_STR, \
-    URLLIB3_REQUEST, patch
+    URLLIB3_REQUEST, patch, retry_assertion
 from test.test_utils import TEST_ID, TEST_FOLDER
 
 MOCK_RESPONSE = uploader_response_mock()
@@ -618,6 +618,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         uploader.replace_tag(UNIQUE_TAG, result["public_id"])
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    @retry_assertion()
     def test_multiple_tags(self):
         """ Should support adding multiple tags: list ["tag1","tag2"] and comma-separated "tag1,tag2" """
         result = uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG])
