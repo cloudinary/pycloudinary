@@ -3,14 +3,13 @@ import os
 import time
 import unittest
 
-from mock.mock import patch
 from six import iterkeys
 from urllib3 import disable_warnings
 
 import cloudinary
 from cloudinary import uploader, SearchFolders, Search
 from test.helper_test import SUFFIX, TEST_IMAGE, TEST_TAG, UNIQUE_TAG, TEST_FOLDER, UNIQUE_TEST_FOLDER, \
-    retry_assertion, cleanup_test_resources_by_tag, URLLIB3_REQUEST, get_json_body, get_uri
+    retry_assertion, cleanup_test_resources_by_tag, URLLIB3_REQUEST, get_json_body, get_uri, patch
 from test.test_api import MOCK_RESPONSE, NEXT_CURSOR
 from test.test_config import CLOUD_NAME, API_KEY, API_SECRET
 

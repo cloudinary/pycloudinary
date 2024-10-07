@@ -1,12 +1,11 @@
 import unittest
 
 import six
-from mock import patch
 
 import cloudinary
 from cloudinary import api
 from cloudinary import uploader
-from test.helper_test import TEST_IMAGE, get_headers, get_params, URLLIB3_REQUEST
+from test.helper_test import TEST_IMAGE, get_headers, get_params, URLLIB3_REQUEST, patch
 from test.test_api import MOCK_RESPONSE
 from test.test_config import OAUTH_TOKEN, CLOUD_NAME, API_KEY, API_SECRET
 from test.test_uploader import API_TEST_PRESET

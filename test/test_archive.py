@@ -9,13 +9,12 @@ import cloudinary
 import cloudinary.poster.streaminghttp
 from cloudinary import uploader, utils
 
-from mock import patch
 import six
 import urllib3
 from urllib3 import disable_warnings
 
 from test.helper_test import SUFFIX, TEST_IMAGE, api_response_mock, cleanup_test_resources_by_tag, UNIQUE_TEST_ID, \
-    get_uri, get_list_param, get_params, URLLIB3_REQUEST
+    get_uri, get_list_param, get_params, URLLIB3_REQUEST, patch
 
 MOCK_RESPONSE = api_response_mock()
 

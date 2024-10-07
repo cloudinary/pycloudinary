@@ -6,9 +6,7 @@ from collections import OrderedDict
 from datetime import datetime
 
 import six
-from mock import patch
 from urllib3 import disable_warnings
-from urllib3.util import parse_url
 
 import cloudinary
 from cloudinary import api, uploader, utils, exceptions
@@ -19,7 +17,7 @@ from test.cache.storage.dummy_cache_storage import DummyCacheStorage
 from test.helper_test import uploader_response_mock, SUFFIX, TEST_IMAGE, get_params, get_headers, TEST_ICON, TEST_DOC, \
     REMOTE_TEST_IMAGE, UTC, populate_large_file, TEST_UNICODE_IMAGE, get_uri, get_method, get_param, \
     cleanup_test_resources_by_tag, cleanup_test_transformation, cleanup_test_resources, EVAL_STR, ON_SUCCESS_STR, \
-    URLLIB3_REQUEST
+    URLLIB3_REQUEST, patch
 from test.test_utils import TEST_ID, TEST_FOLDER
 
 MOCK_RESPONSE = uploader_response_mock()

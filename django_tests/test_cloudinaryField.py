@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from mock import mock
+from test.helper_test import mock
 from urllib3.util import parse_url
 
 import cloudinary

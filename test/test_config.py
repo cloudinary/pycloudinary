@@ -1,11 +1,9 @@
 import os
 from unittest import TestCase
 
-from mock import mock
-
 import cloudinary
 from cloudinary.provisioning import account_config
-
+from test.helper_test import mock
 
 CLOUD_NAME = 'test123'
 API_KEY = 'key'

@@ -4,7 +4,7 @@ import unittest
 from collections import OrderedDict
 
 import six
-from mock import patch
+
 from urllib3 import disable_warnings, ProxyManager, PoolManager
 
 import cloudinary
@@ -13,7 +13,7 @@ from cloudinary.utils import fq_public_id
 from test.helper_test import SUFFIX, TEST_IMAGE, get_uri, get_headers, get_params, get_list_param, get_param, \
     TEST_DOC, get_method, UNIQUE_TAG, api_response_mock, ignore_exception, cleanup_test_resources_by_tag, \
     cleanup_test_transformation, cleanup_test_resources, UNIQUE_TEST_FOLDER, EVAL_STR, get_json_body, REMOTE_TEST_IMAGE, \
-    TEST_IMAGE_SIZE, URLLIB3_REQUEST
+    TEST_IMAGE_SIZE, URLLIB3_REQUEST, patch
 from cloudinary.exceptions import BadRequest, NotFound
 
 MOCK_RESPONSE = api_response_mock()
