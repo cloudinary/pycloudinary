@@ -25,15 +25,41 @@ def dump_response(response):
         print("  %s: %s" % (key, response[key]))
 
 
-def upload_file(file_path, public_id=None):
-    """Upload a file to Cloudinary with options for custom public ID"""
+def upload_file(file_path, public_id=None, mood=None, theme=None):
+    """Upload a file to Cloudinary with options for custom public ID and transformations"""
     print(f"--- Uploading {file_path}")
     
-    # Upload with optional custom public ID
-    response = upload(file_path, tags=DEFAULT_TAG, public_id=public_id)
+    # Define transformations based on mood
+    transformations = []
     
+    if mood == "happy":
+        transformations.append({"effect": "brightness:30"})  # Increase brightness
+    elif mood == "sad":
+        transformations.append({"effect": "grayscale"})  # Convert to grayscale
+
+    # Add text overlay based on theme
+    if theme:
+        transformations.append({
+            "overlay": {
+                "font_family": "Arial",
+                "font_size": 20,
+                "text": f"{theme.capitalize()} - {mood.capitalize()}",
+                "text_color": "white"
+            },
+            "gravity": "north",
+            "y": 10
+        })
+
+    # Upload with transformations
+    response = upload(
+        file_path,
+        public_id=public_id,
+        transformation=transformations,
+        tags=DEFAULT_TAG
+    )
+
     dump_response(response)
-    
+
     url, options = cloudinary_url(
         response['public_id'],
         format=response['format'],
@@ -65,7 +91,9 @@ def generate_post():
         
         # Upload file to Cloudinary
         public_id = request.form.get('public_id', None)
-        image_url = upload_file(file_path, public_id=public_id)
+        mood = request.form.get('mood', None)
+        theme = request.form.get('theme', None)
+        image_url = upload_file(file_path, public_id=public_id, mood=mood, theme=theme)
         
         # Clean up the local file after upload
         os.remove(file_path)
@@ -88,6 +116,11 @@ def cleanup():
     print(f"Deleting {len(resources)} images...")
     delete_resources_by_tag(DEFAULT_TAG)
     print("Done!")
+
+
+@app.route('/')
+def index():
+    return app.send_static_file('index.html')
 
 
 if __name__ == '__main__':
