@@ -285,12 +285,14 @@ class MetadataTest(unittest.TestCase):
             "external_id": EXTERNAL_ID_SET,
             "label": EXTERNAL_ID_SET,
             "type": "set",
+            "allow_dynamic_list_values": True,
         })
 
         self.assert_metadata_field(result, "set", {
             "label": EXTERNAL_ID_SET,
             "external_id": EXTERNAL_ID_SET,
             "mandatory": False,
+            "allow_dynamic_list_values": True,
         })
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
