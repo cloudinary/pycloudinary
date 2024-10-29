@@ -6,6 +6,7 @@ import cloudinary.uploader
 import cloudinary.api
 from dotenv import load_dotenv
 import os
+import time
 
 load_dotenv()
 
@@ -45,7 +46,12 @@ if selected == "Home":
 if selected == "Spooky Pet Background Generator":
     st.title("Spooky Halloween Pet Image Transformer")
 
-    uploaded_file = st.file_uploader("Upload an image (jpg, jpeg, png)", type=["jpg", "jpeg", "png"])
+    upload_option = st.radio("Select image source:", ("Upload a file", "Enter an image URL"))
+
+    if upload_option == "Upload a file":
+        uploaded_file = st.file_uploader("Upload an image (jpg, jpeg, png)", type=["jpg", "jpeg", "png"])
+    else:
+        image_url = st.text_input("Enter the direct URL of the image (jpg, jpeg, png)")
 
     default_prompt = "A dark foggy Halloween night with a full moon in the sky surrounded by twisted trees Scattered glowing pumpkins with carved faces placed around an old broken fence in the background a shadowy haunted house with dimly lit windows"
 
@@ -58,42 +64,65 @@ if selected == "Spooky Pet Background Generator":
     )
 
     if st.button("Submit"):
-        if uploaded_file:
+        if upload_option == "Upload a file" and uploaded_file:
             if uploaded_file.size > MAX_FILE_SIZE_BYTES:
                 st.warning(f"File size exceeds the 5 MB limit. Please upload a smaller file.")
             else:
-                message_placeholder = st.empty()
-                message_placeholder.write("Generating image... Please have patience while the image is being processed by Cloudinary.")
-                
+                with st.spinner("Generating image... Please have patience while the image is being processed by Cloudinary."):
+                    upload_result = cloudinary.uploader.upload(
+                        uploaded_file, 
+                        public_id=f"user_uploaded_{uploaded_file.name[:6]}", 
+                        unique_filename=True, 
+                        overwrite=False
+                    )
+                    public_id = upload_result['public_id']
+                    halloween_bg_image_url = CloudinaryImage(public_id).image(
+                        effect=f"gen_background_replace:prompt_{custom_prompt}"
+                    )
+
+                    start_index = halloween_bg_image_url.find('src="') + len('src="')
+                    end_index = halloween_bg_image_url.find('"', start_index)
+                    generated_image_url = halloween_bg_image_url[start_index:end_index] if start_index != -1 and end_index != -1 else None
+
+                    if generated_image_url:
+                        st.image(generated_image_url)
+                    else:
+                        st.write("Failed to apply the background. Please try again.")
+        
+        elif upload_option == "Enter an image URL" and image_url:
+            with st.spinner("Generating image... Please have patience while the image is being processed by Cloudinary."):
+                unique_id = f"user_uploaded_url_{int(time.time())}"
                 upload_result = cloudinary.uploader.upload(
-                    uploaded_file, 
-                    public_id=f"user_uploaded_{uploaded_file.name[:6]}", 
-                    unique_filename=True, 
+                    image_url,
+                    public_id=unique_id,
+                    unique_filename=True,
                     overwrite=False
                 )
                 public_id = upload_result['public_id']
                 halloween_bg_image_url = CloudinaryImage(public_id).image(
                     effect=f"gen_background_replace:prompt_{custom_prompt}"
                 )
-                
+
                 start_index = halloween_bg_image_url.find('src="') + len('src="')
                 end_index = halloween_bg_image_url.find('"', start_index)
-                image_url = halloween_bg_image_url[start_index:end_index] if start_index != -1 and end_index != -1 else None
-                
-                if image_url:
-                    message_placeholder.empty()
-                    st.image(image_url)
+                generated_image_url = halloween_bg_image_url[start_index:end_index] if start_index != -1 and end_index != -1 else None
+
+                if generated_image_url:
+                    st.image(generated_image_url)
                 else:
-                    message_placeholder.write("Failed to apply the background. Please try again.")
+                    st.write("Failed to apply the background. Please try again.")
         else:
-            st.write("Please upload an image to proceed.")
-
-    st.write("If you don't see the image, just refresh the page and try again. You can also use this test image: [Test Image](https://unsplash.com/photos/black-and-white-cat-lying-on-brown-bamboo-chair-inside-room-gKXKBY-C-Dk)")
-
+            st.write("Please upload an image or provide a URL to proceed.")
+            
 if selected == "Spooky Cat Face Transformer":
     st.title("Spooky Cat Face Transformer")
 
-    uploaded_cat_pic = st.file_uploader("Upload a cat image to give it a spooky transformation! (jpg, jpeg, png)", type=["jpg", "jpeg", "png"])
+    upload_option = st.radio("Select image source:", ("Upload a file", "Enter an image URL"))
+
+    if upload_option == "Upload a file":
+        uploaded_cat_pic = st.file_uploader("Upload a cat image to give it a spooky transformation! (jpg, jpeg, png)", type=["jpg", "jpeg", "png"])
+    else:
+        cat_image_url = st.text_input("Enter the direct URL of the cat image (jpg, jpeg, png)")
 
     default_cat_prompt = "A demonic cat with glowing red eyes sharp fangs and dark mist swirling around it under a blood moon"
 
@@ -106,34 +135,52 @@ if selected == "Spooky Cat Face Transformer":
     )
 
     if st.button("Transform to Spooky"):
-        if uploaded_cat_pic:
+        if upload_option == "Upload a file" and uploaded_cat_pic:
             if uploaded_cat_pic.size > MAX_FILE_SIZE_BYTES:
                 st.warning(f"File size exceeds the 5 MB limit. Please upload a smaller file.")
             else:
-                message_placeholder = st.empty()
-                message_placeholder.write("Generating your cat's spooky transformation... Please wait while Cloudinary processes the image.")
-                
+                with st.spinner("Generating your cat's spooky transformation... Please wait while Cloudinary processes the image."):
+                    upload_result = cloudinary.uploader.upload(
+                        uploaded_cat_pic, 
+                        public_id=f"user_spooky_cat_{uploaded_cat_pic.name[:6]}", 
+                        unique_filename=True, 
+                        overwrite=False
+                    )
+                    public_id = upload_result['public_id']
+                    spooky_image_url = CloudinaryImage(public_id).image(
+                        effect=f"gen_replace:from_cat;to_{custom_cat_prompt}"
+                    )
+
+                    start_index = spooky_image_url.find('src="') + len('src="')
+                    end_index = spooky_image_url.find('"', start_index)
+                    generated_image_url = spooky_image_url[start_index:end_index] if start_index != -1 and end_index != -1 else None
+
+                    if generated_image_url:
+                        st.image(generated_image_url)
+                    else:
+                        st.write("Failed to generate the spooky transformation. Please try again.")
+
+        elif upload_option == "Enter an image URL" and cat_image_url:
+            with st.spinner("Generating your cat's spooky transformation... Please wait while Cloudinary processes the image."):
+                unique_id = f"user_uploaded_url_{int(time.time())}"
                 upload_result = cloudinary.uploader.upload(
-                    uploaded_cat_pic, 
-                    public_id=f"user_spooky_cat_{uploaded_cat_pic.name[:6]}", 
-                    unique_filename=True, 
+                    cat_image_url,
+                    public_id=unique_id,
+                    unique_filename=True,
                     overwrite=False
                 )
                 public_id = upload_result['public_id']
                 spooky_image_url = CloudinaryImage(public_id).image(
                     effect=f"gen_replace:from_cat;to_{custom_cat_prompt}"
                 )
-                
+
                 start_index = spooky_image_url.find('src="') + len('src="')
                 end_index = spooky_image_url.find('"', start_index)
-                image_url = spooky_image_url[start_index:end_index] if start_index != -1 and end_index != -1 else None
-                
-                if image_url:
-                    message_placeholder.empty()
-                    st.image(image_url)
-                else:
-                    message_placeholder.write("Failed to generate the spooky transformation. Please try again.")
-        else:
-            st.write("Please upload an image to proceed.")
+                generated_image_url = spooky_image_url[start_index:end_index] if start_index != -1 and end_index != -1 else None
 
-    st.write("If you don't see the image, just refresh the page and try again. You can also use this test image: [Test Image](https://unsplash.com/photos/black-and-white-cat-lying-on-brown-bamboo-chair-inside-room-gKXKBY-C-Dk)")
+                if generated_image_url:
+                    st.image(generated_image_url)
+                else:
+                    st.write("Failed to generate the spooky transformation. Please try again.")
+        else:
+            st.write("Please upload an image or provide a URL to proceed.")
