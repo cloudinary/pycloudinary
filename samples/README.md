@@ -34,3 +34,11 @@ A simple GAE application that performs image upload and generates on the transfo
 The source code and more details are available here:
 
 [https://github.com/cloudinary/pycloudinary/tree/master/samples/gae](https://github.com/cloudinary/pycloudinary/tree/master/samples/gae)
+
+## SpookyShots
+
+Spooky Pet Image App is a fun platform that transforms ordinary pet images into spooky, Halloween-themed creations. Whether you're looking to give your cat a spooky makeover or place any pet in a chilling Halloween setting, this app has everything you need for a spooky transformation!
+
+The source code and more details are available here:
+
+[https://github.com/cloudinary/pycloudinary/tree/master/samples/spookyshots](https://github.com/cloudinary/pycloudinary/tree/master/samples/spookyshots)

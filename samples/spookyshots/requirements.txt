@@ -1,0 +1,4 @@
+streamlit
+cloudinary
+python-dotenv
+streamlit_option_menu
