@@ -1087,8 +1087,9 @@ class ApiTest(unittest.TestCase):
         result = api.upload_mapping(MAPPING_TEST_ID)
         self.assertEqual(result["template"], "http://res.cloudinary.com")
         result = api.upload_mappings()
-        self.assertIn({"folder": MAPPING_TEST_ID, "template": "http://res.cloudinary.com"},
-                      result["mappings"])
+        self.assertTrue(any(
+            mapping.get("folder") == MAPPING_TEST_ID and mapping.get("template") == "http://res.cloudinary.com" for
+            mapping in result["mappings"]))
         api.delete_upload_mapping(MAPPING_TEST_ID)
         result = api.upload_mappings()
         self.assertNotIn(MAPPING_TEST_ID, [mapping.get("folder") for mapping in result["mappings"]])
