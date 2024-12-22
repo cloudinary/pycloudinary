@@ -2,3 +2,4 @@ streamlit
 cloudinary
 python-dotenv
 streamlit_option_menu
+tornado>=6.4.2 # not directly required, pinned by Snyk to avoid a vulnerability
