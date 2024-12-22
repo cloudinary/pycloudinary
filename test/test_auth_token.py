@@ -11,9 +11,11 @@ ALT_KEY = "CCBB2233FF00"
 class AuthTokenTest(unittest.TestCase):
     def setUp(self):
         self.url_backup = os.environ.get("CLOUDINARY_URL")
-        os.environ["CLOUDINARY_URL"] = "cloudinary://a:b@test123"
+        os.environ["CLOUDINARY_URL"] = ("cloudinary://a:b@test123?"
+                                        "auth_token[duration]=300"
+                                        "&auth_token[start_time]=11111111"
+                                        "&auth_token[key]=" + KEY)
         cloudinary.reset_config()
-        cloudinary.config(auth_token={"key": KEY, "duration": 300, "start_time": 11111111})
 
     def tearDown(self):
         with ignore_exception():
@@ -86,6 +88,16 @@ class AuthTokenTest(unittest.TestCase):
     def test_generate_token_string(self):
         user = "foobar"  # we can't rely on the default "now" value in tests
         token_options = {"key": KEY, "duration": 300, "acl": "/*/t_%s" % user, "start_time": 222222222}
+        cookie_token = cloudinary.utils.generate_auth_token(**token_options)
+        self.assertEqual(
+            cookie_token,
+            "__cld_token__=st=222222222~exp=222222522~acl=%2f*%2ft_foobar~hmac="
+            "8e39600cc18cec339b21fe2b05fcb64b98de373355f8ce732c35710d8b10259f"
+        )
+
+    def test_generate_token_string_from_string_values(self):
+        user = "foobar"
+        token_options = {"key": KEY, "duration": "300", "acl": "/*/t_%s" % user, "start_time": "222222222"}
         cookie_token = cloudinary.utils.generate_auth_token(**token_options)
         self.assertEqual(
             cookie_token,
