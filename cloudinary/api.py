@@ -365,7 +365,7 @@ def delete_backed_up_assets(asset_id, version_ids, **options):
     :param asset_id: The asset ID of the asset to update.
     :type asset_id: str
     :param version_ids: The array of version IDs.
-    :type assets_to_unrelate: list[str]
+    :type version_ids: list[str]
     :param options: Additional options.
     :type options: dict, optional
     :return: The result of the command.
