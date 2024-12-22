@@ -358,6 +358,24 @@ def delete_derived_by_transformation(public_ids, transformations,
     return call_api("delete", uri, params, **options)
 
 
+def delete_backed_up_assets(asset_id, version_ids, **options):
+    """
+    Deletes backed up versions of a resource by asset IDs.
+
+    :param asset_id: The asset ID of the asset to update.
+    :type asset_id: str
+    :param version_ids: The array of version IDs.
+    :type version_ids: list[str]
+    :param options: Additional options.
+    :type options: dict, optional
+    :return: The result of the command.
+    :rtype: dict
+    """
+    uri = ["resources", "backup", asset_id]
+    params = {"version_ids": utils.build_array(version_ids)}
+    return call_json_api("delete", uri, params, **options)
+
+
 def add_related_assets(public_id, assets_to_relate, resource_type="image", type="upload", **options):
     """
     Relates an asset to other assets by public IDs.

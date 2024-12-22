@@ -31,6 +31,8 @@ API_TEST_ID5 = "api_test_{}5".format(SUFFIX)
 API_TEST_ID6 = "api_test_{}6".format(SUFFIX)
 API_TEST_ID7 = "api_test_{}7".format(SUFFIX)
 API_TEST_ASSET_ID = "4af5a0d1d4047808528b5425d166c101"
+API_TEST_ASSET_ID_VERSION_ID = "ded32c1fa9b710b04574f0676133c00a"
+API_TEST_ASSET_ID_VERSION_ID_2 = "aae2bae059d13e1ef0ec1742033bb5f7"
 API_TEST_ASSET_ID2 = "4af5a0d1d4047808528b5425d166c102"
 API_TEST_ASSET_ID3 = "4af5a0d1d4047808528b5425d166c103"
 API_TEST_TRANS = "api_test_transformation_{}".format(SUFFIX)
@@ -585,6 +587,19 @@ class ApiTest(unittest.TestCase):
         param = get_json_body(mocker)['assets_to_unrelate']
         self.assertIn(API_TEST_ASSET_ID2, param)
         self.assertIn(API_TEST_ASSET_ID3, param)
+
+    @patch(URLLIB3_REQUEST)
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_delete_backed_up_assets(self, mocker):
+        """ should allow deleting backed up versions of an asset by asset id"""
+        mocker.return_value = MOCK_RESPONSE
+        api.delete_backed_up_assets(API_TEST_ASSET_ID, [API_TEST_ASSET_ID_VERSION_ID, API_TEST_ASSET_ID_VERSION_ID_2])
+        args, _ = mocker.call_args
+        self.assertEqual(get_method(mocker), 'DELETE')
+        self.assertTrue(get_uri(mocker).endswith('/resources/backup/' + API_TEST_ASSET_ID))
+        version_ids = get_json_body(mocker)['version_ids']
+        self.assertIn(API_TEST_ASSET_ID_VERSION_ID, version_ids)
+        self.assertIn(API_TEST_ASSET_ID_VERSION_ID_2, version_ids)
 
     @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
