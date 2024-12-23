@@ -489,7 +489,7 @@ class ApiTest(unittest.TestCase):
 
         self.assertEqual(get_method(mocker), 'DELETE')
         self.assertTrue(get_uri(mocker).endswith('/resources'))
-        param = get_list_param(mocker, 'asset_ids')
+        param = get_json_body(mocker)['asset_ids']
         self.assertIn(API_TEST_ASSET_ID, param)
         self.assertIn(API_TEST_ASSET_ID2, param)
 
