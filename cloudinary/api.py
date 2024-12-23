@@ -624,6 +624,20 @@ def restore(public_ids, **options):
     params = dict(public_ids=public_ids, **only(options, "versions"))
     return call_json_api("post", uri, params, **options)
 
+def restore_by_asset_ids(asset_ids, **options):
+    """
+      Restores resources (assets) by their asset IDs.
+
+      :param asset_ids: The asset IDs of the assets to restore.
+      :type asset_ids: list[str]
+      :param options: Additional options.
+      :type options: dict, optional
+      :return: The result of the restore operation.
+      :rtype: dict
+      """
+    uri = ["resources", "restore"]
+    params = dict(asset_ids=asset_ids, **only(options, "versions"))
+    return call_json_api("post", uri, params, **options)
 
 def upload_mappings(**options):
     uri = ["upload_mappings"]

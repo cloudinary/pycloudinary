@@ -1105,6 +1105,21 @@ class ApiTest(unittest.TestCase):
         self.assertListEqual(public_ids, json_body["public_ids"])
         self.assertListEqual(versions, json_body["versions"])
 
+    @patch(URLLIB3_REQUEST)
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_restore_by_asset_ids(self, mocker):
+        mocker.return_value = MOCK_RESPONSE
+
+        asset_ids = [API_TEST_ASSET_ID, API_TEST_ASSET_ID2]
+        versions = ["ver1", "ver2"]
+
+        api.restore_by_asset_ids(asset_ids, versions=versions)
+
+        json_body = get_json_body(mocker)
+
+        self.assertListEqual(asset_ids, json_body["asset_ids"])
+        self.assertListEqual(versions, json_body["versions"])
+
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_mapping(self):
 
