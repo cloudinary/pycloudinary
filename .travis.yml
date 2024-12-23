@@ -4,28 +4,28 @@ matrix:
   include:
   - python: 2.7
     env: TOXENV=py27-core
-  - python: 3.7
-    env: TOXENV=py37-core
-  - python: 3.8
-    env: TOXENV=py38-core
   - python: 3.9
     env: TOXENV=py39-core
   - python: 3.10
     env: TOXENV=py310-core
   - python: 3.11
     env: TOXENV=py311-core
+  - python: 3.12
+    env: TOXENV=py312-core
+  - python: 3.13
+    env: TOXENV=py313-core
   - python: 2.7
     env: TOXENV=py27-django111
-  - python: 3.7
-    env: TOXENV=py37-django22
   - python: 3.9
     env: TOXENV=py39-django32
   - python: 3.10
-    env: TOXENV=py310-django40
-  - python: 3.10
-    env: TOXENV=py310-django41
+    env: TOXENV=py310-django42
   - python: 3.11
-    env: TOXENV=py311-django41
+    env: TOXENV=py311-django42
+  - python: 3.12
+    env: TOXENV=py312-django50
+  - python: 3.13
+    env: TOXENV=py313-django51
 install:
 - pip install tox pytest
 

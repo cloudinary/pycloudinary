@@ -41,12 +41,12 @@ For the complete documentation, see the [Python SDK Guide](https://cloudinary.co
 ## Version Support
 
 | SDK Version | Python 2.7 | Python 3.x |
-| ----------- | ---------- | ---------- |
+|-------------|------------|------------|
 | 1.x         | ✔          | ✔          |
 
-| SDK Version | Django 1.11 | Django 2.x | Django 3.x | Django 4.x |
-| ----------- | ----------- | ---------- | ---------- | ---------- |
-| 1.x         | ✔           | ✔          | ✔          | ✔          |
+| SDK Version | Django 1.11 | Django 2.x | Django 3.x | Django 4.x | Django 5.x |
+|-------------|-------------|------------|------------|------------|------------|
+| 1.x         | ✔           | ✔          | ✔          | ✔          | ✔          |
 
 
 ## Installation
