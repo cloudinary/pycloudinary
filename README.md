@@ -1,4 +1,4 @@
-[![Build Status](https://app.travis-ci.com/cloudinary/pycloudinary.svg)](https://app.travis-ci.com/cloudinary/pycloudinary)
+[![Tests](https://github.com/cloudinary/pycloudinary/actions/workflows/test.yml/badge.svg)](https://github.com/cloudinary/pycloudinary/actions/workflows/test.yml)
 [![PyPI Version](https://img.shields.io/pypi/v/cloudinary.svg)](https://pypi.python.org/pypi/cloudinary/)
 [![PyPI PyVersions](https://img.shields.io/pypi/pyversions/cloudinary.svg)](https://pypi.python.org/pypi/cloudinary/)
 [![PyPI DjangoVersions](https://img.shields.io/pypi/djversions/cloudinary.svg)](https://pypi.python.org/pypi/cloudinary/)
@@ -41,12 +41,12 @@ For the complete documentation, see the [Python SDK Guide](https://cloudinary.co
 ## Version Support
 
 | SDK Version | Python 2.7 | Python 3.x |
-| ----------- | ---------- | ---------- |
+|-------------|------------|------------|
 | 1.x         | ✔          | ✔          |
 
-| SDK Version | Django 1.11 | Django 2.x | Django 3.x | Django 4.x |
-| ----------- | ----------- | ---------- | ---------- | ---------- |
-| 1.x         | ✔           | ✔          | ✔          | ✔          |
+| SDK Version | Django 1.11 | Django 2.x | Django 3.x | Django 4.x | Django 5.x |
+|-------------|-------------|------------|------------|------------|------------|
+| 1.x         | ✔           | ✔          | ✔          | ✔          | ✔          |
 
 
 ## Installation
