@@ -6,7 +6,7 @@ import cloudinary
 from cloudinary import CloudinaryResource
 from cloudinary import uploader
 from test.helper_test import SUFFIX, TEST_IMAGE, http_response_mock, get_uri, cleanup_test_resources_by_tag, \
-    URLLIB3_REQUEST, mock
+    URLLIB3_REQUEST, mock, retry_assertion
 
 disable_warnings()
 
@@ -96,6 +96,7 @@ class TestCloudinaryResource(TestCase):
         self.assertIn(self.crop_transformation_str + "/" + self.expected_transformation,
                       get_uri(mocked_request))
 
+    @retry_assertion()
     def test_fetch_breakpoints_real(self):
         """Should retrieve responsive breakpoints from cloudinary resource (real request)"""
         actual_breakpoints = self.res._fetch_breakpoints()
