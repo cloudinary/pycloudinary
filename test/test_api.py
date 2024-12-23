@@ -482,6 +482,19 @@ class ApiTest(unittest.TestCase):
 
     @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test09_delete_resources_by_asset_ids(self, mocker):
+        """ should allow deleting resources by asset_ids"""
+        mocker.return_value = MOCK_RESPONSE
+        api.delete_resources_by_asset_ids([API_TEST_ASSET_ID, API_TEST_ASSET_ID2])
+
+        self.assertEqual(get_method(mocker), 'DELETE')
+        self.assertTrue(get_uri(mocker).endswith('/resources'))
+        param = get_json_body(mocker)['asset_ids']
+        self.assertIn(API_TEST_ASSET_ID, param)
+        self.assertIn(API_TEST_ASSET_ID2, param)
+
+    @patch(URLLIB3_REQUEST)
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test09a_delete_resources_by_prefix(self, mocker):
         """ should allow deleting resources by prefix """
         mocker.return_value = MOCK_RESPONSE

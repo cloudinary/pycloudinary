@@ -299,6 +299,21 @@ def delete_resources(public_ids, **options):
     params = __delete_resource_params(options, public_ids=public_ids)
     return call_api("delete", uri, params, **options)
 
+def delete_resources_by_asset_ids(asset_ids, **options):
+    """
+    Deletes resources (assets) by asset IDs.
+
+    :param asset_ids: The asset IDs of the assets to delete.
+    :type asset_ids: list[str]
+    :param options: Additional options.
+    :type options: dict, optional
+    :return: The result of the command.
+    :rtype: dict
+    """
+    uri = ["resources"]
+    params = __delete_resource_params(options, asset_ids=asset_ids)
+    return call_json_api("delete", uri, params, **options)
+
 
 def delete_resources_by_prefix(prefix, **options):
     resource_type = options.pop("resource_type", "image")
