@@ -1,3 +1,21 @@
+1.42.0 / 2025-01-07
+==================
+
+New functionality and features
+------------------------------
+
+  * Add support for `restore_by_asset_ids` Admin API
+  * Add support for `delete_resources_by_asset_ids` Admin API
+  * Add support for `delete_backed_up_assets` Admin API
+  * Add support for `allow_dynamic_list_values` parameter in `MetadataField`
+
+Other Changes
+-------------
+  * Fix `AuthToken` configuration consumption
+  * Switch to `pytest`
+  * Add Generative AI Transformation sample project
+  * Add missing doc strings
+
 1.41.0 / 2024-08-01
 ==================
 
