@@ -41,11 +41,41 @@ UPLOAD_LARGE_CHUNK_SIZE = 20000000
 
 
 def upload(file, **options):
+    """
+    Uploads file to Cloudinary.
+
+    The file can be:
+        * a local file path
+        * the actual data (byte array buffer)
+        * the Data URI (Base64 encoded), max ~60 MB (62,910,000 chars)
+        * the remote FTP, HTTP or HTTPS URL address of an existing file
+        * a private storage bucket (S3 or Google Storage) URL of a whitelisted bucket
+
+    See: https://cloudinary.com/documentation/image_upload_api_reference#upload_method
+    :param file: The asset to upload.
+    :type file: Any or str
+    :param options: The optional parameters. See the upload API documentation.
+    :type options: dict, optional
+    :return: The result of the upload API call.
+    :rtype: dict
+    """
     params = utils.build_upload_params(**options)
     return call_cacheable_api("upload", params, file=file, **options)
 
 
 def unsigned_upload(file, upload_preset, **options):
+    """
+    Uploads an asset to Cloudinary without requiring authentication.
+
+    :param file: The asset to upload.
+    :type file: file-like object or str
+    :param upload_preset: The upload preset to use for the upload.
+    :type upload_preset: str
+    :param options: Additional options for the upload.
+    :type options: dict, optional
+    :return: The result of the upload API call.
+    :rtype: dict
+    """
     return upload(file, upload_preset=upload_preset, unsigned=True, **options)
 
 
@@ -70,7 +100,16 @@ def upload_resource(file, **options):
 
 
 def upload_large(file, **options):
-    """ Upload large files. """
+    """
+    Uploads large file to Cloudinary.
+
+    :param file: The file to upload. Can be a local file path, file-like object, or remote URL.
+    :type file: str or file-like object
+    :param options: Additional options for the upload.
+    :type options: dict, optional
+    :return: The result of the upload API call.
+    :rtype: dict
+    """
     if utils.is_remote_url(file):
         return upload(file, **options)
 
@@ -108,7 +147,7 @@ def upload_large(file, **options):
 
 
 def upload_large_part(file, **options):
-    """ Upload large files. """
+    """ Uploads large file part. """
     params = utils.build_upload_params(**options)
 
     if 'resource_type' not in options:
@@ -118,6 +157,16 @@ def upload_large_part(file, **options):
 
 
 def destroy(public_id, **options):
+    """
+    Deletes a resource (asset) from Cloudinary.
+
+    :param public_id: The public ID of the resource to delete.
+    :type public_id: str
+    :param options: Additional options for the deletion.
+    :type options: dict, optional
+    :return: The result of the API call.
+    :rtype: dict
+    """
     params = {
         "timestamp": utils.now(),
         "type": options.get("type"),
@@ -128,6 +177,18 @@ def destroy(public_id, **options):
 
 
 def rename(from_public_id, to_public_id, **options):
+    """
+    Renames a resource (asset) in Cloudinary.
+
+    :param from_public_id: The current public ID of the resource.
+    :type from_public_id: str
+    :param to_public_id: The new public ID for the resource.
+    :type to_public_id: str
+    :param options: Additional options for the rename operation.
+    :type options: dict, optional
+    :return: The result of the API call.
+    :rtype: dict
+    """
     params = {
         "timestamp": utils.now(),
         "type": options.get("type"),
@@ -171,12 +232,30 @@ def update_metadata(metadata, public_ids, **options):
 
 
 def explicit(public_id, **options):
+    """
+    Applies actions to already uploaded assets.
+
+    :param public_id: The public ID of the asset to process.
+    :type public_id: str
+    :param options: Additional options for the explicit processing.
+    :type options: dict, optional
+    :return: The result of the API call.
+    :rtype: dict
+    """
     params = utils.build_upload_params(**options)
     params["public_id"] = public_id
     return call_cacheable_api("explicit", params, **options)
 
 
 def create_archive(**options):
+    """
+    Creates an archive of assets in Cloudinary.
+
+    :param options: Additional options for the archive creation.
+    :type options: dict, optional
+    :return: The result of the API call.
+    :rtype: dict
+    """
     params = utils.archive_params(**options)
     if options.get("target_format") is not None:
         params["target_format"] = options.get("target_format")
@@ -184,6 +263,14 @@ def create_archive(**options):
 
 
 def create_zip(**options):
+    """
+    Creates a ZIP archive of assets in Cloudinary.
+
+    :param options: Additional options for the archive creation.
+    :type options: dict, optional
+    :return: The result of the API call.
+    :rtype: dict
+    """
     return create_archive(target_format="zip", **options)
 
 
@@ -263,6 +350,19 @@ def download_multi(tag=None, urls=None, **options):
 
 
 def explode(public_id, **options):
+    """
+    Creates derived images for all the individual pages in a multi-page file (PDF or animated GIF).
+
+    Each derived image is stored with the same public ID as the original file and can be accessed using the page
+    parameter to deliver a specific image.
+
+    :param public_id: The public ID of the file to explode.
+    :type public_id: str
+    :param options: Additional options for the `explode` operation.
+    :type options: dict, optional
+    :return: The result of the API call.
+    :rtype: dict
+    """
     params = {
         "timestamp": utils.now(),
         "public_id": public_id,
@@ -392,6 +492,16 @@ TEXT_PARAMS = [
 
 
 def text(text, **options):
+    """
+    Generates an image of a given text string.
+
+    :param text: The text string to generate an image for.
+    :type text: str
+    :param options: Additional options for the text generation.
+    :type options: dict, optional
+    :return: The result of the API call.
+    :rtype: dict
+    """
     params = {"timestamp": utils.now(), "text": text}
     for key in TEXT_PARAMS:
         params[key] = options.get(key)

@@ -29,6 +29,16 @@ from cloudinary.exceptions import (
 
 
 def ping(**options):
+    """
+    Tests the reachability of the Cloudinary API.
+
+    :param options: Additional options.
+    :type options: dict, optional
+    :return: The result of the API call.
+    :rtype: Response
+
+    See: https://cloudinary.com/documentation/admin_api#ping
+    """
     return call_api("get", ["ping"], {}, **options)
 
 
@@ -39,7 +49,7 @@ def usage(**options):
     requests, number of resources, and add-on usage. Note that numbers are updated periodically.
 
     See: `Get account usage details
-    <https://cloudinary.com/documentation/admin_api#get_account_usage_details>`_
+    <https://cloudinary.com/documentation/admin_api#get_product_environment_usage_details>`_
 
     :param options:     Additional options
     :type options:      dict, optional
@@ -59,7 +69,9 @@ def config(**options):
     """
     Get account config details.
 
-    :param options:     Additional options.
+    Fetches the account's configuration details with optional settings.
+
+    :param options: The optional parameters for the API request.
     :type options:      dict, optional
     :return:            Detailed config information.
     :rtype:             Response
@@ -69,10 +81,26 @@ def config(**options):
 
 
 def resource_types(**options):
+    """
+    Retrieves the types of resources (assets) available.
+
+    :param options: Additional options.
+    :type options: dict, optional
+    :return: The result of the API call.
+    :rtype: Response
+    """
     return call_api("get", ["resources"], {}, **options)
 
 
 def resources(**options):
+    """
+    Retrieves resources (assets) based on the provided options.
+
+    :param options: Additional options to filter the resources.
+    :type options: dict, optional
+    :return: The result of the API call.
+    :rtype: Response
+    """
     resource_type = options.pop("resource_type", "image")
     upload_type = options.pop("type", None)
     uri = ["resources", resource_type]
@@ -84,6 +112,20 @@ def resources(**options):
 
 
 def resources_by_tag(tag, **options):
+    """
+    Lists resources (assets) with the specified tag.
+
+    This method does not return matching deleted assets, even if they have been backed up.
+
+    :param tag: The tag value.
+    :type tag: str
+    :param options: The optional parameters.
+    :type options: dict, optional
+    :return: The result of the API call.
+    :rtype: Response
+
+    See: https://cloudinary.com/documentation/admin_api#get_resources_by_tag
+    """
     resource_type = options.pop("resource_type", "image")
     uri = ["resources", resource_type, "tags", tag]
     params = __list_resources_params(**options)
@@ -91,6 +133,22 @@ def resources_by_tag(tag, **options):
 
 
 def resources_by_moderation(kind, status, **options):
+    """
+    Lists resources (assets) assets currently in the specified moderation queue and status.
+
+    :param kind: Type of image moderation queue to list.
+                 Valid values: "manual", "webpurify", "aws_rek", or "metascan".
+    :type kind: str
+    :param status: Only assets with this moderation status will be returned.
+                   Valid values: "pending", "approved", "rejected".
+    :type status: str
+    :param options: The optional parameters.
+    :type options: dict, optional
+    :return: The result of the API call.
+    :rtype: Response
+
+    See: https://cloudinary.com/documentation/admin_api#get_resources_in_moderation_queues
+    """
     resource_type = options.pop("resource_type", "image")
     uri = ["resources", resource_type, "moderations", kind, status]
     params = __list_resources_params(**options)
@@ -98,6 +156,18 @@ def resources_by_moderation(kind, status, **options):
 
 
 def resources_by_ids(public_ids, **options):
+    """
+    Lists resources (assets) with the specified public IDs.
+
+    :param public_ids: The requested public_ids (up to 100).
+    :type public_ids: list[str]
+    :param options: The optional parameters.
+    :type options: dict, optional
+    :return: The result of the API call.
+    :rtype: Response
+
+    See: https://cloudinary.com/documentation/admin_api#get_resources
+    """
     resource_type = options.pop("resource_type", "image")
     upload_type = options.pop("type", "upload")
     uri = ["resources", resource_type, upload_type]
@@ -127,7 +197,7 @@ def resources_by_asset_ids(asset_ids, **options):
     This method does not return deleted assets even if they have been backed up.
 
     See: `Get resources by context API reference
-    <https://cloudinary.com/documentation/admin_api#get_resources>`_
+    <https://cloudinary.com/documentation/admin_api#get_resources_by_asset_ids>`_
 
     :param asset_ids:   The requested asset IDs.
     :type asset_ids:    list[str]
@@ -219,6 +289,19 @@ def visual_search(image_url=None, image_asset_id=None, text=None, image_file=Non
 
 
 def resource(public_id, **options):
+    """
+    Returns the details of the specified asset and all its derived assets.
+
+    Note that if you only need details about the original asset, you can also use the `uploader.upload`
+    or `uploader.explicit` methods, which return the same information and are not rate limited.
+
+    :param public_id: The public ID of the resource.
+    :type public_id: str
+    :param options: Additional options.
+    :type options: dict, optional
+    :return: The result of the API call.
+    :rtype: Response
+    """
     resource_type = options.pop("resource_type", "image")
     upload_type = options.pop("type", "upload")
     uri = ["resources", resource_type, upload_type, public_id]
@@ -257,6 +340,16 @@ def _prepare_asset_details_params(**options):
 
 
 def update(public_id, **options):
+    """
+    Updates the details of a specified resource.
+
+    :param public_id: The public ID of the resource to update.
+    :type public_id: str
+    :param options: Additional options for the update operation.
+    :type options: dict, optional
+    :return: The result of the API call.
+    :rtype: Response
+    """
     resource_type = options.pop("resource_type", "image")
     upload_type = options.pop("type", "upload")
     uri = ["resources", resource_type, upload_type, public_id]
@@ -298,6 +391,7 @@ def delete_resources(public_ids, **options):
     uri = ["resources", resource_type, upload_type]
     params = __delete_resource_params(options, public_ids=public_ids)
     return call_api("delete", uri, params, **options)
+
 
 def delete_resources_by_asset_ids(asset_ids, **options):
     """
@@ -472,6 +566,16 @@ def delete_related_assets_by_asset_ids(asset_id, assets_to_unrelate, **options):
 
 
 def tags(**options):
+    """
+    Lists all the tags currently used for a specified asset type.
+
+    :param options: The optional parameters.
+    :type options: dict, optional
+    :return: The result of the API call.
+    :rtype: Response
+
+    See: https://cloudinary.com/documentation/admin_api#get_tags
+    """
     resource_type = options.pop("resource_type", "image")
     uri = ["tags", resource_type]
     return call_api("get", uri, only(options, "next_cursor", "max_results", "prefix"), **options)
@@ -624,6 +728,7 @@ def restore(public_ids, **options):
     params = dict(public_ids=public_ids, **only(options, "versions"))
     return call_json_api("post", uri, params, **options)
 
+
 def restore_by_asset_ids(asset_ids, **options):
     """
       Restores resources (assets) by their asset IDs.
@@ -638,6 +743,7 @@ def restore_by_asset_ids(asset_ids, **options):
     uri = ["resources", "restore"]
     params = dict(asset_ids=asset_ids, **only(options, "versions"))
     return call_json_api("post", uri, params, **options)
+
 
 def upload_mappings(**options):
     uri = ["upload_mappings"]
