@@ -628,7 +628,11 @@ def sign_request(params, options):
 
 
 def api_sign_request(params_to_sign, api_secret, algorithm=SIGNATURE_SHA1):
-    params = [(k + "=" + (",".join(v) if isinstance(v, list) else str(v))) for k, v in params_to_sign.items() if v]
+    params = [(k + "=" + (
+        ",".join(v) if isinstance(v, list) else
+        str(v).lower() if isinstance(v, bool) else
+        str(v)
+    )) for k, v in params_to_sign.items() if v]
     to_sign = "&".join(sorted(params))
     return compute_hex_hash(to_sign + api_secret, algorithm)
 
