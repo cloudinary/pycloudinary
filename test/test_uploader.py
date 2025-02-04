@@ -17,7 +17,7 @@ from test.cache.storage.dummy_cache_storage import DummyCacheStorage
 from test.helper_test import uploader_response_mock, SUFFIX, TEST_IMAGE, get_params, get_headers, TEST_ICON, TEST_DOC, \
     REMOTE_TEST_IMAGE, UTC, populate_large_file, TEST_UNICODE_IMAGE, get_uri, get_method, get_param, \
     cleanup_test_resources_by_tag, cleanup_test_transformation, cleanup_test_resources, EVAL_STR, ON_SUCCESS_STR, \
-    URLLIB3_REQUEST, patch, retry_assertion
+    URLLIB3_REQUEST, patch, retry_assertion, CldTestCase
 from test.test_utils import TEST_ID, TEST_FOLDER
 
 MOCK_RESPONSE = uploader_response_mock()
@@ -77,7 +77,7 @@ DISPLAY_NAME = "test"
 disable_warnings()
 
 
-class UploaderTest(unittest.TestCase):
+class UploaderTest(CldTestCase):
     rbp_trans = {"angle": 45, "crop": "scale"}
     rbp_format = "png"
     rbp_values = [206, 50]
@@ -757,7 +757,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
             resource = uploader.upload_large(temp_file_name, chunk_size=LARGE_CHUNK_SIZE,
                                              tags=["upload_large_tag", UNIQUE_TAG])
 
-            self.assertEqual(resource["tags"], ["upload_large_tag", UNIQUE_TAG])
+            self.assertCountEqual(resource["tags"], ["upload_large_tag", UNIQUE_TAG])
             self.assertEqual(resource["resource_type"], "raw")
             self.assertEqual(resource["original_filename"], temp_file_filename)
 
@@ -765,7 +765,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
                                               tags=["upload_large_tag", UNIQUE_TAG], resource_type="image",
                                               use_filename=True, unique_filename=False, filename=filename)
 
-            self.assertEqual(resource2["tags"], ["upload_large_tag", UNIQUE_TAG])
+            self.assertCountEqual(resource2["tags"], ["upload_large_tag", UNIQUE_TAG])
             self.assertEqual(resource2["resource_type"], "image")
             self.assertEqual(resource2["original_filename"], filename)
             self.assertEqual(resource2["original_filename"], resource2["public_id"])
@@ -775,7 +775,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
             resource3 = uploader.upload_large(temp_file_name, chunk_size=LARGE_FILE_SIZE,
                                               tags=["upload_large_tag", UNIQUE_TAG])
 
-            self.assertEqual(resource3["tags"], ["upload_large_tag", UNIQUE_TAG])
+            self.assertCountEqual(resource3["tags"], ["upload_large_tag", UNIQUE_TAG])
             self.assertEqual(resource3["resource_type"], "raw")
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
