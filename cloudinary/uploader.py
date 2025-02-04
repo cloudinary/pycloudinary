@@ -151,7 +151,7 @@ def upload(file, **options):
     :keyword bool return_delete_token:
         If True, returns a token that can be used to delete the asset without authentication.
     :keyword float auto_tagging:
-        (Range 0.0–1.0) If set, automatically tag the image based on content analysis.
+        (Range 0.0-1.0) If set, automatically tag the image based on content analysis.
     :keyword bool async:
         If True, requests asynchronous processing (where applicable).
     :keyword bool cinemagraph_analysis:
