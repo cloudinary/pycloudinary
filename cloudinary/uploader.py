@@ -60,8 +60,6 @@ def upload(file, **options):
     :param options:
         Additional parameters and configuration for the upload call.
 
-    :type options: dict
-
     :keyword str public_id:
         Overrides the default public ID for the uploaded file.
     :keyword str public_id_prefix:
@@ -210,7 +208,6 @@ def unsigned_upload(file, upload_preset, **options):
     :param upload_preset: The unsigned upload preset name to use.
     :type upload_preset: str
     :param options: Additional options for the upload.
-    :type options: dict
     :return: The result of the upload API call.
     :rtype: dict
     """
@@ -226,7 +223,6 @@ def upload_image(file, **options):
     :param file: The asset to upload.
     :type file: Any or str
     :param options: Additional parameters for the upload call.
-    :type options: dict
     :return: A CloudinaryImage object referencing the uploaded image.
     :rtype: cloudinary.CloudinaryImage
     """
@@ -246,7 +242,6 @@ def upload_resource(file, **options):
     :param file: The asset to upload.
     :type file: Any or str
     :param options: Additional parameters for the upload call.
-    :type options: dict
     :return: A CloudinaryResource object referencing the uploaded asset.
     :rtype: cloudinary.CloudinaryResource
     """
@@ -275,7 +270,6 @@ def upload_large(file, **options):
     :param file: The file to upload (local path or file-like object).
     :type file: str or file-like object
     :param options: Additional options for the upload.
-    :type options: dict
     :keyword str filename: Override for the file name (for streams).
     :keyword int chunk_size: Size of each uploaded chunk (default=20000000).
     :keyword bool use_cache: Whether to store responsive breakpoints in cache after upload.
@@ -331,7 +325,6 @@ def upload_large_part(file, **options):
     :param file: A tuple of (filename, chunk_data) for the file part to upload.
     :type file: tuple
     :param options: Additional parameters for the chunk upload.
-    :type options: dict
     :return: The result of the chunk upload API call.
     :rtype: dict
     """
@@ -352,7 +345,6 @@ def destroy(public_id, **options):
     :param public_id: The public ID of the resource to delete.
     :type public_id: str
     :param options: Additional options for the deletion.
-    :type options: dict
     :keyword str type: The storage type (upload, private, authenticated).
     :keyword bool invalidate: Invalidate cached copies on the CDN if True.
     :return: The result of the API call.
@@ -378,7 +370,6 @@ def rename(from_public_id, to_public_id, **options):
     :param to_public_id: The new public ID for the resource.
     :type to_public_id: str
     :param options: Additional options for the rename operation.
-    :type options: dict
     :keyword str type: The storage type of the original asset. Default=upload.
     :keyword bool overwrite: Whether to overwrite if the to_public_id already exists.
     :keyword bool invalidate: Invalidate cached copies on the CDN if True.
@@ -413,7 +404,6 @@ def update_metadata(metadata, public_ids, **options):
     :param public_ids: A list of public IDs (assets) to update.
     :type public_ids: list[str]
     :param options: Additional options such as resource_type or type.
-    :type options: dict
     :keyword str resource_type: The resource type (image, raw, video). Default="image".
     :keyword str type: The storage type (upload, private, authenticated).
     :keyword bool clear_invalid: If True, remove keys that are not valid.
@@ -439,7 +429,6 @@ def explicit(public_id, **options):
     :param public_id: The public ID of the asset to process.
     :type public_id: str
     :param options: Additional options for the explicit API call.
-    :type options: dict
     :return: The result of the API call.
     :rtype: dict
     """
@@ -455,7 +444,6 @@ def create_archive(**options):
     See: https://cloudinary.com/documentation/image_upload_api_reference#generate_archive
 
     :param options: Additional options for the archive creation (filters, transformations, etc.).
-    :type options: dict
     :keyword str target_format: Archive format (zip, tgz, etc.).
     :return: The result of the API call.
     :rtype: dict
@@ -473,7 +461,6 @@ def create_zip(**options):
     See: https://cloudinary.com/documentation/image_upload_api_reference#create_zip_syntax
 
     :param options: Additional options for archive creation.
-    :type options: dict
     :return: The result of the API call.
     :rtype: dict
     """
@@ -491,7 +478,6 @@ def generate_sprite(tag=None, urls=None, **options):
     :param urls: List of URLs to create a sprite from (only if tag not set).
     :type urls: list[str], optional
     :param options: Additional sprite configuration.
-    :type options: dict
     :return: Dictionary with metadata and URLs of generated sprite resources.
     :rtype: dict
     """
@@ -508,7 +494,6 @@ def download_generated_sprite(tag=None, urls=None, **options):
     :param urls: List of URLs to create a sprite from (only if tag not set).
     :type urls: list[str], optional
     :param options: Additional sprite configuration.
-    :type options: dict
     :return: The signed URL to download the sprite.
     :rtype: str
     """
@@ -527,7 +512,6 @@ def multi(tag=None, urls=None, **options):
     :param urls: A list of image URLs (if no tag is set).
     :type urls: list[str], optional
     :param options: Additional multi-configuration options.
-    :type options: dict
     :return: Dictionary with metadata and URLs of the generated file.
     :rtype: dict
     """
@@ -544,7 +528,6 @@ def download_multi(tag=None, urls=None, **options):
     :param urls: A list of image URLs (if no tag is set).
     :type urls: list[str], optional
     :param options: Additional multi-configuration options.
-    :type options: dict
     :return: The signed URL to download the multi.
     :rtype: str
     """
@@ -561,7 +544,6 @@ def explode(public_id, **options):
     :param public_id: The public ID of the file to explode.
     :type public_id: str
     :param options: Additional explode options (format, notification_url, transformation).
-    :type options: dict
     :return: The result of the API call.
     :rtype: dict
     """
@@ -586,7 +568,6 @@ def add_tag(tag, public_ids=None, **options):
     :param public_ids: A list of public IDs (up to 1000).
     :type public_ids: list[str], optional
     :param options: Additional options (e.g., exclusive).
-    :type options: dict
     :keyword bool exclusive: If True, clears this tag from all other assets in the product environment.
     :return: Dictionary with a list of updated public IDs.
     :rtype: dict
@@ -607,7 +588,6 @@ def remove_tag(tag, public_ids=None, **options):
     :param public_ids: A list of public IDs (up to 1000).
     :type public_ids: list[str], optional
     :param options: Additional options.
-    :type options: dict
     :return: Dictionary with a list of updated public IDs.
     :rtype: dict
     """
@@ -625,7 +605,6 @@ def replace_tag(tag, public_ids=None, **options):
     :param public_ids: A list of public IDs (up to 1000).
     :type public_ids: list[str], optional
     :param options: Additional options.
-    :type options: dict
     :return: Dictionary with a list of updated public IDs.
     :rtype: dict
     """
@@ -641,7 +620,6 @@ def remove_all_tags(public_ids, **options):
     :param public_ids: The public IDs of the assets.
     :type public_ids: list[str]
     :param options: Additional options.
-    :type options: dict
     :return: Dictionary with a list of updated public IDs.
     :rtype: dict
     """
@@ -659,7 +637,6 @@ def add_context(context, public_ids, **options):
     :param public_ids: The public IDs of the assets to update.
     :type public_ids: list[str]
     :param options: Additional options.
-    :type options: dict
     :return: Dictionary with a list of updated public IDs.
     :rtype: dict
     """
@@ -675,7 +652,6 @@ def remove_all_context(public_ids, **options):
     :param public_ids: The public IDs of the assets to update.
     :type public_ids: list[str]
     :param options: Additional options.
-    :type options: dict
     :return: Dictionary with a list of updated public IDs.
     :rtype: dict
     """
@@ -695,7 +671,6 @@ def call_tags_api(tag, command, public_ids=None, **options):
     :param public_ids: A list of asset public IDs.
     :type public_ids: list[str], optional
     :param options: Additional options (e.g., type).
-    :type options: dict
     :return: The result of the API call.
     :rtype: dict
     """
@@ -722,7 +697,6 @@ def call_context_api(context, command, public_ids=None, **options):
     :param public_ids: A list of asset public IDs.
     :type public_ids: list[str], optional
     :param options: Additional options (e.g., type).
-    :type options: dict
     :return: The result of the API call.
     :rtype: dict
     """
@@ -759,7 +733,6 @@ def text(text, **options):
     :param text: The text string to generate an image for.
     :type text: str
     :param options: Additional options (e.g., font_family, font_size, etc.).
-    :type options: dict
     :return: The result of the text API call.
     :rtype: dict
     """
@@ -782,7 +755,6 @@ def create_slideshow(**options):
     Creates an auto-generated video slideshow from existing assets.
 
     :param options: Additional parameters for the slideshow creation.
-    :type options: dict
     :keyword str resource_type: The resource type, defaults to "video".
     :keyword str notification_url: A URL to be notified when the processing is completed.
     :keyword str public_id: The public ID to assign to the generated slideshow.
@@ -855,7 +827,6 @@ def call_cacheable_api(action, params, http_headers=None, return_error=False, un
     :param timeout: Request timeout in seconds.
     :type timeout: int, optional
     :param options: Additional Cloudinary configuration or parameters.
-    :type options: dict
     :return: The parsed JSON response from Cloudinary.
     :rtype: dict
     """
@@ -887,7 +858,6 @@ def call_api(action, params, http_headers=None, return_error=False, unsigned=Fal
     :param extra_headers: Additional headers to add/override.
     :type extra_headers: dict, optional
     :param options: Additional Cloudinary config or advanced parameters.
-    :type options: dict
     :return: The parsed JSON response from Cloudinary.
     :rtype: dict
 
