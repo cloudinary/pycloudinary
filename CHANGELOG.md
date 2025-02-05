@@ -1,3 +1,9 @@
+1.42.2 / 2025-02-05
+==================
+
+  * Fix list parameters encoding in Admin API
+  * Align API doc strings
+
 1.42.1 / 2025-01-08
 ==================
 
