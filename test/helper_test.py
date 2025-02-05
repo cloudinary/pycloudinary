@@ -6,6 +6,7 @@ import re
 import sys
 import time
 import traceback
+import unittest
 from contextlib import contextmanager
 from datetime import timedelta, tzinfo
 from functools import wraps
@@ -13,6 +14,7 @@ from functools import wraps
 import six
 from urllib3 import HTTPResponse
 from urllib3._collections import HTTPHeaderDict
+from collections import defaultdict
 
 from cloudinary import utils, logger, api
 from cloudinary.exceptions import NotFound
@@ -249,3 +251,40 @@ def should_test_addon(addon):
         return True
     cld_test_addons_list = [addon_name.strip() for addon_name in cld_test_addons.split(',')]
     return addon in cld_test_addons_list
+
+
+class CldTestCase(unittest.TestCase):
+    """
+    A custom test case class that extends unittest.TestCase.
+    It provides the assertCountEqual method for Python 2.7 compatibility,
+    handling unhashable elements by serializing them.
+    """
+
+    if six.PY2:
+        def assertCountEqual(self, list1, list2, msg=None):
+            """
+            Fail if two sequences do not contain the same elements the same number of times,
+            regardless of their order. Handles unhashable elements by serializing them.
+            This is a compatibility method for Python 2.7.
+            """
+
+            def serialize_item(item):
+                try:
+                    # Attempt to serialize the item to a JSON string
+                    return json.dumps(item, sort_keys=True)
+                except (TypeError, ValueError):
+                    # Fallback: use the string representation
+                    return str(item)
+
+            def count_elements(lst):
+                counts = defaultdict(int)
+                for item in lst:
+                    serialized = serialize_item(item)
+                    counts[serialized] += 1
+                return counts
+
+            count1 = count_elements(list1)
+            count2 = count_elements(list2)
+            if count1 != count2:
+                standard_msg = '%s != %s' % (count1, count2)
+                self.fail(self._formatMessage(msg, standard_msg))
