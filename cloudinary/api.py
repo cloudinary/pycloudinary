@@ -35,7 +35,6 @@ def ping(**options):
     See: https://cloudinary.com/documentation/admin_api#ping_cloudinary_servers
 
     :param options: Additional optional configuration parameters (none currently recognized).
-    :type options: dict
 
     :return: The result of the API call.
     :rtype: Response
@@ -53,7 +52,6 @@ def usage(**options):
     See: https://cloudinary.com/documentation/admin_api#get_product_environment_usage_details
 
     :param options: Additional optional parameters.
-    :type options: dict
     :keyword date: The date for usage details (string in "YYYY-MM" format or a datetime.date object).
                    If omitted, returns usage for the current billing period.
     :type date: str or datetime.date
@@ -79,7 +77,6 @@ def config(**options):
     See: https://cloudinary.com/documentation/admin_api#get_product_environment_config_details
 
     :param options: The optional parameters for the API request.
-    :type options: dict
     :keyword bool settings: When True, returns extended settings in the response (if available).
     :return: Detailed config information.
     :rtype: Response
@@ -95,7 +92,6 @@ def resource_types(**options):
     See: https://cloudinary.com/documentation/admin_api#get_resources
 
     :param options: Additional optional configuration parameters (none currently recognized).
-    :type options: dict
     :return: The result of the API call.
     :rtype: Response
     """
@@ -109,7 +105,6 @@ def resources(**options):
     See: https://cloudinary.com/documentation/admin_api#get_resources
 
     :param options: Additional options to filter the resources.
-    :type options: dict
     :keyword str resource_type: The type of the resources. Defaults to "image".
     :keyword str type: The specific asset type. Defaults to None (not added to URI).
     :keyword str prefix: Return only resources with a public ID (or folder) that starts with this prefix.
@@ -141,7 +136,6 @@ def resources_by_tag(tag, **options):
     :param tag: The tag value.
     :type tag: str
     :param options: Additional options to filter the resources.
-    :type options: dict
     :keyword str resource_type: The type of the resources. Defaults to "image".
     :keyword str direction: Return resources in "asc" or "desc" order (by creation).
     :keyword int max_results: Maximum number of resources to return. Default=10.
@@ -167,7 +161,6 @@ def resources_by_moderation(kind, status, **options):
                    Valid values: "pending", "approved", "rejected".
     :type status: str
     :param options: Additional options to filter the resources.
-    :type options: dict
     :keyword str resource_type: The type of the resources. Defaults to "image".
     :keyword str direction: Return resources in "asc" or "desc" order (by creation).
     :keyword int max_results: Maximum number of resources to return. Default=10.
@@ -190,7 +183,6 @@ def resources_by_ids(public_ids, **options):
     :param public_ids: The requested public_ids (up to 100).
     :type public_ids: list[str]
     :param options: The optional parameters.
-    :type options: dict
     :keyword str resource_type: The type of the resources. Defaults to "image".
     :keyword str type: The specific asset type. Defaults to "upload".
     :keyword str direction: Return resources in "asc" or "desc" order.
@@ -215,7 +207,6 @@ def resources_by_asset_folder(asset_folder, **options):
     :param asset_folder: The Asset Folder of the asset.
     :type asset_folder: str
     :param options: Additional options to filter the resources.
-    :type options: dict
     :keyword str direction: Return resources in "asc" or "desc" order.
     :keyword int max_results: Maximum number of resources to return.
     :keyword str next_cursor: A string returned when there are more results to fetch.
@@ -238,7 +229,6 @@ def resources_by_asset_ids(asset_ids, **options):
     :param asset_ids: The requested asset IDs.
     :type asset_ids: list[str]
     :param options: Additional options to filter the resources.
-    :type options: dict
     :keyword str direction: Return resources in "asc" or "desc" order.
     :keyword int max_results: Maximum number of resources to return.
     :keyword str next_cursor: A string returned when there are more results to fetch.
@@ -262,7 +252,6 @@ def resources_by_context(key, value=None, **options):
     :param value: Only assets with this value for the context key are returned.
     :type value: str, optional
     :param options: Additional options to filter the resources.
-    :type options: dict
     :keyword str resource_type: The type of the resources. Defaults to "image".
     :keyword str direction: Return resources in "asc" or "desc" order.
     :keyword int max_results: Maximum number of resources to return.
@@ -284,7 +273,6 @@ def __resources_params(**options):
     Prepares optional parameters for resources_* API calls.
 
     :param options: Additional options
-    :type options: dict
     :return: Optional parameters
     :rtype: dict
     :internal
@@ -299,7 +287,6 @@ def __list_resources_params(**options):
     Prepares optional parameters for resources_* API calls.
 
     :param options: Additional options
-    :type options: dict
     :return: Optional parameters
     :rtype: dict
     :internal
@@ -324,7 +311,6 @@ def visual_search(image_url=None, image_asset_id=None, text=None, image_file=Non
     :param image_file: The image file. (str|callable|Path|bytes)
     :type image_file: str or callable or Path or bytes, optional
     :param options: Additional optional parameters to pass along.
-    :type options: dict
 
     :return: Resources (assets) that were found
     :rtype: Response
@@ -348,7 +334,6 @@ def resource(public_id, **options):
     :param public_id: The public ID of the resource.
     :type public_id: str
     :param options: Additional optional parameters for retrieval.
-    :type options: dict
     :keyword str resource_type: The resource type (e.g. "image", "raw").
     :keyword str type: The asset's storage type (e.g. "upload").
     :keyword bool exif: Whether to return Exif metadata.
@@ -386,7 +371,6 @@ def resource_by_asset_id(asset_id, **options):
     :param asset_id: The Asset ID of the asset
     :type asset_id: str
     :param options: Additional optional parameters for retrieval.
-    :type options: dict
     :keyword bool exif: Whether to return Exif metadata.
     :keyword bool faces: Whether to return face coordinates.
     :keyword bool colors: Whether to return color information.
@@ -416,7 +400,6 @@ def _prepare_asset_details_params(**options):
     Prepares optional parameters for resource_by_asset_id or resource_by_public_id API calls.
 
     :param options: Additional options
-    :type options: dict
     :return: Optional parameters
     :rtype: dict
     :internal
@@ -435,7 +418,6 @@ def update(public_id, **options):
     :param public_id: The public ID of the resource to update.
     :type public_id: str
     :param options: Additional options for the update operation.
-    :type options: dict
     :keyword str resource_type: The resource type (e.g. "image", "raw").
     :keyword str type: The asset's storage type (e.g. "upload").
     :keyword str moderation_status: Sets the moderation status ("approved" / "rejected").
@@ -508,7 +490,6 @@ def delete_resources(public_ids, **options):
     :param public_ids: The public IDs of the resources to delete.
     :type public_ids: list[str]
     :param options: Additional options.
-    :type options: dict
     :keyword str resource_type: Defaults to "image".
     :keyword str type: Defaults to "upload".
     :keyword list transformations: The derived transformations to delete (if any).
@@ -534,7 +515,6 @@ def delete_resources_by_asset_ids(asset_ids, **options):
     :param asset_ids: The asset IDs of the assets to delete.
     :type asset_ids: list[str]
     :param options: Additional options.
-    :type options: dict
     :keyword list transformations: The derived transformations to delete (if any).
     :keyword bool keep_original: When True, keeps the original resource.
     :keyword str next_cursor: A string returned when more results are available.
@@ -556,7 +536,6 @@ def delete_resources_by_prefix(prefix, **options):
     :param prefix: The prefix of the Public IDs to delete.
     :type prefix: str
     :param options: Additional options.
-    :type options: dict
     :keyword str resource_type: Defaults to "image".
     :keyword str type: Defaults to "upload".
     :keyword list transformations: The derived transformations to delete (if any).
@@ -582,7 +561,6 @@ def delete_all_resources(**options):
     See: https://cloudinary.com/documentation/admin_api#delete_resources
 
     :param options: Additional options.
-    :type options: dict
     :keyword str resource_type: Defaults to "image".
     :keyword str type: Defaults to "upload".
     :keyword list transformations: The derived transformations to delete (if any).
@@ -609,7 +587,6 @@ def delete_resources_by_tag(tag, **options):
     :param tag: The tag whose associated resources should be deleted.
     :type tag: str
     :param options: Additional options.
-    :type options: dict
     :keyword str resource_type: Defaults to "image".
     :keyword list transformations: The derived transformations to delete (if any).
     :keyword bool keep_original: When True, keeps the original resource.
@@ -633,7 +610,6 @@ def delete_derived_resources(derived_resource_ids, **options):
     :param derived_resource_ids: A list of derived resource IDs.
     :type derived_resource_ids: list[str]
     :param options: Additional optional parameters (none currently recognized).
-    :type options: dict
     :return: The result of the command.
     :rtype: Response
     """
@@ -661,7 +637,6 @@ def delete_derived_by_transformation(public_ids, transformations,
     :param invalidate: (optional) True to invalidate the resources after deletion.
     :type invalidate: bool, optional
     :param options: Additional optional parameters (none currently recognized).
-    :type options: dict
     :return: The result of the command, including the public IDs for which derived resources were deleted.
     :rtype: dict
     """
@@ -689,7 +664,6 @@ def delete_backed_up_assets(asset_id, version_ids, **options):
     :param version_ids: The array of version IDs.
     :type version_ids: list[str]
     :param options: Additional optional parameters (none currently recognized).
-    :type options: dict
     :return: The result of the command.
     :rtype: dict
     """
@@ -713,7 +687,6 @@ def add_related_assets(public_id, assets_to_relate, resource_type="image", type=
     :param type: The upload type. Defaults to "upload".
     :type type: str
     :param options: Additional optional parameters (none currently recognized).
-    :type options: dict
     :return: The result of the command.
     :rtype: dict
     """
@@ -733,7 +706,6 @@ def add_related_assets_by_asset_ids(asset_id, assets_to_relate, **options):
     :param assets_to_relate: The array of up to 10 asset IDs.
     :type assets_to_relate: list[str]
     :param options: Additional optional parameters (none currently recognized).
-    :type options: dict
     :return: The result of the command.
     :rtype: dict
     """
@@ -757,7 +729,6 @@ def delete_related_assets(public_id, assets_to_unrelate, resource_type="image", 
     :param type: The upload type. Defaults to "upload".
     :type type: str
     :param options: Additional optional parameters (none currently recognized).
-    :type options: dict
     :return: The result of the command.
     :rtype: dict
     """
@@ -777,7 +748,6 @@ def delete_related_assets_by_asset_ids(asset_id, assets_to_unrelate, **options):
     :param assets_to_unrelate: The array of up to 10 asset IDs.
     :type assets_to_unrelate: list[str]
     :param options: Additional optional parameters (none currently recognized).
-    :type options: dict
     :return: The result of the command.
     :rtype: dict
     """
@@ -793,7 +763,6 @@ def tags(**options):
     See: https://cloudinary.com/documentation/admin_api#get_tags
 
     :param options: The optional parameters.
-    :type options: dict
     :keyword str resource_type: Defaults to "image".
     :keyword str prefix: Return only tags that begin with the specified prefix.
     :keyword int max_results: Maximum number of tags to return.
@@ -813,7 +782,6 @@ def transformations(**options):
     See: https://cloudinary.com/documentation/admin_api#get_transformations
 
     :param options: The optional parameters.
-    :type options: dict
     :keyword bool named: When True, return only named transformations.
     :keyword str next_cursor: A string returned when more results are available.
     :keyword int max_results: Maximum number of transformations to return.
@@ -834,7 +802,6 @@ def transformation(transformation, **options):
     :param transformation: The transformation to retrieve (string or dict).
     :type transformation: str or dict
     :param options: The optional parameters.
-    :type options: dict
     :keyword str next_cursor: A string returned when more results are available.
     :keyword int max_results: Maximum number of derived assets to return.
     :return: The transformation details.
@@ -855,7 +822,6 @@ def delete_transformation(transformation, **options):
     :param transformation: The transformation to delete (string or dict).
     :type transformation: str or dict
     :param options: Additional options (none currently recognized).
-    :type options: dict
     :return: The result of the API call.
     :rtype: Response
     """
@@ -876,7 +842,6 @@ def update_transformation(transformation, **options):
     :param transformation: The transformation to update (string or dict).
     :type transformation: str or dict
     :param options: Additional update options.
-    :type options: dict
     :keyword bool allowed_for_strict: Whether the transformation is allowed in strict mode.
     :keyword dict or str unsafe_update: The transformation to associate under unsafe_update.
     :return: The result of the API call.
@@ -901,7 +866,6 @@ def create_transformation(name, definition, **options):
     :param definition: The transformation definition (string or dict).
     :type definition: str or dict
     :param options: Additional options (none currently recognized).
-    :type options: dict
     :return: The result of the API call.
     :rtype: Response
     """
@@ -917,7 +881,6 @@ def publish_by_ids(public_ids, **options):
     :param public_ids: The list of public IDs to publish.
     :type public_ids: list[str]
     :param options: Additional options.
-    :type options: dict
     :keyword str resource_type: The resource type (e.g. "image").
     :keyword str type: The asset type (e.g. "upload").
     :keyword bool overwrite: Whether to overwrite existing published assets.
@@ -938,7 +901,6 @@ def publish_by_prefix(prefix, **options):
     :param prefix: The prefix of the public IDs to publish.
     :type prefix: str
     :param options: Additional options.
-    :type options: dict
     :keyword str resource_type: The resource type (e.g. "image").
     :keyword str type: The asset type (e.g. "upload").
     :keyword bool overwrite: Whether to overwrite existing published assets.
@@ -959,7 +921,6 @@ def publish_by_tag(tag, **options):
     :param tag: The tag whose associated resources should be published.
     :type tag: str
     :param options: Additional options.
-    :type options: dict
     :keyword str resource_type: The resource type (e.g. "image").
     :keyword str type: The asset type (e.g. "upload").
     :keyword bool overwrite: Whether to overwrite existing published assets.
@@ -980,7 +941,6 @@ def upload_presets(**options):
     See: https://cloudinary.com/documentation/admin_api#get_upload_presets
 
     :param options: Additional options.
-    :type options: dict
     :keyword str next_cursor: A string returned when more results are available.
     :keyword int max_results: Maximum number of presets to return.
     :return: A list of upload presets.
@@ -999,7 +959,6 @@ def upload_preset(name, **options):
     :param name: The name of the upload preset.
     :type name: str
     :param options: Additional options.
-    :type options: dict
     :keyword int max_results: Maximum number of details to return (if relevant).
     :return: The upload preset details.
     :rtype: Response
@@ -1017,7 +976,6 @@ def delete_upload_preset(name, **options):
     :param name: The name of the upload preset to delete.
     :type name: str
     :param options: Additional options (none currently recognized).
-    :type options: dict
     :return: The result of the deletion.
     :rtype: Response
     """
@@ -1034,7 +992,6 @@ def update_upload_preset(name, **options):
     :param name: The name of the upload preset to update.
     :type name: str
     :param options: The parameters to update for the preset (e.g., folder, tags).
-    :type options: dict
     :keyword bool unsigned: Whether this preset is unsigned (public).
     :keyword bool disallow_public_id: When True, the public ID cannot be overridden during upload.
     :keyword bool live: Whether this preset is for live (video) usage.
@@ -1055,7 +1012,6 @@ def create_upload_preset(**options):
     See: https://cloudinary.com/documentation/admin_api#create_an_upload_preset
 
     :param options: The parameters for the new preset (e.g., folder, tags).
-    :type options: dict
     :keyword bool unsigned: Whether this preset is unsigned (public).
     :keyword bool disallow_public_id: When True, the public ID cannot be overridden during upload.
     :keyword str name: The name of the new upload preset.
@@ -1077,7 +1033,6 @@ def root_folders(**options):
     See: https://cloudinary.com/documentation/admin_api#get_root_folders
 
     :param options: Additional options.
-    :type options: dict
     :keyword str next_cursor: A string returned when more results are available.
     :keyword int max_results: Maximum number of folders to return.
     :return: The list of top-level folders.
@@ -1095,7 +1050,6 @@ def subfolders(of_folder_path, **options):
     :param of_folder_path: The path of the parent folder.
     :type of_folder_path: str
     :param options: Additional options.
-    :type options: dict
     :keyword str next_cursor: A string returned when more results are available.
     :keyword int max_results: Maximum number of folders to return.
     :return: The list of subfolders.
@@ -1113,7 +1067,6 @@ def create_folder(path, **options):
     :param path: The path for the new folder.
     :type path: str
     :param options: Additional options (none currently recognized).
-    :type options: dict
     :return: The result of the folder creation.
     :rtype: Response
     """
@@ -1131,7 +1084,6 @@ def rename_folder(from_path, to_path, **options):
     :param to_path: The full path of the new asset folder.
     :type to_path: str
     :param options: Additional options (none currently recognized).
-    :type options: dict
     :return: A response indicating the success or failure of the rename operation.
     :rtype: Response
     """
@@ -1150,7 +1102,6 @@ def delete_folder(path, **options):
     :param path: The folder to delete.
     :type path: str
     :param options: Additional options.
-    :type options: dict
     :keyword bool skip_backup: Whether to skip backing up the folder before deletion.
     :return: A response indicating the success or failure of the delete operation.
     :rtype: Response
@@ -1168,7 +1119,6 @@ def restore(public_ids, **options):
     :param public_ids: The list of public IDs to restore.
     :type public_ids: list[str]
     :param options: Additional options, e.g., "versions".
-    :type options: dict
     :keyword list[str] versions: A list of specific version IDs to restore.
     :keyword str resource_type: Defaults to "image".
     :keyword str type: Defaults to "upload".
@@ -1191,7 +1141,6 @@ def restore_by_asset_ids(asset_ids, **options):
     :param asset_ids: The asset IDs of the assets to restore.
     :type asset_ids: list[str]
     :param options: Additional options (e.g., versions).
-    :type options: dict
     :keyword list[str] versions: A list of specific version IDs to restore.
     :return: The result of the restore operation.
     :rtype: dict
@@ -1208,7 +1157,6 @@ def upload_mappings(**options):
     See: https://cloudinary.com/documentation/admin_api#get_upload_mappings
 
     :param options: Additional options.
-    :type options: dict
     :keyword str next_cursor: A string returned when more results are available.
     :keyword int max_results: Maximum number of mappings to return.
     :return: A list of upload mappings.
@@ -1227,7 +1175,6 @@ def upload_mapping(name, **options):
     :param name: The folder name.
     :type name: str
     :param options: Additional options (none currently recognized).
-    :type options: dict
     :return: Details of the specified upload mapping.
     :rtype: Response
     """
@@ -1245,7 +1192,6 @@ def delete_upload_mapping(name, **options):
     :param name: The folder name.
     :type name: str
     :param options: Additional options (none currently recognized).
-    :type options: dict
     :return: The result of the deletion.
     :rtype: Response
     """
@@ -1263,7 +1209,6 @@ def update_upload_mapping(name, **options):
     :param name: The folder name.
     :type name: str
     :param options: Additional parameters to update.
-    :type options: dict
     :keyword str template: A URL template for the given folder name.
     :return: The result of the update operation.
     :rtype: Response
@@ -1283,7 +1228,6 @@ def create_upload_mapping(name, **options):
     :param name: The folder name.
     :type name: str
     :param options: Additional parameters.
-    :type options: dict
     :keyword str template: A URL template for the given folder name.
     :return: The result of the creation.
     :rtype: Response
@@ -1301,7 +1245,6 @@ def list_streaming_profiles(**options):
     See: https://cloudinary.com/documentation/admin_api#get_adaptive_streaming_profiles
 
     :param options: Additional optional parameters (none currently recognized).
-    :type options: dict
     :return: The list of streaming profiles.
     :rtype: Response
     """
@@ -1318,7 +1261,6 @@ def get_streaming_profile(name, **options):
     :param name: The name of the streaming profile.
     :type name: str
     :param options: Additional optional parameters (none currently recognized).
-    :type options: dict
     :return: The details of the streaming profile.
     :rtype: Response
     """
@@ -1335,7 +1277,6 @@ def delete_streaming_profile(name, **options):
     :param name: The name of the streaming profile to delete.
     :type name: str
     :param options: Additional optional parameters (none currently recognized).
-    :type options: dict
     :return: The result of the deletion.
     :rtype: Response
     """
@@ -1352,7 +1293,6 @@ def create_streaming_profile(name, **options):
     :param name: The name for the new streaming profile.
     :type name: str
     :param options: Additional options.
-    :type options: dict
     :keyword str display_name: A display name for the streaming profile.
     :keyword list representations: A list of transformations (dict or str).
     :return: The created streaming profile.
@@ -1373,7 +1313,6 @@ def update_streaming_profile(name, **options):
     :param name: The name of the streaming profile to update.
     :type name: str
     :param options: Additional options.
-    :type options: dict
     :keyword str display_name: A display name for the streaming profile.
     :keyword list representations: A list of transformations (dict or str).
     :return: The updated streaming profile.
@@ -1420,7 +1359,6 @@ def __prepare_streaming_profile_params(**options):
     Prepares the parameters for creating or updating a streaming profile.
 
     :param options: Additional options, typically including "representations" and "display_name".
-    :type options: dict
     :return: A dictionary of parameters for the streaming profile API call.
     :rtype: dict
     :internal
@@ -1439,7 +1377,6 @@ def __delete_resource_params(options, **params):
     next_cursor, invalidate, etc.
 
     :param options: A dict of delete-related options.
-    :type options: dict
     :param params: Additional parameters (e.g., prefix, public_ids, asset_ids).
     :type params: dict
     :return: A combined dictionary of params.
@@ -1459,7 +1396,6 @@ def list_metadata_fields(**options):
     See: https://cloudinary.com/documentation/admin_api#get_metadata_fields
 
     :param options: Additional optional parameters (none currently recognized).
-    :type options: dict
     :return: A list of metadata fields.
     :rtype: Response
     """
@@ -1475,7 +1411,6 @@ def metadata_field_by_field_id(field_external_id, **options):
     :param field_external_id: The ID of the metadata field to retrieve.
     :type field_external_id: str
     :param options: Additional optional parameters (none currently recognized).
-    :type options: dict
     :return: The metadata field details.
     :rtype: Response
     """
@@ -1492,7 +1427,6 @@ def add_metadata_field(field, **options):
     :param field: The field to add.
     :type field: dict
     :param options: Additional optional parameters (none currently recognized).
-    :type options: dict
     :return: The created metadata field.
     :rtype: Response
     """
@@ -1510,7 +1444,6 @@ def update_metadata_field(field_external_id, field, **options):
     :param field: The field definition to update.
     :type field: dict
     :param options: Additional optional parameters (none currently recognized).
-    :type options: dict
     :return: The updated metadata field.
     :rtype: Response
     """
@@ -1541,7 +1474,6 @@ def delete_metadata_field(field_external_id, **options):
     :param field_external_id: The external ID of the field to delete.
     :type field_external_id: str
     :param options: Additional optional parameters (none currently recognized).
-    :type options: dict
     :return: An array with a "message" key. "ok" value indicates a successful deletion.
     :rtype: Response
     """
@@ -1560,7 +1492,6 @@ def delete_datasource_entries(field_external_id, entries_external_id, **options)
     :param entries_external_id: The IDs of the entries to delete from the datasource.
     :type entries_external_id: list[str]
     :param options: Additional optional parameters (none currently recognized).
-    :type options: dict
     :return: A response indicating the success or failure of the deletion.
     :rtype: Response
     """
@@ -1580,7 +1511,6 @@ def update_metadata_field_datasource(field_external_id, entries_external_id, **o
     :param entries_external_id: The list of entries to update/add.
     :type entries_external_id: list[dict]
     :param options: Additional optional parameters (none currently recognized).
-    :type options: dict
     :return: The updated metadata field.
     :rtype: Response
     """
@@ -1606,7 +1536,6 @@ def restore_metadata_field_datasource(field_external_id, entries_external_ids, *
     :param entries_external_ids: An array of IDs of datasource entries to restore (unblock).
     :type entries_external_ids: list[str]
     :param options: Additional optional parameters (none currently recognized).
-    :type options: dict
     :return: A response indicating the success or failure of the restore operation.
     :rtype: Response
     """
@@ -1628,7 +1557,6 @@ def reorder_metadata_field_datasource(field_external_id, order_by, direction=Non
     :param direction: Optional direction: 'asc' or 'desc'.
     :type direction: str, optional
     :param options: Additional optional parameters (none currently recognized).
-    :type options: dict
     :return: The result of the ordering operation.
     :rtype: Response
     """
@@ -1646,7 +1574,6 @@ def reorder_metadata_fields(order_by, direction=None, **options):
     :param direction: Optional direction: 'asc' or 'desc'.
     :type direction: str, optional
     :param options: Additional optional parameters (none currently recognized).
-    :type options: dict
     :return: The result of the ordering operation.
     :rtype: Response
     """
@@ -1666,7 +1593,6 @@ def analyze(input_type, analysis_type, uri=None, **options):
     :param uri: The URI of the asset to analyze.
     :type uri: str, optional
     :param options: Additional optional parameters (none currently recognized).
-    :type options: dict
     :return: The analysis result.
     :rtype: Response
     """
