@@ -1,21 +1,18 @@
 # Copyright Cloudinary
 
 import datetime
-import email.utils
 import json
-import socket
 
-import urllib3
 from six import string_types
-from urllib3.exceptions import HTTPError
 
 import cloudinary
 from cloudinary import utils
 from cloudinary.api_client.call_api import (
-    call_api,
     call_metadata_api,
+    call_api,
     call_json_api,
-    _call_v2_api
+    _call_v2_api,
+
 )
 from cloudinary.exceptions import (
     BadRequest,
@@ -39,7 +36,7 @@ def ping(**options):
     :return: The result of the API call.
     :rtype: Response
     """
-    return call_api("get", ["ping"], {}, **options)
+    return call_json_api("get", ["ping"], {}, **options)
 
 
 def usage(**options):
@@ -65,7 +62,7 @@ def usage(**options):
         if isinstance(date, datetime.date):
             date = utils.encode_date_to_usage_api_format(date)
         uri.append(date)
-    return call_api("get", uri, {}, **options)
+    return call_json_api("get", uri, {}, **options)
 
 
 def config(**options):
@@ -82,7 +79,7 @@ def config(**options):
     :rtype: Response
     """
     params = only(options, "settings")
-    return call_api("get", ["config"], params, **options)
+    return call_json_api("get", ["config"], params, **options)
 
 
 def resource_types(**options):
@@ -95,7 +92,7 @@ def resource_types(**options):
     :return: The result of the API call.
     :rtype: Response
     """
-    return call_api("get", ["resources"], {}, **options)
+    return call_json_api("get", ["resources"], {}, **options)
 
 
 def resources(**options):
@@ -122,7 +119,7 @@ def resources(**options):
         uri.append(upload_type)
     params = __list_resources_params(**options)
     params.update(only(options, "prefix", "start_at"))
-    return call_api("get", uri, params, **options)
+    return call_json_api("get", uri, params, **options)
 
 
 def resources_by_tag(tag, **options):
@@ -146,7 +143,7 @@ def resources_by_tag(tag, **options):
     resource_type = options.pop("resource_type", "image")
     uri = ["resources", resource_type, "tags", tag]
     params = __list_resources_params(**options)
-    return call_api("get", uri, params, **options)
+    return call_json_api("get", uri, params, **options)
 
 
 def resources_by_moderation(kind, status, **options):
@@ -171,7 +168,7 @@ def resources_by_moderation(kind, status, **options):
     resource_type = options.pop("resource_type", "image")
     uri = ["resources", resource_type, "moderations", kind, status]
     params = __list_resources_params(**options)
-    return call_api("get", uri, params, **options)
+    return call_json_api("get", uri, params, **options)
 
 
 def resources_by_ids(public_ids, **options):
@@ -195,7 +192,7 @@ def resources_by_ids(public_ids, **options):
     upload_type = options.pop("type", "upload")
     uri = ["resources", resource_type, upload_type]
     params = dict(__resources_params(**options), public_ids=public_ids)
-    return call_api("get", uri, params, **options)
+    return call_json_api("get", uri, params, **options)
 
 
 def resources_by_asset_folder(asset_folder, **options):
@@ -216,7 +213,7 @@ def resources_by_asset_folder(asset_folder, **options):
     uri = ["resources", "by_asset_folder"]
     params = __list_resources_params(**options)
     params["asset_folder"] = asset_folder
-    return call_api("get", uri, params, **options)
+    return call_json_api("get", uri, params, **options)
 
 
 def resources_by_asset_ids(asset_ids, **options):
@@ -237,7 +234,7 @@ def resources_by_asset_ids(asset_ids, **options):
     """
     uri = ["resources", "by_asset_ids"]
     params = dict(__resources_params(**options), asset_ids=asset_ids)
-    return call_api("get", uri, params, **options)
+    return call_json_api("get", uri, params, **options)
 
 
 def resources_by_context(key, value=None, **options):
@@ -265,7 +262,7 @@ def resources_by_context(key, value=None, **options):
     params["key"] = key
     if value is not None:
         params["value"] = value
-    return call_api("get", uri, params, **options)
+    return call_json_api("get", uri, params, **options)
 
 
 def __resources_params(**options):
@@ -278,7 +275,9 @@ def __resources_params(**options):
     :internal
     """
     params = only(options, "tags", "context", "metadata", "moderations")
-    params["fields"] = options.get("fields") and utils.encode_list(utils.build_array(options["fields"]))
+    if options.get("fields"):
+        params["fields"] = utils.encode_list(utils.build_array(options["fields"]))
+
     return params
 
 
@@ -359,7 +358,7 @@ def resource(public_id, **options):
     upload_type = options.pop("type", "upload")
     uri = ["resources", resource_type, upload_type, public_id]
     params = _prepare_asset_details_params(**options)
-    return call_api("get", uri, params, **options)
+    return call_json_api("get", uri, params, **options)
 
 
 def resource_by_asset_id(asset_id, **options):
@@ -392,7 +391,7 @@ def resource_by_asset_id(asset_id, **options):
     """
     uri = ["resources", asset_id]
     params = _prepare_asset_details_params(**options)
-    return call_api("get", uri, params, **options)
+    return call_json_api("get", uri, params, **options)
 
 
 def _prepare_asset_details_params(**options):
@@ -476,7 +475,7 @@ def update(public_id, **options):
     if "clear_invalid" in options:
         params["clear_invalid"] = options.get("clear_invalid")
 
-    return call_api("post", uri, params, **options)
+    return call_json_api("post", uri, params, **options)
 
 
 def delete_resources(public_ids, **options):
@@ -503,7 +502,7 @@ def delete_resources(public_ids, **options):
     upload_type = options.pop("type", "upload")
     uri = ["resources", resource_type, upload_type]
     params = __delete_resource_params(options, public_ids=public_ids)
-    return call_api("delete", uri, params, **options)
+    return call_json_api("delete", uri, params, **options)
 
 
 def delete_resources_by_asset_ids(asset_ids, **options):
@@ -549,7 +548,7 @@ def delete_resources_by_prefix(prefix, **options):
     upload_type = options.pop("type", "upload")
     uri = ["resources", resource_type, upload_type]
     params = __delete_resource_params(options, prefix=prefix)
-    return call_api("delete", uri, params, **options)
+    return call_json_api("delete", uri, params, **options)
 
 
 def delete_all_resources(**options):
@@ -575,7 +574,7 @@ def delete_all_resources(**options):
     upload_type = options.pop("type", "upload")
     uri = ["resources", resource_type, upload_type]
     params = __delete_resource_params(options, all=True)
-    return call_api("delete", uri, params, **options)
+    return call_json_api("delete", uri, params, **options)
 
 
 def delete_resources_by_tag(tag, **options):
@@ -598,7 +597,7 @@ def delete_resources_by_tag(tag, **options):
     resource_type = options.pop("resource_type", "image")
     uri = ["resources", resource_type, "tags", tag]
     params = __delete_resource_params(options)
-    return call_api("delete", uri, params, **options)
+    return call_json_api("delete", uri, params, **options)
 
 
 def delete_derived_resources(derived_resource_ids, **options):
@@ -615,7 +614,7 @@ def delete_derived_resources(derived_resource_ids, **options):
     """
     uri = ["derived_resources"]
     params = {"derived_resource_ids": derived_resource_ids}
-    return call_api("delete", uri, params, **options)
+    return call_json_api("delete", uri, params, **options)
 
 
 def delete_derived_by_transformation(public_ids, transformations,
@@ -650,7 +649,7 @@ def delete_derived_by_transformation(public_ids, transformations,
     }
     if invalidate is not None:
         params['invalidate'] = invalidate
-    return call_api("delete", uri, params, **options)
+    return call_json_api("delete", uri, params, **options)
 
 
 def delete_backed_up_assets(asset_id, version_ids, **options):
@@ -772,7 +771,7 @@ def tags(**options):
     """
     resource_type = options.pop("resource_type", "image")
     uri = ["tags", resource_type]
-    return call_api("get", uri, only(options, "next_cursor", "max_results", "prefix"), **options)
+    return call_json_api("get", uri, only(options, "next_cursor", "max_results", "prefix"), **options)
 
 
 def transformations(**options):
@@ -790,7 +789,7 @@ def transformations(**options):
     """
     uri = ["transformations"]
     params = only(options, "named", "next_cursor", "max_results")
-    return call_api("get", uri, params, **options)
+    return call_json_api("get", uri, params, **options)
 
 
 def transformation(transformation, **options):
@@ -810,7 +809,7 @@ def transformation(transformation, **options):
     uri = ["transformations"]
     params = only(options, "next_cursor", "max_results")
     params["transformation"] = utils.build_single_eager(transformation)
-    return call_api("get", uri, params, **options)
+    return call_json_api("get", uri, params, **options)
 
 
 def delete_transformation(transformation, **options):
@@ -827,7 +826,7 @@ def delete_transformation(transformation, **options):
     """
     uri = ["transformations"]
     params = {"transformation": utils.build_single_eager(transformation)}
-    return call_api("delete", uri, params, **options)
+    return call_json_api("delete", uri, params, **options)
 
 
 def update_transformation(transformation, **options):
@@ -852,7 +851,7 @@ def update_transformation(transformation, **options):
     if "unsafe_update" in options:
         updates["unsafe_update"] = transformation_string(options.get("unsafe_update"))
     updates["transformation"] = utils.build_single_eager(transformation)
-    return call_api("put", uri, updates, **options)
+    return call_json_api("put", uri, updates, **options)
 
 
 def create_transformation(name, definition, **options):
@@ -871,7 +870,7 @@ def create_transformation(name, definition, **options):
     """
     uri = ["transformations"]
     params = {"name": name, "transformation": utils.build_single_eager(definition)}
-    return call_api("post", uri, params, **options)
+    return call_json_api("post", uri, params, **options)
 
 
 def publish_by_ids(public_ids, **options):
@@ -891,7 +890,7 @@ def publish_by_ids(public_ids, **options):
     resource_type = options.pop("resource_type", "image")
     uri = ["resources", resource_type, "publish_resources"]
     params = dict(only(options, "type", "overwrite", "invalidate"), public_ids=public_ids)
-    return call_api("post", uri, params, **options)
+    return call_json_api("post", uri, params, **options)
 
 
 def publish_by_prefix(prefix, **options):
@@ -911,7 +910,7 @@ def publish_by_prefix(prefix, **options):
     resource_type = options.pop("resource_type", "image")
     uri = ["resources", resource_type, "publish_resources"]
     params = dict(only(options, "type", "overwrite", "invalidate"), prefix=prefix)
-    return call_api("post", uri, params, **options)
+    return call_json_api("post", uri, params, **options)
 
 
 def publish_by_tag(tag, **options):
@@ -931,7 +930,7 @@ def publish_by_tag(tag, **options):
     resource_type = options.pop("resource_type", "image")
     uri = ["resources", resource_type, "publish_resources"]
     params = dict(only(options, "type", "overwrite", "invalidate"), tag=tag)
-    return call_api("post", uri, params, **options)
+    return call_json_api("post", uri, params, **options)
 
 
 def upload_presets(**options):
@@ -947,7 +946,7 @@ def upload_presets(**options):
     :rtype: Response
     """
     uri = ["upload_presets"]
-    return call_api("get", uri, only(options, "next_cursor", "max_results"), **options)
+    return call_json_api("get", uri, only(options, "next_cursor", "max_results"), **options)
 
 
 def upload_preset(name, **options):
@@ -964,7 +963,7 @@ def upload_preset(name, **options):
     :rtype: Response
     """
     uri = ["upload_presets", name]
-    return call_api("get", uri, only(options, "max_results"), **options)
+    return call_json_api("get", uri, only(options, "max_results"), **options)
 
 
 def delete_upload_preset(name, **options):
@@ -980,7 +979,7 @@ def delete_upload_preset(name, **options):
     :rtype: Response
     """
     uri = ["upload_presets", name]
-    return call_api("delete", uri, {}, **options)
+    return call_json_api("delete", uri, {}, **options)
 
 
 def update_upload_preset(name, **options):
@@ -1002,7 +1001,7 @@ def update_upload_preset(name, **options):
     params = utils.build_upload_params(**options)
     params = utils.cleanup_params(params)
     params.update(only(options, "unsigned", "disallow_public_id", "live"))
-    return call_api("put", uri, params, **options)
+    return call_json_api("put", uri, params, **options)
 
 
 def create_upload_preset(**options):
@@ -1023,7 +1022,7 @@ def create_upload_preset(**options):
     params = utils.build_upload_params(**options)
     params = utils.cleanup_params(params)
     params.update(only(options, "unsigned", "disallow_public_id", "name", "live"))
-    return call_api("post", uri, params, **options)
+    return call_json_api("post", uri, params, **options)
 
 
 def root_folders(**options):
@@ -1038,7 +1037,7 @@ def root_folders(**options):
     :return: The list of top-level folders.
     :rtype: Response
     """
-    return call_api("get", ["folders"], only(options, "next_cursor", "max_results"), **options)
+    return call_json_api("get", ["folders"], only(options, "next_cursor", "max_results"), **options)
 
 
 def subfolders(of_folder_path, **options):
@@ -1055,7 +1054,7 @@ def subfolders(of_folder_path, **options):
     :return: The list of subfolders.
     :rtype: Response
     """
-    return call_api("get", ["folders", of_folder_path], only(options, "next_cursor", "max_results"), **options)
+    return call_json_api("get", ["folders", of_folder_path], only(options, "next_cursor", "max_results"), **options)
 
 
 def create_folder(path, **options):
@@ -1070,7 +1069,7 @@ def create_folder(path, **options):
     :return: The result of the folder creation.
     :rtype: Response
     """
-    return call_api("post", ["folders", path], {}, **options)
+    return call_json_api("post", ["folders", path], {}, **options)
 
 
 def rename_folder(from_path, to_path, **options):
@@ -1088,7 +1087,7 @@ def rename_folder(from_path, to_path, **options):
     :rtype: Response
     """
     params = {"to_folder": to_path}
-    return call_api("put", ["folders", from_path], params, **options)
+    return call_json_api("put", ["folders", from_path], params, **options)
 
 
 def delete_folder(path, **options):
@@ -1107,7 +1106,7 @@ def delete_folder(path, **options):
     :rtype: Response
     """
     params = only(options, "skip_backup")
-    return call_api("delete", ["folders", path], params, **options)
+    return call_json_api("delete", ["folders", path], params, **options)
 
 
 def restore(public_ids, **options):
@@ -1163,7 +1162,7 @@ def upload_mappings(**options):
     :rtype: Response
     """
     uri = ["upload_mappings"]
-    return call_api("get", uri, only(options, "next_cursor", "max_results"), **options)
+    return call_json_api("get", uri, only(options, "next_cursor", "max_results"), **options)
 
 
 def upload_mapping(name, **options):
@@ -1180,7 +1179,7 @@ def upload_mapping(name, **options):
     """
     uri = ["upload_mappings"]
     params = dict(folder=name)
-    return call_api("get", uri, params, **options)
+    return call_json_api("get", uri, params, **options)
 
 
 def delete_upload_mapping(name, **options):
@@ -1197,7 +1196,7 @@ def delete_upload_mapping(name, **options):
     """
     uri = ["upload_mappings"]
     params = dict(folder=name)
-    return call_api("delete", uri, params, **options)
+    return call_json_api("delete", uri, params, **options)
 
 
 def update_upload_mapping(name, **options):
@@ -1216,7 +1215,7 @@ def update_upload_mapping(name, **options):
     uri = ["upload_mappings"]
     params = dict(folder=name)
     params.update(only(options, "template"))
-    return call_api("put", uri, params, **options)
+    return call_json_api("put", uri, params, **options)
 
 
 def create_upload_mapping(name, **options):
@@ -1235,7 +1234,7 @@ def create_upload_mapping(name, **options):
     uri = ["upload_mappings"]
     params = dict(folder=name)
     params.update(only(options, "template"))
-    return call_api("post", uri, params, **options)
+    return call_json_api("post", uri, params, **options)
 
 
 def list_streaming_profiles(**options):
@@ -1249,7 +1248,7 @@ def list_streaming_profiles(**options):
     :rtype: Response
     """
     uri = ["streaming_profiles"]
-    return call_api('GET', uri, {}, **options)
+    return call_json_api('GET', uri, {}, **options)
 
 
 def get_streaming_profile(name, **options):
@@ -1265,7 +1264,7 @@ def get_streaming_profile(name, **options):
     :rtype: Response
     """
     uri = ["streaming_profiles", name]
-    return call_api('GET', uri, {}, **options)
+    return call_json_api('GET', uri, {}, **options)
 
 
 def delete_streaming_profile(name, **options):
@@ -1281,7 +1280,7 @@ def delete_streaming_profile(name, **options):
     :rtype: Response
     """
     uri = ["streaming_profiles", name]
-    return call_api('DELETE', uri, {}, **options)
+    return call_json_api('DELETE', uri, {}, **options)
 
 
 def create_streaming_profile(name, **options):
@@ -1301,7 +1300,7 @@ def create_streaming_profile(name, **options):
     uri = ["streaming_profiles"]
     params = __prepare_streaming_profile_params(**options)
     params["name"] = name
-    return call_api('POST', uri, params, **options)
+    return call_json_api('POST', uri, params, **options)
 
 
 def update_streaming_profile(name, **options):
@@ -1320,7 +1319,7 @@ def update_streaming_profile(name, **options):
     """
     uri = ["streaming_profiles", name]
     params = __prepare_streaming_profile_params(**options)
-    return call_api('PUT', uri, params, **options)
+    return call_json_api('PUT', uri, params, **options)
 
 
 def only(source, *keys):
