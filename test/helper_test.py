@@ -16,7 +16,8 @@ from urllib3 import HTTPResponse
 from urllib3._collections import HTTPHeaderDict
 from collections import defaultdict
 
-from cloudinary import utils, logger, api
+from cloudinary import utils, logger, api, urlparse
+from cloudinary.compat import parse_qsl
 from cloudinary.exceptions import NotFound
 from test.addon_types import ADDON_ALL
 
@@ -82,11 +83,67 @@ def get_method(mocker):
 
 
 def get_uri(mocker):
-    return mocker.call_args[1]["url"]
+    return urlparse(mocker.call_args[1]["url"]).path
 
 
 def get_headers(mocker):
     return mocker.call_args[1]["headers"]
+
+
+def get_params_from_url(mocker):
+    return parse_query_params(mocker.call_args[1]["url"])
+
+
+def parse_query_params(url):
+    """
+    Parses the query parameters from a URL into a dictionary.
+
+    :param url: The URL string to parse.
+    :return: Dictionary of query parameters with values as lists.
+    """
+    parsed_url = urlparse(url)
+    query = parsed_url.query
+    pairs = parse_qsl(query, keep_blank_values=True)
+
+    params = {}
+    list_keys = set()
+
+    for key, value in pairs:
+        if key.endswith('[]'):
+            key = key[:-2]  # Remove the trailing '[]'
+            list_keys.add(key)
+
+        if key in params:
+            if key in list_keys:
+                params[key].append(value)
+            else:
+                # If previously a scalar, convert to list
+                if isinstance(params[key], list):
+                    params[key].append(value)
+                else:
+                    params[key] = [params[key], value]
+        else:
+            if key in list_keys:
+                params[key] = [value]
+            else:
+                params[key] = value
+
+    return params
+
+
+def clean_params(params):
+    """
+    Cleans the parameter keys by stripping '[]' if present.
+
+    :param params: Dictionary of query parameters with values as lists.
+    :return: Cleaned dictionary with bracket-less keys.
+    """
+    cleaned = {}
+    for key, values in params.items():
+        if key.endswith('[]'):
+            key = key[:-2]  # Remove the trailing '[]'
+        cleaned[key] = values
+    return cleaned
 
 
 def get_params(mocker):
@@ -98,8 +155,14 @@ def get_params(mocker):
       - [("urls[]", "http://host1"), ("urls[]", "http://host2")]
     In both cases the result would be {"urls": ["http://host1", "http://host2"]}
     """
+    if get_headers(mocker).get("Content-Type", None) == "application/json" and get_method(mocker).upper() != "GET":
+        return get_json_body(mocker)
+    if get_method(mocker).upper() == "GET":
+        return get_params_from_url(mocker)
+
     if not mocker.call_args[1].get("fields"):
         return {}
+
     params = {}
     reg = re.compile(r'^(.*)\[\d*]$')
     fields = mocker.call_args[1].get("fields")

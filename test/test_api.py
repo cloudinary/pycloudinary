@@ -330,7 +330,6 @@ class ApiTest(unittest.TestCase):
 
         api.visual_search(image_file=TEST_IMAGE)
 
-        args, kwargs = mocker.call_args
         self.assertTrue(get_uri(mocker).endswith('/resources/visual_search'))
         self.assertEqual('POST', get_method(mocker))
 
@@ -649,7 +648,7 @@ class ApiTest(unittest.TestCase):
         mocker.return_value = MOCK_RESPONSE
         api.transformation(API_TEST_TRANS_SCALE100, next_cursor=NEXT_CURSOR, max_results=10)
         self.assertEqual(get_param(mocker, 'next_cursor'), NEXT_CURSOR)
-        self.assertEqual(get_param(mocker, 'max_results'), 10)
+        self.assertEqual(get_param(mocker, 'max_results'), '10')
 
     @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -1033,7 +1032,7 @@ class ApiTest(unittest.TestCase):
         self.assertEqual("DELETE", get_method(mocker))
         self.assertTrue(get_uri(mocker).endswith('/folders/' + UNIQUE_TEST_FOLDER))
         self.assertTrue("skip_backup" in get_params(mocker))
-        self.assertEqual("true", get_params(mocker)["skip_backup"])
+        self.assertEqual(True, get_params(mocker)["skip_backup"])
 
     @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
