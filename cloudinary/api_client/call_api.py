@@ -23,9 +23,9 @@ def call_metadata_api(method, uri, params, **options):
 
 def call_metadata_rules_api(method, uri, params, **options):
     """Private function that assists with performing an API call to the
-    metadata_fields part of the Admin API
+    metadata_rules part of the Admin API
     :param method: The HTTP method. Valid methods: get, post, put, delete
-    :param uri: REST endpoint of the API (without 'metadata_fields')
+    :param uri: REST endpoint of the API (without 'metadata_rules')
     :param params: Query/body parameters passed to the method
     :param options: Additional options
     :rtype: Response
