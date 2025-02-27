@@ -1604,7 +1604,7 @@ def __metadata_rule_params(rule):
     :rtype: dict
     :internal
     """
-    return only(rule, "metadata_field_id", "condition", "result", "name")
+    return only(rule, "external_id", "metadata_field_id", "condition", "result", "name")
 
 
 def add_metadata_rule(rule, **options):
