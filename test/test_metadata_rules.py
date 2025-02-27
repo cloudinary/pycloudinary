@@ -79,12 +79,6 @@ METADATA_RULES_TO_CREATE = [
 """
 disable_warnings()
 
-cloudinary.config(
-  cloud_name= 'vdeub-2',
-  api_key= '385461177139567',
-  api_secret= 'kAOmn_JDPk3CBx1RxEUBeGAQdoQ'
-)
-
 class MetadataTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
