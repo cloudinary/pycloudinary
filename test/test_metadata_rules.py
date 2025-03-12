@@ -1,7 +1,3 @@
-import time
-import unittest
-from datetime import datetime, timedelta
-
 from six import text_type
 from urllib3 import disable_warnings
 
@@ -75,10 +71,6 @@ class MetadataTest(unittest.TestCase):
 
             api.add_metadata_field(field)
         
-        """
-        for rule in METADATA_RULES_TO_CREATE:
-             api.add_metadata_rule(rule)
-        """
 
     @classmethod
     def tearDownClass(cls):
@@ -330,7 +322,7 @@ class MetadataTest(unittest.TestCase):
 
     @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
-    def test8_delete_metadata_rule(self, mocker):
+    def test08_delete_metadata_rule(self, mocker):
         """Test deleting a metadata rule definition by its external id."""
 
         mocker.return_value = MOCK_RESPONSE

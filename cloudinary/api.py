@@ -1647,7 +1647,7 @@ def delete_metadata_rule(rule_external_id, **options):
     :param rule_external_id: The external ID of the rule to delete.
     :type rule_external_id: str
     :param options: Additional optional parameters (none currently recognized).
-    :return: An array with a "succe" key. true value indicates a successful deletion.
+    :return: An array with a "success" key. true value indicates a successful deletion.
     :rtype: Response
     """
     uri = [rule_external_id]

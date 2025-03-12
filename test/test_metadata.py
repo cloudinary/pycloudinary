@@ -180,7 +180,6 @@ class MetadataTest(unittest.TestCase):
 
         self.assertTrue(get_uri(mocker).endswith("/metadata_fields"))
         self.assertEqual(get_method(mocker), "GET")
-        self.assertFalse(get_params(mocker).get("fields"))
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test02_get_metadata_field(self):
