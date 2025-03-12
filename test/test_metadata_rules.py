@@ -235,9 +235,13 @@ class MetadataRulesTest(unittest.TestCase):
             "state": "inactive"
         })
 
+        target_uri = "/metadata_rules/{}".format(EXTERNAL_ID_METADATA_RULE_GENERAL)
+        self.assertTrue(get_uri(mocker).endswith(target_uri))
         self.assertEqual(get_method(mocker), "PUT")
-        self.assertEqual(get_json_body(mocker)["state"], "inactive")
-        self.assertEqual(get_json_body(mocker)["name"], new_name + "_inactive")
+        self.assertEqual(get_json_body(mocker), {
+            "name": new_name + "_inactive",
+            "state": "inactive"
+        })
 
     @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
