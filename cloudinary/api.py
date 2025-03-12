@@ -1604,7 +1604,7 @@ def __metadata_rule_params(rule):
     :rtype: dict
     :internal
     """
-    return only(rule, "external_id", "metadata_field_id", "condition", "result", "name")
+    return only(rule, "external_id", "metadata_field_id", "condition", "result", "name", "state")
 
 
 def add_metadata_rule(rule, **options):
@@ -1636,9 +1636,7 @@ def update_metadata_rule(rule_external_id, rule, **options):
     :rtype: Response
     """
     uri = [rule_external_id]
-    params = __metadata_rule_params(rule)
-    params.update(only(options, "state"))
-    return call_metadata_rules_api("put", uri, params, **options)
+    return call_metadata_rules_api("put", uri, __metadata_rule_params(rule), **options)
 
 def delete_metadata_rule(rule_external_id, **options):
     """
