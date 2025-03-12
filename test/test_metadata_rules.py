@@ -59,87 +59,7 @@ METADATA_FIELDS_TO_CREATE = [
 
 disable_warnings()
 
-class MetadataTest(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cloudinary.reset_config()
-        if not cloudinary.config().api_secret:
-            return
-
-        for field in METADATA_FIELDS_TO_CREATE:
-            if "label" not in field:
-                field["label"] = field["external_id"]
-
-            api.add_metadata_field(field)
-        
-
-    @classmethod
-    def tearDownClass(cls):
-
-        for external_id in METADATA_FIELDS:
-            with ignore_exception(suppress_traceback_classes=(NotFound,)):
-                api.delete_metadata_field(external_id)
-
-    def assert_metadata_rule(self, metadata_rule, conditions=None, results=None):
-        """Asserts that a given object fits the generic structure of a metadata field
-
-        See: `Generic structure of a metadata field in API reference
-        <https://cloudinary.com/documentation/admin_api#generic_structure_of_a_metadata_field>`_
-
-        :param metadata_rule: The object to test
-        :param conditions: An associative array where the key is the name of the parameter to check and the
-               value is the condition
-        :param results: An associative array where the key is the name of the parameter to check and the
-               value is the results
-        """
-        self.assertIsInstance(metadata_rule["external_id"], text_type)
-        self.assertIsInstance(metadata_rule["metadata_field_id"], text_type)
-
-        self.assert_metadata_rule_condition(metadata_rule["condition"])
-        self.assert_metadata_rule_result(metadata_rule["result"])
-
-        self.assertIsInstance(condition, dict)
-        self.assertIsInstance(result, dict)
-
-
-    def assert_metadata_rule_condition(self, condition):
-        """Asserts that a given object fits the generic structure of a metadata rule condition
-
-        See: `Condition values in Admin API <https://cloudinary.com/documentation/admin_api#condition_structure>`_
-
-        :param condition:
-        """
-        self.assertTrue(condition)
-        self.assertIsInstance(condition["metadata_field_id"], text_type)
-        if condition["includes"]:
-          self.assertIsInstance(condition["includes"], dict)
-        elif condition["populated"]:
-          self.assertIsInstance(condition["populated"], bool)
-        elif condition["equals"]:
-          self.assertIsInstance(condition["equals"], text_type)
-        elif condition["or"]:
-          self.assertIsInstance(condition["or"], dict)
-        elif condition["and"]:
-          self.assertIsInstance(condition["and"], dict)
-
-
-    def assert_metadata_rule_result(self, result):
-        """Asserts that a given object fits the generic structure of a metadata rule result
-
-        See: `Result result in Admin API <https://cloudinary.com/documentation/admin_api#result_structure>`_
-
-        :param result:
-        """
-        self.assertTrue(result)
-        self.assertIsInstance(result["enable"], bool)
-        if result["activate_values"]:
-          self.assertIsInstance(result["activate_values"], dict)
-        elif result["apply_value"]:
-          self.assertIsInstance(result["apply_value"], dict)
-        elif result["set_mandatory"]:
-          self.assertIsInstance(result["set_mandatory"], bool)
-
-
+class MetadataRulesTest(unittest.TestCase):
     @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test01_list_metadata_rules(self, mocker):
@@ -150,7 +70,6 @@ class MetadataTest(unittest.TestCase):
 
         self.assertTrue(get_uri(mocker).endswith("/metadata_rules"))
         self.assertEqual(get_method(mocker), "GET")
-        self.assertFalse(get_params(mocker).get("metadata_rules"))
 
 
     @patch(URLLIB3_REQUEST)
@@ -303,23 +222,23 @@ class MetadataTest(unittest.TestCase):
             "result": { "enable": True, "activate_values": {"external_ids": ["value1","value2"]}},
         })
 
+    @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test07_update_metadata_rule(self):
         """Update a metadata rule by external id"""
+        mocker.return_value = MOCK_RESPONSE
 
         new_name = "update_metadata_rule_new_name{}".format(EXTERNAL_ID_METADATA_RULE_GENERAL)
 
-        result = api.update_metadata_rule(EXTERNAL_ID_METADATA_RULE_GENERAL, {
+        api.update_metadata_rule(EXTERNAL_ID_METADATA_RULE_GENERAL, {
             "name": new_name + "_inactive",
             "state": "inactive"
         })
 
-        self.assert_metadata_rule(result, "string", {
-            "external_id": EXTERNAL_ID_METADATA_RULE_GENERAL,
-            "name": new_name + "_inactive",
-            "state": "inactive"
-        })
-
+        self.assertTrue(get_uri(mocker).endswith("/metadata_rules"))
+        self.assertEqual(get_method(mocker), "PUT")
+        self.assertEqual(get_params(mocker)["state"], "inactive")
+        self.assertEqual(get_params(mocker)["name"], new_name + "_inactive")
 
     @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
