@@ -236,8 +236,8 @@ class MetadataRulesTest(unittest.TestCase):
         })
 
         self.assertEqual(get_method(mocker), "PUT")
-        self.assertEqual(get_params(mocker)["state"], "inactive")
-        self.assertEqual(get_params(mocker)["name"], new_name + "_inactive")
+        self.assertEqual(get_json_body(mocker)["state"], "inactive")
+        self.assertEqual(get_json_body(mocker)["name"], new_name + "_inactive")
 
     @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
