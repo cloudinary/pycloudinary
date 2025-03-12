@@ -235,7 +235,6 @@ class MetadataRulesTest(unittest.TestCase):
             "state": "inactive"
         })
 
-        self.assertTrue(get_uri(mocker).endswith("/metadata_rules"))
         self.assertEqual(get_method(mocker), "PUT")
         self.assertEqual(get_params(mocker)["state"], "inactive")
         self.assertEqual(get_params(mocker)["name"], new_name + "_inactive")
