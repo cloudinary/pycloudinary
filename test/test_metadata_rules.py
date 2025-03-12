@@ -224,7 +224,7 @@ class MetadataRulesTest(unittest.TestCase):
 
     @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
-    def test07_update_metadata_rule(self):
+    def test07_update_metadata_rule(self,mocker):
         """Update a metadata rule by external id"""
         mocker.return_value = MOCK_RESPONSE
 
