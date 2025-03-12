@@ -1636,7 +1636,9 @@ def update_metadata_rule(rule_external_id, rule, **options):
     :rtype: Response
     """
     uri = [rule_external_id]
-    return call_metadata_rules_api("put", uri, __metadata_rule_params(rule), **options)
+    params = __metadata_rule_params(rule)
+    params.update(only(options, "state"))
+    return call_metadata_rules_api("put", uri, params, **options)
 
 def delete_metadata_rule(rule_external_id, **options):
     """
