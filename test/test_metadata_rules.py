@@ -231,17 +231,18 @@ class MetadataRulesTest(unittest.TestCase):
         new_name = "update_metadata_rule_new_name{}".format(EXTERNAL_ID_METADATA_RULE_GENERAL)
 
         api.update_metadata_rule(EXTERNAL_ID_METADATA_RULE_GENERAL, {
+            "metadata_field_id": EXTERNAL_ID_ENUM,
             "name": new_name + "_inactive",
+            "condition": {},
+            "result": {},
             "state": "inactive"
         })
 
         target_uri = "/metadata_rules/{}".format(EXTERNAL_ID_METADATA_RULE_GENERAL)
         self.assertTrue(get_uri(mocker).endswith(target_uri))
         self.assertEqual(get_method(mocker), "PUT")
-        self.assertEqual(get_json_body(mocker), {
-            "name": new_name + "_inactive",
-            "state": "inactive"
-        })
+        self.assertEqual(get_params(mocker).get("state"), "inactive")
+        self.assertEqual(get_params(mocker).get("name"), new_name + "_inactive")
 
     @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
