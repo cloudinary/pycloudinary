@@ -60,23 +60,6 @@ METADATA_FIELDS_TO_CREATE = [
     }
 ]
 
-"""
-METADATA_RULES_TO_CREATE = [
-    {
-        "metadata_field_id": ID_METADATA_RULE_DELETE,
-        "name": ID_METADATA_RULE_DELETE,
-        "condition": { "metadata_field_id": EXTERNAL_ID_SET, "equals": DATASOURCE_ENTRY_EXTERNAL_ID },
-        "result": { "enable": True, "activate_values": "all" },
-    },
-    {
-        "metadata_field_id": ID_METADATA_RULE_GENERAL,
-        "name": ID_METADATA_RULE_GENERAL,
-        "condition": { "metadata_field_id": EXTERNAL_ID_SET, "equals": DATASOURCE_ENTRY_EXTERNAL_ID },
-        "result": { "enable": True, "activate_values": "all" },
-    },
-    
-]
-"""
 disable_warnings()
 
 class MetadataTest(unittest.TestCase):
@@ -331,7 +314,7 @@ class MetadataTest(unittest.TestCase):
     def test07_update_metadata_rule(self):
         """Update a metadata rule by external id"""
 
-        new_name = "update_metadata_rule_new_name{}".format(ID_METADATA_RULE_GENERAL)
+        new_name = "update_metadata_rule_new_name{}".format(EXTERNAL_ID_METADATA_RULE_GENERAL)
 
         result = api.update_metadata_rule(EXTERNAL_ID_METADATA_RULE_GENERAL, {
             "name": new_name + "_inactive",
