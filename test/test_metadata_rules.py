@@ -1,3 +1,4 @@
+import unittest
 from six import text_type
 from urllib3 import disable_warnings
 
