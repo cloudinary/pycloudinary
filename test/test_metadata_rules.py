@@ -18,44 +18,8 @@ EXTERNAL_ID_SET = "metadata_external_id_set_{}".format(UNIQUE_TEST_ID)
 EXTERNAL_ID_METADATA_RULE_GENERAL = "metadata_rule_id_general_{}".format(UNIQUE_TEST_ID)
 EXTERNAL_ID_METADATA_RULE_DELETE = "metadata_rule_id_deletion_{}".format(UNIQUE_TEST_ID)
 
-METADATA_FIELDS = [
-    EXTERNAL_ID_ENUM,
-    EXTERNAL_ID_SET,
-]
 # Sample datasource data
 DATASOURCE_ENTRY_EXTERNAL_ID = "metadata_datasource_entry_external_id{}".format(UNIQUE_TEST_ID)
-
-# Sample datasource data
-DATASOURCE_MULTIPLE = [
-    {
-        "value": "v2",
-        "external_id": DATASOURCE_ENTRY_EXTERNAL_ID,
-    },
-    {
-        "value": "v3",
-    },
-    {
-        "value": "v4",
-    },
-]
-
-# Sample metadata_field data
-METADATA_FIELDS_TO_CREATE = [
-    {
-        "external_id": EXTERNAL_ID_ENUM,
-        "type": "enum",
-        "datasource": {
-            "values": DATASOURCE_MULTIPLE,
-        },
-    },
-    {
-        "external_id": EXTERNAL_ID_SET,
-        "type": "set",
-        "datasource": {
-            "values": DATASOURCE_MULTIPLE,
-        },
-    }
-]
 
 disable_warnings()
 
