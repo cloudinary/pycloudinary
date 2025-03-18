@@ -1,3 +1,11 @@
+1.43.0 / 2025-03-18
+==================
+
+New functionality and features
+------------------------------
+
+  * Add support for Conditional Metadata Rules API
+
 1.42.2 / 2025-02-05
 ==================
 
