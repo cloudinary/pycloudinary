@@ -9,6 +9,7 @@ import cloudinary
 from cloudinary import utils
 from cloudinary.api_client.call_api import (
     call_metadata_api,
+    call_metadata_rules_api,
     call_api,
     call_json_api,
     _call_v2_api,
@@ -1579,6 +1580,78 @@ def reorder_metadata_fields(order_by, direction=None, **options):
     uri = ['order']
     params = {'order_by': order_by, 'direction': direction}
     return call_metadata_api('put', uri, params, **options)
+
+
+def list_metadata_rules(**options):
+    """
+    Returns a list of all metadata rules definitions.
+
+    See: https://cloudinary.com/documentation/admin_api#get_metadata_rules
+
+    :param options: Additional optional parameters (none currently recognized).
+    :return: A list of metadata rules.
+    :rtype: Response
+    """
+    return call_metadata_rules_api("get", [], {}, **options)
+
+def __metadata_rule_params(rule):
+    """
+    Builds the parameters needed for creating or updating a metadata rule.
+
+    :param rule: The rule definition.
+    :type rule: dict
+    :return: The relevant key-value pairs.
+    :rtype: dict
+    :internal
+    """
+    return only(rule, "external_id", "metadata_field_id", "condition", "result", "name", "state")
+
+
+def add_metadata_rule(rule, **options):
+    """
+    Creates a new metadata rule definition.
+
+    See: https://cloudinary.com/documentation/admin_api#create_a_metadata_rule
+
+    :param rule: The rule to add.
+    :type rule: dict
+    :param options: Additional optional parameters (none currently recognized).
+    :return: The created metadata rule.
+    :rtype: Response
+    """
+    return call_metadata_rules_api("post", [], __metadata_rule_params(rule), **options)
+
+def update_metadata_rule(rule_external_id, rule, **options):
+    """
+    Updates a metadata rule by external id.
+
+    See: https://cloudinary.com/documentation/admin_api#update_a_metadata_rule_by_id
+
+    :param rule_external_id: The ID of the metadata rule to update.
+    :type rule_external_id: str
+    :param rule: The rule definition to update.
+    :type rule: dict
+    :param options: Additional optional parameters (none currently recognized).
+    :return: The updated metadata rule.
+    :rtype: Response
+    """
+    uri = [rule_external_id]
+    return call_metadata_rules_api("put", uri, __metadata_rule_params(rule), **options)
+
+def delete_metadata_rule(rule_external_id, **options):
+    """
+    Deletes a metadata rule definition.
+
+    See: https://cloudinary.com/documentation/admin_api#delete_a_metadata_rule_by_id
+
+    :param rule_external_id: The external ID of the rule to delete.
+    :type rule_external_id: str
+    :param options: Additional optional parameters (none currently recognized).
+    :return: An array with a "success" key. true value indicates a successful deletion.
+    :rtype: Response
+    """
+    uri = [rule_external_id]
+    return call_metadata_rules_api("delete", uri, {}, **options)
 
 
 def analyze(input_type, analysis_type, uri=None, **options):
