@@ -13,6 +13,10 @@ from test.helper_test import SUFFIX, TEST_IMAGE, TEST_TAG, UNIQUE_TAG, TEST_FOLD
 from test.test_api import MOCK_RESPONSE, NEXT_CURSOR
 from test.test_config import CLOUD_NAME, API_KEY, API_SECRET
 
+CUSTOM_AGGREGATION = {"type": "bytes",
+             "ranges": [{"key": "tiny", "to": 500}, {"key": "medium", "from": 501, "to": 1999},
+                        {"key": "big", "from": 2000}]}
+
 TEST_TAG = 'search_{}'.format(TEST_TAG)
 UNIQUE_TAG = 'search_{}'.format(UNIQUE_TAG)
 
@@ -99,6 +103,11 @@ class SearchTest(unittest.TestCase):
 
         query = Search().aggregate('format').aggregate('size_category').as_dict()
         self.assertEqual(query, {"aggregate": ["format", "size_category"]})
+
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_should_add_custom_aggregations_arguments_as_array_as_dict(self):
+        query = Search().aggregate('format').aggregate('size_category').aggregate(CUSTOM_AGGREGATION).as_dict()
+        self.assertEqual(query, {"aggregate": ["format", "size_category", CUSTOM_AGGREGATION]})
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_should_add_with_field_as_dict(self):
@@ -204,7 +213,7 @@ class SearchTest(unittest.TestCase):
     @patch(URLLIB3_REQUEST)
     def test_should_not_duplicate_values(self, mocker):
         mocker.return_value = MOCK_RESPONSE
-
+        override_custom_aggregation = dict(CUSTOM_AGGREGATION, ranges=[])
         Search() \
             .sort_by('created_at', 'asc') \
             .sort_by('public_id', 'asc') \
@@ -212,6 +221,8 @@ class SearchTest(unittest.TestCase):
             .aggregate('format') \
             .aggregate('format') \
             .aggregate(['resource_type', 'type']) \
+            .aggregate(override_custom_aggregation) \
+            .aggregate(CUSTOM_AGGREGATION) \
             .with_field('context') \
             .with_field('context') \
             .with_field('tags') \
@@ -228,7 +239,7 @@ class SearchTest(unittest.TestCase):
                 {'created_at': 'desc'},
                 {'public_id': 'asc'},
             ],
-            'aggregate': ['format', 'resource_type', 'type'],
+            'aggregate': ['format', 'resource_type', 'type', CUSTOM_AGGREGATION],
             'with_field': ['context', 'tags'],
             'fields': ['tags', 'context', 'metadata'],
         })
