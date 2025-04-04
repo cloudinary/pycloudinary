@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Upload</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        input[type="file"], input[type="text"], select {
+            margin-bottom: 10px;
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #response {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Upload Image to Cloudinary</h1>
+    <form id="uploadForm">
+        <input type="file" name="image" accept="image/*" required>
+        <input type="text" name="public_id" placeholder="Public ID (optional)">
+        <input type="text" name="mood" placeholder="Mood (e.g., happy, sad)" required>
+        <input type="text" name="theme" placeholder="Theme (e.g., nature, technology)" required>
+        <select name="aspect_ratio" required>
+            <option value="1:1">1:1</option>
+            <option value="16:9">16:9</option>
+            <option value="4:3">4:3</option>
+            <option value="2:1">2:1</option>
+        </select>
+        <button type="submit">Upload</button>
+    </form>
+    <div id="response"></div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            fetch('/generate_post', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                const responseDiv = document.getElementById('response');
+                if (data.error) {
+                    responseDiv.innerHTML = `<p style="color: red;">Error: ${data.error}</p>`;
+                } else {
+                    responseDiv.innerHTML = `<p style="color: green;">Success! Image URL: <a href="${data.image_url}" target="_blank">${data.image_url}</a></p>`;
+                    responseDiv.innerHTML += `<p>Generated Content: ${data.content}</p>`;
+                }
+            })
+            .catch(error => {
+                document.getElementById('response').innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            });
+        });
+    </script>
+</body>
+</html>
