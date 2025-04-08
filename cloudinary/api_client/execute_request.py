@@ -87,7 +87,6 @@ def execute_request(http_connector, method, params, headers, auth, api_url, **op
 
     if "error" in result:
         exception_class = EXCEPTION_CODES.get(response.status) or Exception
-        exception_class = exception_class
         raise exception_class("Error {0} - {1}".format(response.status, result["error"]["message"]))
 
     return Response(result, response)
