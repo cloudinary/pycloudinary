@@ -448,6 +448,19 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         self.assertEqual(self.rbp_values, cache_value)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_explicit_error_handling_not_found(self):
+        # Test explicit error handling
+        with six.assertRaisesRegex(self, exceptions.NotFound, "Resource not found"):
+            uploader.explicit(UNIQUE_ID + "_does_not_exist", type="upload", tags=[UNIQUE_TAG])
+
+        not_found_res = uploader.explicit(UNIQUE_ID + "_does_not_exist", type="upload", tags=[UNIQUE_TAG],
+                                          return_error=True)
+
+        self.assertEqual(not_found_res["error"]["http_code"], 404)
+        self.assertTrue(not_found_res["error"]["message"].startswith("Resource not found"))
+
+
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_update_metadata(self):
         metadata = {METADATA_FIELD_UNIQUE_EXTERNAL_ID: "test"}
         test_image = uploader.upload(TEST_IMAGE, metadata=metadata, tags=[UNIQUE_TAG])
@@ -799,7 +812,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
             resource = uploader.upload_large(temp_file, chunk_size=LARGE_CHUNK_SIZE,
                                              tags=["upload_large_tag", UNIQUE_TAG], resource_type="image")
 
-            self.assertEqual(resource["tags"], ["upload_large_tag", UNIQUE_TAG])
+            self.assertCountEqual(resource["tags"], ["upload_large_tag", UNIQUE_TAG])
             self.assertEqual(resource["resource_type"], "image")
             self.assertEqual(resource["width"], LARGE_FILE_WIDTH)
             self.assertEqual(resource["height"], LARGE_FILE_HEIGHT)

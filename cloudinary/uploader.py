@@ -9,6 +9,7 @@ from urllib3.exceptions import HTTPError
 
 import cloudinary
 from cloudinary import utils
+from cloudinary.api_client.execute_request import EXCEPTION_CODES
 from cloudinary.cache.responsive_breakpoints_cache import instance as responsive_breakpoints_cache_instance
 from cloudinary.exceptions import Error
 from cloudinary.utils import build_eager
@@ -898,7 +899,6 @@ def call_api(action, params, http_headers=None, return_error=False, unsigned=Fal
     if timeout is not None:
         kw['timeout'] = timeout
 
-    code = 200
     try:
         response = _http.request(method="POST", url=api_url, fields=param_list, headers=headers, **kw)
     except HTTPError as e:
@@ -913,11 +913,11 @@ def call_api(action, params, http_headers=None, return_error=False, unsigned=Fal
                     .format(response.status, response.data, e))
 
     if "error" in result:
-        if response.status not in [200, 400, 401, 403, 404, 500]:
-            code = response.status
         if return_error:
-            result["error"]["http_code"] = code
-        else:
-            raise Error(result["error"]["message"])
+            result["error"]["http_code"] = response.status
+            return result
+
+        exception_class = EXCEPTION_CODES.get(response.status) or Error
+        raise exception_class(result["error"]["message"])
 
     return result
