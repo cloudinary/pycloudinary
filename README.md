@@ -1,4 +1,4 @@
-[![Build Status](https://app.travis-ci.com/cloudinary/pycloudinary.svg)](https://app.travis-ci.com/cloudinary/pycloudinary)
+[![Tests](https://github.com/cloudinary/pycloudinary/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/cloudinary/pycloudinary/actions/workflows/test.yml)
 [![PyPI Version](https://img.shields.io/pypi/v/cloudinary.svg)](https://pypi.python.org/pypi/cloudinary/)
 [![PyPI PyVersions](https://img.shields.io/pypi/pyversions/cloudinary.svg)](https://pypi.python.org/pypi/cloudinary/)
 [![PyPI DjangoVersions](https://img.shields.io/pypi/djversions/cloudinary.svg)](https://pypi.python.org/pypi/cloudinary/)
