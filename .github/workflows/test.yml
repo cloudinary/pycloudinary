@@ -37,10 +37,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Setup Python
         uses: actions/setup-python@v5
+        if: matrix.python-version != '2.7'
         with:
           python-version: ${{ matrix.python-version }}
+
+      - name: Install Python 2.7 manually
+        if: matrix.python-version == '2.7'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python2.7 python2.7-dev python2.7-distutils curl
+          curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py
+          sudo python2.7 get-pip.py
+          python2.7 --version
 
       - name: Install dependencies
         run: |
