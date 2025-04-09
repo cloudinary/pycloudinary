@@ -43,14 +43,17 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install Python 2.7 manually
+      - name: Install Python 2.7 and set as default
         if: matrix.python-version == '2.7'
         run: |
           sudo apt-get update
-          sudo apt-get install -y python2.7 python2.7-dev python2.7-distutils curl
+          sudo apt-get install -y python2 curl
+          sudo update-alternatives --install /usr/bin/python python /usr/bin/python2 1
+          sudo update-alternatives --install /usr/bin/pip pip /usr/bin/pip2 1
           curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py
-          sudo python2.7 get-pip.py
-          python2.7 --version
+          sudo python get-pip.py
+          python --version
+          pip --version
 
       - name: Install dependencies
         run: |
