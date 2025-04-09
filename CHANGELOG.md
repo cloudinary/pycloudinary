@@ -1,3 +1,16 @@
+1.44.0 / 2025-04-09
+==================
+
+New Functionality and Features
+------------------------------
+
+  * Add support for custom aggregations in Search API
+
+Other Changes
+-------------
+
+  * Improve error handling in Upload API
+
 1.43.0 / 2025-03-18
 ==================
 
