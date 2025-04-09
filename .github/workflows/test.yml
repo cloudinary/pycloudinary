@@ -49,9 +49,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y python2 curl
           sudo update-alternatives --install /usr/bin/python python /usr/bin/python2 1
-          sudo update-alternatives --install /usr/bin/pip pip /usr/bin/pip2 1
           curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py
           sudo python get-pip.py
+          sudo ln -sf /usr/local/bin/pip2 /usr/bin/pip || true
           python --version
           pip --version
 
