@@ -55,6 +55,8 @@ TEST_FOLDER = 'folder/test'
 
 MOCKED_NOW = 1549533574
 API_SECRET = 'X7qLTrsES31MzxxkxPPA-pAGGfU'
+API_SIGN_REQUEST_TEST_SECRET = "hdcixPpR2iKERPwqvH6sHdK9cyac"
+API_SIGN_REQUEST_CLOUD_NAME = "dn6ot3ged"
 
 
 class TestUtils(unittest.TestCase):
@@ -1443,16 +1445,49 @@ class TestUtils(unittest.TestCase):
                                    expected_url=DEFAULT_UPLOAD_PATH + long_signature + "/" + image_name)
 
     def test_api_sign_request_sha1(self):
-        params = dict(cloud_name="dn6ot3ged", timestamp=1568810420, username="user@cloudinary.com")
-        signature = api_sign_request(params, "hdcixPpR2iKERPwqvH6sHdK9cyac")
+        params = dict(cloud_name=API_SIGN_REQUEST_CLOUD_NAME, timestamp=1568810420, username="user@cloudinary.com")
+        signature = api_sign_request(params, API_SIGN_REQUEST_TEST_SECRET)
         expected = "14c00ba6d0dfdedbc86b316847d95b9e6cd46d94"
         self.assertEqual(expected, signature)
 
     def test_api_sign_request_sha256(self):
-        params = dict(cloud_name="dn6ot3ged", timestamp=1568810420, username="user@cloudinary.com")
-        signature = api_sign_request(params, "hdcixPpR2iKERPwqvH6sHdK9cyac", cloudinary.utils.SIGNATURE_SHA256)
+        params = dict(cloud_name=API_SIGN_REQUEST_CLOUD_NAME, timestamp=1568810420, username="user@cloudinary.com")
+        signature = api_sign_request(params, API_SIGN_REQUEST_TEST_SECRET, cloudinary.utils.SIGNATURE_SHA256)
         expected = "45ddaa4fa01f0c2826f32f669d2e4514faf275fe6df053f1a150e7beae58a3bd"
         self.assertEqual(expected, signature)
+
+    def test_api_sign_request_prevents_parameter_smuggling(self):
+        """Should prevent parameter smuggling via & characters in parameter values"""
+        # Test with notification_url containing & characters
+        params_with_ampersand = {
+            "cloud_name": API_SIGN_REQUEST_CLOUD_NAME, 
+            "timestamp": 1568810420,
+            "notification_url": "https://fake.com/callback?a=1&tags=hello,world"
+        }
+        
+        signature_with_ampersand = api_sign_request(params_with_ampersand, API_SIGN_REQUEST_TEST_SECRET)
+        
+        # Test that attempting to smuggle parameters by splitting the notification_url fails
+        params_smuggled = {
+            "cloud_name": API_SIGN_REQUEST_CLOUD_NAME,
+            "timestamp": 1568810420, 
+            "notification_url": "https://fake.com/callback?a=1",
+            "tags": "hello,world"  # This would be smuggled if & encoding didn't work
+        }
+        
+        signature_smuggled = api_sign_request(params_smuggled, API_SIGN_REQUEST_TEST_SECRET)
+        
+        # The signatures should be different, proving that parameter smuggling is prevented
+        self.assertNotEqual(signature_with_ampersand, signature_smuggled,
+                           "Signatures should be different to prevent parameter smuggling")
+        
+        # Verify the expected signature for the properly encoded case
+        expected_signature = "4fdf465dd89451cc1ed8ec5b3e314e8a51695704"
+        self.assertEqual(expected_signature, signature_with_ampersand)
+        
+        # Verify the expected signature for the smuggled parameters case
+        expected_smuggled_signature = "7b4e3a539ff1fa6e6700c41b3a2ee77586a025f9"
+        self.assertEqual(expected_smuggled_signature, signature_smuggled)
 
 
 if __name__ == '__main__':

@@ -628,7 +628,7 @@ def sign_request(params, options):
 
 
 def api_sign_request(params_to_sign, api_secret, algorithm=SIGNATURE_SHA1):
-    params = [(k + "=" + (
+    params = [_encode_param(k + "=" + (
         ",".join(v) if isinstance(v, list) else
         str(v).lower() if isinstance(v, bool) else
         str(v)
@@ -636,6 +636,17 @@ def api_sign_request(params_to_sign, api_secret, algorithm=SIGNATURE_SHA1):
     to_sign = "&".join(sorted(params))
     return compute_hex_hash(to_sign + api_secret, algorithm)
 
+def _encode_param(value):
+    """
+    Encodes a parameter for safe inclusion in URL query strings.
+    
+    Specifically replaces "&" characters with their percent-encoded equivalent "%26"
+    to prevent them from being interpreted as parameter separators in URL query strings.
+
+    :param value: The parameter to encode
+    :return: Encoded parameter
+    """
+    return str(value).replace("&", "%26")
 
 def breakpoint_settings_mapper(breakpoint_settings):
     breakpoint_settings = copy.deepcopy(breakpoint_settings)
