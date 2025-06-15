@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: ubuntu-20.04  # focal equivalent
+    runs-on: ubuntu-24.04  # noble equivalent
 
     strategy:
       matrix:
