@@ -9,8 +9,6 @@ jobs:
     strategy:
       matrix:
         include:
-          - python-version: "2.7"
-            toxenv: py27-core
           - python-version: "3.9"
             toxenv: py39-core
           - python-version: "3.10"
@@ -21,8 +19,6 @@ jobs:
             toxenv: py312-core
           - python-version: "3.13"
             toxenv: py313-core
-          - python-version: "2.7"
-            toxenv: py27-django111
           - python-version: "3.9"
             toxenv: py39-django32
           - python-version: "3.10"
@@ -39,21 +35,8 @@ jobs:
 
       - name: Setup Python
         uses: actions/setup-python@v5
-        if: matrix.python-version != '2.7'
         with:
           python-version: ${{ matrix.python-version }}
-
-      - name: Install Python 2.7 and set as default
-        if: matrix.python-version == '2.7'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y python2 curl
-          sudo update-alternatives --install /usr/bin/python python /usr/bin/python2 1
-          curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py
-          sudo python get-pip.py
-          sudo ln -sf /usr/local/bin/pip2 /usr/bin/pip || true
-          python --version
-          pip --version
 
       - name: Install dependencies
         run: |
