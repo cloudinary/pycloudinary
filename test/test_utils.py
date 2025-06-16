@@ -1489,6 +1489,45 @@ class TestUtils(unittest.TestCase):
         expected_smuggled_signature = "7b4e3a539ff1fa6e6700c41b3a2ee77586a025f9"
         self.assertEqual(expected_smuggled_signature, signature_smuggled)
 
+    def test_api_sign_request_signature_versions(self):
+        """Should use signature version 1 (without parameter encoding) for backward compatibility"""
+        public_id_with_ampersand = 'tests/logo&version=2'
+        test_version = 1
+        
+        expected_signature_v1 = api_sign_request(
+            {'public_id': public_id_with_ampersand, 'version': test_version},
+            API_SIGN_REQUEST_TEST_SECRET,
+            cloudinary.utils.SIGNATURE_SHA1,
+            signature_version=1
+        )
+        
+        expected_signature_v2 = api_sign_request(
+            {'public_id': public_id_with_ampersand, 'version': test_version},
+            API_SIGN_REQUEST_TEST_SECRET,
+            cloudinary.utils.SIGNATURE_SHA1,
+            signature_version=2
+        )
+        
+        self.assertNotEqual(expected_signature_v1, expected_signature_v2)
+        
+        # verify_api_response_signature should use version 1 for backward compatibility
+        with patch('cloudinary.config', return_value=cloudinary.config(api_secret=API_SIGN_REQUEST_TEST_SECRET)):
+            self.assertTrue(
+                verify_api_response_signature(
+                    public_id_with_ampersand,
+                    test_version,
+                    expected_signature_v1
+                )
+            )
+            
+            self.assertFalse(
+                verify_api_response_signature(
+                    public_id_with_ampersand,
+                    test_version,
+                    expected_signature_v2
+                )
+            )
+
 
 if __name__ == '__main__':
     unittest.main()
