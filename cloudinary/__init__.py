@@ -183,6 +183,8 @@ class Config(BaseConfig):
 
         if not self.signature_algorithm:
             self.signature_algorithm = utils.SIGNATURE_SHA1
+        if not self.signature_version:
+            self.signature_version = 2
 
     def _config_from_parsed_url(self, parsed_url):
         if not self._is_url_scheme_valid(parsed_url):
