@@ -55,6 +55,8 @@ TEST_FOLDER = 'folder/test'
 
 MOCKED_NOW = 1549533574
 API_SECRET = 'X7qLTrsES31MzxxkxPPA-pAGGfU'
+API_SIGN_REQUEST_TEST_SECRET = "hdcixPpR2iKERPwqvH6sHdK9cyac"
+API_SIGN_REQUEST_CLOUD_NAME = "dn6ot3ged"
 
 
 class TestUtils(unittest.TestCase):
@@ -76,7 +78,8 @@ class TestUtils(unittest.TestCase):
                           cname=None,  # for these tests without actual upload, we ignore cname
                           api_key="a", api_secret="b",
                           secure_distribution=None,
-                          private_cdn=False)
+                          private_cdn=False,
+                          signature_version=2)
 
     def __test_cloudinary_url(self, public_id=TEST_ID, options=None, expected_url=None, expected_options=None):
         if expected_options is None:
@@ -1443,16 +1446,150 @@ class TestUtils(unittest.TestCase):
                                    expected_url=DEFAULT_UPLOAD_PATH + long_signature + "/" + image_name)
 
     def test_api_sign_request_sha1(self):
-        params = dict(cloud_name="dn6ot3ged", timestamp=1568810420, username="user@cloudinary.com")
-        signature = api_sign_request(params, "hdcixPpR2iKERPwqvH6sHdK9cyac")
+        params = dict(cloud_name=API_SIGN_REQUEST_CLOUD_NAME, timestamp=1568810420, username="user@cloudinary.com")
+        signature = api_sign_request(params, API_SIGN_REQUEST_TEST_SECRET)
         expected = "14c00ba6d0dfdedbc86b316847d95b9e6cd46d94"
         self.assertEqual(expected, signature)
 
     def test_api_sign_request_sha256(self):
-        params = dict(cloud_name="dn6ot3ged", timestamp=1568810420, username="user@cloudinary.com")
-        signature = api_sign_request(params, "hdcixPpR2iKERPwqvH6sHdK9cyac", cloudinary.utils.SIGNATURE_SHA256)
+        params = dict(cloud_name=API_SIGN_REQUEST_CLOUD_NAME, timestamp=1568810420, username="user@cloudinary.com")
+        signature = api_sign_request(params, API_SIGN_REQUEST_TEST_SECRET, cloudinary.utils.SIGNATURE_SHA256)
         expected = "45ddaa4fa01f0c2826f32f669d2e4514faf275fe6df053f1a150e7beae58a3bd"
         self.assertEqual(expected, signature)
+
+    def test_api_sign_request_prevents_parameter_smuggling(self):
+        """Should prevent parameter smuggling via & characters in parameter values"""
+        # Test with notification_url containing & characters
+        params_with_ampersand = {
+            "cloud_name": API_SIGN_REQUEST_CLOUD_NAME,
+            "timestamp": 1568810420,
+            "notification_url": "https://fake.com/callback?a=1&tags=hello,world"
+        }
+
+        signature_with_ampersand = api_sign_request(params_with_ampersand, API_SIGN_REQUEST_TEST_SECRET)
+
+        # Test that attempting to smuggle parameters by splitting the notification_url fails
+        params_smuggled = {
+            "cloud_name": API_SIGN_REQUEST_CLOUD_NAME,
+            "timestamp": 1568810420,
+            "notification_url": "https://fake.com/callback?a=1",
+            "tags": "hello,world"  # This would be smuggled if & encoding didn't work
+        }
+
+        signature_smuggled = api_sign_request(params_smuggled, API_SIGN_REQUEST_TEST_SECRET)
+
+        # The signatures should be different, proving that parameter smuggling is prevented
+        self.assertNotEqual(signature_with_ampersand, signature_smuggled,
+                           "Signatures should be different to prevent parameter smuggling")
+
+        # Verify the expected signature for the properly encoded case
+        expected_signature = "4fdf465dd89451cc1ed8ec5b3e314e8a51695704"
+        self.assertEqual(expected_signature, signature_with_ampersand)
+
+        # Verify the expected signature for the smuggled parameters case
+        expected_smuggled_signature = "7b4e3a539ff1fa6e6700c41b3a2ee77586a025f9"
+        self.assertEqual(expected_smuggled_signature, signature_smuggled)
+
+    def test_api_sign_request_signature_versions(self):
+        """Should use signature version 1 (without parameter encoding) for backward compatibility"""
+        public_id_with_ampersand = 'tests/logo&version=2'
+        test_version = 1
+
+        expected_signature_v1 = api_sign_request(
+            {'public_id': public_id_with_ampersand, 'version': test_version},
+            API_SIGN_REQUEST_TEST_SECRET,
+            cloudinary.utils.SIGNATURE_SHA1,
+            signature_version=1
+        )
+
+        expected_signature_v2 = api_sign_request(
+            {'public_id': public_id_with_ampersand, 'version': test_version},
+            API_SIGN_REQUEST_TEST_SECRET,
+            cloudinary.utils.SIGNATURE_SHA1,
+            signature_version=2
+        )
+
+        self.assertNotEqual(expected_signature_v1, expected_signature_v2)
+
+        # verify_api_response_signature should use version 1 for backward compatibility
+        with patch('cloudinary.config', return_value=cloudinary.config(api_secret=API_SIGN_REQUEST_TEST_SECRET)):
+            self.assertTrue(
+                verify_api_response_signature(
+                    public_id_with_ampersand,
+                    test_version,
+                    expected_signature_v1
+                )
+            )
+
+            self.assertFalse(
+                verify_api_response_signature(
+                    public_id_with_ampersand,
+                    test_version,
+                    expected_signature_v2
+                )
+            )
+
+    def test_signature_version_config_support(self):
+        """Should use signature_version from config and produce different signatures for v1 vs v2"""
+        # Use params with & characters to show the encoding difference between versions
+        params = {'public_id': 'test&image', 'notification_url': 'https://example.com/callback?param=value&other=data'}
+
+        # Test with config signature_version = 1
+        cloudinary.config().signature_version = 1
+
+        # Test sign_request function uses config values
+        options_with_config = {'api_key': 'test_key', 'api_secret': API_SIGN_REQUEST_TEST_SECRET}
+        signed_params_config_v1 = cloudinary.utils.sign_request(params.copy(), options_with_config)
+
+        # Test explicit signature version
+        options_explicit_v1 = options_with_config.copy()
+        options_explicit_v1['signature_version'] = 1
+        signed_params_explicit_v1 = cloudinary.utils.sign_request(params.copy(), options_explicit_v1)
+
+        self.assertEqual(signed_params_config_v1['signature'], signed_params_explicit_v1['signature'])
+
+        # Test with config signature_version = 2
+        cloudinary.config().signature_version = 2
+
+        signed_params_config_v2 = cloudinary.utils.sign_request(params.copy(), options_with_config)
+
+        options_explicit_v2 = options_with_config.copy()
+        options_explicit_v2['signature_version'] = 2
+        signed_params_explicit_v2 = cloudinary.utils.sign_request(params.copy(), options_explicit_v2)
+
+        self.assertEqual(signed_params_config_v2['signature'], signed_params_explicit_v2['signature'])
+
+        # Verify that v1 and v2 actually produce different signatures due to parameter encoding
+        self.assertNotEqual(signed_params_config_v1['signature'], signed_params_config_v2['signature'],
+                          "Signature v1 and v2 should be different for parameters with & characters")
+
+    def test_sign_request_with_signature_version(self):
+        """Should support signature_version parameter in sign_request function"""
+        params = {'public_id': 'test_image', 'version': 1234}
+        options = {'api_key': 'test_key', 'api_secret': API_SIGN_REQUEST_TEST_SECRET}
+
+        # Test with signature_version in options
+        options_v1 = options.copy()
+        options_v1['signature_version'] = 1
+        signed_params_v1 = cloudinary.utils.sign_request(params.copy(), options_v1)
+
+        options_v2 = options.copy()
+        options_v2['signature_version'] = 2
+        signed_params_v2 = cloudinary.utils.sign_request(params.copy(), options_v2)
+
+        # The signatures should be different for different versions (for params with & characters)
+        # For these simple params without & they might be the same, but let's test the structure
+        self.assertIn('signature', signed_params_v1)
+        self.assertIn('signature', signed_params_v2)
+        self.assertIn('api_key', signed_params_v1)
+        self.assertIn('api_key', signed_params_v2)
+
+        # Test that signature_version is passed through correctly
+        expected_sig_v1 = api_sign_request(params, API_SIGN_REQUEST_TEST_SECRET, cloudinary.utils.SIGNATURE_SHA1, 1)
+        expected_sig_v2 = api_sign_request(params, API_SIGN_REQUEST_TEST_SECRET, cloudinary.utils.SIGNATURE_SHA1, 2)
+
+        self.assertEqual(signed_params_v1['signature'], expected_sig_v1)
+        self.assertEqual(signed_params_v2['signature'], expected_sig_v2)
 
 
 if __name__ == '__main__':

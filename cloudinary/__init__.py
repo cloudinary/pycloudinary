@@ -183,6 +183,8 @@ class Config(BaseConfig):
 
         if not self.signature_algorithm:
             self.signature_algorithm = utils.SIGNATURE_SHA1
+        if not self.signature_version:
+            self.signature_version = 2
 
     def _config_from_parsed_url(self, parsed_url):
         if not self._is_url_scheme_valid(parsed_url):
@@ -280,7 +282,7 @@ class CloudinaryResource(object):
         return len(self.public_id) if self.public_id is not None else 0
 
     def validate(self):
-        return self.signature == self.get_expected_signature()
+        return utils.verify_api_response_signature(self.public_id, self.version, self.signature)
 
     def get_prep_value(self):
         if None in [self.public_id,
@@ -301,7 +303,7 @@ class CloudinaryResource(object):
 
     def get_expected_signature(self):
         return utils.api_sign_request({"public_id": self.public_id, "version": self.version}, config().api_secret,
-                                      config().signature_algorithm)
+                                      config().signature_algorithm, signature_version=1)
 
     @property
     def url(self):
