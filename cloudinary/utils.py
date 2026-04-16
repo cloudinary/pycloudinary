@@ -121,6 +121,7 @@ __SIMPLE_UPLOAD_PARAMS = [
     "async",
     "cinemagraph_analysis",
     "accessibility_analysis",
+    "auto_chaptering",
 ]
 
 __SERIALIZED_UPLOAD_PARAMS = [

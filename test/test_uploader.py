@@ -977,6 +977,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
             'on_success': ON_SUCCESS_STR,
             'regions': {"box_1": [[1, 2], [3, 4]], "box_2": [[5, 6], [7, 8]]},
             'auto_transcription': True,
+            'auto_chaptering': True,
         }
 
         uploader.upload(TEST_IMAGE, **options)
