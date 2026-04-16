@@ -1,4 +1,5 @@
 import io
+import json
 import os
 import tempfile
 import unittest
@@ -459,6 +460,20 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         self.assertEqual(not_found_res["error"]["http_code"], 404)
         self.assertTrue(not_found_res["error"]["message"].startswith("Resource not found"))
 
+
+    @patch(URLLIB3_REQUEST)
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_explicit_auto_transcription(self, mocker):
+        """Should pass auto_transcription to the API via explicit"""
+        mocker.return_value = MOCK_RESPONSE
+
+        uploader.explicit("test_id", type="upload", resource_type="video", auto_transcription=True)
+        self.assertEqual(get_param(mocker, "auto_transcription"), "true")
+
+        uploader.explicit("test_id", type="upload", resource_type="video",
+                          auto_transcription={"translate": ["pl-PL", "he-IL"]})
+        result = json.loads(get_param(mocker, "auto_transcription"))
+        self.assertEqual(result, {"translate": ["pl-PL", "he-IL"]})
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_update_metadata(self):
@@ -960,7 +975,8 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
             'media_metadata': True,
             'visual_search': True,
             'on_success': ON_SUCCESS_STR,
-            'regions': {"box_1": [[1, 2], [3, 4]], "box_2": [[5, 6], [7, 8]]}
+            'regions': {"box_1": [[1, 2], [3, 4]], "box_2": [[5, 6], [7, 8]]},
+            'auto_transcription': True,
         }
 
         uploader.upload(TEST_IMAGE, **options)
