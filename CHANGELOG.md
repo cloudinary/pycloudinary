@@ -1,3 +1,8 @@
+1.44.2 / 2026-04-16
+==================
+
+  * Add `auto_transcription` and `auto_chaptering` to upload params
+
 1.44.1 / 2025-06-17
 ==================
 
