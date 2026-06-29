@@ -21,6 +21,7 @@ from cloudinary.utils import (
     encode_unicode_url,
     base64url_encode,
     patch_fetch_format,
+    cloudinary_url,
     cloudinary_scaled_url,
     chain_transformations,
     generate_transformation_string,
@@ -1590,6 +1591,54 @@ class TestUtils(unittest.TestCase):
 
         self.assertEqual(signed_params_v1['signature'], expected_sig_v1)
         self.assertEqual(signed_params_v2['signature'], expected_sig_v2)
+
+    def test_cloudinary_url_sign_without_secret_raises(self):
+        """Signing without a secret should raise ValueError"""
+        cloudinary.config(cloud_name="test123", api_secret=None)
+        with self.assertRaises(ValueError) as context:
+            cloudinary_url("sample", sign_url=True)
+        self.assertEqual(str(context.exception), "Must supply api_secret")
+
+    def test_cloudinary_url_unsigned_without_secret_works(self):
+        """Unsigned URL should work without a secret"""
+        cloudinary.config(cloud_name="test123", api_secret=None)
+        url, _ = cloudinary_url("sample")
+        self.assertIn("test123", url)
+        self.assertNotIn("s--", url)
+
+    def test_cloudinary_url_sign_with_secret_works(self):
+        """Signing with a secret should work and include signature"""
+        cloudinary.config(cloud_name="test123", api_key="key", api_secret="secret")
+        url, _ = cloudinary_url("sample", sign_url=True)
+        self.assertIn("s--", url)
+        self.assertIn("test123", url)
+
+    def test_cloudinary_url_per_call_secret_override(self):
+        """Per-call api_secret override should sign successfully"""
+        cloudinary.config(cloud_name="test123", api_secret=None)
+        url, _ = cloudinary_url("sample", sign_url=True, api_secret="override_secret")
+        self.assertIn("s--", url)
+        self.assertIn("test123", url)
+
+    def test_api_sign_request_without_secret_raises(self):
+        """api_sign_request with None secret should raise ValueError"""
+        params = {"a": "b"}
+        with self.assertRaises(ValueError) as context:
+            api_sign_request(params, None)
+        self.assertEqual(str(context.exception), "Must supply api_secret")
+
+    def test_api_sign_request_with_empty_string_raises(self):
+        """api_sign_request with empty string secret should raise ValueError"""
+        params = {"a": "b"}
+        with self.assertRaises(ValueError) as context:
+            api_sign_request(params, "")
+        self.assertEqual(str(context.exception), "Must supply api_secret")
+
+    def test_api_sign_request_with_secret_works(self):
+        """api_sign_request with a real secret should work"""
+        params = dict(cloud_name=API_SIGN_REQUEST_CLOUD_NAME, timestamp=1568810420, username="user@cloudinary.com")
+        signature = api_sign_request(params, API_SIGN_REQUEST_TEST_SECRET)
+        self.assertEqual(signature, "14c00ba6d0dfdedbc86b316847d95b9e6cd46d94")
 
 
 if __name__ == '__main__':
