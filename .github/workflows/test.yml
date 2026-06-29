@@ -4,8 +4,12 @@ on: [push, pull_request]
 
 jobs:
   build:
-    # Skip redundant runs: don't run on push if there's an associated PR
-    if: github.event_name == 'pull_request' || github.event.pull_request == null
+    # Run on every branch push, but avoid duplicate runs when a same-repo PR
+    # exists: same-repo changes run via the push event, while fork PRs (which
+    # can't trigger a push in this repo) run via the pull_request event.
+    if: >-
+      (github.event_name == 'push' && !github.event.pull_request.head.repo.fork) ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork)
     runs-on: ubuntu-24.04  # noble equivalent
 
     strategy:
