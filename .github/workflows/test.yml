@@ -21,14 +21,18 @@ jobs:
             toxenv: py314-core
           - python-version: "3.10"
             toxenv: py310-django42
-          - python-version: "3.11"
-            toxenv: py311-django42
-          - python-version: "3.12"
-            toxenv: py312-django50
+          - python-version: "3.10"
+            toxenv: py310-django50
+          - python-version: "3.10"
+            toxenv: py310-django51
+          - python-version: "3.10"
+            toxenv: py310-django52
           - python-version: "3.13"
-            toxenv: py313-django51
+            toxenv: py313-django42
           - python-version: "3.13"
             toxenv: py313-django52
+          - python-version: "3.12"
+            toxenv: py312-django60
           - python-version: "3.14"
             toxenv: py314-django60
 

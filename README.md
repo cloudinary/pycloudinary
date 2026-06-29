@@ -44,9 +44,9 @@ For the complete documentation, see the [Python SDK Guide](https://cloudinary.co
 |-------------|------------|------------|
 | 1.x         | ✔          | ✔          |
 
-| SDK Version | Django 1.11 | Django 2.x | Django 3.x | Django 4.x | Django 5.x |
-|-------------|-------------|------------|------------|------------|------------|
-| 1.x         | ✔           | ✔          | ✔          | ✔          | ✔          |
+| SDK Version | Django 1.11 | Django 2.x | Django 3.x | Django 4.x | Django 5.x | Django 6.x |
+|-------------|-------------|------------|------------|------------|------------|------------|
+| 1.x         | ✔           | ✔          | ✔          | ✔          | ✔          | ✔          |
 
 
 ## Installation
