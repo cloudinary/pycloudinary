@@ -1,3 +1,8 @@
+1.44.3 / 2026-06-29
+==================
+
+  * Add OAuth token refresh retry to `upload_large` chunks
+
 1.44.2 / 2026-04-16
 ==================
 
