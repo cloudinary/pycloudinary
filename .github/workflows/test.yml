@@ -4,6 +4,8 @@ on: [push, pull_request]
 
 jobs:
   build:
+    # Skip redundant runs: don't run on push if there's an associated PR
+    if: github.event_name == 'pull_request' || github.event.pull_request == null
     runs-on: ubuntu-24.04  # noble equivalent
 
     strategy:
