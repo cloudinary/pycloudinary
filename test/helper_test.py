@@ -351,3 +351,15 @@ class CldTestCase(unittest.TestCase):
             if count1 != count2:
                 standard_msg = '%s != %s' % (count1, count2)
                 self.fail(self._formatMessage(msg, standard_msg))
+
+    def assertObjectContainsSubset(self, actual, expected, msg=None):
+        """
+        Fail unless every key/value pair in expected is present in actual.
+        Nested dicts are compared recursively, so actual may contain extra keys.
+        """
+        for key, value in expected.items():
+            self.assertIn(key, actual, msg)
+            if isinstance(value, dict):
+                self.assertObjectContainsSubset(actual[key], value, msg)
+            else:
+                self.assertEqual(actual[key], value, msg)

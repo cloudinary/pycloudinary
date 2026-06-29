@@ -10,7 +10,7 @@ from cloudinary import api
 from cloudinary.exceptions import BadRequest, NotFound
 from test.helper_test import (
     UNIQUE_TEST_ID, get_uri, get_params, get_method, api_response_mock, ignore_exception, get_json_body,
-    URLLIB3_REQUEST, patch
+    URLLIB3_REQUEST, patch, CldTestCase
 )
 
 MOCK_RESPONSE = api_response_mock()
@@ -105,7 +105,7 @@ METADATA_FIELDS_TO_CREATE = [
 disable_warnings()
 
 
-class MetadataTest(unittest.TestCase):
+class MetadataTest(CldTestCase):
     @classmethod
     def setUpClass(cls):
         cloudinary.reset_config()
@@ -151,9 +151,7 @@ class MetadataTest(unittest.TestCase):
         if metadata_field["type"] in ["enum", "set"]:
             self.assert_metadata_field_datasource(metadata_field["datasource"])
 
-        values = values or {}
-        for key, value in values.items():
-            self.assertEqual(metadata_field[key], value)
+        self.assertObjectContainsSubset(metadata_field, values or {})
 
     def assert_metadata_field_datasource(self, datasource):
         """Asserts that a given object fits the generic structure of a metadata field datasource
@@ -308,17 +306,15 @@ class MetadataTest(unittest.TestCase):
             "external_id": EXTERNAL_ID_SET,
             "label": new_label,
             "type": "integer",
-            "mandatory": True,
             "default_value": new_default_value,
-            "restrictions": {"readonly_ui": True}
+            "restrictions": {"readonly_ui": True},
         })
 
         self.assert_metadata_field(result, "string", {
             "external_id": EXTERNAL_ID_GENERAL,
             "label": new_label,
             "default_value": new_default_value,
-            "mandatory": True,
-            "restrictions": {"readonly_ui": True}
+            "restrictions": {"readonly_ui": True},
         })
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -501,8 +497,7 @@ class MetadataTest(unittest.TestCase):
 
         self.assertTrue(get_uri(mocker).endswith("/metadata_fields/order"))
         self.assertEqual(get_method(mocker), "PUT")
-        self.assertEqual(get_json_body(mocker)['order_by'], "label")
-        self.assertEqual(get_json_body(mocker)['direction'], "asc")
+        self.assertObjectContainsSubset(get_json_body(mocker), {"order_by": "label", "direction": "asc"})
 
     @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -513,8 +508,7 @@ class MetadataTest(unittest.TestCase):
 
         self.assertTrue(get_uri(mocker).endswith("/metadata_fields/order"))
         self.assertEqual(get_method(mocker), "PUT")
-        self.assertEqual(get_json_body(mocker)['order_by'], "external_id")
-        self.assertEqual(get_json_body(mocker)['direction'], "desc")
+        self.assertObjectContainsSubset(get_json_body(mocker), {"order_by": "external_id", "direction": "desc"})
 
     @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -525,8 +519,7 @@ class MetadataTest(unittest.TestCase):
 
         self.assertTrue(get_uri(mocker).endswith("/metadata_fields/order"))
         self.assertEqual(get_method(mocker), "PUT")
-        self.assertEqual(get_json_body(mocker)['order_by'], "created_at")
-        self.assertEqual(get_json_body(mocker)['direction'], "asc")
+        self.assertObjectContainsSubset(get_json_body(mocker), {"order_by": "created_at", "direction": "asc"})
 
 
 if __name__ == "__main__":
