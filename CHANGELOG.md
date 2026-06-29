@@ -1,3 +1,8 @@
+1.44.4 / 2026-06-29
+==================
+
+  * Raise clear error when signing without `api_secret`
+
 1.44.3 / 2026-06-29
 ==================
 
