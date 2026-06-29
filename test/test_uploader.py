@@ -196,11 +196,12 @@ class UploaderTest(CldTestCase):
 
         result = uploader.upload(TEST_UNICODE_IMAGE, tags=[UNIQUE_TAG], use_filename=True, unique_filename=False)
 
-        self.assertEqual(result["width"], TEST_IMAGE_WIDTH)
-        self.assertEqual(result["height"], TEST_IMAGE_HEIGHT)
-
-        self.assertEqual(expected_name, result["public_id"])
-        self.assertEqual(expected_name, result["original_filename"])
+        self.assertObjectContainsSubset(result, {
+            "width": TEST_IMAGE_WIDTH,
+            "height": TEST_IMAGE_HEIGHT,
+            "public_id": expected_name,
+            "original_filename": expected_name,
+        })
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_file_io_without_filename(self):
@@ -211,9 +212,11 @@ class UploaderTest(CldTestCase):
 
             result = uploader.upload(temp_file, tags=[UNIQUE_TAG])
 
-        self.assertEqual(result["width"], TEST_IMAGE_WIDTH)
-        self.assertEqual(result["height"], TEST_IMAGE_HEIGHT)
-        self.assertEqual('stream', result["original_filename"])
+        self.assertObjectContainsSubset(result, {
+            "width": TEST_IMAGE_WIDTH,
+            "height": TEST_IMAGE_HEIGHT,
+            "original_filename": "stream",
+        })
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_upload_custom_filename(self):
@@ -794,11 +797,13 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
                                               use_filename=True, unique_filename=False, filename=filename)
 
             self.assertCountEqual(resource2["tags"], ["upload_large_tag", UNIQUE_TAG])
-            self.assertEqual(resource2["resource_type"], "image")
-            self.assertEqual(resource2["original_filename"], filename)
+            self.assertObjectContainsSubset(resource2, {
+                "resource_type": "image",
+                "original_filename": filename,
+                "width": LARGE_FILE_WIDTH,
+                "height": LARGE_FILE_HEIGHT,
+            })
             self.assertEqual(resource2["original_filename"], resource2["public_id"])
-            self.assertEqual(resource2["width"], LARGE_FILE_WIDTH)
-            self.assertEqual(resource2["height"], LARGE_FILE_HEIGHT)
 
             resource3 = uploader.upload_large(temp_file_name, chunk_size=LARGE_FILE_SIZE,
                                               tags=["upload_large_tag", UNIQUE_TAG])
