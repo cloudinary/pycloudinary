@@ -1,3 +1,10 @@
+1.45.0 / 2026-07-01
+==================
+
+New Functionality and Features
+------------------------------
+  * Add support for `create_agent_account` Provisioning API
+
 1.44.4 / 2026-06-29
 ==================
 
