@@ -1,3 +1,4 @@
+import json
 import unittest
 from datetime import datetime
 
@@ -8,7 +9,8 @@ import cloudinary.provisioning.account
 from cloudinary.provisioning import account_config, reset_config
 from cloudinary.exceptions import AuthorizationRequired, NotFound
 
-from test.helper_test import UNIQUE_SUB_ACCOUNT_ID, UNIQUE_TEST_ID
+from test.helper_test import (UNIQUE_SUB_ACCOUNT_ID, UNIQUE_TEST_ID, URLLIB3_REQUEST, patch, api_response_mock,
+                              get_uri, get_method, get_params, get_headers)
 
 disable_warnings()
 
@@ -85,6 +87,7 @@ class AccountApiTest(unittest.TestCase):
     @unittest.skipUnless(cloudinary.provisioning.account_config().provisioning_api_secret,
                          "requires provisioning_api_key/provisioning_api_secret")
     def test_get_all_sub_accounts(self):
+
         res = cloudinary.provisioning.sub_accounts(True)
 
         sub_account_by_id = [sub_account for sub_account in res["sub_accounts"]
@@ -262,6 +265,94 @@ class AccountApiTest(unittest.TestCase):
 
         named_key_del_res = cloudinary.provisioning.delete_access_key(self.cloud_id, name=key_name)
         self.assertEqual("ok", named_key_del_res["message"])
+
+
+class CreateAgentAccountTest(unittest.TestCase):
+    """
+    The create agent account endpoint is public, unauthenticated and rate limited per IP,
+    so it is verified against a mocked transport rather than the live API.
+    """
+
+    def test_create_agent_account(self):
+        with patch(URLLIB3_REQUEST) as mocker:
+            mocker.return_value = api_response_mock()
+            cloudinary.provisioning.create_agent_account(
+                "jane@example.com",
+                agent_framework="langchain",
+                agent_llm_model="claude-opus-4-8",
+                agent_goal="Build a product image gallery",
+                sdk_framework="python",
+            )
+
+        self.assertEqual("POST", get_method(mocker))
+        self.assertTrue(get_uri(mocker).endswith("/provisioning/agents/accounts"))
+
+        params = get_params(mocker)
+        self.assertEqual("jane@example.com", params["email"])
+        self.assertEqual("langchain", params["agent_framework"])
+        self.assertEqual("claude-opus-4-8", params["agent_llm_model"])
+        self.assertEqual("Build a product image gallery", params["agent_goal"])
+        self.assertEqual("python", params["sdk_framework"])
+
+    def test_create_agent_account_is_unauthenticated(self):
+        with patch(URLLIB3_REQUEST) as mocker:
+            mocker.return_value = api_response_mock()
+            cloudinary.provisioning.create_agent_account(
+                "jane@example.com",
+                agent_framework="langchain",
+                agent_llm_model="claude-opus-4-8",
+                agent_goal="Build a product image gallery",
+            )
+
+        # The endpoint is public - no authorization header must be sent.
+        headers = get_headers(mocker)
+        self.assertNotIn("authorization", {k.lower() for k in headers})
+
+    def test_create_agent_account_omits_unset_sdk_framework(self):
+        with patch(URLLIB3_REQUEST) as mocker:
+            mocker.return_value = api_response_mock()
+            cloudinary.provisioning.create_agent_account(
+                "jane@example.com",
+                agent_framework="langchain",
+                agent_llm_model="claude-opus-4-8",
+                agent_goal="Build a product image gallery",
+            )
+
+        self.assertNotIn("sdk_framework", get_params(mocker))
+
+    def test_create_agent_account_parses_response(self):
+        body = json.dumps({
+            "external_id": "0aaaaa1bbbbb2ccccc3ddddd4eeeee5f",
+            "email": "jane@example.com",
+            "plan_name": "free",
+            "product_environments": [{
+                "external_id": "abcde1fghij2klmno3pqrst4uvwxy5z",
+                "cloud_name": "product1",
+                "api_key": "123456789012345",
+                "api_secret": "asdf1JKL2xyz3ABc4s3c5reT01DfaKez",
+                "api_environment_variable":
+                    "CLOUDINARY_URL=cloudinary://123456789012345:asdf1JKL2xyz3ABc4s3c5reT01DfaKez@product1",
+            }],
+            "guidance": "A verification email has been sent to the supplied email address.",
+        })
+        with patch(URLLIB3_REQUEST) as mocker:
+            mocker.return_value = api_response_mock(body)
+            res = cloudinary.provisioning.create_agent_account(
+                "jane@example.com",
+                agent_framework="langchain",
+                agent_llm_model="claude-opus-4-8",
+                agent_goal="Build a product image gallery",
+            )
+
+        self.assertEqual("free", res["plan_name"])
+        self.assertEqual("jane@example.com", res["email"])
+        self.assertEqual(1, len(res["product_environments"]))
+        product_environment = res["product_environments"][0]
+        self.assertEqual("product1", product_environment["cloud_name"])
+        self.assertEqual("123456789012345", product_environment["api_key"])
+        self.assertEqual("asdf1JKL2xyz3ABc4s3c5reT01DfaKez", product_environment["api_secret"])
+        self.assertIn("CLOUDINARY_URL=cloudinary://", product_environment["api_environment_variable"])
+        self.assertIn("guidance", res)
 
 
 if __name__ == '__main__':
