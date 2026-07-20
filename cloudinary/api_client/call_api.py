@@ -2,7 +2,7 @@ import json
 
 import cloudinary
 from cloudinary.api_client.execute_request import execute_request
-from cloudinary.utils import get_http_connector, normalize_params
+from cloudinary.utils import get_http_connector, normalize_params, consume_cloudinary_config
 
 logger = cloudinary.logger
 _http = get_http_connector(cloudinary.config(), cloudinary.CERT_KWARGS)
@@ -52,6 +52,7 @@ def call_api(method, uri, params, **options):
 
 
 def _call_api(method, uri, params=None, body=None, headers=None, extra_headers=None, **options):
+    options = consume_cloudinary_config(options)
     prefix = options.pop("upload_prefix",
                          cloudinary.config().upload_prefix) or "https://api.cloudinary.com"
     cloud_name = options.pop("cloud_name", cloudinary.config().cloud_name)

@@ -75,6 +75,27 @@ cloudinary.utils.cloudinary_url("sample.jpg", width=100, height=150, crop="fill"
 cloudinary.uploader.upload("my_picture.jpg")
 ```
 
+### Per-call account configuration
+For multi-account or multi-tenant applications, you can override configuration for a single API call by passing
+`cloudinary_config`. This does not mutate the global SDK configuration.
+
+```python
+cloudinary.api.ping(cloudinary_config={
+    "cloud_name": "tenant_cloud",
+    "api_key": "tenant_key",
+    "api_secret": "tenant_secret",
+})
+
+cloudinary.uploader.upload(
+    "my_picture.jpg",
+    cloudinary_config={
+        "cloud_name": "tenant_cloud",
+        "api_key": "tenant_key",
+        "api_secret": "tenant_secret",
+    },
+)
+```
+
 ### Django
 - [See full documentation](https://cloudinary.com/documentation/django_image_and_video_upload#django_forms_and_models).
 

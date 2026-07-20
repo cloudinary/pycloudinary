@@ -194,6 +194,7 @@ def upload(file, **options):
         - etc.
     :rtype: dict
     """
+    options = utils.consume_cloudinary_config(options)
     params = utils.build_upload_params(**options)
     return call_cacheable_api("upload", params, file=file, **options)
 
@@ -275,12 +276,13 @@ def _upload_large_part_with_auth_retry(file, http_headers, options):
     :rtype: dict
     """
     # Pin the token so the value handed to the callback is the one actually sent.
-    token = cloudinary.config().oauth_token
+    options = utils.consume_cloudinary_config(options)
+    token = options.get("oauth_token", cloudinary.config().oauth_token)
     pinned = dict(options, oauth_token=token) if token else options
     try:
         return upload_large_part(file, http_headers=http_headers, **pinned)
     except AuthorizationRequired:
-        callback = cloudinary.config().oauth_token_refresh_callback
+        callback = options.get("oauth_token_refresh_callback", cloudinary.config().oauth_token_refresh_callback)
         if not callback:
             raise
         callback(token)
@@ -303,6 +305,8 @@ def upload_large(file, **options):
     :return: The result of the upload API call.
     :rtype: dict
     """
+    options = utils.consume_cloudinary_config(options)
+
     if utils.is_remote_url(file):
         return upload(file, **options)
 
@@ -357,6 +361,7 @@ def upload_large_part(file, **options):
     :return: The result of the chunk upload API call.
     :rtype: dict
     """
+    options = utils.consume_cloudinary_config(options)
     params = utils.build_upload_params(**options)
 
     if 'resource_type' not in options:
@@ -859,6 +864,7 @@ def call_cacheable_api(action, params, http_headers=None, return_error=False, un
     :return: The parsed JSON response from Cloudinary.
     :rtype: dict
     """
+    options = utils.consume_cloudinary_config(options)
     result = call_api(action, params, http_headers, return_error, unsigned, file, timeout, **options)
     if "use_cache" in options or cloudinary.config().use_cache:
         _save_responsive_breakpoints_to_cache(result)
@@ -892,6 +898,7 @@ def call_api(action, params, http_headers=None, return_error=False, unsigned=Fal
 
     :raises Error: If an HTTP error or a Cloudinary error occurs.
     """
+    options = utils.consume_cloudinary_config(options)
     params = utils.cleanup_params(params)
 
     headers = {"User-Agent": cloudinary.get_user_agent()}

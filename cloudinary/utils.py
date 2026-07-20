@@ -20,6 +20,11 @@ import six.moves.urllib.parse
 from six import iteritems
 from urllib3 import ProxyManager, PoolManager
 
+try:
+    from collections.abc import Mapping
+except ImportError:
+    from collections import Mapping
+
 import cloudinary
 from cloudinary import auth_token
 from cloudinary.api_client.tcp_keep_alive_manager import TCPKeepAlivePoolManager, TCPKeepAliveProxyManager
@@ -171,6 +176,8 @@ signature_algorithms = {
     SIGNATURE_SHA256: hashlib.sha256,
 }
 
+CLOUDINARY_CONFIG_OPTION = "cloudinary_config"
+
 
 def compute_hex_hash(s, algorithm=SIGNATURE_SHA1):
     """
@@ -194,6 +201,21 @@ def build_array(arg):
     elif arg is None:
         return []
     return [arg]
+
+
+def consume_cloudinary_config(options):
+    config_overrides = options.pop(CLOUDINARY_CONFIG_OPTION, None)
+
+    if config_overrides is None:
+        return options
+
+    if not isinstance(config_overrides, Mapping):
+        raise ValueError("{} must be a dictionary".format(CLOUDINARY_CONFIG_OPTION))
+
+    for key, value in config_overrides.items():
+        options.setdefault(key, value)
+
+    return options
 
 
 def build_list_of_dicts(val):
@@ -614,6 +636,7 @@ def normalize_params(params):
 
 
 def sign_request(params, options):
+    options = consume_cloudinary_config(options)
     api_key = options.get("api_key", cloudinary.config().api_key)
     if not api_key:
         raise ValueError("Must supply api_key")
@@ -798,6 +821,7 @@ def unsigned_download_url_prefix(source, cloud_name, private_cdn, cdn_subdomain,
 
 
 def build_distribution_domain(options):
+    options = consume_cloudinary_config(options)
     source = options.pop('source', '')
     cloud_name = options.pop("cloud_name", cloudinary.config().cloud_name or None)
     if cloud_name is None:
@@ -906,6 +930,7 @@ def cloudinary_url(source, **options):
 
 
 def base_api_url(path, **options):
+    options = consume_cloudinary_config(options)
     cloudinary_prefix = options.get("upload_prefix", cloudinary.config().upload_prefix) \
                         or "https://api.cloudinary.com"
     cloud_name = options.get("cloud_name", cloudinary.config().cloud_name)
@@ -1161,6 +1186,7 @@ def build_custom_headers(headers):
 
 
 def build_upload_params(**options):
+    options = consume_cloudinary_config(options)
     params = {param_name: options.get(param_name) for param_name in __SIMPLE_UPLOAD_PARAMS if param_name in options}
     params["upload_preset"] = params.pop("upload_preset", cloudinary.config().upload_preset)
 
