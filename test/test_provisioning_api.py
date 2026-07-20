@@ -355,5 +355,34 @@ class CreateAgentAccountTest(unittest.TestCase):
         self.assertIn("guidance", res)
 
 
+class AccountApiTemporaryConfigTest(unittest.TestCase):
+    def tearDown(self):
+        reset_config()
+
+    def test_temporary_config_account_api(self):
+        with patch(URLLIB3_REQUEST) as mocker:
+            mocker.return_value = api_response_mock()
+            cloudinary.provisioning.sub_accounts(cloudinary_config={
+                "account_id": "temporary_account",
+                "provisioning_api_key": "temporary_key",
+                "provisioning_api_secret": "temporary_secret",
+                "upload_prefix": "https://custom.example.com",
+            })
+
+        self.assertEqual("GET", get_method(mocker))
+        self.assertTrue(
+            get_uri(mocker).endswith("/v1_1/provisioning/accounts/temporary_account/sub_accounts")
+        )
+
+        headers = get_headers(mocker)
+        self.assertTrue("authorization" in headers)
+        self.assertEqual("Basic dGVtcG9yYXJ5X2tleTp0ZW1wb3Jhcnlfc2VjcmV0", headers["authorization"])
+
+        config = account_config()
+        self.assertIsNone(config.account_id)
+        self.assertIsNone(config.provisioning_api_key)
+        self.assertIsNone(config.provisioning_api_secret)
+
+
 if __name__ == '__main__':
     unittest.main()

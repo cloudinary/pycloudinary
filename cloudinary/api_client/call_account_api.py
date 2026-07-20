@@ -1,7 +1,7 @@
 import cloudinary
 from cloudinary.api_client.execute_request import execute_request
 from cloudinary.provisioning.account_config import account_config
-from cloudinary.utils import get_http_connector, normalize_params
+from cloudinary.utils import get_http_connector, normalize_params, consume_cloudinary_config
 
 PROVISIONING_SUB_PATH = "provisioning"
 ACCOUNT_SUB_PATH = "accounts"
@@ -10,6 +10,7 @@ _http = get_http_connector(account_config(), cloudinary.CERT_KWARGS)
 
 # Account-scoped, authenticated call: provisioning/accounts/{account_id}/...
 def _call_account_api(method, uri, params=None, headers=None, **options):
+    options = consume_cloudinary_config(options)
     account_uri = [ACCOUNT_SUB_PATH, _account_id(options)] + uri
     return _execute_account_request(method, account_uri, _account_auth(options),
                                     params=params, headers=headers, **options)
@@ -17,6 +18,7 @@ def _call_account_api(method, uri, params=None, headers=None, **options):
 
 # Public, unauthenticated call: provisioning/... with no account_id or credentials
 def _call_public_account_api(method, uri, params=None, headers=None, **options):
+    options = consume_cloudinary_config(options)
     return _execute_account_request(method, uri, {"anonymous": True},
                                     params=params, headers=headers, **options)
 
@@ -41,6 +43,7 @@ def _account_auth(options):
 # Core transport: builds the provisioning URL and dispatches with the resolved auth.
 # The API version can be overridden via the "api_version" option (defaults to cloudinary.API_VERSION).
 def _execute_account_request(method, uri, auth, params=None, headers=None, **options):
+    options = consume_cloudinary_config(options)
     prefix = options.pop("upload_prefix",
                          cloudinary.config().upload_prefix) or "https://api.cloudinary.com"
     api_version = options.pop("api_version", cloudinary.API_VERSION)

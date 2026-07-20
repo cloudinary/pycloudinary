@@ -5,7 +5,7 @@ import six
 import cloudinary
 from cloudinary import api
 from cloudinary import uploader
-from test.helper_test import TEST_IMAGE, get_headers, get_params, URLLIB3_REQUEST, patch
+from test.helper_test import TEST_IMAGE, get_headers, get_params, get_uri, URLLIB3_REQUEST, patch
 from test.test_api import MOCK_RESPONSE
 from test.test_config import OAUTH_TOKEN, CLOUD_NAME, API_KEY, API_SECRET
 from test.test_uploader import API_TEST_PRESET
@@ -60,6 +60,29 @@ class ApiAuthorizationTest(unittest.TestCase):
 
         with six.assertRaisesRegex(self, Exception, "Must supply api_key"):
             api.ping()
+
+    @patch(URLLIB3_REQUEST)
+    def test_temporary_config_admin_api(self, mocker):
+        self.config.oauth_token = None
+        self.config.api_key = None
+        self.config.api_secret = None
+        mocker.return_value = MOCK_RESPONSE
+
+        api.ping(cloudinary_config={
+            "cloud_name": "temporary_cloud",
+            "api_key": "temporary_key",
+            "api_secret": "temporary_secret",
+        })
+
+        headers = get_headers(mocker)
+
+        self.assertTrue("authorization" in headers)
+        self.assertEqual("Basic dGVtcG9yYXJ5X2tleTp0ZW1wb3Jhcnlfc2VjcmV0", headers["authorization"])
+        self.assertTrue(get_uri(mocker).endswith("/temporary_cloud/ping"))
+
+        self.assertIsNone(self.config.api_key)
+        self.assertIsNone(self.config.api_secret)
+        self.assertEqual(CLOUD_NAME, self.config.cloud_name)
 
     @patch(URLLIB3_REQUEST)
     def test_oauth_token_upload_api(self, mocker):
@@ -118,6 +141,31 @@ class ApiAuthorizationTest(unittest.TestCase):
         args, _ = mocker.call_args
         params = get_params(mocker)
         self.assertTrue("upload_preset" in params)
+
+    @patch(URLLIB3_REQUEST)
+    def test_temporary_config_upload_api(self, mocker):
+        self.config.oauth_token = None
+        self.config.api_key = None
+        self.config.api_secret = None
+        mocker.return_value = MOCK_RESPONSE
+
+        uploader.upload(TEST_IMAGE, cloudinary_config={
+            "cloud_name": "temporary_cloud",
+            "api_key": "temporary_key",
+            "api_secret": "temporary_secret",
+            "upload_preset": API_TEST_PRESET,
+        })
+
+        self.assertTrue(get_uri(mocker).endswith("/temporary_cloud/image/upload"))
+
+        params = get_params(mocker)
+        self.assertEqual("temporary_key", params["api_key"])
+        self.assertEqual(API_TEST_PRESET, params["upload_preset"])
+        self.assertIn("signature", params)
+
+        self.assertIsNone(self.config.api_key)
+        self.assertIsNone(self.config.api_secret)
+        self.assertEqual(CLOUD_NAME, self.config.cloud_name)
 
 
 if __name__ == '__main__':
