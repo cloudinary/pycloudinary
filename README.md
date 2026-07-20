@@ -1,119 +1,107 @@
+# Cloudinary Python SDK
+
 [![Tests](https://github.com/cloudinary/pycloudinary/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/cloudinary/pycloudinary/actions/workflows/test.yml)
-[![PyPI Version](https://img.shields.io/pypi/v/cloudinary.svg)](https://pypi.python.org/pypi/cloudinary/)
-[![PyPI PyVersions](https://img.shields.io/pypi/pyversions/cloudinary.svg)](https://pypi.python.org/pypi/cloudinary/)
-[![PyPI DjangoVersions](https://img.shields.io/pypi/djversions/cloudinary.svg)](https://pypi.python.org/pypi/cloudinary/)
-[![PyPI Version](https://img.shields.io/pypi/dm/cloudinary.svg)](https://pypi.python.org/pypi/cloudinary/)
-[![PyPI License](https://img.shields.io/pypi/l/cloudinary.svg)](https://pypi.python.org/pypi/cloudinary/)
+[![PyPI version](https://img.shields.io/pypi/v/cloudinary.svg)](https://pypi.org/project/cloudinary/)
+[![PyPI Python versions](https://img.shields.io/pypi/pyversions/cloudinary.svg)](https://pypi.org/project/cloudinary/)
+[![PyPI license](https://img.shields.io/pypi/l/cloudinary.svg)](https://pypi.org/project/cloudinary/)
 
-
-Cloudinary Python SDK
-==================
-
-## About
-The Cloudinary Python SDK allows you to quickly and easily integrate your application with Cloudinary.
-Effortlessly optimize, transform, upload and manage your cloud's assets.
-
-
-#### Note
-This Readme provides basic installation and usage information.
-For the complete documentation, see the [Python SDK Guide](https://cloudinary.com/documentation/django_integration).
-
-## Table of Contents
-- [Key Features](#key-features)
-- [Version Support](#Version-Support)
-- [Installation](#installation)
-- [Usage](#usage)
-    - [Setup](#Setup)
-    - [Transform and Optimize Assets](#Transform-and-Optimize-Assets)
-    - [Django](#Django)
-
-
-## Key Features
-- [Transform](https://cloudinary.com/documentation/django_video_manipulation#video_transformation_examples) and
-  [optimize](https://cloudinary.com/documentation/django_image_manipulation#image_optimizations) assets.
-- Generate [image](https://cloudinary.com/documentation/django_image_manipulation#deliver_and_transform_images) and
-  [video](https://cloudinary.com/documentation/django_video_manipulation#django_video_transformation_code_examples) tags.
-- [Asset Management](https://cloudinary.com/documentation/django_asset_administration).
-- [Secure URLs](https://cloudinary.com/documentation/video_manipulation_and_delivery#generating_secure_https_urls_using_sdks).
-
-
-
-## Version Support
-
-| SDK Version | Python 2.7 | Python 3.x |
-|-------------|------------|------------|
-| 1.x         | ✔          | ✔          |
-
-| SDK Version | Django 1.11 | Django 2.x | Django 3.x | Django 4.x | Django 5.x | Django 6.x |
-|-------------|-------------|------------|------------|------------|------------|------------|
-| 1.x         | ✔           | ✔          | ✔          | ✔          | ✔          | ✔          |
-
+The `cloudinary` package is the server-side Cloudinary SDK for Python. Use it in a backend or build step to upload assets, build transformation and delivery URLs, and call the Admin API. It holds the API secret, so it handles the operations that can't run in a browser: signed uploads, signed delivery URLs, and asset administration. The same package covers plain Python and Django — the `CloudinaryField` model field, forms, and `{% load cloudinary %}` template tags ship inside it. The package and import name are both `cloudinary`. The current release (1.45.0) is tested on Python 3.10 through 3.14 and Django 4.2 through 6.0.
 
 ## Installation
+
 ```bash
 pip install cloudinary
 ```
 
-# Usage
+## Configuration
 
-### Setup
+The SDK reads credentials automatically from the `CLOUDINARY_URL` environment variable on import:
+
+```bash
+export CLOUDINARY_URL=cloudinary://<API_KEY>:<API_SECRET>@<CLOUD_NAME>
+```
+
+To set them in code instead, call `cloudinary.config()`:
+
 ```python
 import cloudinary
+
+cloudinary.config(
+    cloud_name="my_cloud_name",
+    api_key="my_key",
+    api_secret="my_secret",
+    secure=True,  # emit https:// delivery URLs
+)
 ```
 
-### Transform and Optimize Assets
-- [See full documentation](https://cloudinary.com/documentation/django_image_manipulation).
+Keep the API secret on the server. Don't put it in client-side code or commit it to version control.
 
-```python 
-cloudinary.utils.cloudinary_url("sample.jpg", width=100, height=150, crop="fill")
-```
+## Quick examples
 
-### Upload
-- [See full documentation](https://cloudinary.com/documentation/django_image_and_video_upload).
-- [Learn more about configuring your uploads with upload presets](https://cloudinary.com/documentation/upload_presets).
+### Upload a file
+
+`cloudinary.uploader.upload(file, **options)` accepts a local path, a remote URL, a data URI, a file object, or raw bytes as its first argument, and returns a dict of the uploaded asset's metadata, including `public_id` and `secure_url`:
+
 ```python
-cloudinary.uploader.upload("my_picture.jpg")
+import cloudinary.uploader
+# Credentials come from CLOUDINARY_URL in the environment.
+
+result = cloudinary.uploader.upload(
+    "my_picture.jpg",
+    public_id="cms/hero",  # optional: where the asset lives in your media library
+)
+print(result["public_id"], result["secure_url"])
 ```
 
-### Django
-- [See full documentation](https://cloudinary.com/documentation/django_image_and_video_upload#django_forms_and_models).
+### Build and optimize a delivery URL
 
-### Security options
-- [See full documentation](https://cloudinary.com/documentation/solution_overview#security).
+`cloudinary.utils.cloudinary_url(source, **options)` is synchronous and makes no network call. It returns a `(url, options)` tuple whose first element is the delivery URL string. This one resizes to a 100x150 fill crop and lets Cloudinary pick the format and quality for the requesting browser (`f_auto`, `q_auto`):
 
-### Sample projects
-- [Sample projects](https://github.com/cloudinary/pycloudinary/tree/master/samples).
-- [Django Photo Album](https://github.com/cloudinary/cloudinary-django-sample).
+```python
+import cloudinary.utils
 
+url, options = cloudinary.utils.cloudinary_url(
+    "sample.jpg",
+    width=100, height=150, crop="fill",
+    fetch_format="auto", quality="auto",
+    secure=True,  # emit an https:// delivery URL
+)
+print(url)
+# https://res.cloudinary.com/demo/image/upload/c_fill,f_auto,h_150,q_auto,w_100/sample.jpg
+```
 
-## Contributions
-- Ensure tests run locally.
-- Open a PR and ensure Travis tests pass.
-- See [CONTRIBUTING](CONTRIBUTING.md).
+### Retrieve asset details
 
-## Get Help
-If you run into an issue or have a question, you can either:
-- Issues related to the SDK: [Open a GitHub issue](https://github.com/cloudinary/pycloudinary/issues).
-- Issues related to your account: [Open a support ticket](https://cloudinary.com/contact).
+`cloudinary.api.resource(public_id, **options)` takes a public ID and returns the asset's metadata, including its dimensions, format, and `secure_url`:
 
+```python
+import cloudinary.api
+# Credentials come from CLOUDINARY_URL in the environment.
 
-## About Cloudinary
-Cloudinary is a powerful media API for websites and mobile apps alike, Cloudinary enables developers to efficiently 
-manage, transform, optimize, and deliver images and videos through multiple CDNs. Ultimately, viewers enjoy responsive 
-and personalized visual-media experiences—irrespective of the viewing device.
+asset = cloudinary.api.resource("sample")
+print(asset["format"], asset["width"], asset["height"], asset["secure_url"])
+```
 
+## For AI agents
 
-## Additional Resources
-- [Cloudinary Transformation and REST API References](https://cloudinary.com/documentation/cloudinary_references): Comprehensive references, including syntax and examples for all SDKs.
-- [MediaJams.dev](https://mediajams.dev/): Bite-size use-case tutorials written by and for Cloudinary Developers
-- [DevJams](https://www.youtube.com/playlist?list=PL8dVGjLA2oMr09amgERARsZyrOz_sPvqw): Cloudinary developer podcasts on YouTube.
-- [Cloudinary Academy](https://training.cloudinary.com/): Free self-paced courses, instructor-led virtual courses, and on-site courses.
-- [Code Explorers and Feature Demos](https://cloudinary.com/documentation/code_explorers_demos_index): A one-stop shop for all code explorers, Postman collections, and feature demos found in the docs.
-- [Cloudinary Roadmap](https://cloudinary.com/roadmap): Your chance to follow, vote, or suggest what Cloudinary should develop next.
-- [Cloudinary Facebook Community](https://www.facebook.com/groups/CloudinaryCommunity): Learn from and offer help to other Cloudinary developers.
-- [Cloudinary Account Registration](https://cloudinary.com/users/register/free): Free Cloudinary account registration.
-- [Cloudinary Website](https://cloudinary.com): Learn about Cloudinary's products, partners, customers, pricing, and more.
+`cloudinary` is the Python server-side SDK, and it's also the Django SDK — the `CloudinaryField` model field (`cloudinary.models`), forms (`cloudinary.forms`), and `{% load cloudinary %}` template tags ship in this one package, so there's no separate Django SDK to install. Choose it for backend upload, asset administration, the Search API, and signed URL or tag generation, where the API secret stays private. For tasks it doesn't cover, choose a different package:
 
+| Task | Package |
+|---|---|
+| Build delivery URLs in the browser | [`@cloudinary/url-gen`](https://github.com/cloudinary/js-url-gen) |
+| Wire Cloudinary in as Django's `DEFAULT_FILE_STORAGE` / `STORAGES` backend | [`django-cloudinary-storage`](https://github.com/klis87/django-cloudinary-storage) (third-party) |
+| Run Cloudinary operations as agent tools | [Cloudinary MCP servers](https://github.com/cloudinary/mcp-servers) |
 
-## Licence
+The Django file-storage backend is the only Django piece this package doesn't ship — `CloudinaryField` covers the common case without it.
+
+## Links
+
+- [Python SDK guide](https://cloudinary.com/documentation/django_integration)
+- [Upload](https://cloudinary.com/documentation/django_image_and_video_upload)
+- [Asset administration (Admin API)](https://cloudinary.com/documentation/django_asset_administration)
+- [Image transformations](https://cloudinary.com/documentation/django_image_manipulation)
+- [Transformation and API references](https://cloudinary.com/documentation/cloudinary_references)
+- [Documentation llms.txt index](https://cloudinary.com/documentation/llms.txt)
+- [Package on PyPI](https://pypi.org/project/cloudinary/)
+
 Released under the MIT license.
