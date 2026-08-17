@@ -429,27 +429,27 @@ class CreateCloudTest(unittest.TestCase):
 
     def test_create_cloud_parses_response(self):
         body = json.dumps({
-            "account_id": "e8d2628f-b471-4623-8e70-bfadf2d698d6",
-            "email": "cloud-23846ea414f8f060@cloud.cloudinary.invalid",
-            "cloud_name": "ywzadsah",
-            "api_key": "263699673149279",
-            "api_secret": "ed8CiWnoTcJ3glxvlA-_-WDLDCM",
+            "account_id": "00000000-0000-0000-0000-000000000000",
+            "email": "cloud-0000000000000000@cloud.cloudinary.invalid",
+            "cloud_name": "test-cloud",
+            "api_key": "000000000000000",
+            "api_secret": "FAKE_API_SECRET_FOR_TESTS",
             "api_environment_variable":
-                "CLOUDINARY_URL=cloudinary://263699673149279:ed8CiWnoTcJ3glxvlA-_-WDLDCM@ywzadsah",
+                "CLOUDINARY_URL=cloudinary://000000000000000:FAKE_API_SECRET_FOR_TESTS@test-cloud",
             "claimed": False,
             "expires_at": "2026-08-13T13:08:42Z",
             "delivery_ips": ["8.8.8.8"],
-            "claim_url": "https://console.cloudinary.com/users/agent_email_confirmation?token=abc123",
+            "claim_url": "https://console.cloudinary.com/users/agent_email_confirmation?token=FAKE_CLAIM_TOKEN",
             "guidance": "A Claimable Cloud is ready and the API key and secret below work immediately.",
         })
         with patch(URLLIB3_REQUEST) as mocker:
             mocker.return_value = api_response_mock(body)
             res = cloudinary.provisioning.create_cloud(["8.8.8.8"])
 
-        self.assertEqual("e8d2628f-b471-4623-8e70-bfadf2d698d6", res["account_id"])
-        self.assertEqual("ywzadsah", res["cloud_name"])
-        self.assertEqual("263699673149279", res["api_key"])
-        self.assertEqual("ed8CiWnoTcJ3glxvlA-_-WDLDCM", res["api_secret"])
+        self.assertEqual("00000000-0000-0000-0000-000000000000", res["account_id"])
+        self.assertEqual("test-cloud", res["cloud_name"])
+        self.assertEqual("000000000000000", res["api_key"])
+        self.assertEqual("FAKE_API_SECRET_FOR_TESTS", res["api_secret"])
         self.assertIn("CLOUDINARY_URL=cloudinary://", res["api_environment_variable"])
         self.assertFalse(res["claimed"])
         self.assertEqual("2026-08-13T13:08:42Z", res["expires_at"])
@@ -463,15 +463,15 @@ class CreateCloudTest(unittest.TestCase):
         # product_environments[], the shape the agent-account endpoint uses) still reach the
         # caller intact instead of being dropped.
         body = json.dumps({
-            "id": "e8d2628f-b471-4623-8e70-bfadf2d698d6",
-            "email": "cloud-23846ea414f8f060@cloud.cloudinary.invalid",
+            "id": "00000000-0000-0000-0000-000000000000",
+            "email": "cloud-0000000000000000@cloud.cloudinary.invalid",
             "expires_at": "2026-08-13T13:08:42Z",
             "delivery_ips": ["8.8.8.8"],
-            "claim_url": "https://console.cloudinary.com/users/agent_email_confirmation?token=abc123",
+            "claim_url": "https://console.cloudinary.com/users/agent_email_confirmation?token=FAKE_CLAIM_TOKEN",
             "product_environments": [{
-                "cloud_name": "ywzadsah",
-                "api_access_keys": [{"key": "263699673149279",
-                                     "secret": "ed8CiWnoTcJ3glxvlA-_-WDLDCM",
+                "cloud_name": "test-cloud",
+                "api_access_keys": [{"key": "000000000000000",
+                                     "secret": "FAKE_API_SECRET_FOR_TESTS",
                                      "enabled": True}],
             }],
         })
@@ -480,9 +480,9 @@ class CreateCloudTest(unittest.TestCase):
             res = cloudinary.provisioning.create_cloud(["8.8.8.8"])
 
         product_environment = res["product_environments"][0]
-        self.assertEqual("ywzadsah", product_environment["cloud_name"])
-        self.assertEqual("263699673149279", product_environment["api_access_keys"][0]["key"])
-        self.assertEqual("ed8CiWnoTcJ3glxvlA-_-WDLDCM", product_environment["api_access_keys"][0]["secret"])
+        self.assertEqual("test-cloud", product_environment["cloud_name"])
+        self.assertEqual("000000000000000", product_environment["api_access_keys"][0]["key"])
+        self.assertEqual("FAKE_API_SECRET_FOR_TESTS", product_environment["api_access_keys"][0]["secret"])
 
     def test_create_cloud_maps_errors(self):
         for status, code in ((400, "delivery_ips_not_public"),
