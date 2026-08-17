@@ -7,10 +7,10 @@ from urllib3 import disable_warnings
 
 import cloudinary.provisioning.account
 from cloudinary.provisioning import account_config, reset_config
-from cloudinary.exceptions import AuthorizationRequired, NotFound
+from cloudinary.exceptions import AuthorizationRequired, BadRequest, NotFound, RateLimited
 
 from test.helper_test import (UNIQUE_SUB_ACCOUNT_ID, UNIQUE_TEST_ID, URLLIB3_REQUEST, patch, api_response_mock,
-                              get_uri, get_method, get_params, get_headers)
+                              http_response_mock, get_uri, get_method, get_params, get_headers)
 
 disable_warnings()
 
@@ -353,6 +353,157 @@ class CreateAgentAccountTest(unittest.TestCase):
         self.assertEqual("asdf1JKL2xyz3ABc4s3c5reT01DfaKez", product_environment["api_secret"])
         self.assertIn("CLOUDINARY_URL=cloudinary://", product_environment["api_environment_variable"])
         self.assertIn("guidance", res)
+
+
+class CreateCloudTest(unittest.TestCase):
+    """
+    The create cloud endpoint is public, unauthenticated and rate limited per IP, and every
+    successful call provisions a real account, so it is verified against a mocked transport
+    rather than the live API.
+    """
+
+    def test_create_cloud(self):
+        with patch(URLLIB3_REQUEST) as mocker:
+            mocker.return_value = api_response_mock()
+            cloudinary.provisioning.create_cloud()
+
+        self.assertEqual("POST", get_method(mocker))
+        uri = get_uri(mocker)
+        self.assertTrue(uri.endswith("/provisioning/clouds"))
+        # The resource sits directly under provisioning/, with no agents/ prefix and no
+        # accounts/{account_id} segment.
+        self.assertNotIn("/agents", uri)
+        self.assertNotIn("/accounts", uri)
+
+    def test_create_cloud_is_unauthenticated(self):
+        with patch(URLLIB3_REQUEST) as mocker:
+            mocker.return_value = api_response_mock()
+            cloudinary.provisioning.create_cloud()
+
+        # The endpoint is public - no authorization header must be sent.
+        headers = get_headers(mocker)
+        self.assertNotIn("authorization", {k.lower() for k in headers})
+
+    def test_create_cloud_omits_unset_delivery_ips(self):
+        with patch(URLLIB3_REQUEST) as mocker:
+            mocker.return_value = api_response_mock()
+            cloudinary.provisioning.create_cloud()
+
+        # The default path sends no delivery_ips at all, letting the server derive the
+        # allow-list from the requester's own resolved address.
+        self.assertNotIn("delivery_ips", get_params(mocker))
+        # Nothing else is sent either - an empty body is the documented default request.
+        self.assertEqual({}, get_params(mocker))
+
+    def test_create_cloud_sends_requester_ip_sentinel(self):
+        with patch(URLLIB3_REQUEST) as mocker:
+            mocker.return_value = api_response_mock()
+            cloudinary.provisioning.create_cloud(["requester_ip"])
+
+        # Passed through verbatim; the server substitutes its own resolved address.
+        self.assertEqual(["requester_ip"], get_params(mocker)["delivery_ips"])
+
+    def test_create_cloud_sends_delivery_ips_as_array(self):
+        with patch(URLLIB3_REQUEST) as mocker:
+            mocker.return_value = api_response_mock()
+            cloudinary.provisioning.create_cloud(["8.8.8.8", "1.1.1.1", "requester_ip"])
+
+        # The server rejects a comma-joined string with "delivery_ips must be an array of
+        # IP addresses", so the list must stay a genuine array on the wire.
+        self.assertEqual(["8.8.8.8", "1.1.1.1", "requester_ip"], get_params(mocker)["delivery_ips"])
+
+    def test_create_cloud_sends_optional_email(self):
+        with patch(URLLIB3_REQUEST) as mocker:
+            mocker.return_value = api_response_mock()
+            cloudinary.provisioning.create_cloud(email="jane@example.com")
+
+        self.assertEqual("jane@example.com", get_params(mocker)["email"])
+
+    def test_create_cloud_omits_unset_email(self):
+        with patch(URLLIB3_REQUEST) as mocker:
+            mocker.return_value = api_response_mock()
+            cloudinary.provisioning.create_cloud(["8.8.8.8"])
+
+        # Omitted rather than sent empty: the server generates a placeholder address.
+        self.assertNotIn("email", get_params(mocker))
+
+    def test_create_cloud_parses_response(self):
+        body = json.dumps({
+            "account_id": "e8d2628f-b471-4623-8e70-bfadf2d698d6",
+            "email": "cloud-23846ea414f8f060@cloud.cloudinary.invalid",
+            "cloud_name": "ywzadsah",
+            "api_key": "263699673149279",
+            "api_secret": "ed8CiWnoTcJ3glxvlA-_-WDLDCM",
+            "api_environment_variable":
+                "CLOUDINARY_URL=cloudinary://263699673149279:ed8CiWnoTcJ3glxvlA-_-WDLDCM@ywzadsah",
+            "claimed": False,
+            "expires_at": "2026-08-13T13:08:42Z",
+            "delivery_ips": ["8.8.8.8"],
+            "claim_url": "https://console.cloudinary.com/users/agent_email_confirmation?token=abc123",
+            "guidance": "A Claimable Cloud is ready and the API key and secret below work immediately.",
+        })
+        with patch(URLLIB3_REQUEST) as mocker:
+            mocker.return_value = api_response_mock(body)
+            res = cloudinary.provisioning.create_cloud(["8.8.8.8"])
+
+        self.assertEqual("e8d2628f-b471-4623-8e70-bfadf2d698d6", res["account_id"])
+        self.assertEqual("ywzadsah", res["cloud_name"])
+        self.assertEqual("263699673149279", res["api_key"])
+        self.assertEqual("ed8CiWnoTcJ3glxvlA-_-WDLDCM", res["api_secret"])
+        self.assertIn("CLOUDINARY_URL=cloudinary://", res["api_environment_variable"])
+        self.assertFalse(res["claimed"])
+        self.assertEqual("2026-08-13T13:08:42Z", res["expires_at"])
+        self.assertEqual(["8.8.8.8"], res["delivery_ips"])
+        self.assertIn("agent_email_confirmation", res["claim_url"])
+        self.assertIn("guidance", res)
+
+    def test_create_cloud_passes_through_unknown_response_shape(self):
+        # The contracted response is flat, but it is returned verbatim rather than reshaped,
+        # so unrecognized or added fields (here credentials nested under
+        # product_environments[], the shape the agent-account endpoint uses) still reach the
+        # caller intact instead of being dropped.
+        body = json.dumps({
+            "id": "e8d2628f-b471-4623-8e70-bfadf2d698d6",
+            "email": "cloud-23846ea414f8f060@cloud.cloudinary.invalid",
+            "expires_at": "2026-08-13T13:08:42Z",
+            "delivery_ips": ["8.8.8.8"],
+            "claim_url": "https://console.cloudinary.com/users/agent_email_confirmation?token=abc123",
+            "product_environments": [{
+                "cloud_name": "ywzadsah",
+                "api_access_keys": [{"key": "263699673149279",
+                                     "secret": "ed8CiWnoTcJ3glxvlA-_-WDLDCM",
+                                     "enabled": True}],
+            }],
+        })
+        with patch(URLLIB3_REQUEST) as mocker:
+            mocker.return_value = api_response_mock(body)
+            res = cloudinary.provisioning.create_cloud(["8.8.8.8"])
+
+        product_environment = res["product_environments"][0]
+        self.assertEqual("ywzadsah", product_environment["cloud_name"])
+        self.assertEqual("263699673149279", product_environment["api_access_keys"][0]["key"])
+        self.assertEqual("ed8CiWnoTcJ3glxvlA-_-WDLDCM", product_environment["api_access_keys"][0]["secret"])
+
+    def test_create_cloud_maps_errors(self):
+        for status, code in ((400, "delivery_ips_not_public"),
+                             (400, "delivery_ips_invalid"),
+                             (400, "delivery_ips_too_many")):
+            body = json.dumps({"error": {"category": "invalid_parameter",
+                                         "code": code,
+                                         "message": "delivery_ips error"}})
+            with patch(URLLIB3_REQUEST) as mocker:
+                mocker.return_value = http_response_mock(body, status=status)
+                with self.assertRaises(BadRequest):
+                    cloudinary.provisioning.create_cloud(["not-an-ip"])
+
+        for status in (420, 429):
+            body = json.dumps({"error": {"category": "rate_limit",
+                                         "code": "ip_rate_limit_exceeded",
+                                         "message": "Rate limit exceeded"}})
+            with patch(URLLIB3_REQUEST) as mocker:
+                mocker.return_value = http_response_mock(body, status=status)
+                with self.assertRaises(RateLimited):
+                    cloudinary.provisioning.create_cloud(["8.8.8.8"])
 
 
 if __name__ == '__main__':

@@ -2,6 +2,7 @@ from cloudinary.api_client.call_account_api import _call_account_api, _call_publ
 from cloudinary.utils import encode_list
 
 AGENTS_SUB_PATH = "agents"
+CLOUDS_SUB_PATH = "clouds"
 SUB_ACCOUNTS_SUB_PATH = "sub_accounts"
 USERS_SUB_PATH = "users"
 USER_GROUPS_SUB_PATH = "user_groups"
@@ -57,6 +58,64 @@ def create_agent_account(email, agent_framework, agent_llm_model, agent_goal, sd
               "agent_llm_model": agent_llm_model,
               "agent_goal": agent_goal,
               "sdk_framework": sdk_framework}
+    return _call_public_account_api("POST", uri, params=params, **options)
+
+
+def create_cloud(delivery_ips=None, email=None, **options):
+    """
+    Create a Claimable Cloud, intended for use by AI agents.
+
+    Creates a temporary cloud whose credentials work immediately, with media delivery
+    restricted to a small allow-list of IP addresses. No verification email is sent. Unless a
+    human claims it via the returned claim_url, the cloud is disabled automatically when it
+    expires. Claiming makes it permanent, preserves the credentials and any assets already
+    created, and lifts the IP restriction.
+
+    Usually call this without delivery_ips: the server derives the allow-list from the address
+    it sees the request arriving from, which is more reliable than detecting it client-side (a
+    caller behind a VPN or a pooled egress can easily resolve a different address than the one
+    the API observes).
+
+    A cloud can only be created: there is no endpoint to read, update or delete one, and in
+    particular the delivery IPs cannot be changed afterwards. If they are wrong, create a
+    new cloud or claim this one.
+
+    Note that the IP restriction applies to media delivery only. The Upload and Admin APIs
+    authenticate by signature and are not restricted, so anyone holding the API secret can
+    retrieve the content from any address. Uploads succeeding while delivery fails with
+    `x-cld-error: ACL deny` is the expected symptom of the restriction, not a broken cloud
+    or bad credentials.
+
+    This endpoint is public and unauthenticated, and is rate-limited per IP address.
+
+    :param delivery_ips:    Additional IP addresses permitted to deliver media from this cloud,
+                            at most three. Omit this (the default) to let the server derive the
+                            allow-list from the requester's own resolved address; pass a list
+                            only to allow delivery from hosts other than the caller. The
+                            caller's observed address is appended either way, and non-public
+                            addresses are dropped, so read delivery_ips back from the response
+                            rather than assuming the list sent was stored. IPv4 and IPv6 are
+                            both accepted, CIDR ranges are not. The literal string
+                            "requester_ip" is replaced by the caller's resolved address.
+                            The whole call fails with delivery_ips_not_public unless at least
+                            one publicly routable address results. These addresses cannot be
+                            changed after creation.
+    :type delivery_ips:     list[str], optional
+    :param email:           Optional email address the claim is associated with. It is not
+                            verified at creation and no mail is sent to it; when omitted the
+                            server generates a placeholder address. The human supplies the real
+                            address when claiming.
+    :type email:            str, optional
+    :param options:         Generic advanced options dict, see online documentation
+    :type options:          dict, optional
+    :return:                The created Claimable Cloud, including working credentials,
+                            the claim URL and the expiry time
+    :rtype:                 dict
+    """
+    uri = [CLOUDS_SUB_PATH]
+    # delivery_ips is passed as a raw list on purpose: the server requires a genuine array
+    # and rejects a comma-joined string, so this must not go through encode_list.
+    params = {"delivery_ips": delivery_ips, "email": email}
     return _call_public_account_api("POST", uri, params=params, **options)
 
 
