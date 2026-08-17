@@ -61,51 +61,45 @@ def create_agent_account(email, agent_framework, agent_llm_model, agent_goal, sd
     return _call_public_account_api("POST", uri, params=params, **options)
 
 
-def create_cloud(delivery_ips=None, email=None, **options):
+def create_cloud(delivery_ips=None, email=None, agent_framework=None, agent_llm_model=None, agent_goal=None,
+                 sdk_framework=None, **options):
     """
     Create a Claimable Cloud, intended for use by AI agents.
 
-    Creates a temporary cloud whose credentials work immediately, with media delivery
-    restricted to a small allow-list of IP addresses. No verification email is sent. Unless a
-    human claims it via the returned claim_url, the cloud is disabled automatically when it
-    expires. Claiming makes it permanent, preserves the credentials and any assets already
-    created, and lifts the IP restriction.
+    Creates a temporary cloud whose credentials work immediately, with media delivery restricted
+    to an IP allow-list. No verification email is sent. Unless a human claims it via the returned
+    claim_url, the cloud is disabled when it expires; claiming makes it permanent, keeps the
+    credentials and assets, and lifts the IP restriction.
 
-    Usually call this without delivery_ips: the server derives the allow-list from the address
-    it sees the request arriving from, which is more reliable than detecting it client-side (a
-    caller behind a VPN or a pooled egress can easily resolve a different address than the one
-    the API observes).
+    Creation only: a cloud cannot be read, updated or deleted, so the delivery IPs are fixed for
+    its lifetime. If they are wrong, create another cloud or claim this one.
 
-    A cloud can only be created: there is no endpoint to read, update or delete one, and in
-    particular the delivery IPs cannot be changed afterwards. If they are wrong, create a
-    new cloud or claim this one.
-
-    Note that the IP restriction applies to media delivery only. The Upload and Admin APIs
-    authenticate by signature and are not restricted, so anyone holding the API secret can
-    retrieve the content from any address. Uploads succeeding while delivery fails with
-    `x-cld-error: ACL deny` is the expected symptom of the restriction, not a broken cloud
-    or bad credentials.
+    The restriction covers media delivery only, not the Upload and Admin APIs, so it is not a
+    confidentiality control. Uploads succeeding while delivery fails with `x-cld-error: ACL deny`
+    is the expected symptom of it.
 
     This endpoint is public and unauthenticated, and is rate-limited per IP address.
 
-    :param delivery_ips:    Additional IP addresses permitted to deliver media from this cloud,
-                            at most three. Omit this (the default) to let the server derive the
-                            allow-list from the requester's own resolved address; pass a list
-                            only to allow delivery from hosts other than the caller. The
-                            caller's observed address is appended either way, and non-public
-                            addresses are dropped, so read delivery_ips back from the response
-                            rather than assuming the list sent was stored. IPv4 and IPv6 are
-                            both accepted, CIDR ranges are not. The literal string
-                            "requester_ip" is replaced by the caller's resolved address.
-                            The whole call fails with delivery_ips_not_public unless at least
-                            one publicly routable address results. These addresses cannot be
-                            changed after creation.
+    :param delivery_ips:    Up to three additional IP addresses permitted to deliver media, for
+                            hosts other than the caller. The caller's own resolved address is
+                            always appended, so omitting this is the usual call; the literal
+                            "requester_ip" is replaced by that address. IPv4 and IPv6 are
+                            accepted, CIDR ranges are not. Non-public addresses are dropped and
+                            the call fails unless at least one public address remains, so read
+                            delivery_ips back from the response rather than assuming the list
+                            sent was stored.
     :type delivery_ips:     list[str], optional
-    :param email:           Optional email address the claim is associated with. It is not
-                            verified at creation and no mail is sent to it; when omitted the
-                            server generates a placeholder address. The human supplies the real
-                            address when claiming.
+    :param email:           Email address to associate the claim with. Not verified, and no mail
+                            is sent to it; a placeholder is generated when omitted.
     :type email:            str, optional
+    :param agent_framework: The name of the agent framework used to create the cloud.
+    :type agent_framework:  str, optional
+    :param agent_llm_model: The LLM model powering the agent.
+    :type agent_llm_model:  str, optional
+    :param agent_goal:      A short description of what the agent is trying to achieve.
+    :type agent_goal:       str, optional
+    :param sdk_framework:   The Cloudinary SDK framework the agent intends to use.
+    :type sdk_framework:    str, optional
     :param options:         Generic advanced options dict, see online documentation
     :type options:          dict, optional
     :return:                The created Claimable Cloud, including working credentials,
@@ -113,9 +107,12 @@ def create_cloud(delivery_ips=None, email=None, **options):
     :rtype:                 dict
     """
     uri = [CLOUDS_SUB_PATH]
-    # delivery_ips is passed as a raw list on purpose: the server requires a genuine array
-    # and rejects a comma-joined string, so this must not go through encode_list.
-    params = {"delivery_ips": delivery_ips, "email": email}
+    params = {"delivery_ips": delivery_ips,
+              "email": email,
+              "agent_framework": agent_framework,
+              "agent_llm_model": agent_llm_model,
+              "agent_goal": agent_goal,
+              "sdk_framework": sdk_framework}
     return _call_public_account_api("POST", uri, params=params, **options)
 
 

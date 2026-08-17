@@ -427,6 +427,31 @@ class CreateCloudTest(unittest.TestCase):
         # Omitted rather than sent empty: the server generates a placeholder address.
         self.assertNotIn("email", get_params(mocker))
 
+    def test_create_cloud_sends_optional_agent_metadata(self):
+        with patch(URLLIB3_REQUEST) as mocker:
+            mocker.return_value = api_response_mock()
+            cloudinary.provisioning.create_cloud(
+                agent_framework="langchain",
+                agent_llm_model="claude-opus-5",
+                agent_goal="Build a product image gallery",
+                sdk_framework="python",
+            )
+
+        params = get_params(mocker)
+        self.assertEqual("langchain", params["agent_framework"])
+        self.assertEqual("claude-opus-5", params["agent_llm_model"])
+        self.assertEqual("Build a product image gallery", params["agent_goal"])
+        self.assertEqual("python", params["sdk_framework"])
+
+    def test_create_cloud_omits_unset_agent_metadata(self):
+        with patch(URLLIB3_REQUEST) as mocker:
+            mocker.return_value = api_response_mock()
+            cloudinary.provisioning.create_cloud()
+
+        params = get_params(mocker)
+        for field in ("agent_framework", "agent_llm_model", "agent_goal", "sdk_framework"):
+            self.assertNotIn(field, params)
+
     def test_create_cloud_parses_response(self):
         body = json.dumps({
             "account_id": "00000000-0000-0000-0000-000000000000",
