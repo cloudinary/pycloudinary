@@ -122,6 +122,7 @@ __SIMPLE_UPLOAD_PARAMS = [
     "cinemagraph_analysis",
     "accessibility_analysis",
     "auto_chaptering",
+    "batch_id",
 ]
 
 __SERIALIZED_UPLOAD_PARAMS = [
@@ -1092,6 +1093,7 @@ def archive_params(**options):
     params = {
         "allow_missing": options.get("allow_missing"),
         "async": options.get("async"),
+        "batch_id": options.get("batch_id"),
         "expires_at": options.get("expires_at"),
         "flatten_folders": options.get("flatten_folders"),
         "flatten_transformations": options.get("flatten_transformations"),
@@ -1234,6 +1236,7 @@ def build_multi_and_sprite_params(**options):
         "mode": options.get("mode"),
         "timestamp": now(),
         "async": options.get("async"),
+        "batch_id": options.get("batch_id"),
         "notification_url": options.get("notification_url"),
         "tag": tag,
         "urls": urls,
@@ -1555,6 +1558,17 @@ def base64url_encode(data):
     return to_string(base64.urlsafe_b64encode(to_bytes(data)))
 
 
+def base64url_decode(data):
+    """
+    Url safe version of urlsafe_b64decode that restores the `=` padding if it was stripped.
+
+    :param data: Base64 URL safe encoded string, padded or not
+
+    :return: Decoded string
+    """
+    return to_string(base64.urlsafe_b64decode(to_bytes(data + "=" * (-len(data) % 4))))
+
+
 def encode_unicode_url(url_str):
     """
     Quote and encode possible unicode url string (applicable for python2)
@@ -1645,7 +1659,9 @@ def verify_notification_signature(body, timestamp, signature, valid_for=7200, al
     Verifies the authenticity of a notification signature
 
     :param body: Json of the request's body
-    :param timestamp: Unix timestamp. Can be retrieved from the X-Cld-Timestamp header
+    :param timestamp: Unix timestamp. Can be retrieved from the X-Cld-Timestamp header, or from
+                      the `timestamp` of a notification returned by `api.notifications`. Both
+                      deliver it as a string, which is accepted here.
     :param signature: Actual signature. Can be retrieved from the X-Cld-Signature header
     :param valid_for: The desired time in seconds for considering the request valid
     :param algorithm: Name of hashing algorithm to use for calculation of HMACs.
@@ -1656,7 +1672,7 @@ def verify_notification_signature(body, timestamp, signature, valid_for=7200, al
     if not cloudinary.config().api_secret:
         raise Exception('Api secret key is empty')
 
-    if timestamp < time.time() - valid_for:
+    if int(timestamp) < time.time() - valid_for:
         return False
 
     if not isinstance(body, str):
@@ -1665,6 +1681,31 @@ def verify_notification_signature(body, timestamp, signature, valid_for=7200, al
     return signature == compute_hex_hash(
         '{}{}{}'.format(body, timestamp, cloudinary.config().api_secret),
         algorithm or cloudinary.config().signature_algorithm)
+
+
+def verify_notification(message, valid_for=7200, algorithm=None):
+    """
+    Verifies the authenticity of a signed notification message.
+
+    :param message: Signed message, with `signed_payload`, `signature` and `timestamp` keys
+    :type message: dict
+    :param valid_for: The desired time in seconds for considering the message valid
+    :param algorithm: Name of hashing algorithm to use for calculation of HMACs.
+                      By default, uses `cloudinary.config().signature_algorithm`
+
+    :return: Boolean result of the validation
+    :raises ValueError: If the message is missing signed_payload, signature or timestamp
+    """
+    missing = [key for key in ("signed_payload", "signature", "timestamp") if key not in message]
+    if missing:
+        raise ValueError("Message is missing required key(s): {}".format(", ".join(missing)))
+
+    return verify_notification_signature(
+        base64url_decode(message["signed_payload"]),
+        message["timestamp"],
+        message["signature"],
+        valid_for=valid_for,
+        algorithm=algorithm)
 
 
 def get_http_connector(conf, options):

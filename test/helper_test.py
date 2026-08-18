@@ -55,6 +55,8 @@ EVAL_STR = 'if (resource_info["width"] < 450) { upload_options["quality_analysis
 
 ON_SUCCESS_STR = 'current_asset.update({tags: ["autocaption"]});'
 
+MOCK_REQUEST_ID = "e529e88d138f4013655501c4711233d3"
+
 try:
     # urllib3 2.x support
     # noinspection PyProtectedMember
@@ -217,11 +219,12 @@ def http_response_mock(body="", headers=None, status=200):
 def api_response_mock(body='{"foo":"bar"}'):
     return http_response_mock(body, {"x-featureratelimit-limit": '0',
                                      "x-featureratelimit-reset": 'Sat, 01 Apr 2017 22:00:00 GMT',
-                                     "x-featureratelimit-remaining": '0'})
+                                     "x-featureratelimit-remaining": '0',
+                                     "x-request-id": MOCK_REQUEST_ID})
 
 
 def uploader_response_mock():
-    return http_response_mock('{"foo":"bar"}')
+    return http_response_mock('{"foo":"bar"}', {"x-request-id": MOCK_REQUEST_ID})
 
 
 def populate_large_file(file_io, size, chunk_size=4096):
