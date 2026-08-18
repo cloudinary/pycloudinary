@@ -139,8 +139,8 @@ class ApiTest(unittest.TestCase):
         self.assertIsInstance(http, ProxyManager)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
-    def test_rate_limits(self):
-        """ should include details of the account's rate limits"""
+    def test_response_metadata(self):
+        """ should include the account's rate limits and the request id"""
         results = [
             api.ping(),
             api.root_folders(),
@@ -155,6 +155,9 @@ class ApiTest(unittest.TestCase):
             self.assertGreater(result.rate_limit_allowed, 0)
             self.assertIsNotNone(result.rate_limit_reset_at)
             self.assertGreater(result.rate_limit_remaining, 0)
+
+            self.assertIsNotNone(result.request_id)
+            self.assertNotIn("request_id", result)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test01_resource_types(self):

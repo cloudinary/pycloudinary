@@ -53,16 +53,19 @@ class ArchiveTest(unittest.TestCase):
         """should allow optional parameters"""
         mocker.return_value = MOCK_RESPONSE
         expires_at = int(time.time()+3600)
+        batch_id = "batch_{}".format(UNIQUE_TEST_ID)
         uploader.create_zip(
             tags=[TEST_TAG],
             expires_at=expires_at,
             allow_missing=True,
             skip_transformation_name=True,
+            batch_id=batch_id,
         )
         params = get_params(mocker)
         self.assertEqual(params['expires_at'], expires_at)
         self.assertTrue(params['allow_missing'])
         self.assertTrue(params['skip_transformation_name'])
+        self.assertEqual(params['batch_id'], batch_id)
 
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_archive_url(self):

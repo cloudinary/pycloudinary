@@ -159,6 +159,7 @@ class UploaderTest(CldTestCase):
         result = uploader.upload(TEST_IMAGE, tags=[UNIQUE_TAG])
         self.assertEqual(result["width"], TEST_IMAGE_WIDTH)
         self.assertEqual(result["height"], TEST_IMAGE_HEIGHT)
+        self.assertIsNotNone(result["request_id"])
         expected_signature = utils.api_sign_request(
             dict(public_id=result["public_id"], version=result["version"]),
             cloudinary.config().api_secret)
@@ -486,7 +487,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
 
         result = uploader.update_metadata(METADATA_FIELDS, public_ids)
 
-        self.assertEqual(result, {
+        self.assertObjectContainsSubset(result, {
             "public_ids": public_ids,
         })
 
@@ -1167,6 +1168,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
             'regions': {"box_1": [[1, 2], [3, 4]], "box_2": [[5, 6], [7, 8]]},
             'auto_transcription': True,
             'auto_chaptering': True,
+            'batch_id': 'batch_{}'.format(UNIQUE_ID),
         }
 
         uploader.upload(TEST_IMAGE, **options)
