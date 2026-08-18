@@ -1,3 +1,12 @@
+1.46.0 / 2026-08-18
+==================
+
+New Functionality and Features
+------------------------------
+
+  * Add support for `create_cloud` Provisioning API
+  * Add support for notification trigger management and poll notifications
+
 1.45.0 / 2026-07-01
 ==================
 
