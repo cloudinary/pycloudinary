@@ -2,7 +2,7 @@ import json
 
 import cloudinary
 from cloudinary.api_client.execute_request import execute_request
-from cloudinary.utils import get_http_connector, normalize_params
+from cloudinary.utils import get_http_connector, json_body, normalize_params
 
 logger = cloudinary.logger
 _http = get_http_connector(cloudinary.config(), cloudinary.CERT_KWARGS)
@@ -35,12 +35,13 @@ def call_metadata_rules_api(method, uri, params, **options):
 
 
 def call_json_api(method, uri, params, **options):
-    data=None
+    data = None
+    headers = {'Content-Type': 'application/json'}
     if method.upper() != 'GET':
-        data = json.dumps(params).encode('utf-8')
+        data, headers = json_body(params)
         params = None
 
-    return _call_api(method, uri, params=params, body=data, headers={'Content-Type': 'application/json'}, **options)
+    return _call_api(method, uri, params=params, body=data, headers=headers, **options)
 
 
 def _call_v2_api(method, uri, params, module=None, **options):
