@@ -613,6 +613,20 @@ def normalize_params(params):
     return dict([(k, __bool_string(v)) for (k, v) in params.items() if v is not None and not v == ""])
 
 
+def json_body(params, headers=None):
+    """
+    Encodes params as a JSON request body with the matching Content-Type.
+
+    :param params:  Params to serialize.
+    :param headers: Headers to extend. A Content-Type already present is kept.
+    :return:        Tuple of the encoded body and the resulting headers.
+    """
+    headers = dict(headers or {})
+    headers.setdefault("Content-Type", "application/json")
+
+    return json.dumps(params).encode("utf-8"), headers
+
+
 def sign_request(params, options):
     api_key = options.get("api_key", cloudinary.config().api_key)
     if not api_key:

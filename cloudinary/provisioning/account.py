@@ -219,7 +219,7 @@ def update_sub_account(sub_account_id, name=None, cloud_name=None, custom_attrib
     return _call_account_api("put", uri, params=params, **options)
 
 
-def users(user_ids=None, sub_account_id=None, pending=None, prefix=None, last_login=None, from_date=None, to_date=None,
+def users(user_ids=None, sub_account_id=None, status=None, prefix=None, last_login=None, from_date=None, to_date=None,
           **options):
     """
     List all users
@@ -227,10 +227,10 @@ def users(user_ids=None, sub_account_id=None, pending=None, prefix=None, last_lo
     :type user_ids:         list, optional
     :param sub_account_id:  The id of a sub account
     :type sub_account_id:   str, optional
-    :param pending:         Limit results to pending users (True),
-                            users that are not pending (False),
-                            or all users (None, the default).
-    :type pending:          bool, optional
+    :param status:          Limit results to users of this status: "pending" for users who have not yet
+                            set a password, otherwise a user status such as "active". All users when
+                            omitted.
+    :type status:           str, optional
     :param prefix:          User prefix
     :type prefix:           str, optional
     :param last_login:      Return only users that last logged in in the specified range of dates (true), 
@@ -249,7 +249,7 @@ def users(user_ids=None, sub_account_id=None, pending=None, prefix=None, last_lo
     user_ids = encode_list(user_ids)
     params = {"ids": user_ids,
               "sub_account_id": sub_account_id,
-              "pending": pending,
+              "status": status,
               "prefix": prefix,
               "last_login": last_login,
               "from": from_date,
