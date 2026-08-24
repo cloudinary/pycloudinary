@@ -23,9 +23,9 @@ Please be aware that the package is used in a wide variety of environments and t
 - Ensure the PR description clearly describes the bug / feature. Include the relevant issue number if applicable.
 - Provide test code that covers the new code
 - Make sure that your code works both with and without Django
-- The code should support:
-  - Python >= 2.7
-  - Django >= 1.8
+- The code should support the versions tested in CI:
+  - Python 3.10 - 3.14
+  - Django 4.2, 5.0, 5.1, 5.2, 6.0
 
 ## Code contribution
 
@@ -71,29 +71,42 @@ We definitely appreciate pull requests that highlight or reproduce a problem, ev
 
 Implement your feature or bug fix.
 Try to follow [PEP8](https://pep8.org/).
-Make sure that your code works both with and without Django
-The code should support:
+Make sure that your code works both with and without Django.
+The code should support the versions tested in CI:
 
-  - Python >= 2.7
-  - Django >= 1.8
+  - Python 3.10 - 3.14
+  - Django 4.2, 5.0, 5.1, 5.2, 6.0
 
 Make sure that tests completes without errors.
 
 #### Write Documentation
 
-Document any external behavior in the [README](README.md).
+Document any external behavior in the bundled task docs under
+[cloudinary/docs](cloudinary/docs) — these ship inside the published package and are the
+source of truth for the installed version. Add a matching runnable file to
+[examples](examples) when the change introduces a new task, and keep the two consistent.
+The [README](README.md) links the task docs; update it only when the set of tasks
+changes.
 
 #### Running the tests
 
 Run the basic test suite with your `CLOUDINARY_URL`:
 
-    CLOUDINARY_URL=cloudinary://apikey:apisecret@cloudname python setup.py test
+    CLOUDINARY_URL=cloudinary://apikey:apisecret@cloudname python -m pytest test
+
+The suite runs against the live API, so a working `CLOUDINARY_URL` is required. If you do
+not have credentials, provision a throwaway cloud with
+`python -c "from cloudinary.provisioning import create_cloud; print(create_cloud())"`.
+
+Run the Django suite separately:
+
+    DJANGO_SETTINGS_MODULE=django_tests.settings django-admin test -v2 django_tests
 
 This only runs the tests for the current environment.
-Travis-CI will run the full suite when you submit your pull request.
+GitHub Actions will run the full suite when you submit your pull request.
 
 The full test suite takes a long time to run because it tests multiple combinations of Python and Django.
-You need to have Python 2.7, 3.4, 3.5, 3.6, 3.7 installed to run all environments. Then run:
+You need the Python versions listed above installed to run all environments. Then run:
 
     CLOUDINARY_URL=cloudinary://apikey:apisecret@cloudname tox
 
@@ -139,7 +152,7 @@ git push origin my-feature-branch -f
 
 #### Check on Your Pull Request
 
-Go back to your pull request after a few minutes and see whether it passed muster with Travis-CI. Everything should look green, otherwise fix issues and amend your commit as described above.
+Go back to your pull request after a few minutes and see whether it passed muster with GitHub Actions. Everything should look green, otherwise fix issues and amend your commit as described above.
 
 #### Be Patient
 
