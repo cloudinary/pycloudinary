@@ -6,7 +6,7 @@ Do this once per process before any upload, admin, or URL-generation call.
 
 **Prerequisite:** a `cloud_name`, `api_key`, and `api_secret`. If you do not have them,
 see [Get Cloudinary credentials](get-credentials.md) —
-`cloudinary.provisioning.create_cloud()` provisions a working cloud with no signup.
+`cloudinary.provisioning.create_cloud()` provisions a working cloud with delayed email verification so you can immediately get up and running.
 
 ## Recommended: environment variable
 
