@@ -1,8 +1,12 @@
-"""Upload an image held for manual review, list the queue, and approve it.
+"""Upload an image into a manual moderation queue, list the queue, and approve it.
 
-An asset with a pending moderation status is stored but not deliverable - its URL returns
-404 until approved. moderation="manual" needs no add-on subscription, so this runs on any
-account.
+Moderation is stateful: an asset carries a status until a decision is recorded, and your
+application should deliver only approved assets. A pending asset is still deliverable by
+default - the status is metadata to gate on, not an access control. Blocking non-approved
+assets is configured per product environment by Cloudinary support, not by an upload
+parameter.
+
+moderation="manual" needs no add-on subscription, so this runs on any account.
 
 Prerequisites: set CLOUDINARY_URL in your environment (Console > Settings > API Keys).
 
@@ -31,7 +35,7 @@ def main() -> None:
     public_id = result["public_id"]
     print(f"Uploaded:  {public_id}")
     print(f"Status:    {result['moderation'][0]['status']}")  # 'pending'
-    print("Not deliverable until approved.")
+    print("Deliverable already - gate on the status in your own code.")
 
     pending = cloudinary.api.resources_by_moderation("manual", "pending", max_results=100)
     print(f"In the review queue: {len(pending['resources'])}")

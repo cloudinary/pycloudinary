@@ -103,8 +103,11 @@ address. Pass your public address explicitly. See
 
 ### `File size too large. Got <n>. Maximum is <n>.`
 
-The file exceeds the plan's per-request limit. Use
-[`upload_large`](upload-large-video.md), which chunks it, or resize before uploading.
+Two different limits produce this message. If the request exceeded the **100 MB
+per-request ceiling**, use [`upload_large`](upload-large-video.md), which chunks it. If
+the asset exceeds your **product environment's maximum asset size** (plan-dependent),
+chunking will not help — compress, resize, or upgrade the plan. Read the real values from
+`cloudinary.api.usage()["media_limits"]`; see [Size limits](upload-image.md#size-limits).
 
 ### `Rate limit exceeded` / `You don't have an active subscription for <add-on>`
 
@@ -115,6 +118,17 @@ Both raise `RateLimited`, but they are different problems:
   response headers `x-featureratelimit-limit` and `-remaining` show the budget.
 - An unsubscribed add-on — the message names the add-on. Enable it on the account;
   `moderation="manual"` needs no subscription.
+
+### `423` while an asset is still processing
+
+The asset is not yet available for the operation you requested — common right after
+uploading a large video, or while an eager or add-on-driven transformation is still
+running. This is transient: retry with backoff rather than treating it as a failure. For
+long jobs, prefer `eager_async=True` with a `notification_url` over polling.
+
+Note that 423 is not in this SDK's status-to-exception map, so it surfaces as a plain
+`Exception` rather than a `cloudinary.exceptions.Error` subclass — a handler that catches
+only `cloudinary.exceptions.Error` will miss it.
 
 ### A transformation is missing from the generated URL
 
@@ -150,6 +164,8 @@ takes a long time.
 
 ## Still stuck
 
+- Platform status: https://status.cloudinary.com — check this first. A widespread
+  incident explains failures that look like a bug in your code.
 - Every error message the API can return, per endpoint:
   [Admin API reference](https://cloudinary.com/documentation/admin_api.md) and
   [Upload API reference](https://cloudinary.com/documentation/image_upload_api_reference.md).

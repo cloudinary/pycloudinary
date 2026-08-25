@@ -58,8 +58,10 @@ address is appended automatically, so omitting the parameter is the usual call. 
 to three more for hosts other than the caller:
 
 ```python
-cloud = create_cloud(delivery_ips=["203.0.113.10"])   # a teammate or deployed viewer
+cloud = create_cloud(delivery_ips=["203.0.113.10", "2001:db8::8a2e:370:7334"])
 ```
+
+IPv4 and IPv6 addresses are both accepted; CIDR ranges are not.
 
 Non-public addresses are dropped, and the call fails with
 `delivery_ips must contain at least one public IP address` unless at least one public

@@ -98,8 +98,9 @@ resource_type="video")`.
 - The video uploads but `.m3u8` 404s — the eager renditions are still transcoding
   (`eager_async=True`). Poll `cloudinary.api.resource(public_id)` or use
   `notification_url`.
-- Free plans cap video at 100 MB and audio/video duration; the API reports the limit in
-  the error message.
+- `File size too large` despite chunking — chunking only clears the 100 MB per-request
+  ceiling, not your product environment's maximum asset size. Read the real values from
+  `cloudinary.api.usage()["media_limits"]`; compress, resize, or upgrade the plan.
 
 ## Related
 

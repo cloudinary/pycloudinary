@@ -79,18 +79,35 @@ optional.
 
 ## Size limits
 
-Free plans cap a single upload at 10 MB for images and 100 MB for video; paid plans
-raise both. Requests larger than the cap fail with
-`File size too large. Got NNN. Maximum is NNN.` — use
-[`upload_large`](upload-large-video.md), which chunks the file, or resize before
-uploading.
+Two separate limits apply, and they fail the same way with
+`File size too large. Got NNN. Maximum is NNN.`:
+
+- **100 MB per request.** A single `upload` call cannot exceed this, whatever your plan.
+  Above it, use [`upload_large`](upload-large-video.md) — it splits the file into chunks
+  (20 MB by default, set with `chunk_size`) and uploads them sequentially.
+- **Your product environment's maximum asset size**, which varies by plan and is
+  unrelated to the per-request ceiling. `upload_large` does not raise it.
+
+Read the real values for your environment rather than assuming:
+
+```python
+media_limits = cloudinary.api.usage()["media_limits"]
+print(media_limits["image_max_size_bytes"])
+print(media_limits["video_max_size_bytes"])
+print(media_limits["image_max_px"], media_limits["asset_max_total_px"])
+```
+
+If an asset exceeds the environment maximum, chunking will not help — compress or resize
+it before uploading, or upgrade the plan.
 
 ## Troubleshooting
 
 - `Must supply api_key` — the SDK is not configured. See
   [Configure Cloudinary](configure-cloudinary.md).
 - `Invalid Signature` — a wrong `api_secret` for this cloud name.
-- `File size too large` — see [Size limits](#size-limits).
+- `File size too large` — see [Size limits](#size-limits); either the request exceeded
+  the 100 MB single-request ceiling, or the asset exceeds your product environment's
+  maximum.
 - `Invalid image file` — the file is not a format Cloudinary can decode.
 - `Resource not found - <url>` when fetching a remote URL — the URL is not publicly
   reachable. Upload the bytes directly instead.
