@@ -1,10 +1,10 @@
 [project]
 name = "cloudinary"
-description = "Python and Django SDK for Cloudinary"
+description = "Upload, transform, optimize, and manage images and videos with Cloudinary from Python or Django."
 version = "1.46.0"
 
 authors = [{ name = "Cloudinary", email = "info@cloudinary.com" }]
-license = { file = "LICENSE.txt" }
+license = { file = "LICENSE" }
 keywords = ["cloudinary", "image", "video", "upload", "crop", "resize", "filter", "transformation", "manipulation", "cdn"]
 readme = "README.md"
 classifiers = [
@@ -61,8 +61,11 @@ Changelog = "https://raw.githubusercontent.com/cloudinary/pycloudinary/master/CH
 include-package-data = true
 zip-safe = false
 
+[tool.setuptools.package-data]
+cloudinary = ["docs/*.md"]
+
 [tool.setuptools.packages.find]
-exclude = ["samples", "tools", "test*", "django_tests*", "venv*"]
+exclude = ["samples", "tools", "test*", "django_tests*", "venv*", "examples*"]
 namespaces = false
 
 

@@ -1,4 +1,6 @@
 include *.txt
+include LICENSE
+recursive-include cloudinary/docs *.md
 recursive-include cloudinary/templates *.html
 recursive-include cloudinary/static *.html *.js
 prune django_tests
