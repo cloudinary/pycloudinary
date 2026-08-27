@@ -1,3 +1,8 @@
+1.46.2 / 2026-08-27
+==================
+
+  * Add `notification_url` and `batch_id` to asset management params
+
 1.46.1 / 2026-08-27
 ==================
 
