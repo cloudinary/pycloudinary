@@ -386,13 +386,16 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
     @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_rename_parameters(self, mocker):
-        """Should support to_type, invalidate, and overwrite """
+        """Should support to_type, invalidate, overwrite, notification_url and batch_id"""
         mocker.return_value = MOCK_RESPONSE
-        uploader.rename(TEST_IMAGE, TEST_IMAGE + "2", to_type='raw', invalidate=True, overwrite=False)
+        uploader.rename(TEST_IMAGE, TEST_IMAGE + "2", to_type='raw', invalidate=True, overwrite=False,
+                        notification_url="poll://*", batch_id="batch_1")
 
         self.assertEqual(get_params(mocker)['to_type'], 'raw')
         self.assertTrue(get_params(mocker)['invalidate'])
         self.assertTrue(get_params(mocker)['overwrite'])
+        self.assertEqual(get_params(mocker)['notification_url'], "poll://*")
+        self.assertEqual(get_params(mocker)['batch_id'], "batch_1")
 
     @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -577,7 +580,8 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
                 }
             },
             transformation={"fetch_format": "auto", "quality": "auto"},
-            tags=['tag1', 'tag2', 'tag3']
+            tags=['tag1', 'tag2', 'tag3'],
+            batch_id="batch_1"
         )
 
         args, _ = mocker.call_args
@@ -587,6 +591,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         self.assertEqual("fn_render:" + slideshow_manifest, get_params(mocker)['manifest_transformation'])
         self.assertEqual("f_auto,q_auto", get_params(mocker)['transformation'])
         self.assertEqual("tag1,tag2,tag3", get_params(mocker)['tags'])
+        self.assertEqual("batch_1", get_params(mocker)['batch_id'])
 
     @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
@@ -1194,6 +1199,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
             TEST_ID,
             page="all",
             format="jpg",
+            type="private",
             notification_url="poll://*",
             batch_id=batch_id,
         )
@@ -1201,6 +1207,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         params = get_params(request_mock)
         self.assertEqual(params["public_id"], TEST_ID)
         self.assertEqual(params["format"], "jpg")
+        self.assertEqual(params["type"], "private")
         self.assertEqual(params["notification_url"], "poll://*")
         self.assertEqual(params["batch_id"], batch_id)
 
@@ -1236,6 +1243,10 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         result = uploader.generate_sprite(sprite_test_tag, format="jpg", width=100)
         uploader.destroy(result.get("public_id"))
         self.assertIn("f_jpg,w_100", result["css_url"])
+
+        # Generate sprite with an explicit public_id, instead of one derived from the tag
+        result = uploader.generate_sprite(sprite_test_tag, public_id=sprite_test_tag + "_named")
+        self.assertIn(sprite_test_tag + "_named", result["css_url"])
 
     def test_download_sprite(self):
         """Should generate signed download url for sprite"""
@@ -1286,13 +1297,17 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         self.assertTrue(pdf_result.get("url").endswith(".pdf"))
         self.assertIn("w_111", pdf_result.get("url"))
 
+        # Generate multi with an explicit public_id, instead of one derived from the tag
+        named_result = uploader.multi(tag=multi_test_tag, public_id=multi_test_tag + "_named")
+        self.assertEqual(multi_test_tag + "_named", named_result.get("public_id"))
+
     def test_download_multi(self):
         """Should generate signed download url for multi"""
         multi_test_tag = "multi_test_tag"
         url_1 = "https://res.cloudinary.com/demo/image/upload/sample"
         url_2 = "https://res.cloudinary.com/demo/image/upload/car"
 
-        url_from_tag = uploader.download_multi(tag=multi_test_tag)
+        url_from_tag = uploader.download_multi(tag=multi_test_tag, public_id=TEST_ID)
         url_from_urls = uploader.download_multi(urls=[url_1, url_2])
 
         self.assertTrue(url_from_tag.startswith(
@@ -1302,6 +1317,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
 
         parameters = parse_qs(urlparse(url_from_tag).query)
         self.assertEqual(multi_test_tag, parameters["tag"][0])
+        self.assertEqual(TEST_ID, parameters["public_id"][0])
         self.assertEqual("download", parameters["mode"][0])
         self.assertIn("timestamp", parameters)
         self.assertIn("signature", parameters)
@@ -1320,6 +1336,54 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         mocker.return_value = MOCK_RESPONSE
         uploader.create_zip(tags="test-tag", target_asset_folder="test-asset-folder")
         self.assertEqual("test-asset-folder", get_param(mocker, "target_asset_folder"))
+
+    @staticmethod
+    def sign_request_without(params, *excluded):
+        """
+        Signs the params as sent in the request, leaving out the excluded keys.
+
+        :param params: The params as sent in the request.
+        :param excluded: Keys to leave out of the signature.
+        :return: The expected signature.
+        """
+        config = cloudinary.config()
+        params_to_sign = dict((k, v) for k, v in params.items()
+                              if k not in excluded and k not in ("signature", "api_key"))
+        return utils.api_sign_request(params_to_sign, config.api_secret, config.signature_algorithm,
+                                      config.signature_version)
+
+    def assert_notification_params_unsigned(self, mocker):
+        """
+        Assert notification_url and batch_id were sent, but left out of the signature.
+
+        :param mocker: The mocked request.
+        """
+        params = get_params(mocker)
+        self.assertEqual("poll://*", params["notification_url"])
+        self.assertEqual("batch_1", params["batch_id"])
+        self.assertEqual(self.sign_request_without(params, "notification_url", "batch_id"), params["signature"])
+
+    @patch(URLLIB3_REQUEST)
+    @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
+    def test_notification_params_signing(self, mocker):
+        """Should send notification_url and batch_id, unsigned on tags, context and metadata"""
+        mocker.return_value = MOCK_RESPONSE
+        options = {"notification_url": "poll://*", "batch_id": "batch_1"}
+
+        uploader.add_tag("tag1", [TEST_ID], **options)
+        self.assert_notification_params_unsigned(mocker)
+
+        uploader.add_context({"k": "v"}, [TEST_ID], **options)
+        self.assert_notification_params_unsigned(mocker)
+
+        uploader.update_metadata({"k": "v"}, [TEST_ID], **options)
+        self.assert_notification_params_unsigned(mocker)
+
+        uploader.destroy(TEST_ID, **options)
+        params = get_params(mocker)
+        self.assertEqual("poll://*", params["notification_url"])
+        self.assertEqual("batch_1", params["batch_id"])
+        self.assertEqual(self.sign_request_without(params), params["signature"])
 
 
 if __name__ == '__main__':
