@@ -522,9 +522,11 @@ class ApiTest(unittest.TestCase):
         """ should allow deleting resources by transformations """
         mocker.return_value = MOCK_RESPONSE
 
-        api.delete_resources(['api_test', 'api_test2'], transformations=['c_crop,w_100'])
+        api.delete_resources(['api_test', 'api_test2'], transformations=['c_crop,w_100'],
+                             notification_url="http://example.com")
         self.assertEqual(get_method(mocker), 'DELETE')
         self.assertEqual(get_param(mocker, 'transformations'), 'c_crop,w_100')
+        self.assertEqual(get_param(mocker, 'notification_url'), "http://example.com")
 
         api.delete_all_resources(transformations=['c_crop,w_100', {"crop": "scale", "width": 107}])
         self.assertEqual(get_method(mocker), 'DELETE')
@@ -824,11 +826,12 @@ class ApiTest(unittest.TestCase):
     @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test21_notification_url(self, mocker):
-        """ should support notification_url param """
+        """ should support notification_url and batch_id params """
         mocker.return_value = MOCK_RESPONSE
-        api.update("api_test", notification_url="http://example.com")
+        api.update("api_test", notification_url="http://example.com", batch_id="batch_1")
         notification_url = get_param(mocker, 'notification_url')
         self.assertEqual(notification_url, "http://example.com")
+        self.assertEqual(get_param(mocker, 'batch_id'), "batch_1")
 
     @patch(URLLIB3_REQUEST)
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
