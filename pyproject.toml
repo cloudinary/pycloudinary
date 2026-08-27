@@ -1,7 +1,7 @@
 [project]
 name = "cloudinary"
 description = "Upload, transform, optimize, and manage images and videos with Cloudinary from Python or Django."
-version = "1.46.0"
+version = "1.46.1"
 
 authors = [{ name = "Cloudinary", email = "info@cloudinary.com" }]
 license = { file = "LICENSE" }

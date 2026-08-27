@@ -1,3 +1,9 @@
+1.46.1 / 2026-08-27
+==================
+
+  * Add `batch_id` to `explode` parameters
+  * Add agent-readable documentation and examples
+
 1.46.0 / 2026-08-18
 ==================
 
