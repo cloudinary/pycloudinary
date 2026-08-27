@@ -1183,6 +1183,27 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC\
         for param in options.keys():
             self.assertIn(param, params)
 
+    @patch(URLLIB3_REQUEST)
+    def test_explode_parameters(self, request_mock):
+        """Should support notification_url and batch_id in explode"""
+        request_mock.return_value = MOCK_RESPONSE
+
+        batch_id = "batch_{}".format(UNIQUE_ID)
+
+        uploader.explode(
+            TEST_ID,
+            page="all",
+            format="jpg",
+            notification_url="poll://*",
+            batch_id=batch_id,
+        )
+
+        params = get_params(request_mock)
+        self.assertEqual(params["public_id"], TEST_ID)
+        self.assertEqual(params["format"], "jpg")
+        self.assertEqual(params["notification_url"], "poll://*")
+        self.assertEqual(params["batch_id"], batch_id)
+
     @unittest.skipUnless(cloudinary.config().api_secret, "requires api_key/api_secret")
     def test_eval_upload_parameter(self):
         """Should support eval in upload"""
