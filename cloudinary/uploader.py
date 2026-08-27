@@ -574,7 +574,9 @@ def explode(public_id, **options):
 
     :param public_id: The public ID of the file to explode.
     :type public_id: str
-    :param options: Additional explode options (format, notification_url, transformation).
+    :param options: Additional explode options (format, notification_url, batch_id, transformation).
+    :keyword str batch_id: Correlation key for the completion notification, used to address it
+        when polling.
     :return: The result of the API call.
     :rtype: dict
     """
@@ -583,6 +585,7 @@ def explode(public_id, **options):
         "public_id": public_id,
         "format": options.get("format"),
         "notification_url": options.get("notification_url"),
+        "batch_id": options.get("batch_id"),
         "transformation": utils.generate_transformation_string(**options)[0]
     }
     return call_api("explode", params, **options)
