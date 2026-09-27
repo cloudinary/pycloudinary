@@ -267,6 +267,22 @@ class AccountApiTest(unittest.TestCase):
         self.assertEqual("ok", named_key_del_res["message"])
 
 
+class UserInUserGroupsTest(unittest.TestCase):
+    """
+    Verifies the request shape against a mocked transport, so no account credentials are needed.
+    """
+
+    def test_user_in_user_groups(self):
+        with patch(URLLIB3_REQUEST) as mocker:
+            mocker.return_value = api_response_mock()
+            cloudinary.provisioning.user_in_user_groups("user_id", account_id="account_id",
+                                                        provisioning_api_key="key",
+                                                        provisioning_api_secret="secret")
+
+        self.assertEqual("GET", get_method(mocker))
+        self.assertTrue(get_uri(mocker).endswith("/provisioning/accounts/account_id/users/user_id/groups"))
+
+
 class CreateAgentAccountTest(unittest.TestCase):
     """
     The create agent account endpoint is public, unauthenticated and rate limited per IP,
