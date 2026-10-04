@@ -132,6 +132,15 @@ class AuthTokenTest(unittest.TestCase):
     def test_must_provide_expiration_or_duration(self):
         self.assertRaises(Exception, cloudinary.utils.generate_auth_token, acl="*", expiration=None, duration=None)
 
+    def test_reject_invalid_numeric_options(self):
+        for option in ("start_time", "duration", "expiration"):
+            for value in ("invalid", [300], {"seconds": 300}, complex(1, 2)):
+                options = {"acl": "*", "start_time": 1111111111, "duration": 300}
+                options[option] = value
+                with self.assertRaises(ValueError) as error:
+                    cloudinary.utils.generate_auth_token(**options)
+                self.assertEqual(str(error.exception), "Value '{}' must be an integer.".format(value))
+
     def test_must_provide_acl_or_url(self):
         self.assertRaises(Exception, cloudinary.utils.generate_auth_token, start_time=1111111111, duration=300)
 
