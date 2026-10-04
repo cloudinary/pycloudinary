@@ -1,3 +1,9 @@
+1.46.3 / 2026-10-04
+==================
+
+  * Fix validation errors for non-integer auth token options
+  * Fix the path of `provisioning.user_in_user_groups`
+
 1.46.2 / 2026-08-27
 ==================
 
