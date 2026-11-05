@@ -44,7 +44,8 @@ offline or mocked tier. CI allocates a throwaway cloud per job via
 ## Project structure
 
 - `cloudinary/` — the package. `uploader.py` (Upload API), `api.py` (Admin API),
-  `utils.py` (URL building, signing, transformation strings), `search.py`.
+  `utils.py` (URL building, signing, transformation strings), `search.py`,
+  `collections.py` (Collections API, imported explicitly like `api`).
 - `cloudinary/docs/` — version-matched Markdown task docs, shipped inside the
   published package. Keep in sync with the code they document.
 - `cloudinary/models.py`, `forms.py`, `templatetags/`, `templates/`, `static/` — the
@@ -67,6 +68,11 @@ offline or mocked tier. CI allocates a throwaway cloud per job via
 - Python 2/3 compatible source: the package still imports `six` and
   `cloudinary/compat.py`. Do not introduce f-strings, walrus operators, or
   type-annotation syntax into `cloudinary/`.
+- A module named after a standard-library module (e.g. `cloudinary/collections.py`)
+  shadows it on Python 2. Every file in `cloudinary/` that imports that stdlib name
+  needs `from __future__ import absolute_import`.
+- Every API error raises a `cloudinary.exceptions.Error` subclass. Map new HTTP
+  statuses in `EXCEPTION_CODES` (`cloudinary/api_client/execute_request.py`).
 - 4-space indent, `snake_case`, module-level functions for API surface (not classes).
 - Public API convention: positional arguments first, then `**options` passed through
   to the API call.
@@ -83,6 +89,9 @@ offline or mocked tier. CI allocates a throwaway cloud per job via
 ## Git workflow
 
 - Branch from `master`; one topic per pull request.
+- Commit messages are public and user-facing: a short summary of the change and a
+  pointer to the task doc. No usage examples, internal mechanics, or infrastructure
+  detail; the docs are the reference.
 - Run `python -m pytest test` before opening a PR, and the Django suite when touching
   `models.py`, `forms.py`, or `templatetags/`.
 - Never rewrite published `CHANGELOG.md` entries; new entries go at the top and are
@@ -95,6 +104,11 @@ offline or mocked tier. CI allocates a throwaway cloud per job via
 **Always**
 
 - Keep `cloudinary/docs/` and `examples/` consistent with the code they document.
+- A new API module needs a task doc in `cloudinary/docs/`, a runnable example in
+  `examples/`, and links from `platform-capabilities.md`, `import-and-call.md`,
+  `cloudinary/docs/README.md`, and `README.md`.
+- Document only behaviour verified against the live API. Do not document server-side
+  bugs as expected behaviour.
 - Update tests when public behavior changes.
 - Keep API secrets out of examples, docs, tests, and fixtures.
 
