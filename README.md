@@ -71,6 +71,7 @@ Save as `quickstart.py` and run `python quickstart.py`. [Create a free account](
 - [Transform and deliver an image](cloudinary/docs/transform-and-deliver-image.md)
 - [Transform and deliver a video](cloudinary/docs/transform-and-deliver-video.md)
 - [Search and manage assets](cloudinary/docs/search-and-manage-assets.md)
+- [Organize and share collections](cloudinary/docs/organize-and-share-collections.md)
 - [Moderate an upload](cloudinary/docs/moderate-upload.md)
 - [Use structured metadata](cloudinary/docs/use-structured-metadata.md)
 - [Use with Django](cloudinary/docs/use-with-django.md)
